@@ -1,0 +1,2 @@
+ADD_SUBDIRECTORY(bamtools)
+ADD_SUBDIRECTORY(gtest)
