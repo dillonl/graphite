@@ -5,7 +5,7 @@
 int main(int argc, char** argv) {
     if (argc != 3) {
         printf("usage: %s [a] [b]\n", argv[0]);
-        printf("shows version-string comparison of strings a and b\n", argv[0]);
+        printf("shows version-string comparison of strings a and b\n");
         printf("for instance, chr1 < chr10, 1 < 10, abca < bcac\n");
         return 1;
     }

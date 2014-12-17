@@ -1,5 +1,6 @@
 # vcflib
 ### a C++ library for parsing and manipulating VCF files.
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ekg/vcflib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### author: Erik Garrison <erik.garrison@bc.edu>
 
@@ -295,7 +296,7 @@ given window size to the left, right, and center  of the record.
 
     Any number of filters may be specified.  They are combined via logical AND
     unless --or is specified on the command line.  Obtain logical negation through
-    the use of parentheses, e.g. ! "( DP = 10 )"
+    the use of parentheses, e.g. "! ( DP = 10 )"
 
     For convenience, you can specify "QUAL" to refer to the quality of the site, even
     though it does not appear in the INFO fields.

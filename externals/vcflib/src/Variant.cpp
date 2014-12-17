@@ -1259,7 +1259,7 @@ bool VariantCallFile::parseHeader(string& hs) {
 
 bool VariantCallFile::getNextVariant(Variant& var) {
         if (firstRecord && !justSetRegion) {
-            if (!line.empty()) {
+            if (!line.empty() && line.substr(0,1) != "#") {
                 var.parse(line, parseSamples);
                 firstRecord = false;
                 _done = false;
@@ -1269,7 +1269,7 @@ bool VariantCallFile::getNextVariant(Variant& var) {
             }
         }
         if (usingTabix) {
-            if (justSetRegion && !line.empty()) {
+            if (justSetRegion && !line.empty() && line.substr(0,1) != "#") {
                 if (firstRecord) {
                     firstRecord = false;
                 }
@@ -2323,8 +2323,6 @@ vector<Variant*> Variant::matchingHaplotypes() {
         // get the meta_line unique key (first chars before the =)
         unsigned int meta_line_index = meta_line.find("=", 0);
         string meta_line_prefix = meta_line.substr(0, meta_line_index);
-        // all map keys are lower case so when we check we need to be lower case too!
-        std::transform(meta_line_prefix.begin(), meta_line_prefix.end(), meta_line_prefix.begin(), ::tolower);
 
         // check if the meta_line_prefix is in the header_lines, if so add it to the appropirate list
         if (this->header_lines.find(meta_line_prefix) != header_lines.end()) // the meta_line is a header line so replace what was there
