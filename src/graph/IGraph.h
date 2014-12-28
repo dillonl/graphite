@@ -1,8 +1,8 @@
 #ifndef GWIZ_IGRAPH_H
 #define GWIZ_IGRAPH_H
 
-#include "core/IReference.h"
-#include "core/IVariant.h"
+#include "core/reference/IReference.h"
+#include "core/variants/IVariant.h"
 #include "utils/NonCopyable.h"
 
 #include <list>
@@ -16,11 +16,13 @@ namespace gwiz
 	class IGraph : private noncopyable
 	{
 	public:
+		typedef std::shared_ptr<IGraph> SharedPtr;
+
 		IGraph() {}
 		virtual ~IGraph() {}
 
 
-		static std::shared_ptr<IGraph> BuildGraph(std::shared_ptr<IReference> reference, std::list< std::shared_ptr<IVariant> >, GRAPH_TYPE graphType);
+		static IGraph::SharedPtr BuildGraph(IReference::SharedPtr reference, std::list< IVariant::SharedPtr >, GRAPH_TYPE graphType);
 	protected:
 
 		virtual void constructGraph() = 0;

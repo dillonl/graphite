@@ -2,16 +2,19 @@
 #define GWIZ_IREFERENCE_H
 
 #include <stdint.h>
+#include <memory>
 
 #include "utils/NonCopyable.h"
+#include "utils/Types.h"
 
 namespace gwiz
 {
-	typedef uint32_t position;
 
 	class IReference : private noncopyable
 	{
 	public:
+		typedef std::shared_ptr<IReference> SharedPtr;
+
 		IReference() {}
 		virtual ~IReference() {}
 

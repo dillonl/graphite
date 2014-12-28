@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "IReference.h"
+#include "reference/IReference.h"
 #include "IVariant.h"
 
 namespace gwiz

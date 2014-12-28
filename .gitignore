@@ -1,6 +1,20 @@
 # bin folder
 bin/
 
+#Gtags folders
+GPATH
+GRTAGS
+GTAGS
+
+# ignore emacs files
+\#*
+*~
+.#*
+\#*\#
+
+# config folder headers
+config/TestConfig.h
+
 # Compiled Object files
 *.slo
 *.lo

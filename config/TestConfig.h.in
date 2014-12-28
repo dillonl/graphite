@@ -1,0 +1,6 @@
+#ifndef GWIZ_TEST_CONFIG_H
+#define GWIZ_TEST_CONFIG_H
+
+#define TEST_DIRECTORY "@CMAKE_SOURCE_DIR@/data/";
+
+#endif // GWIZ_TEST_CONFIG_H

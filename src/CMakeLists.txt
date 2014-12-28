@@ -11,8 +11,10 @@ set(GWIZ_SOURCES
 )
 
 set(GWIZ_CORE_SOURCES
-  core/Reference.cpp
-  core/Variant.cpp
+  core/reference/Reference.cpp
+  core/variants/Variant.cpp
+  core/variants/VCFReader.cpp
+  core/Region.cpp
 )
 
 set(GWIZ_GRAPH_SOURCES
@@ -20,10 +22,13 @@ set(GWIZ_GRAPH_SOURCES
   graph/SparseGraph.cpp
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/src/core/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/bamtools/src/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/vcflib)
 include_directories(${CMAKE_SOURCE_DIR}/externals/vcflib/src)
 include_directories(${CMAKE_SOURCE_DIR}/externals/)
+
+ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_BUILD_TYPE Debug)

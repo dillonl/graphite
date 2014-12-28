@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 
 #include "graph/IGraph.h"
-#include "core/IVariant.h"
-#include "core/IReference.h"
+#include "core/variants/IVariant.h"
+#include "core/reference/IReference.h"
 
 namespace
 {

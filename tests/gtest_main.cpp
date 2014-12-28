@@ -7,6 +7,7 @@
 #include "BuildGraphTests.hpp"
 #include "VariantsTest.hpp"
 #include "ReferenceTest.hpp"
+#include "RegionTests.hpp"
 
 #include "gtest/gtest.h"
 

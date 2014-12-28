@@ -43,6 +43,7 @@ INCLUDE_DIRECTORIES(include src)
 
 
 # add subfolders
+ADD_SUBDIRECTORY(config)
 ADD_SUBDIRECTORY(externals)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)

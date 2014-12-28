@@ -3,11 +3,14 @@
 
 #include "utils/NonCopyable.h"
 
+#include <memory>
+
 namespace gwiz
 {
     class IVariant : private noncopyable
     {
         public:
+            typedef std::shared_ptr<IVariant> SharedPtr;
             IVariant() {}
             virtual ~IVariant() {}
         private:

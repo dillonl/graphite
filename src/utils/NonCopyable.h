@@ -8,6 +8,7 @@ namespace gwiz
 //  class noncopyable cannot be copied.
 
 //  Contributed by Dave Abrahams
+//  This code has been repurposed from boost's noncopyable class
 
 	namespace noncopyable_  // protection from unintended ADL
 	{
@@ -15,7 +16,7 @@ namespace gwiz
 		{
 		protected:
 			noncopyable() {}
-			~noncopyable() {}
+			virtual ~noncopyable() {}
 			noncopyable( const noncopyable& ) = delete;
 			noncopyable& operator=( const noncopyable& ) = delete;
 		};
