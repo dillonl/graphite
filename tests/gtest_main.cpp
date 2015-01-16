@@ -4,10 +4,13 @@
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/directed_graph.hpp"
 
+#include "VCFFileTests.hpp"
+
 #include "BuildGraphTests.hpp"
 #include "VariantsTest.hpp"
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
+#include "FileTests.hpp"
 
 #include "gtest/gtest.h"
 

@@ -15,7 +15,7 @@ include_directories(
   ${gtest_SOURCE_DIR})
 
 set(Boost_USE_MULTITHREADED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -lboost_iostreams")
 set(CMAKE_BUILD_TYPE Debug)
 
 
@@ -24,4 +24,4 @@ add_executable(gwiz_tests
   ${GWIZ_TEST_SOURCES}
 )
 
-target_link_libraries(gwiz_tests gtest BamTools BamTools-utils ${VCFLIB_LIBRARIES} gwiz_core gwiz_graph)
+target_link_libraries(gwiz_tests gtest BamTools BamTools-utils ${VCFLIB_LIBRARIES} gwiz_core gwiz_graph gwiz_utils)

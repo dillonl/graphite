@@ -10,24 +10,14 @@ namespace gwiz
 	Region::Region(const std::string& region_string) :
 		m_region_string(region_string)
 	{
-		sregex rex = sregex::compile("^(\\w+):(\\d+)-(\\d+)$"); // in the form of 20:1000-2000
-
-		smatch matches;
-
-		if(regex_match(region_string, matches, rex))
+		this->m_end_position = 1;
+		if (!boost::spirit::qi::parse(region_string.c_str(), region_string.c_str() + region_string.size(), m_region_parser, this->m_reference_id, this->m_start_position, this->m_end_position))
 		{
-			this->m_reference_id = matches[1];
-			this->m_start_position = stoi(matches[2]);
-			this->m_end_position = stoi(matches[3]);
-		}
-		else
-		{
-			throw std::invalid_argument("Region string is invalid");
+			throw std::invalid_argument("Region format is invalid");
 		}
 	}
 
 	Region::~Region()
 	{
 	}
-
 }

@@ -1,11 +1,15 @@
 #ifndef GWIZ_VARIANT_H
-#define GWIZ_VARIANT_h
+#define GWIZ_VARIANT_H
 
+#include <exception>
+#include <cstring>
 #include <string>
 #include <vector>
+#include <memory>
 
-#include "reference/IReference.h"
 #include "IVariant.h"
+#include "VCFParser.hpp"
+#include "core/reference/Reference.h"
 
 namespace gwiz
 {
@@ -22,23 +26,38 @@ namespace gwiz
 	class Variant : public IVariant
 	{
 	public:
-		Variant(const VARIANT_TYPE variant_type,
-				std::string& sequence,
-				position start_position,
-			    position end_position);
+		typedef std::shared_ptr<Variant> SharedPtr;
+		Variant();
 		~Variant();
 
-		VARIANT_TYPE getVariantType() { return m_variant_type; }
-		position getStartPosition() { return m_start_position; }
-		position getEndPosition() { return m_end_position; }
+		inline static Variant::SharedPtr BuildVariant(const char* vcf_line, VariantParser<const char*>& parser)
+		{
+			const char* end_line = static_cast< const char* >(rawmemchr(vcf_line, '\n'));
+			auto variant = std::make_shared<Variant>();
+			variant->m_variant_type = VARIANT_TYPE::SNP;
+			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variant->m_chrom, variant->m_position, variant->m_id, variant->m_ref, variant->m_alt))
+			{
+				throw "An invalid line caused an exception. Please correct the input and try again";
+			}
+			return variant;
+		}
 
+		VARIANT_TYPE getVariantType() const { return m_variant_type; }
+		std::string getChrom() const { return m_chrom; }
+		uint32_t getPosition() const { return m_position; }
+		std::string getID() const { return m_id; }
+		std::vector<std::string> const getRef() { return m_ref; }
+		std::vector<std::string> const getAlt() { return m_alt; }
 	private:
+
 		VARIANT_TYPE m_variant_type;
-		std::string m_sequence;
-		position m_start_position;
-		position m_end_position;
+		uint32_t m_position;
+		std::string m_chrom;
+		std::string m_id;
+		std::vector<std::string> m_ref;
+		std::vector<std::string> m_alt;
 	};
 
 }
 
-#endif //GWIZ_VARIANT_h
+#endif //GWIZ_VARIANT_H

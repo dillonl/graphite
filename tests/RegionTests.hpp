@@ -45,16 +45,8 @@ TEST(RegionTest, GetStartPosition)
 TEST(RegionTest, TestRegionInvalidArgument)
 {
 	bool success = false;
-	try
-	{
-		std::string invalidString = "invalid";
-		gwiz::Region region(invalidString);
-	}
-	catch (std::invalid_argument& exc)
-	{
-		success = true;
-	}
-	EXPECT_EQ(success, true);
+	std::string invalidString = "invalid";
+	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
 }
 
 #endif //GWIZ_TESTS_REGION_HPP

@@ -5,6 +5,7 @@
 
 #include "utils/NonCopyable.h"
 #include "utils/Types.h"
+#include "RegionParser.hpp"
 
 namespace gwiz
 {
@@ -30,6 +31,8 @@ namespace gwiz
 		std::string m_reference_id;
 		position m_start_position;
 		position m_end_position;
+
+		RegionParser< const char* > m_region_parser;
 	};
 
 }

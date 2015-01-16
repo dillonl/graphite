@@ -14,8 +14,6 @@ namespace gwiz
             IVariant() {}
             virtual ~IVariant() {}
         private:
-            IVariant(const IVariant& other) = delete;
-            IVariant& operator=(const IVariant& other) = delete;
     };
 }
 
