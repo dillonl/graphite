@@ -20,27 +20,7 @@ IF("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
   MESSAGE(SEND_ERROR "In-source builds are not allowed, please build this in the bin directory!")
 ENDIF("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
-
-# make vcflib
-add_custom_command(
-  OUTPUT ${PROJECT_BINARY_DIR}/vcflib.lib
-  COMMAND make
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/externals/vcflib
-  )
-
-add_custom_target(
-  vcflib_lib
-  DEPENDS ${PROJECT_BINARY_DIR}/vcflib.lib
-  )
-
-# create library paths
-set(VCFLIB_LIBRARIES
-  ${PROJECT_SOURCE_DIR}/externals/vcflib/tabixpp/libtabix.a
-  ${PROJECT_SOURCE_DIR}/externals/vcflib/libvcflib.a
-  )
-
-INCLUDE_DIRECTORIES(include src)
-
+INCLUDE_DIRECTORIES(include src config)
 
 # add subfolders
 ADD_SUBDIRECTORY(config)

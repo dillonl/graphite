@@ -5,15 +5,19 @@
 # =================================
 
 # set header and source files
-set(GWIZ_SOURCES
-  utils/Parameters.cpp
+set(GWIZ_TOOLS_SOURCES
   tools/gwiz.cpp
+)
+
+set(GWIZ_UTILS_SOURCES
+  utils/Parameters.cpp
+  utils/file/ASCIIFileReader.cpp
 )
 
 set(GWIZ_CORE_SOURCES
   core/reference/Reference.cpp
   core/variants/Variant.cpp
-  core/variants/VCFReader.cpp
+  core/variants/VCFFileReader.cpp
   core/Region.cpp
 )
 
@@ -24,23 +28,22 @@ set(GWIZ_GRAPH_SOURCES
 
 include_directories(${CMAKE_SOURCE_DIR}/src/core/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/bamtools/src/)
-include_directories(${CMAKE_SOURCE_DIR}/externals/vcflib)
-include_directories(${CMAKE_SOURCE_DIR}/externals/vcflib/src)
 include_directories(${CMAKE_SOURCE_DIR}/externals/)
 
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -lboost_iostreams")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(gwiz_core ${GWIZ_CORE_SOURCES})
 add_library(gwiz_graph ${GWIZ_GRAPH_SOURCES})
+add_library(gwiz_utils ${GWIZ_UTILS_SOURCES})
 
 #create binary
 add_executable(gwiz
-  ${GWIZ_SOURCES}
+  ${GWIZ_TOOLS_SOURCES}
 )
 
 # link libraries to executables
-target_link_libraries(gwiz BamTools BamTools-utils ${VCFLIB_LIBRARIES})
+target_link_libraries(gwiz BamTools BamTools-utils)
 
