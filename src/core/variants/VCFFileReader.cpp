@@ -44,7 +44,7 @@ namespace gwiz
 		const char* start_pos = this->m_file->const_data();
 		std::string end_header_value = "#CHROM";
 		const char* end_pos = strstr(start_pos, end_header_value.c_str());
-		end_pos = static_cast<const char*>(rawmemchr(end_pos, '\n'));
+		end_pos = static_cast<const char*>(memchr(end_pos, '\n', std::numeric_limits< position >::max()));
 		return (end_pos + 1) - start_pos;
 	}
 
@@ -125,6 +125,7 @@ namespace gwiz
 			this->m_end_position = (this->m_end_position != NULL && getPositionFromLine(this->m_end_position) > endPositionTemp) ? this->m_end_position : end;
 		}
 		this->m_region_mutex.unlock();
+		return true;
 	}
 
 	bool VCFFileReader::registerRegion(Region::SharedPtr region)
@@ -156,6 +157,7 @@ namespace gwiz
 		{
 			throw "Region " + region->getRegionString() + " was not found.";
 		}
+		return true;
 	}
 
 } // end namespace gwiz

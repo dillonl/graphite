@@ -3,7 +3,7 @@
 
 #define TEST_DIRECTORY "@CMAKE_SOURCE_DIR@/data/";
 #define TEST_LINE_NUMBERS_FILE "@CMAKE_SOURCE_DIR@/data/test_line_numbers.txt";
-#define TEST_1KG_VCF_FILE "@CMAKE_SOURCE_DIR@/data/1kg.vcf";
+#define TEST_1KG_VCF_FILE "@CMAKE_SOURCE_DIR@/data/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5.20130502.sites.vcf";
 #define TEST_VCF_FILE "@CMAKE_SOURCE_DIR@/data/test1.vcf";
 #define TEST_VCF_GZ_FILE "@CMAKE_SOURCE_DIR@/data/test1.vcf.gz";
 #define TEST_REFERENCE_FILE "@CMAKE_SOURCE_DIR@/data/hs37d5.fa.gz";

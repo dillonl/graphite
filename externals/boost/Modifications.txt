@@ -1,0 +1,17 @@
+Modifications:
+
+To allow for this boost package to be a sub project, a few minor modifications were made:
+
+(1) Only boost/boost and boost/libs are included.
+
+(2) All documentation / Test code was removed from boost/libs.
+
+(3) The file boost/config/autolink.hpp was modified to disable autolink, to ensure the library is built the same way on every platform.
+
+(4) A master CMakeLists.txt file was added to compile the majority of the libraries.
+
+(5) python/converter/builtin_converters.hpp modified to work properly with Python3.
+
+(6) Added process from unapproved projects (https://svn.boost.org/svn/boost/sandbox/process)
+    ** Note: processes library (older version of process?) is the only version being built as of revision r32 (see CMakeLists.txt).
+             The process header-only library has been updated to 1.53.0 (April 2013).

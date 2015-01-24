@@ -32,7 +32,7 @@ namespace gwiz
 
 		inline static Variant::SharedPtr BuildVariant(const char* vcf_line, VariantParser<const char*>& parser)
 		{
-			const char* end_line = static_cast< const char* >(rawmemchr(vcf_line, '\n'));
+			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
 			auto variant = std::make_shared<Variant>();
 			variant->m_variant_type = VARIANT_TYPE::SNP;
 			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variant->m_chrom, variant->m_position, variant->m_id, variant->m_ref, variant->m_alt))

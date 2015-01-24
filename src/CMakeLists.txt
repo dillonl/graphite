@@ -29,10 +29,11 @@ set(GWIZ_GRAPH_SOURCES
 include_directories(${CMAKE_SOURCE_DIR}/src/core/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/bamtools/src/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/)
+include_directories(${SCI_BOOST_INCLUDE})
 
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -lboost_iostreams")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(gwiz_core ${GWIZ_CORE_SOURCES})
@@ -45,5 +46,5 @@ add_executable(gwiz
 )
 
 # link libraries to executables
-target_link_libraries(gwiz BamTools BamTools-utils)
+target_link_libraries(gwiz BamTools BamTools-utils ${SCI_BOOST_LIBRARY})
 

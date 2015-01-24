@@ -1,6 +1,7 @@
 #ifndef GWIZ_VG_VARIANT_GRAPH_H
 #define GWIZ_VG_VARIANT_GRAPH_H
 
+#include "core/variants/IVariantIterator.h"
 #include "core/graph/IGraph.h"
 #include "core/graph/INode.h"
 
