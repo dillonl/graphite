@@ -17,7 +17,7 @@ namespace gwiz
 		FastaReference(const std::string& path, Region::SharedPtr region);
 		~FastaReference();
 
-		const char* getSequence() { return m_sequence.c_str(); }
+		const char* getSequence() override { return m_sequence.c_str(); }
 
 	private:
 		void setRegion();

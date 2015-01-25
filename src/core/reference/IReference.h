@@ -18,6 +18,7 @@ namespace gwiz
 		IReference() {}
 		virtual ~IReference() {}
 
+		virtual const char* getSequence() = 0;
 	private:
 		IReference(const IReference&) = delete;
 		IReference& operator=(const IReference&) = delete;
