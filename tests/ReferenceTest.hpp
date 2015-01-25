@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "graph/IGraph.h"
+#include "core/graph/IGraph.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/IReference.h"
 

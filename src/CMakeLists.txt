@@ -10,20 +10,18 @@ set(GWIZ_TOOLS_SOURCES
 )
 
 set(GWIZ_UTILS_SOURCES
-  utils/Parameters.cpp
-  utils/file/ASCIIFileReader.cpp
+  core/utils/Parameters.cpp
+  core/utils/file/ASCIIFileReader.cpp
 )
 
 set(GWIZ_CORE_SOURCES
   core/reference/Reference.cpp
   core/variants/Variant.cpp
   core/variants/VCFFileReader.cpp
-  core/Region.cpp
+  core/region/Region.cpp
 )
 
 set(GWIZ_GRAPH_SOURCES
-  graph/IGraph.cpp
-  graph/SparseGraph.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/src/core/)
@@ -37,7 +35,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(gwiz_core ${GWIZ_CORE_SOURCES})
-add_library(gwiz_graph ${GWIZ_GRAPH_SOURCES})
+#add_library(gwiz_graph ${GWIZ_GRAPH_SOURCES})
 add_library(gwiz_utils ${GWIZ_UTILS_SOURCES})
 
 #create binary

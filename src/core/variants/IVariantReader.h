@@ -2,9 +2,9 @@
 #define GWIZ_IVARIANT_READER_H
 
 #include "core/variants/IVariant.h"
-#include "core/Region.h"
+#include "core/region/Region.h"
 
-#include "utils/NonCopyable.h"
+#include "core/utils/NonCopyable.h"
 
 #include <list>
 

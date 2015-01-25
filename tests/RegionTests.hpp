@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "core/Region.h"
+#include "core/region/Region.h"
 
 // Tests factorial of negative numbers.
 TEST(RegionTest, ConstructorWithGetRegionString)

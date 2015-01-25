@@ -25,4 +25,13 @@ add_executable(gwiz_tests
   ${GWIZ_TEST_SOURCES}
 )
 
-target_link_libraries(gwiz_tests gtest BamTools BamTools-utils ${VCFLIB_LIBRARIES} gwiz_core gwiz_graph gwiz_utils ${SCI_BOOST_LIBRARY})
+target_link_libraries(gwiz_tests
+	gtest
+	BamTools
+	BamTools-utils
+	${VCFLIB_LIBRARIES}
+	gwiz_core
+	#gwiz_graph
+	gwiz_utils
+	${SCI_BOOST_LIBRARY}
+)

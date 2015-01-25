@@ -6,7 +6,7 @@
 
 #include "core/variants/VCFParser.hpp"
 
-#include "graph/IGraph.h"
+#include "core/graph/IGraph.h"
 #include "core/variants/Variant.h"
 #include "core/variants/VCFFileReader.h"
 

@@ -1,7 +1,7 @@
 #ifndef GWIZ_CHROMPARSER_H
 #define GWIZ_CHROMPARSER_H
 
-#include "utils/Types.h"
+#include "core/utils/Types.h"
 
 #include <string>
 

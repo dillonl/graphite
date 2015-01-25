@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "core/variants/VCFFileReader.h"
-#include "core/Region.h"
+#include "core/region/Region.h"
 
 #include "TestConfig.h"
 

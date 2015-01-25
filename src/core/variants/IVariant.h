@@ -1,7 +1,7 @@
 #ifndef GWIZ_IVARIANT_H
 #define GWIZ_IVARIANT_H
 
-#include "utils/NonCopyable.h"
+#include "core/utils/NonCopyable.h"
 
 #include <memory>
 

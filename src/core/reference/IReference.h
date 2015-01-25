@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <memory>
 
-#include "utils/NonCopyable.h"
-#include "utils/Types.h"
+#include "core/utils/NonCopyable.h"
+#include "core/utils/Types.h"
 
 namespace gwiz
 {

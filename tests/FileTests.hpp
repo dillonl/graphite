@@ -1,13 +1,11 @@
 #ifndef GWIZ_TESTS_FILETESTS_HPP
 #define GWIZ_TESTS_FILETESTS_HPP
 
-#include "utils/file/ASCIIFileReader.h"
+#include "core/utils/file/ASCIIFileReader.h"
 #include "TestConfig.h"
 
 TEST(ASCIIFileReaderTests, OpenValidFileTest)
 {
-	// auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader::SharedPtr>(TEST_LINE_NUMBERS_FILE);
-	// auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>("");
 	bool success = true;
 	try
 	{
