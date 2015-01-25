@@ -20,10 +20,13 @@ IF("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
   MESSAGE(SEND_ERROR "In-source builds are not allowed, please build this in the bin directory!")
 ENDIF("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
 
-INCLUDE_DIRECTORIES(include src config)
+INCLUDE_DIRECTORIES(include src config plugins)
+
+SET(PLUGIN_LIBS)
 
 # add subfolders
 ADD_SUBDIRECTORY(config)
 ADD_SUBDIRECTORY(externals)
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(plugins)
 ADD_SUBDIRECTORY(tests)

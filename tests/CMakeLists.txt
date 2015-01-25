@@ -11,6 +11,8 @@ set(GWIZ_TEST_SOURCES
 
 # Where Google Test's .h files can be found.
 include_directories(
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/externals
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR}
   ${SCI_BOOST_INCLUDE})
@@ -34,4 +36,5 @@ target_link_libraries(gwiz_tests
 	#gwiz_graph
 	gwiz_utils
 	${SCI_BOOST_LIBRARY}
+	${PLUGIN_LIBS}
 )

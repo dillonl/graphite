@@ -5,12 +5,13 @@
 #include "boost/graph/directed_graph.hpp"
 
 #include "VCFFileTests.hpp"
-
 #include "BuildGraphTests.hpp"
 #include "VariantsTest.hpp"
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
+
+#include "plugins/TestIncludes.h"
 
 #include "gtest/gtest.h"
 

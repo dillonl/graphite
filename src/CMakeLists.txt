@@ -44,5 +44,10 @@ add_executable(gwiz
 )
 
 # link libraries to executables
-target_link_libraries(gwiz BamTools BamTools-utils ${SCI_BOOST_LIBRARY})
+target_link_libraries(gwiz
+	BamTools
+	BamTools-utils
+	${SCI_BOOST_LIBRARY}
+	${PLUGIN_LIBS}
+)
 
