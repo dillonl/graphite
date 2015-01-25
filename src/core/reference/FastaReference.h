@@ -3,6 +3,7 @@
 
 #include "IReference.h"
 
+#include "core/region/Region.h"
 #include "fastahack/Fasta.h"
 
 #include <map>
@@ -10,16 +11,20 @@
 
 namespace gwiz
 {
-	class FastaReference : IReference
+	class FastaReference : public IReference
 	{
 	public:
-		FastaReference(std::string path);
+		FastaReference(const std::string& path, Region::SharedPtr region);
 		~FastaReference();
 
-	private:
-		std::string m_fasta_path;
-		std::map< std::string, std::string > m_region_mapped_reference; // key = region string, value = reference at that region
+		const char* getSequence() { return m_sequence.c_str(); }
 
+	private:
+		void setRegion();
+
+		std::string m_fasta_path;
+		Region::SharedPtr m_region;
+		std::string m_sequence;
 		std::shared_ptr< fastahack::FastaReference > m_fasta_reference;
 
 	};

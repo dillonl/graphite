@@ -1,6 +1,9 @@
 # bin folder
 bin/
 
+#data folder
+data/
+
 #Gtags folders
 GPATH
 GRTAGS

@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-#include "TestConfig.h"
+#include "config/TestConfig.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
 
@@ -48,12 +48,11 @@ namespace
 	// Tests that the Foo::Bar() method does Abc.
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
-		/*
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:100000-1000000");
 		std::string fastaPath = TEST_FASTA_FILE;
-		gwiz::FastaReference::SharedPtr fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		const char* reference = fastaReferencePtr->getSequence();
-		*/
+		gwiz::FastaReference test(fastaPath, regionPtr);
+//		gwiz::FastaReference::SharedPtr fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+		// const char* reference = fastaReferencePtr->getSequence();
 	}
 }
 

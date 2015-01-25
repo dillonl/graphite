@@ -16,6 +16,7 @@ set(GWIZ_UTILS_SOURCES
 
 set(GWIZ_CORE_SOURCES
   core/reference/Reference.cpp
+  core/reference/FastaReference.cpp
   core/variants/Variant.cpp
   core/variants/VCFFileReader.cpp
   core/region/Region.cpp
@@ -47,7 +48,7 @@ add_executable(gwiz
 target_link_libraries(gwiz
 	BamTools
 	BamTools-utils
+	fastahack_lib
 	${SCI_BOOST_LIBRARY}
-	${PLUGIN_LIBS}
 )
 

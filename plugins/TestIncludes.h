@@ -1,6 +1,10 @@
-#ifndef GWIZ_PLUGIN_CONFIG_H
-#define GWIZ_PLUGIN_CONFIG_H
+#ifndef GWIZ_PLUGIN_TESTS_H
+#define GWIZ_PLUGIN_TESTS_H
+
+/*
+ * Add test include files for the plugins here
+ */
 
 #include "vg/tests/TestIncludes.h"
 
-#endif // GWIZ_TEST_CONFIG_H
+#endif // GWIZ_PLUGIN_TESTS_H
