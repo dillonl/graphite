@@ -19,7 +19,7 @@ include_directories(
 
 set(Boost_USE_MULTITHREADED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 
 #create binary

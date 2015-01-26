@@ -23,6 +23,21 @@ namespace gwiz
 
 		void VariantGraph::constructGraph()
 		{
+			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
+			size_t referenceOffset = 0;
+			Variant::SharedPtr variantPtr;
+			m_variant_reader_ptr->getNextVariant(variantPtr);
+			ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getPosition() - startPosition);
+			auto referenceVertex = boost::add_vertex(refNode, *m_graph_ptr);
+			while (m_variant_reader_ptr->getNextVariant(variantPtr))
+			{
+				// ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, )
+			}
+		}
+
+		/*
+		void VariantGraph::constructGraph()
+		{
 			std::vector< std::string > name;
 			// boost::dynamic_properties dp;
 			// dp.property("label", boost::get(&INode::test, *this->m_graph_ptr));
@@ -41,6 +56,8 @@ namespace gwiz
 				auto v1 = boost::add_vertex(refNode, *m_graph_ptr);
 				boost::add_edge(v0, v1, *m_graph_ptr);
 				name.push_back(refNode->sequence);
+				std::cout << refNode->sequence << std::endl;
+				exit(0);
 
 				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 				{
@@ -58,7 +75,7 @@ namespace gwiz
 			boost::write_graphviz(ofs, *this->m_graph_ptr, boost::make_label_writer(&name[0]));
 			// boost::write_graphviz(ofs, *this->m_graph_ptr, boost::make_label_writer(boost::get(&INode::SharedPtr::sequence, *this->m_graph_ptr)));
 		}
-
+		*/
 	}// end namespace vg
 
 }// end namespace gwiz

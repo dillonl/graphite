@@ -33,7 +33,7 @@ include_directories(${SCI_BOOST_INCLUDE})
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 add_library(gwiz_core ${GWIZ_CORE_SOURCES})
 #add_library(gwiz_graph ${GWIZ_GRAPH_SOURCES})

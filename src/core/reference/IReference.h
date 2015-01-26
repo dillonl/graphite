@@ -16,7 +16,7 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr<IReference> SharedPtr;
 
-	IReference(Region::SharedPtr region) : m_region(region) {}
+	    IReference(Region::SharedPtr region) : m_region(region) {}
 		virtual ~IReference() {}
 
 		virtual const char* getSequence() = 0;

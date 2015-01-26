@@ -52,9 +52,9 @@ namespace
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
 		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60808-62964872");
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60808-82964");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2657239");
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_1KG_VCF_FILE;
+		std::string vcfPath = TEST_VCF_FILE;
 
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);

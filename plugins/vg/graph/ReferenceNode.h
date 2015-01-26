@@ -14,9 +14,14 @@ namespace gwiz
 		    ReferenceNode(const char* sequence, position position, uint32_t length) :
 			    INode(sequence, position, length)
 				{}
+    		ReferenceNode(IReference::SharedPtr reference, size_t offset, size_t length) :
+				m_offset(offset),
+				INode(reference->getSequence() + offset, length)
+				{}
 			~ReferenceNode() {}
 
-			void updateLength(uint32_t length) { m_length = length; }
+		private:
+			size_t m_offset;
 		};
 	}
 }
