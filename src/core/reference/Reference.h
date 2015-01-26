@@ -13,7 +13,7 @@ namespace gwiz
 	class Reference : public IReference
 	{
 	public:
-		Reference(const std::string& fasta_path);
+		Reference(Region::SharedPtr region);
 		~Reference();
 
 	private:

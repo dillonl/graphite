@@ -3,7 +3,8 @@
 namespace gwiz
 {
 
-	Reference::Reference(const std::string& fasta_path) : m_fasta_path(fasta_path)
+	Reference::Reference(Region::SharedPtr region) :
+		IReference(region)
 	{
 
 	}

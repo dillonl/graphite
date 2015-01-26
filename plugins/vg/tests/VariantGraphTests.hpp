@@ -5,6 +5,8 @@
 
 #include "config/TestConfig.h"
 #include "plugins/vg/graph/VariantGraph.h"
+
+#include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
 
@@ -49,17 +51,15 @@ namespace
 	// Tests that the Foo::Bar() method does Abc.
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:100000-1000000");
+		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60808-62964872");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60808-82964");
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_VCF_FILE;
+		std::string vcfPath = TEST_1KG_VCF_FILE;
 
-		 // gwiz::FastaReference test(fastaPath, regionPtr);
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		// const char* reference = fastaReferencePtr->getSequence();
-
-		// gwiz::IGraph::SharedPtr variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
+		vcfFileReader->Open(regionPtr);
+		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
 	}
 }
 

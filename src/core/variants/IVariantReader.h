@@ -2,6 +2,8 @@
 #define GWIZ_IVARIANT_READER_H
 
 #include "core/variants/IVariant.h"
+#include "core/variants/Variant.h"
+
 #include "core/region/Region.h"
 
 #include "core/utils/NonCopyable.h"
@@ -22,9 +24,7 @@ namespace gwiz
 		IVariantReader() {}
 		virtual ~IVariantReader() {}
 
-		virtual std::list<IVariant::SharedPtr> GetAllVariants() = 0;
-		virtual std::list<IVariant::SharedPtr> GetAllVariantsWithinChromosome(std::string& chrom) = 0;
-		virtual std::list<IVariant::SharedPtr> GetVariantsWithinRegion(Region::SharedPtr region) = 0;
+		virtual inline bool getNextVariant(Variant::SharedPtr& variant) = 0;
 	};
 } // end namespace gwiz
 

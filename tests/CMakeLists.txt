@@ -37,5 +37,6 @@ target_link_libraries(gwiz_tests
 	#gwiz_graph
 	gwiz_utils
 	${SCI_BOOST_LIBRARY}
+	#vg_lib
 	${PLUGIN_LIBS}
 )

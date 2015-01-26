@@ -2,6 +2,7 @@
 #define GWIZ_VCFFILEREADER_H
 
 #include "core/utils/file/ASCIIFileReader.h"
+#include "core/variants/IVariantReader.h"
 
 #include "core/variants/VCFParser.hpp"
 #include "core/variants/ChromParser.hpp"
@@ -21,7 +22,7 @@
 
 namespace gwiz
 {
-	class VCFFileReader : public ASCIIFileReader
+	class VCFFileReader : public ASCIIFileReader, public IVariantReader
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;
@@ -31,12 +32,12 @@ namespace gwiz
         void Open() override;
 		void Open(Region::SharedPtr region);
 
-		inline bool getNextVariant(Variant::SharedPtr& variant)
+		inline bool getNextVariant(Variant::SharedPtr& variant) override
 		{
 			const char* line = getNextLine();
 			if (line != NULL)
 			{
-				variant = Variant::BuildVariant(line, m_vcf_parser);
+				variant = variant->BuildVariant(line, m_vcf_parser); // static function call to BuildVariant
 				return true;
 			}
 			else

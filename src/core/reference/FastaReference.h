@@ -18,12 +18,12 @@ namespace gwiz
 		~FastaReference();
 
 		const char* getSequence() override { return m_sequence.c_str(); }
+		size_t getSequenceSize() override { return m_sequence.size();  }
 
 	private:
 		void setRegion();
 
 		std::string m_fasta_path;
-		Region::SharedPtr m_region;
 		std::string m_sequence;
 		std::shared_ptr< fastahack::FastaReference > m_fasta_reference;
 

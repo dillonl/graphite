@@ -18,7 +18,9 @@ set(CMAKE_BUILD_TYPE Debug)
 
 add_library(vg_lib ${GWIZ_VG_GRAPH_SOURCES})
 
-SET(PLUGIN_LIBS ${PLUGIN_LIBS} vg_lib)
+SET(TMP_PLUGINS ${PLUGIN_LIBS}) # store a temp plugin var
+UNSET(PLUGIN_LIBS CACHE)  #unset the plugin_libs var
+SET(PLUGIN_LIBS "${TMP_PLUGINS};vg_lib" CACHE LIST "A LIST OF THE PLUGIN LIBRARIES") #add vg_lib to the list of plugins
 
 #create binary
 #add_executable(gwiz

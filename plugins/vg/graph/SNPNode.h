@@ -12,8 +12,9 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< SNPNode > SharedPtr;
-		SNPNode(std::string& test) : m_test(test)
-			{}
+		    SNPNode(const char* sequence, position position, uint32_t length) :
+			    INode(sequence, position, length)
+			    {}
 			~SNPNode() {}
 
 			std::string m_test;

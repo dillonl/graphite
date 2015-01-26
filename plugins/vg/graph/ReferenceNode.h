@@ -11,14 +11,12 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< ReferenceNode > SharedPtr;
-		    ReferenceNode(IReference::SharedPtr referencePtr, char* sequence, uint32_t length) :
-			    m_reference_ptr(referencePtr),
-				INode(sequence, length)
+		    ReferenceNode(const char* sequence, position position, uint32_t length) :
+			    INode(sequence, position, length)
 				{}
 			~ReferenceNode() {}
 
-		private:
-			IReference::SharedPtr m_reference_ptr;
+			void updateLength(uint32_t length) { m_length = length; }
 		};
 	}
 }

@@ -4,7 +4,8 @@ namespace gwiz
 {
 
 	FastaReference::FastaReference(const std::string& path, Region::SharedPtr region) :
-		m_fasta_path(path), m_region(region)
+		m_fasta_path(path),
+		IReference(region)
 	{
 		m_fasta_reference = std::make_shared< fastahack::FastaReference >();
 		m_fasta_reference->open(this->m_fasta_path);
