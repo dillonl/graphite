@@ -17,12 +17,12 @@ namespace gwiz
 	 * framework for a variant reader. This will allow flexibility
 	 * for all file types and implementations.
 	 */
-	class IVariantReader : private noncopyable
+	class IVariantList : private noncopyable
 	{
 	public:
-		typedef std::shared_ptr<IVariantReader> SharedPtr;
-		IVariantReader() {}
-		virtual ~IVariantReader() {}
+		typedef std::shared_ptr< IVariantList > SharedPtr;
+		IVariantList() {}
+		virtual ~IVariantList() {}
 
 		virtual inline bool getNextVariant(Variant::SharedPtr& variant) = 0;
 	};

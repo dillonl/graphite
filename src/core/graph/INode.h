@@ -15,7 +15,9 @@ namespace gwiz
     	INode(const char* sequence, size_t length) :
 		    m_sequence(sequence),
 			m_length(length)
-		{}
+		{
+			nodeSeq = std::string(m_sequence, m_length);
+		}
 			/*
     	INode(const char* sequence, position pos,  uint32_t length) :
 		    m_sequence(sequence),
@@ -32,6 +34,7 @@ namespace gwiz
 
 		void setLength(uint32_t length) { m_length = length; setSequence(); }
 
+		std::string nodeSeq;
 		std::string sequence;
 		const char* test;
 

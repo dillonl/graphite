@@ -17,7 +17,7 @@ namespace gwiz
 		public:
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
 
-			VariantGraph(IReference::SharedPtr referencePtr, IVariantReader::SharedPtr variantReaderPtr);
+			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
 			~VariantGraph();
 
 		protected:
@@ -29,6 +29,17 @@ namespace gwiz
 			/* typedef boost::graph_traits< Graph >::vertex_descriptor INodeType; */
 
 			GraphPtr m_graph_ptr;
+
+
+			struct OurVertexPropertyWriter {
+			OurVertexPropertyWriter(Graph& g_) : g(g_) {}
+				template <class Vertex>
+				void operator() (std::ostream& out, Vertex u) {
+					out << "[label=" << g[u]->nodeSeq << "]";
+				}
+
+				Graph& g;
+			};
 		};
 	}
 }

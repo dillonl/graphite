@@ -2,7 +2,7 @@
 #define GWIZ_IGRAPH_H
 
 #include "core/reference/IReference.h"
-#include "core/variants/IVariantReader.h"
+#include "core/variants/IVariantList.h"
 #include "core/variants/IVariant.h"
 #include "core/utils/NonCopyable.h"
 
@@ -19,15 +19,15 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr<IGraph> SharedPtr;
 
-	    IGraph(IReference::SharedPtr referencePtr, IVariantReader::SharedPtr variantReaderPtr) :
-		    m_reference_ptr(referencePtr), m_variant_reader_ptr(variantReaderPtr) {}
+	    IGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
+		    m_reference_ptr(referencePtr), m_variant_list_ptr(variantListPtr) {}
 		virtual ~IGraph() {}
 
 	protected:
 
 		virtual void constructGraph() = 0;
 		IReference::SharedPtr m_reference_ptr;
-		IVariantReader::SharedPtr m_variant_reader_ptr;
+		IVariantList::SharedPtr m_variant_list_ptr;
 
 	private:
 

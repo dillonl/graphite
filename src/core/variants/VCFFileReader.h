@@ -2,7 +2,7 @@
 #define GWIZ_VCFFILEREADER_H
 
 #include "core/utils/file/ASCIIFileReader.h"
-#include "core/variants/IVariantReader.h"
+#include "core/variants/IVariantList.h"
 
 #include "core/variants/VCFParser.hpp"
 #include "core/variants/ChromParser.hpp"
@@ -22,7 +22,7 @@
 
 namespace gwiz
 {
-	class VCFFileReader : public ASCIIFileReader, public IVariantReader
+	class VCFFileReader : public ASCIIFileReader, public IVariantList
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;

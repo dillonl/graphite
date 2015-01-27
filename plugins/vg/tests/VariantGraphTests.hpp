@@ -4,6 +4,8 @@
 #include "gtest/gtest.h"
 
 #include "config/TestConfig.h"
+#include "tests/classes/TestReference.h"
+#include "tests/classes/TestVariantList.h"
 #include "plugins/vg/graph/VariantGraph.h"
 
 #include "core/variants/VCFFileReader.h"
@@ -55,6 +57,7 @@ namespace
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2657239");
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_VCF_FILE;
+		// std::string vcfPath = TEST_1KG_VCF_FILE;
 
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);

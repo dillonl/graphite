@@ -10,8 +10,8 @@ namespace gwiz
 	namespace vg
 	{
 
-		VariantGraph::VariantGraph(IReference::SharedPtr referencePtr, IVariantReader::SharedPtr variantReaderPtr) :
-			IGraph(referencePtr, variantReaderPtr),
+		VariantGraph::VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
+			IGraph(referencePtr, variantListPtr),
 			m_graph_ptr(std::make_shared< Graph >())
 		{
 			constructGraph();
@@ -21,6 +21,52 @@ namespace gwiz
 		{
 		}
 
+		void VariantGraph::constructGraph()
+		{
+			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
+			size_t referenceOffset = 0;
+			Variant::SharedPtr variantPtr;
+			std::vector< Graph::vertex_descriptor > altAndRefVertices;
+			while (m_variant_list_ptr->getNextVariant(variantPtr))
+			{
+				Graph::vertex_descriptor referenceVertex;
+				size_t referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
+				if (referenceSize > 0)
+				{
+					auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
+					referenceVertex = boost::add_vertex(referenceNode, *m_graph_ptr);
+					// add previous variant and reference Vertices to the referenceVertex
+					for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
+					{
+						boost::add_edge(referenceVertex, (*iter), *this->m_graph_ptr);
+					}
+				}
+
+				altAndRefVertices.clear(); // clear out the alt and ref vertices
+				// get next variants and add edges from the ref to the variants
+				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+				{
+					INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
+					auto variantVertex = boost::add_vertex(variantNode, *this->m_graph_ptr);
+					boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
+					altAndRefVertices.push_back(variantVertex);
+				}
+				if (variantPtr->getRef().size() != 1)
+				{
+					std::cout << "variant ref error: " << variantPtr->getRef().size() << std::endl;
+				}
+				ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset + referenceSize, variantPtr->getRef()[0].size());
+				auto variantReferenceVertex = boost::add_vertex(variantReferenceNode, *m_graph_ptr);
+				boost::add_edge(referenceVertex, variantReferenceVertex, *this->m_graph_ptr);
+				altAndRefVertices.push_back(variantReferenceVertex);
+				referenceOffset += referenceSize + variantPtr->getRef()[0].size();
+			}
+
+			std::ofstream ofs("out.dot");
+			boost::write_graphviz(ofs, *this->m_graph_ptr,OurVertexPropertyWriter(*this->m_graph_ptr));
+		}
+
+		/*
 		void VariantGraph::constructGraph()
 		{
 			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
@@ -43,6 +89,7 @@ namespace gwiz
 				}
 			}
 		}
+		*/
 
 		/*
 		void VariantGraph::constructGraph()
