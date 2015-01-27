@@ -29,9 +29,18 @@ namespace gwiz
 			m_variant_reader_ptr->getNextVariant(variantPtr);
 			ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getPosition() - startPosition);
 			auto referenceVertex = boost::add_vertex(refNode, *m_graph_ptr);
+
+			// -- Should be converted into a do while loop
+
 			while (m_variant_reader_ptr->getNextVariant(variantPtr))
 			{
-				// ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, )
+				 // ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, )
+				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+				{
+					// IVariantNode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
+					auto variantVertex = boost::add_vertex(IVariantNode::BuildVariantNodes(variantPtr, i), *this->m_graph_ptr);
+					boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
+				}
 			}
 		}
 

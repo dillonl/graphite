@@ -1,6 +1,7 @@
 #ifndef GWIZ_VG_SNPNODE
 #define GWIZ_VG_SNPNODE
 
+#include "IVariantNode.h"
 #include "core/graph/INode.h"
 #include "core/utils/Types.h"
 
@@ -8,16 +9,16 @@ namespace gwiz
 {
 	namespace vg
 	{
-		class SNPNode : public INode
+		class SNPNode : public IVariantNode
 		{
 		public:
 			typedef std::shared_ptr< SNPNode > SharedPtr;
-		    SNPNode(const char* sequence, position position, uint32_t length) :
-			    INode(sequence, position, length)
-			    {}
+
+    		SNPNode(Variant::SharedPtr variant, uint32_t altIndex) :
+				IVariantNode(variant, altIndex)
+			{}
 			~SNPNode() {}
 
-			std::string m_test;
 		};
 	}// end namespace vg
 }// end namespace gwiz

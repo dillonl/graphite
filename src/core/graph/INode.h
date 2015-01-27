@@ -14,15 +14,17 @@ namespace gwiz
 		INode() {}
     	INode(const char* sequence, size_t length) :
 		    m_sequence(sequence),
-		    m_length(length)
+			m_length(length)
 		{}
-    	INode(const char* sequence,position pos,  uint32_t length) :
+			/*
+    	INode(const char* sequence, position pos,  uint32_t length) :
 		    m_sequence(sequence),
 				m_position(pos),
 				m_length(length)
 			{
 				setSequence();
 			}
+			*/
 		virtual ~INode() {}
 
 		const char* getSequence() { return m_sequence; }

@@ -11,9 +11,11 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< ReferenceNode > SharedPtr;
+			/*
 		    ReferenceNode(const char* sequence, position position, uint32_t length) :
 			    INode(sequence, position, length)
 				{}
+			*/
     		ReferenceNode(IReference::SharedPtr reference, size_t offset, size_t length) :
 				m_offset(offset),
 				INode(reference->getSequence() + offset, length)
