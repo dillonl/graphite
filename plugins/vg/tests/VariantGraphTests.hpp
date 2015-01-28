@@ -4,8 +4,9 @@
 #include "gtest/gtest.h"
 
 #include "config/TestConfig.h"
-#include "tests/classes/TestReference.h"
-#include "tests/classes/TestVariantList.h"
+#include "tests/classes/TestReference.hpp"
+#include "tests/classes/TestVariantList.hpp"
+#include "tests/classes/TestReferenceVariantGenerator.hpp"
 #include "plugins/vg/graph/VariantGraph.h"
 
 #include "core/variants/VCFFileReader.h"
@@ -19,6 +20,10 @@ namespace
 	class VariantGraphTest : public ::testing::Test
 	{
 	protected:
+
+		//std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTGAGATTACAGGTGTGAACCACTGCACCTGGTCTCAAATCAGAAAATCTTTGAATTCATCTAATGGTCACCTATCCTGTGGGCCCTCACTTTGAGATATTTTGCCTTTTTTGGCCAAACCAATATGTAGCCTCCATGTATTATATGACCTTGCCTGCAACCTCTGCCTTCCCACCTTTAAAAACCCTTACACATAAGCCATCAGGGAGATTAGGCCTTAAGGATTAGCTGCCTGATACTCCTTGCTTGCTGCCTGCAATAAATTCCTCAACTTCTGTCTCAGCAATGCCGATATCAGTGCTTGACTTTGATAGGCTGGGTGGGTGGACCCAAATTTGGTTTGGTGACCCTTTGAGCTTAGATTCAAAATTCTAGTTTTGTCACTCTGCAGTTTTGTGATCTTGAGCAAGTTACTTAACCTCTCTGAGCCTTGTTTGTCATGTGTAATGAAAAGAGCTATACTTACCTTGTGAGGTAGTCCTCAGGATTCAATGAGATAATAAGTACTCACTAAACAAAACTCGTTATTACAAAAGAATCACTTTGTCTCTGAAGTGGGCAATTCAACCCATTTCTAGGAGATTTTAAACATGATTTTAGATATTTGGTGTGATTTTGTGAATGGGTTTATCGTTAATAGCTTTCATGCTCCAGAATTTTCTTGAATAATAGGTTTTTGCAAAGTGCATTCCATGGAATACTCATTTGGGTGACGTTAATAGACATCACTCAAAAGCTGGGTGAATATTACAATGTTTACTTCATCTGTAACAAGCTGAGTAGCTACAGTACATATCTAAGAGGGGGCTCTAATTCTCAATATTTTCCAAATTTATTAGATCACAGACTTTTCTTTTAGTGAAGTGCTTAATGAAACTTAAGTTCTGTGAAAAGTACTTTGAGAAATATTGCTTTAAAAAGAAAAAGATTGAGCCCTGTATCAGGGGAAATATCTAATATTATATTAAACAAAAAAGTCCCA";
+		std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
+
 		// You can remove any or all of the following functions if its body
 		// is empty.
 
@@ -50,19 +55,23 @@ namespace
 		// Objects declared here can be used by all tests in the test case for Foo.
 	};
 
-	// Tests that the Foo::Bar() method does Abc.
+
+
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
+        /*
 		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60808-62964872");
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2657239");
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_VCF_FILE;
 		// std::string vcfPath = TEST_1KG_VCF_FILE;
+		*/
 
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		vcfFileReader->Open(regionPtr);
-		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+
+		testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
+
+		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 	}
 }
 

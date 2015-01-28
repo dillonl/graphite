@@ -1,5 +1,5 @@
-#ifndef GWIZ_TESTS_CLASSES_TESTVARIANTLIST_H
-#define GWIZ_TESTS_CLASSES_TESTVARIANTLIST_H
+#ifndef GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
+#define GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
 
 #include "core/variants/IVariantList.h"
 
@@ -15,6 +15,7 @@ namespace gwiz
 		class TestVariantList : public IVariantList
 		{
 		public:
+			typedef std::shared_ptr< TestVariantList > SharedPtr;
 		    TestVariantList(std::vector< Variant::SharedPtr > variantPtrList) :
 			    m_variant_index(0),
 			    m_variant_ptr_list(variantPtrList)
@@ -48,4 +49,4 @@ namespace gwiz
 	}
 }
 
-#endif //GWIZ_TESTS_CLASSES_TESTVARIANTLIST_H
+#endif //GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP

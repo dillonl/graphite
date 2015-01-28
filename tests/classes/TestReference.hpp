@@ -1,5 +1,5 @@
-#ifndef GWIZ_TESTS_CLASSES_TESTREFERENCE_H
-#define GWIZ_TESTS_CLASSES_TESTREFERENCE_H
+#ifndef GWIZ_TESTS_CLASSES_TESTREFERENCE_HPP
+#define GWIZ_TESTS_CLASSES_TESTREFERENCE_HPP
 
 #include "core/reference/IReference.h"
 
@@ -15,7 +15,8 @@ namespace gwiz
 		class TestReference : public IReference
 		{
 		public:
-		    TestReference(std::string& sequence, Region::SharedPtr region) :
+			typedef std::shared_ptr< TestReference > SharedPtr;
+		    TestReference(const std::string& sequence, const Region::SharedPtr region) :
 			    m_sequence(sequence), IReference(region)
 			{
 			}
@@ -35,4 +36,4 @@ namespace gwiz
 	}
 }
 
-#endif //GWIZ_TESTS_CLASSES_TESTREFERENCE_H
+#endif //GWIZ_TESTS_CLASSES_TESTREFERENCE_HPP
