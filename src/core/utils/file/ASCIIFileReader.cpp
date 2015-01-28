@@ -7,7 +7,7 @@
 
 namespace gwiz
 {
-	ASCIIFileReader::ASCIIFileReader(std::string& path) :
+	ASCIIFileReader::ASCIIFileReader(const std::string& path) :
 		IFile(path),
 		m_start_position(NULL),
 		m_end_position(NULL)

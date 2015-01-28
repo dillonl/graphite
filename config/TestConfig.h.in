@@ -4,6 +4,7 @@
 #define TEST_DIRECTORY "@CMAKE_SOURCE_DIR@/data/";
 #define TEST_LINE_NUMBERS_FILE "@CMAKE_SOURCE_DIR@/data/test_line_numbers.txt";
 #define TEST_1KG_VCF_FILE "@CMAKE_SOURCE_DIR@/data/ALL.autosomes.phase3_shapeit2_mvncall_integrated_v5.20130502.sites.vcf";
+#define TEST_1KG_CHR20_VCF_FILE "@CMAKE_SOURCE_DIR@/data/ALL.chr20.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf";
 #define TEST_VCF_FILE "@CMAKE_SOURCE_DIR@/data/ALL.chrY.phase3_integrated.20130502.genotypes.vcf";
 #define TEST_FASTA_FILE "@CMAKE_SOURCE_DIR@/data/hs37d5.fa";
 #define TEST_INVALID_FILE "@CMAKE_SOURCE_DIR@/data/invalid.txt";

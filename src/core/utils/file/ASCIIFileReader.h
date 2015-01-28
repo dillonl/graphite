@@ -17,7 +17,7 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr<ASCIIFileReader> SharedPtr;
-		ASCIIFileReader(std::string& path);
+		ASCIIFileReader(const std::string& path);
 		~ASCIIFileReader() override;
 
 		/*
@@ -95,7 +95,7 @@ namespace gwiz
 		 */
 		inline const char* getNextLine()
 		{
-			if (!this->m_opened || this->m_current_position > this->m_end_position) { return NULL; }
+			if (!this->m_opened || this->m_current_position >= this->m_end_position) { return NULL; }
 			const char* current_line = this->m_current_position;
 			const char* line = static_cast< const char* >(memchr(this->m_current_position, '\n', (this->m_end_file_ptr - this->m_current_position)));
 			size_t lineSize = (line - this->m_current_position) + 1;

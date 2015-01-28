@@ -42,7 +42,7 @@ namespace gwiz
 
 			TestReference::SharedPtr getReference()
 			{
-				return std::make_shared< TestReference >(m_reference, m_region);
+				return std::make_shared< TestReference >(m_reference, this->m_region->getRegionString());
 			}
 
 		private:

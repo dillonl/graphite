@@ -7,14 +7,16 @@ namespace gwiz
 {
 	using namespace boost::xpressive;
 
-	Region::Region(const std::string& region_string) :
-		m_region_string(region_string)
+	Region::Region(const std::string& regionString) :
+		m_region_string(regionString),
+		m_start_position(0),
+		m_end_position(0)
 	{
-		this->m_end_position = 1;
-		if (!boost::spirit::qi::parse(region_string.c_str(), region_string.c_str() + region_string.size(), m_region_parser, this->m_reference_id, this->m_start_position, this->m_end_position))
+		if (regionString.size() == 0)
 		{
 			throw std::invalid_argument("Region format is invalid");
 		}
+		boost::spirit::qi::parse(regionString.c_str(), regionString.c_str() + regionString.size(), m_region_parser, this->m_reference_id, this->m_start_position, this->m_end_position);
 	}
 
 	Region::~Region()

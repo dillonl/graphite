@@ -42,10 +42,24 @@ TEST(RegionTest, GetStartPosition)
 }
 
 // Tests factorial of negative numbers.
+TEST(RegionTest, TestRegionRegionIDOnly)
+{
+	bool success = false;
+	std::string regionString = "Y";
+
+	gwiz::Region region(regionString);
+	EXPECT_EQ(regionString, region.getReferenceID());
+	gwiz::position startPositionNotEqual = 1;
+	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
+	EXPECT_EQ(region.getStartPosition(), 0);
+	EXPECT_EQ(region.getEndPosition(), 0);
+}
+
+// Tests factorial of negative numbers.
 TEST(RegionTest, TestRegionInvalidArgument)
 {
 	bool success = false;
-	std::string invalidString = "invalid";
+	std::string invalidString = "";
 	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
 }
 

@@ -11,7 +11,7 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr<IFile> SharedPtr;
-	    IFile(std::string& path)
+	    IFile(const std::string& path)
 			: m_file_path(path), m_opened(false), m_file_size(0)
 		{
 		}

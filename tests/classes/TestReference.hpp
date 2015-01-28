@@ -16,8 +16,8 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< TestReference > SharedPtr;
-		    TestReference(const std::string& sequence, const Region::SharedPtr region) :
-			    m_sequence(sequence), IReference(region)
+		    TestReference(const std::string& sequence, const std::string& regionString) :
+			    m_sequence(sequence)
 			{
 			}
 

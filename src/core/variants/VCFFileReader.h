@@ -26,11 +26,9 @@ namespace gwiz
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;
-		VCFFileReader(std::string& path);
+		VCFFileReader(const std::string& path, Region::SharedPtr region);
+		VCFFileReader(const std::string& path);
 		~VCFFileReader();
-
-        void Open() override;
-		void Open(Region::SharedPtr region);
 
 		inline bool getNextVariant(Variant::SharedPtr& variant) override
 		{
@@ -45,6 +43,10 @@ namespace gwiz
 				return false;
 			}
 		}
+		void Open() override;
+		void Open(Region::SharedPtr region);
+	protected:
+
 
 	private:
 		size_t getHeaderSize();

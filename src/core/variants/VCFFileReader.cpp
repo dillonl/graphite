@@ -14,10 +14,18 @@
 
 namespace gwiz
 {
-	VCFFileReader::VCFFileReader(std::string& path) :
+	VCFFileReader::VCFFileReader(const std::string& path, Region::SharedPtr region) :
 		ASCIIFileReader(path)
 	{
+		Open(region);
 	}
+
+	VCFFileReader::VCFFileReader(const std::string& path) :
+		ASCIIFileReader(path)
+	{
+		Open();
+	}
+
 
 	VCFFileReader::~VCFFileReader()
 	{
@@ -26,7 +34,6 @@ namespace gwiz
 	void VCFFileReader::Open()
 	{
 		ASCIIFileReader::Open();
-		// readHeader();
 		this->m_current_position = this->m_file->const_data() + getHeaderSize(); // advance past the header
 		this->m_end_position = this->m_file->const_data() + this->m_file_size; // set the end position to the eof
 	}
@@ -34,7 +41,11 @@ namespace gwiz
 	void VCFFileReader::Open(Region::SharedPtr region)
 	{
 		ASCIIFileReader::Open();
-		// readHeader();
+		if (region->getStartPosition() == 0 && region->getEndPosition() == 0)
+		{
+			region->setStartPosition(1);
+			region->setEndPosition(std::numeric_limits< position >::max());
+		}
 		registerRegion(region);
 		this->m_current_position = this->m_start_position;
 	}
@@ -123,6 +134,7 @@ namespace gwiz
 		if (endPositionTemp != 0)
 		{
 			this->m_end_position = (this->m_end_position != NULL && getPositionFromLine(this->m_end_position) > endPositionTemp) ? this->m_end_position : end;
+			this->m_end_position = static_cast< const char* >(memchr(this->m_end_position, '\n', std::numeric_limits< size_t >::max())) + 1;
 		}
 		this->m_region_mutex.unlock();
 		return true;

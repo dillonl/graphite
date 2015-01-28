@@ -13,12 +13,10 @@ namespace gwiz
 	class Reference : public IReference
 	{
 	public:
-		Reference(Region::SharedPtr region);
+		Reference(std::string& regionString);
 		~Reference();
 
 	private:
-
-		std::string m_fasta_path;
 	};
 
 }

@@ -27,8 +27,15 @@ namespace gwiz
 			size_t referenceOffset = 0;
 			Variant::SharedPtr variantPtr;
 			std::vector< Graph::vertex_descriptor > altAndRefVertices;
+			size_t count = 0;
+			std::cout << "starting" << std::endl;
 			while (m_variant_list_ptr->getNextVariant(variantPtr))
 			{
+				// if (++count % 10000 == 0)
+				// {
+				// 	std::cout << "count " << boost::num_vertices(*this->m_graph_ptr);
+				// }
+
 				Graph::vertex_descriptor referenceVertex;
 				size_t referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 				if (referenceSize > 0)
@@ -60,9 +67,13 @@ namespace gwiz
 				boost::add_edge(referenceVertex, variantReferenceVertex, *this->m_graph_ptr);
 				altAndRefVertices.push_back(variantReferenceVertex);
 				referenceOffset += referenceSize + variantPtr->getRef()[0].size();
-			}
 
-			std::ofstream ofs("out.dot");
+			}
+		}
+
+		void VariantGraph::printGraph(std::string& path)
+		{
+			std::ofstream ofs(path.c_str());
 			boost::write_graphviz(ofs, *this->m_graph_ptr,OurVertexPropertyWriter(*this->m_graph_ptr));
 		}
 

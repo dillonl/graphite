@@ -18,8 +18,7 @@ TEST(VCFFileReaderTests, TestVCFFileReaderGetRegion)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
 	std::string path = TEST_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
-	vcfFileReader->Open(region);
+	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
 	gwiz::Variant::SharedPtr variantPtr;
 	vcfFileReader->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), startPosition);
@@ -41,8 +40,7 @@ TEST(VCFFileReaderTests, TestVCFFileReaderGetRegionBeforeStart)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
 	std::string path = TEST_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
-	vcfFileReader->Open(region);
+	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
 	gwiz::Variant::SharedPtr variantPtr;
 	vcfFileReader->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
@@ -57,13 +55,23 @@ TEST(VCFFileReaderTests, TestVCFFileReaderGetRegionEnd)
     std::string regionString = chrom + ":" + std::to_string(startRegionPosition) + "-" + std::to_string(endRegionPosition);
 	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
 	std::string path = TEST_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
-	vcfFileReader->Open(region);
+	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
 	gwiz::Variant::SharedPtr variantPtr;
 	while (vcfFileReader->getNextVariant(variantPtr))
 	{
 	}
 	ASSERT_EQ(variantPtr->getPosition(), endPosition);
+}
+
+TEST(VCFFileReaderTests, TestVCFFileReaderWithoutRegion)
+{
+	std::string path = TEST_VCF_FILE;
+	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
+	gwiz::Variant::SharedPtr variantPtr;
+	while (vcfFileReader->getNextVariant(variantPtr))
+	{
+	}
+	ASSERT_TRUE(true); // if we get here then we have completed the test
 }
 
 /*
@@ -77,8 +85,8 @@ TEST(VCFFileReaderTests, TestVCFFileReaderGetNoRegion)
     std::string regionString = chrom + ":" + std::to_string(startRegionPosition) + "-" + std::to_string(endRegionPosition);
 	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
 	std::string path = TEST_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
-	ASSERT_ANY_THROW(vcfFileReader->Open(region));
+    ASSERT_ANY_THROW(std::make_shared<gwiz::VCFFileReader>(path, region));
 }
+
 
 #endif // GWIZ_VCF_FILE_TESTS_HPP

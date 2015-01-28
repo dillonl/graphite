@@ -21,7 +21,7 @@ namespace gwiz
 		size_t getSequenceSize() override { return m_sequence.size();  }
 
 	private:
-		void setRegion();
+		void setSequence(Region::SharedPtr region);
 
 		std::string m_fasta_path;
 		std::string m_sequence;

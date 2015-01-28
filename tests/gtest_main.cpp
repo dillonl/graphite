@@ -1,13 +1,12 @@
 #include <stdio.h>
 
-/*
-#include "VCFFileTests.hpp"
-#include "BuildGraphTests.hpp"
-#include "VariantsTest.hpp"
-#include "ReferenceTest.hpp"
-#include "RegionTests.hpp"
-#include "FileTests.hpp"
-*/
+// #include "VCFFileTests.hpp"
+// #include "BuildGraphTests.hpp"
+// #include "VariantsTest.hpp"
+// #include "ReferenceTest.hpp"
+// #include "RegionTests.hpp"
+// #include "FileTests.hpp"
+
 
 #include "plugins/TestIncludes.h"
 

@@ -17,7 +17,7 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr<Region> SharedPtr;
-		Region(const std::string& region_string);
+		Region(const std::string& regionString);
 		Region() = delete; // force region_string usage
 		~Region();
 
@@ -25,6 +25,9 @@ namespace gwiz
 		std::string getReferenceID() const { return this->m_reference_id; }
 		position getStartPosition() const { return this->m_start_position; }
 		position getEndPosition() const { return this->m_end_position; }
+
+		void setStartPosition(position startPosition) { this->m_start_position = startPosition; }
+		void setEndPosition(position endPosition) { this->m_end_position = endPosition; }
 
 	private:
 		std::string m_region_string;

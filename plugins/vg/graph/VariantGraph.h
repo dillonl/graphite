@@ -20,6 +20,8 @@ namespace gwiz
 			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
 			~VariantGraph();
 
+			void printGraph(std::string& path);
+
 		protected:
 			void constructGraph() override;
 
