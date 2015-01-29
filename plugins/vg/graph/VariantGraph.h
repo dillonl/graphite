@@ -8,6 +8,8 @@
 /* #include <boost/graph/graph_traits.hpp> */
 #include <boost/graph/adjacency_list.hpp>
 
+#include <mutex>
+
 namespace gwiz
 {
 	namespace vg
@@ -20,10 +22,12 @@ namespace gwiz
 			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
 			~VariantGraph();
 
-			void printGraph(std::string& path);
+			void printGraph(const char* path);
 
 		protected:
 			void constructGraph() override;
+
+			void addNode(INode::SharedPtr nodePtr);
 
 		private:
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
@@ -31,6 +35,7 @@ namespace gwiz
 			/* typedef boost::graph_traits< Graph >::vertex_descriptor INodeType; */
 
 			GraphPtr m_graph_ptr;
+			std::mutex m_graph_mutex;
 
 
 			struct OurVertexPropertyWriter {

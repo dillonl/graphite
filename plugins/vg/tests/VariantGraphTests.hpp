@@ -56,9 +56,9 @@ namespace
 	};
 
 
-
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
+		/*
 		std::string regionString = "20:60808-62964872";
 		// std::string regionString = "Y:2655180-2657239";
 		std::string fastaPath = TEST_FASTA_FILE;
@@ -69,14 +69,13 @@ namespace
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
 		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
-
-/*
+		*/
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
 
 		testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
 
 		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
-*/
+		variantGraph->printGraph("test.dot");
 	}
 /*
 	TEST_F(VariantGraphTest, ConstructGraph)

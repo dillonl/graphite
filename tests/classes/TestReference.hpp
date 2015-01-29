@@ -19,6 +19,7 @@ namespace gwiz
 		    TestReference(const std::string& sequence, const std::string& regionString) :
 			    m_sequence(sequence)
 			{
+				m_region = std::make_shared< Region >(regionString);
 			}
 
 			~TestReference()

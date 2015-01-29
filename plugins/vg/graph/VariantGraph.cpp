@@ -28,14 +28,8 @@ namespace gwiz
 			Variant::SharedPtr variantPtr;
 			std::vector< Graph::vertex_descriptor > altAndRefVertices;
 			size_t count = 0;
-			std::cout << "starting" << std::endl;
 			while (m_variant_list_ptr->getNextVariant(variantPtr))
 			{
-				// if (++count % 10000 == 0)
-				// {
-				// 	std::cout << "count " << boost::num_vertices(*this->m_graph_ptr);
-				// }
-
 				Graph::vertex_descriptor referenceVertex;
 				size_t referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 				if (referenceSize > 0)
@@ -71,9 +65,15 @@ namespace gwiz
 			}
 		}
 
-		void VariantGraph::printGraph(std::string& path)
+		void VariantGraph::addNode(INode::SharedPtr nodePtr)
 		{
-			std::ofstream ofs(path.c_str());
+			std::lock_guard< std::mutex > lock(this->m_graph_mutex); // m_graph_mutex lock will release when it falls out of scope
+
+		}
+
+		void VariantGraph::printGraph(const char* path)
+		{
+			std::ofstream ofs(path);
 			boost::write_graphviz(ofs, *this->m_graph_ptr,OurVertexPropertyWriter(*this->m_graph_ptr));
 		}
 
