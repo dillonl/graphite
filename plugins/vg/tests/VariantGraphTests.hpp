@@ -22,7 +22,7 @@ namespace
 	protected:
 
 		//std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTGAGATTACAGGTGTGAACCACTGCACCTGGTCTCAAATCAGAAAATCTTTGAATTCATCTAATGGTCACCTATCCTGTGGGCCCTCACTTTGAGATATTTTGCCTTTTTTGGCCAAACCAATATGTAGCCTCCATGTATTATATGACCTTGCCTGCAACCTCTGCCTTCCCACCTTTAAAAACCCTTACACATAAGCCATCAGGGAGATTAGGCCTTAAGGATTAGCTGCCTGATACTCCTTGCTTGCTGCCTGCAATAAATTCCTCAACTTCTGTCTCAGCAATGCCGATATCAGTGCTTGACTTTGATAGGCTGGGTGGGTGGACCCAAATTTGGTTTGGTGACCCTTTGAGCTTAGATTCAAAATTCTAGTTTTGTCACTCTGCAGTTTTGTGATCTTGAGCAAGTTACTTAACCTCTCTGAGCCTTGTTTGTCATGTGTAATGAAAAGAGCTATACTTACCTTGTGAGGTAGTCCTCAGGATTCAATGAGATAATAAGTACTCACTAAACAAAACTCGTTATTACAAAAGAATCACTTTGTCTCTGAAGTGGGCAATTCAACCCATTTCTAGGAGATTTTAAACATGATTTTAGATATTTGGTGTGATTTTGTGAATGGGTTTATCGTTAATAGCTTTCATGCTCCAGAATTTTCTTGAATAATAGGTTTTTGCAAAGTGCATTCCATGGAATACTCATTTGGGTGACGTTAATAGACATCACTCAAAAGCTGGGTGAATATTACAATGTTTACTTCATCTGTAACAAGCTGAGTAGCTACAGTACATATCTAAGAGGGGGCTCTAATTCTCAATATTTTCCAAATTTATTAGATCACAGACTTTTCTTTTAGTGAAGTGCTTAATGAAACTTAAGTTCTGTGAAAAGTACTTTGAGAAATATTGCTTTAAAAAGAAAAAGATTGAGCCCTGTATCAGGGGAAATATCTAATATTATATTAAACAAAAAAGTCCCA";
-		std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
+		std::string m_reference_string = "AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
 
 		// You can remove any or all of the following functions if its body
 		// is empty.
@@ -60,9 +60,10 @@ namespace
 	{
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
 
-		testReferenceVariantGenerator.addVariant(6010, ".", 5, {"A","C"});
-		testReferenceVariantGenerator.addVariant(6015, ".", 1, {"AAAC","GG"});
-		testReferenceVariantGenerator.addVariant(6020, ".", 1, {"A","CCC"});
+		testReferenceVariantGenerator.addVariant(6039, ".", 1, {"A"});
+		testReferenceVariantGenerator.addVariant(6040, ".", 1, {"C"});
+		// testReferenceVariantGenerator.addVariant(6015, ".", 1, {"AAAC","GG"});
+		// testReferenceVariantGenerator.addVariant(6020, ".", 1, {"A","CCC"});
 
 		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->printGraph("test.dot");
@@ -73,7 +74,9 @@ namespace
 	{
 
 		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2656127");
+		//gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2656128");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2756128");
+
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
 		// std::string vcfPath = TEST_1KG_VCF_FILE;

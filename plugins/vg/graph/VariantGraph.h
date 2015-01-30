@@ -42,7 +42,8 @@ namespace gwiz
 			OurVertexPropertyWriter(Graph& g_) : g(g_) {}
 				template <class Vertex>
 				void operator() (std::ostream& out, Vertex u) {
-					out << "[label=" << g[u]->nodeSeq << "]";
+					/* out << "[label=" << g[u]->nodeSeq << "]"; */
+					out << "[label=\"" << g[u]->nodeSeq << " " << g[u]->seq_position << "\"]";
 				}
 
 				Graph& g;
