@@ -43,6 +43,7 @@ namespace gwiz
 				return false;
 			}
 		}
+
 		void Open() override;
 		void Open(Region::SharedPtr region);
 	protected:

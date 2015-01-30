@@ -29,8 +29,12 @@ namespace gwiz
 		}
 		else
 		{
-			position startPosition = this->m_region->getStartPosition();
-			size_t length = this->m_region->getEndPosition() - startPosition;
+			// we must subtract 1 because fastahack is 1 based and strings are 0 based and since we
+			// are using this as a char* then we must account for that
+			position startPosition = this->m_region->getStartPosition() - 1;
+			// we must add 1 because fastahack is not inclusive
+			// so [100-200] would be position 100 to 199
+			size_t length = (this->m_region->getEndPosition() + 1) - startPosition;
 			this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, startPosition, length);
 		}
 	}

@@ -26,8 +26,8 @@ namespace gwiz
 
 		protected:
 			void constructGraph() override;
-
-			void addNode(INode::SharedPtr nodePtr);
+			bool getCompoundNode(Variant::SharedPtr variant);
+			Variant::SharedPtr buildCompoundNode(std::vector< Variant::SharedPtr > variants);
 
 		private:
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
@@ -36,6 +36,11 @@ namespace gwiz
 
 			GraphPtr m_graph_ptr;
 			std::mutex m_graph_mutex;
+
+			// This is used in conjunction with getCompoundNode.
+			// This stores the next variant so we don't have to
+			// get the variant twice
+			Variant m_next_variant;
 
 
 			struct OurVertexPropertyWriter {

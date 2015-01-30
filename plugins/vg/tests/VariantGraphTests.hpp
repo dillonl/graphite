@@ -55,13 +55,21 @@ namespace
 		// Objects declared here can be used by all tests in the test case for Foo.
 	};
 
-
-	TEST_F(VariantGraphTest, ConstructGraph)
+	TEST_F(VariantGraphTest, ConstructGraphNoVariants)
 	{
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+	}
 
-		testReferenceVariantGenerator.addVariant(6039, ".", 1, {"A"});
-		testReferenceVariantGenerator.addVariant(6040, ".", 1, {"C"});
+	TEST_F(VariantGraphTest, MultipleVariantsSequentially)
+	{
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+        //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
+		testReferenceVariantGenerator.addVariant(6001, ".", 1, {"T"});
+		testReferenceVariantGenerator.addVariant(6002, ".", 1, {"G"});
+		testReferenceVariantGenerator.addVariant(6003, ".", 1, {"A"});
+		testReferenceVariantGenerator.addVariant(6004, ".", 1, {"C"});
+		testReferenceVariantGenerator.addVariant(6005, ".", 1, {"G"});
 		// testReferenceVariantGenerator.addVariant(6015, ".", 1, {"AAAC","GG"});
 		// testReferenceVariantGenerator.addVariant(6020, ".", 1, {"A","CCC"});
 
@@ -69,13 +77,14 @@ namespace
 		variantGraph->printGraph("test.dot");
 	}
 
-
+	/*
 	TEST_F(VariantGraphTest, ConstructGraphYChr)
 	{
 
 		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
 		//gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2656128");
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2756128");
+		// problem is at position: 2820410
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820400-2820410");
 
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
@@ -92,6 +101,7 @@ namespace
 		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
+	*/
 
 }
 

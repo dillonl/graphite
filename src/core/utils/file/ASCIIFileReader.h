@@ -92,6 +92,7 @@ namespace gwiz
 		 * Returns a handle to the m_line pointer.
 		 * This may need to be modified to support
 		 * multithreaded functionality.
+		 * Advances file position.
 		 */
 		inline const char* getNextLine()
 		{

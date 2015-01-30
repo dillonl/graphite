@@ -36,6 +36,8 @@ namespace gwiz
 				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 				if (referenceSize > 0)
 				{
+					std::cout << "ref > 0: " << variantPtr->getPosition() << std::endl;
+					std::cout << "refsize: " << referenceSize << std::endl;
 					auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
 					referenceVertex = boost::add_vertex(referenceNode, *m_graph_ptr);
 					// add previous variant and reference Vertices to the referenceVertex
@@ -62,6 +64,7 @@ namespace gwiz
 				}
 				else
 				{
+					std::cout << "ref == 0: " << variantPtr->getPosition() << std::endl;
 					std::vector< Graph::vertex_descriptor > tmpAltAndRefVertices;
 					for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 					{
@@ -86,6 +89,7 @@ namespace gwiz
 				referenceOffset += referenceSize + variantPtr->getRef()[0].size();
 			}
 
+			std::cout << "almost done" << std::endl;
 			// if the referenceSize == 0
 			uint32_t endPosition = (startPosition + referenceOffset);
 			if (this->m_reference_ptr->getRegion()->getEndPosition() > endPosition)
@@ -101,9 +105,27 @@ namespace gwiz
 			}
 		}
 
-		void VariantGraph::addNode(INode::SharedPtr nodePtr)
+		bool getCompoundNode(Variant::SharedPtr variant)
 		{
-			// std::lock_guard< std::mutex > lock(this->m_graph_mutex); // m_graph_mutex lock will release when it falls out of scope
+			std::vector< Variant::SharedPtr > variants;
+			Variant::SharedPtr nextVariant;
+			/*
+			while(m_variant_list_ptr->getNextVariant(nextVariant) && doVariantsOverlap())
+			{
+
+			}
+
+			if (m_variant_list_ptr->getNextVariant(nextVariant))
+			{
+
+			}
+			*/
+			return false;
+		}
+
+		Variant::SharedPtr buildCompoundNode(std::vector< Variant::SharedPtr > variants)
+		{
+			return std::make_shared< Variant >();
 		}
 
 		void VariantGraph::printGraph(const char* path)
