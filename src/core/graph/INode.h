@@ -35,6 +35,7 @@ namespace gwiz
 		void setLength(uint32_t length) { m_length = length; setSequence(); }
 
 		std::string nodeSeq;
+		position seq_position;
 		std::string sequence;
 		const char* test;
 

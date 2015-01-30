@@ -23,15 +23,17 @@ namespace gwiz
 
 		void VariantGraph::constructGraph()
 		{
+			// std::lock_guard< std::mutex > lock(this->m_graph_mutex); // m_graph_mutex lock will release when it falls out of scope
 			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 			size_t referenceOffset = 0;
 			Variant::SharedPtr variantPtr;
 			std::vector< Graph::vertex_descriptor > altAndRefVertices;
 			size_t count = 0;
+			Graph::vertex_descriptor referenceVertex;
+			size_t referenceSize;
 			while (m_variant_list_ptr->getNextVariant(variantPtr))
 			{
-				Graph::vertex_descriptor referenceVertex;
-				size_t referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
+				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 				if (referenceSize > 0)
 				{
 					auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
@@ -39,36 +41,69 @@ namespace gwiz
 					// add previous variant and reference Vertices to the referenceVertex
 					for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
 					{
-						boost::add_edge(referenceVertex, (*iter), *this->m_graph_ptr);
+						boost::add_edge((*iter), referenceVertex, *this->m_graph_ptr);
 					}
-				}
 
-				altAndRefVertices.clear(); // clear out the alt and ref vertices
-				// get next variants and add edges from the ref to the variants
-				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
-				{
-					INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
-					auto variantVertex = boost::add_vertex(variantNode, *this->m_graph_ptr);
-					boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
-					altAndRefVertices.push_back(variantVertex);
+					altAndRefVertices.clear(); // clear out the alt and ref vertices
+					// get next variants and add edges from the ref to the variants
+					for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+					{
+						INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
+						auto variantVertex = boost::add_vertex(variantNode, *this->m_graph_ptr);
+						boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
+						altAndRefVertices.push_back(variantVertex); // add this vertex so the next reference can add an edge between itself and this variant
+					}
+
+					//adding the reference node from the variantPtr
+					ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset + referenceSize, variantPtr->getRef()[0].size());
+					auto variantReferenceVertex = boost::add_vertex(variantReferenceNode, *m_graph_ptr);
+					boost::add_edge(referenceVertex, variantReferenceVertex, *this->m_graph_ptr);
+					altAndRefVertices.push_back(variantReferenceVertex);
 				}
-				if (variantPtr->getRef().size() != 1)
+				else
 				{
-					std::cout << "variant ref error: " << variantPtr->getRef().size() << std::endl;
+					std::vector< Graph::vertex_descriptor > tmpAltAndRefVertices;
+					for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+					{
+						INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
+						auto variantVertex = boost::add_vertex(variantNode, *this->m_graph_ptr);
+						for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
+						{
+							boost::add_edge((*iter), variantVertex, *this->m_graph_ptr);
+						}
+						tmpAltAndRefVertices.push_back(variantVertex); // add this vertex so the next reference can add an edge between itself and this variant
+					}
+					ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset + referenceSize, variantPtr->getRef()[0].size());
+					auto variantReferenceVertex = boost::add_vertex(variantReferenceNode, *m_graph_ptr);
+					for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
+					{
+						boost::add_edge((*iter), variantReferenceVertex, *this->m_graph_ptr);
+					}
+					tmpAltAndRefVertices.push_back(variantReferenceVertex);
+					referenceOffset += referenceSize + variantPtr->getRef()[0].size();
+					altAndRefVertices = tmpAltAndRefVertices;
 				}
-				ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset + referenceSize, variantPtr->getRef()[0].size());
-				auto variantReferenceVertex = boost::add_vertex(variantReferenceNode, *m_graph_ptr);
-				boost::add_edge(referenceVertex, variantReferenceVertex, *this->m_graph_ptr);
-				altAndRefVertices.push_back(variantReferenceVertex);
 				referenceOffset += referenceSize + variantPtr->getRef()[0].size();
+			}
 
+			// if the referenceSize == 0
+			uint32_t endPosition = (startPosition + referenceOffset);
+			if (this->m_reference_ptr->getRegion()->getEndPosition() > endPosition)
+			{
+				referenceSize = this->m_reference_ptr->getRegion()->getEndPosition() - endPosition;
+				auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
+				referenceVertex = boost::add_vertex(referenceNode, *m_graph_ptr);
+				// add previous variant and reference Vertices to the referenceVertex
+				for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
+				{
+					boost::add_edge((*iter), referenceVertex, *this->m_graph_ptr);
+				}
 			}
 		}
 
 		void VariantGraph::addNode(INode::SharedPtr nodePtr)
 		{
-			std::lock_guard< std::mutex > lock(this->m_graph_mutex); // m_graph_mutex lock will release when it falls out of scope
-
+			// std::lock_guard< std::mutex > lock(this->m_graph_mutex); // m_graph_mutex lock will release when it falls out of scope
 		}
 
 		void VariantGraph::printGraph(const char* path)

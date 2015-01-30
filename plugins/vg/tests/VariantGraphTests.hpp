@@ -58,42 +58,38 @@ namespace
 
 	TEST_F(VariantGraphTest, ConstructGraph)
 	{
-		/*
-		std::string regionString = "20:60808-62964872";
-		// std::string regionString = "Y:2655180-2657239";
-		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
-		// std::string vcfPath = TEST_1KG_VCF_FILE;
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(regionString);
-
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
-		*/
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
 
-		testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
+		testReferenceVariantGenerator.addVariant(6010, ".", 5, {"A","C"});
+		testReferenceVariantGenerator.addVariant(6015, ".", 1, {"AAAC","GG"});
+		testReferenceVariantGenerator.addVariant(6020, ".", 1, {"A","CCC"});
 
 		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->printGraph("test.dot");
 	}
-/*
-	TEST_F(VariantGraphTest, ConstructGraph)
+
+
+	TEST_F(VariantGraphTest, ConstructGraphYChr)
 	{
 
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
-		//gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2657239");
+		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2656127");
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
+		std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
 		// std::string vcfPath = TEST_1KG_VCF_FILE;
 
+		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath, regionPtr);
+		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
+		variantGraph->printGraph("test1.dot");
 
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
-		testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
-		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+
+		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+		// testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
+		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
-*/
+
 }
 
 #endif //VARIANT_GRAPH_TESTS_HPP

@@ -18,7 +18,7 @@ namespace gwiz
 			}
 			~TestReferenceVariantGenerator() {}
 
-			void addVariant(position position, const std::string& id, const std::vector< std::string >& alts)
+			void addVariant(position position, const std::string& id, uint32_t refLength, const std::vector< std::string >& alts)
 			{
 				if (position > this->m_region->getEndPosition())
 				{
@@ -30,7 +30,7 @@ namespace gwiz
 					throw "Reference and alt are the same at position: " + std::to_string(position);
 				}
 				std::string variantString = boost::algorithm::join(alts, ",");
-				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + m_reference[position - m_region->getStartPosition()] + "\t" + variantString + "\t";
+				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + (position - m_region->getStartPosition()), refLength) + "\t" + variantString + "\t";
 
 				m_variant_list.push_back(Variant::BuildVariant(variantLine.c_str(), m_vcf_parser));
 			}

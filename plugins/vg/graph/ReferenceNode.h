@@ -19,7 +19,9 @@ namespace gwiz
     		ReferenceNode(IReference::SharedPtr reference, size_t offset, size_t length) :
 				m_offset(offset),
 				INode(reference->getSequence() + offset, length)
-				{}
+				{
+					seq_position = reference->getRegion()->getStartPosition() + offset;
+				}
 			~ReferenceNode() {}
 
 		private:
