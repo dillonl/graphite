@@ -40,6 +40,7 @@ namespace gwiz
 			}
 			else
 			{
+				variant = NULL;
 				return false;
 			}
 		}

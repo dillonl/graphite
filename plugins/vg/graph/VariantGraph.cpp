@@ -12,7 +12,8 @@ namespace gwiz
 
 		VariantGraph::VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
 			IGraph(referencePtr, variantListPtr),
-			m_graph_ptr(std::make_shared< Graph >())
+			m_graph_ptr(std::make_shared< Graph >()),
+			m_next_variant_init(false)
 		{
 			constructGraph();
 		}
@@ -105,27 +106,82 @@ namespace gwiz
 			}
 		}
 
-		bool getCompoundNode(Variant::SharedPtr variant)
+		bool VariantGraph::getNextCompoundVariant(Variant::SharedPtr& variant)
 		{
+			// the first time we call this function we need to get the first variant
+			if (!m_next_variant_init)
+			{
+				m_next_variant_init = true;
+				m_variant_list_ptr->getNextVariant(this->m_next_variant);
+			}
+			variant = this->m_next_variant; // set the variant to be returned
+			if (this->m_next_variant == NULL) { return false; } // if the variant is NULL then return false, this indicates we are past the region of interest
+
+			std::string referenceString = variant->getRef()[0];
 			std::vector< Variant::SharedPtr > variants;
 			Variant::SharedPtr nextVariant;
-			/*
-			while(m_variant_list_ptr->getNextVariant(nextVariant) && doVariantsOverlap())
+			bool variantAdded = false;
+
+			// loop through variants until the variants stop overlapping.
+			// As we loop through build a concatenated reference string
+			// that represents the entire overlapped variants reference.
+			// for those overlapped variants add them to a vector so
+			// a "compound variant" can be generated.
+			while(m_variant_list_ptr->getNextVariant(nextVariant))
 			{
-
+				position variantEndPosition = (variant->getPosition() + referenceString.size());
+				if (variantEndPosition < nextVariant->getPosition())
+				{
+					break;
+				}
+				// this is a minor efficiency, even though this is a bit ugly
+				// it is more efficient to add the variant after checking that this
+				// is a compound variant because it is so rare
+				if (!variantAdded)
+				{
+					variants.push_back(variant); // we will build a compound variant with all these variants
+					variantAdded = true;
+				}
+				std::string nextReferenceString = nextVariant->getRef()[0];
+				position nextVariantEndPosition = (nextVariant->getPosition() + nextReferenceString.size());
+				// if the next variant has reference at a further position then add it to the end of the referenceString
+				if (nextVariantEndPosition > variantEndPosition)
+				{
+					position referenceDelta = (nextVariantEndPosition - variantEndPosition);
+					referenceString += nextReferenceString.substr(referenceDelta);
+				}
+				variants.push_back(nextVariant); // we will build a compound variant with all these variants
 			}
-
-			if (m_variant_list_ptr->getNextVariant(nextVariant))
+			// std::cout << "We are here" << std::endl;
+			if (!variants.empty())
 			{
-
+				variant = buildCompoundVariant(referenceString, variants);
 			}
-			*/
-			return false;
+			this->m_next_variant = nextVariant; // set the next variant
+			return true;
 		}
 
-		Variant::SharedPtr buildCompoundNode(std::vector< Variant::SharedPtr > variants)
+		Variant::SharedPtr VariantGraph::buildCompoundVariant(const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants)
 		{
-			return std::make_shared< Variant >();
+			std::string chrom = variants[0]->getChrom();
+			position pos = variants[0]->getPosition();
+			std::string id = ".";
+			std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
+			for (auto variantIter = variants.begin(); variantIter != variants.end(); ++variantIter)
+			{
+				for (auto varAltIter = (*variantIter)->getAlt().begin(); varAltIter != (*variantIter)->getAlt().end(); ++varAltIter)
+				{
+					std::string variantString = referenceString;
+					position vPos = (*variantIter)->getPosition() - pos;
+					variantString.replace(vPos, (*varAltIter).size(), (*varAltIter));
+					line += variantString + ",";
+				}
+			}
+			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a \t
+			// std::cout << "variants: " << line << std::endl;
+			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+			// std::cout << "variants: " << variant.get() << std::endl;
+			return Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
 		}
 
 		void VariantGraph::printGraph(const char* path)
@@ -134,72 +190,6 @@ namespace gwiz
 			boost::write_graphviz(ofs, *this->m_graph_ptr,OurVertexPropertyWriter(*this->m_graph_ptr));
 		}
 
-		/*
-		void VariantGraph::constructGraph()
-		{
-			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
-			size_t referenceOffset = 0;
-			Variant::SharedPtr variantPtr;
-			m_variant_reader_ptr->getNextVariant(variantPtr);
-			ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getPosition() - startPosition);
-			auto referenceVertex = boost::add_vertex(refNode, *m_graph_ptr);
-
-			// -- Should be converted into a do while loop
-
-			while (m_variant_reader_ptr->getNextVariant(variantPtr))
-			{
-				 // ReferenceNode::SharedPtr refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, )
-				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
-				{
-					// IVariantNode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
-					auto variantVertex = boost::add_vertex(IVariantNode::BuildVariantNodes(variantPtr, i), *this->m_graph_ptr);
-					boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
-				}
-			}
-		}
-		*/
-
-		/*
-		void VariantGraph::constructGraph()
-		{
-			std::vector< std::string > name;
-			// boost::dynamic_properties dp;
-			// dp.property("label", boost::get(&INode::test, *this->m_graph_ptr));
-			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
-
-			auto refNode = std::make_shared< ReferenceNode >(this->m_reference_ptr->getSequence(), startPosition, this->m_reference_ptr->getSequenceSize());
-			auto v0 = boost::add_vertex(refNode, *m_graph_ptr);
-
-			uint32_t count = 0;
-			Variant::SharedPtr variantPtr;
-			while (m_variant_reader_ptr->getNextVariant(variantPtr))
-			{
-				position variantDistance = variantPtr->getPosition() - startPosition;
-				refNode->updateLength(variantDistance);
-				refNode = std::make_shared< ReferenceNode >(variantPtr->getRef()[0].c_str(), startPosition + variantDistance, variantPtr->getRef()[0].size());
-				auto v1 = boost::add_vertex(refNode, *m_graph_ptr);
-				boost::add_edge(v0, v1, *m_graph_ptr);
-				name.push_back(refNode->sequence);
-				std::cout << refNode->sequence << std::endl;
-				exit(0);
-
-				for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
-				{
-					INode::SharedPtr variantNode = std::make_shared< SNPNode >(variantPtr->getAlt()[i].c_str(), variantPtr->getPosition(), variantPtr->getAlt()[i].size());
-					auto v2 = boost::add_vertex(variantNode, *m_graph_ptr);
-					boost::add_edge(v0, v2, *m_graph_ptr);
-					name.push_back(variantNode->sequence);
-
-				}
-				++count;
-			}
-			std::cout << "variant count: " << count << std::endl;
-
-			std::ofstream ofs("out.dot");
-			boost::write_graphviz(ofs, *this->m_graph_ptr, boost::make_label_writer(&name[0]));
-			// boost::write_graphviz(ofs, *this->m_graph_ptr, boost::make_label_writer(boost::get(&INode::SharedPtr::sequence, *this->m_graph_ptr)));
-		}
-		*/
 	}// end namespace vg
 
 }// end namespace gwiz

@@ -30,10 +30,10 @@ namespace gwiz
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const char* vcf_line, VariantParser<const char*>& parser)
+		inline static Variant::SharedPtr BuildVariant(const char* vcf_line, VariantParser< const char* >& parser)
 		{
 			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
-			auto variant = std::make_shared<Variant>();
+			auto variant = std::make_shared< Variant >();
 			variant->m_variant_type = VARIANT_TYPE::SNP;
 			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variant->m_chrom, variant->m_position, variant->m_id, variant->m_ref, variant->m_alt))
 			{
@@ -46,16 +46,16 @@ namespace gwiz
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }
 		std::string getID() const { return m_id; }
-		std::vector<std::string> const getRef() { return m_ref; }
-		std::vector<std::string> const getAlt() { return m_alt; }
+		std::vector< std::string > const getRef() { return m_ref; }
+		std::vector< std::string > const getAlt() { return m_alt; }
 	private:
 
 		VARIANT_TYPE m_variant_type;
 		uint32_t m_position;
 		std::string m_chrom;
 		std::string m_id;
-		std::vector<std::string> m_ref;
-		std::vector<std::string> m_alt;
+		std::vector< std::string > m_ref;
+		std::vector< std::string > m_alt;
 	};
 
 }

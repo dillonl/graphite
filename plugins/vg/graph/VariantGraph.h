@@ -20,27 +20,34 @@ namespace gwiz
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
 
 			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
-			~VariantGraph();
+			virtual ~VariantGraph();
 
 			void printGraph(const char* path);
 
-		protected:
-			void constructGraph() override;
-			bool getCompoundNode(Variant::SharedPtr variant);
-			Variant::SharedPtr buildCompoundNode(std::vector< Variant::SharedPtr > variants);
-
-		private:
+		/* protected: */
+			VariantGraph() {} // used in tests
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
 			typedef std::shared_ptr< Graph > GraphPtr;
-			/* typedef boost::graph_traits< Graph >::vertex_descriptor INodeType; */
+
+			virtual void constructGraph() override;
+			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
+			virtual Variant::SharedPtr buildCompoundVariant(const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
 			GraphPtr m_graph_ptr;
+
+			bool m_next_variant_init;
+			/* typedef boost::graph_traits< Graph >::vertex_descriptor INodeType; */
+
 			std::mutex m_graph_mutex;
 
 			// This is used in conjunction with getCompoundNode.
 			// This stores the next variant so we don't have to
 			// get the variant twice
-			Variant m_next_variant;
+			Variant::SharedPtr m_next_variant;
+			VariantParser< const char* > m_vcf_parser;
+
+		private:
+
 
 
 			struct OurVertexPropertyWriter {

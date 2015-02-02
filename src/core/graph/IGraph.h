@@ -24,6 +24,7 @@ namespace gwiz
 		virtual ~IGraph() {}
 
 	protected:
+		IGraph() {} // used in tests
 
 		virtual void constructGraph() = 0;
 		IReference::SharedPtr m_reference_ptr;
