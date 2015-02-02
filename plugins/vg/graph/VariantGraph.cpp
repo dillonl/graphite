@@ -121,6 +121,7 @@ namespace gwiz
 			std::vector< Variant::SharedPtr > variants;
 			Variant::SharedPtr nextVariant;
 			bool variantAdded = false;
+			position startPosition = variant->getPosition();
 
 			// loop through variants until the variants stop overlapping.
 			// As we loop through build a concatenated reference string
@@ -129,7 +130,7 @@ namespace gwiz
 			// a "compound variant" can be generated.
 			while(m_variant_list_ptr->getNextVariant(nextVariant))
 			{
-				position variantEndPosition = (variant->getPosition() + referenceString.size());
+				position variantEndPosition = (variant->getPosition() + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 				if (variantEndPosition < nextVariant->getPosition())
 				{
 					break;
@@ -151,36 +152,44 @@ namespace gwiz
 					referenceString += nextReferenceString.substr(referenceDelta);
 				}
 				variants.push_back(nextVariant); // we will build a compound variant with all these variants
+				if (nextVariant->getPosition() < startPosition)
+				{
+					startPosition = nextVariant->getPosition();
+				}
 			}
-			// std::cout << "We are here" << std::endl;
 			if (!variants.empty())
 			{
-				variant = buildCompoundVariant(referenceString, variants);
+				variant = buildCompoundVariant(startPosition, referenceString, variants);
 			}
 			this->m_next_variant = nextVariant; // set the next variant
 			return true;
 		}
 
-		Variant::SharedPtr VariantGraph::buildCompoundVariant(const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants)
+		Variant::SharedPtr VariantGraph::buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants)
 		{
+			position referenceEndPosition = referenceString.size() + startPosition;
 			std::string chrom = variants[0]->getChrom();
 			position pos = variants[0]->getPosition();
 			std::string id = ".";
 			std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
+			// loop over all the variants
 			for (auto variantIter = variants.begin(); variantIter != variants.end(); ++variantIter)
 			{
+				// loop over all the alts in the variants
 				for (auto varAltIter = (*variantIter)->getAlt().begin(); varAltIter != (*variantIter)->getAlt().end(); ++varAltIter)
 				{
+					// basically we are replacing the variant's reference with the alt within the aggrigated reference (referenceString)
+					// it's complicated to explain in words but if you follow the code it isn't too bad
+					std::string altString = (*varAltIter);
 					std::string variantString = referenceString;
-					position vPos = (*variantIter)->getPosition() - pos;
-					variantString.replace(vPos, (*varAltIter).size(), (*varAltIter));
+					variantString.erase((*variantIter)->getPosition() - startPosition, (*variantIter)->getRef()[0].size());
+					variantString.insert((*variantIter)->getPosition() - startPosition, altString);
+
 					line += variantString + ",";
 				}
 			}
-			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a \t
-			// std::cout << "variants: " << line << std::endl;
-			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
-			// std::cout << "variants: " << variant.get() << std::endl;
+
+			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
 			return Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
 		}
 

@@ -31,7 +31,7 @@ namespace gwiz
 
 			virtual void constructGraph() override;
 			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
-			virtual Variant::SharedPtr buildCompoundVariant(const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
+			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
 			GraphPtr m_graph_ptr;
 
