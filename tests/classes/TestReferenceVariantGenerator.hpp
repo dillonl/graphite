@@ -35,7 +35,7 @@ namespace gwiz
 				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + (position - m_region->getStartPosition()), refLength) + "\t" + variantString + "\t";
 
 				m_variant_list.push_back(Variant::BuildVariant(variantLine.c_str(), m_vcf_parser));
-				std::cout << "variant added: " << m_variant_list.size() << std::endl;
+				// std::cout << "variant added: " << m_variant_list.size() << std::endl;
 			}
 
 			TestVariantList::SharedPtr getVariants()

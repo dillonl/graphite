@@ -24,7 +24,7 @@ namespace gwiz
 
 			void printGraph(const char* path);
 
-		/* protected: */
+		protected:
 			VariantGraph() {} // used in tests
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
 			typedef std::shared_ptr< Graph > GraphPtr;
