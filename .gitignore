@@ -1,6 +1,9 @@
 # bin folder
 bin/
 
+# lib folder contents
+lib/*
+
 #data folder
 data/
 
