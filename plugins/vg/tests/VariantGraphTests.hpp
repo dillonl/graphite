@@ -26,6 +26,7 @@ namespace
 		VGTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
 			VariantGraph(referencePtr, variantListPtr)
 		{
+
 		}
 
 		~VGTest()
@@ -87,14 +88,18 @@ namespace
 		gwiz::position pos = 6000;
 		gwiz::position variantPositionOffset = 3;
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+
         //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "1", 1, {"A"});
 		testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "2", 1, {"G"});
 
+
 		auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+
 		gwiz::Variant::SharedPtr variantPtr;
 		variantGraph->getNextCompoundVariant(variantPtr);
 		std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
+
 		ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
 		ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "A");
 		ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "G");

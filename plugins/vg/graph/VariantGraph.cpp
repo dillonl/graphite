@@ -175,21 +175,20 @@ namespace gwiz
 			for (auto variantIter = variants.begin(); variantIter != variants.end(); ++variantIter)
 			{
 				// loop over all the alts in the variants
-				for (auto varAltIter = (*variantIter)->getAlt().begin(); varAltIter != (*variantIter)->getAlt().end(); ++varAltIter)
+				for (uint32_t i = 0; i < (*variantIter)->getAlt().size(); ++i)
 				{
+					std::string altString = (*variantIter)->getAlt()[i];
 					// basically we are replacing the variant's reference with the alt within the aggrigated reference (referenceString)
 					// it's complicated to explain in words but if you follow the code it isn't too bad
-					std::string altString = (*varAltIter);
 					std::string variantString = referenceString;
 					variantString.erase((*variantIter)->getPosition() - startPosition, (*variantIter)->getRef()[0].size());
 					variantString.insert((*variantIter)->getPosition() - startPosition, altString);
-
 					line += variantString + ",";
 				}
 			}
-
-			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
-			return Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+			line.replace(line.size() - 1, 1, "\t\n"); // replace the past comma with a tab
+			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+			return variant;
 		}
 
 		void VariantGraph::printGraph(const char* path)

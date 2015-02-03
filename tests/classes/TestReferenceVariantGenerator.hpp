@@ -32,9 +32,10 @@ namespace gwiz
 					throw "Reference and alt are the same at position: " + std::to_string(position);
 				}
 				std::string variantString = boost::algorithm::join(alts, ",");
-				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + (position - m_region->getStartPosition()), refLength) + "\t" + variantString + "\t";
+				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + (position - m_region->getStartPosition()), refLength) + "\t" + variantString + "\t\n";
 
-				m_variant_list.push_back(Variant::BuildVariant(variantLine.c_str(), m_vcf_parser));
+				auto variant = Variant::BuildVariant(variantLine.c_str(), m_vcf_parser);
+				m_variant_list.push_back(variant);
 				// std::cout << "variant added: " << m_variant_list.size() << std::endl;
 			}
 

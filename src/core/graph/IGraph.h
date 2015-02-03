@@ -20,7 +20,9 @@ namespace gwiz
 		typedef std::shared_ptr<IGraph> SharedPtr;
 
 	    IGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
-		    m_reference_ptr(referencePtr), m_variant_list_ptr(variantListPtr) {}
+		    m_reference_ptr(referencePtr), m_variant_list_ptr(variantListPtr)
+		{
+		}
 		virtual ~IGraph() {}
 
 	protected:
