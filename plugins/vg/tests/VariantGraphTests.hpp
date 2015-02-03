@@ -23,12 +23,9 @@ namespace
 	public:
 		typedef std::shared_ptr< VGTest > VGTestPtr;
 
-		VGTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr)
+		VGTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
+			VariantGraph(referencePtr, variantListPtr)
 		{
-			m_next_variant_init = false;
-			m_reference_ptr = referencePtr;
-			m_variant_list_ptr = variantListPtr;
-			m_graph_ptr = std::make_shared< gwiz::vg::VariantGraph::Graph >();
 		}
 
 		~VGTest()

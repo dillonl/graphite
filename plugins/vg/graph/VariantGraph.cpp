@@ -15,7 +15,6 @@ namespace gwiz
 			m_graph_ptr(std::make_shared< Graph >()),
 			m_next_variant_init(false)
 		{
-			constructGraph();
 		}
 
 		VariantGraph::~VariantGraph()

@@ -1,11 +1,9 @@
 #ifndef GWIZ_VG_VARIANT_GRAPH_H
 #define GWIZ_VG_VARIANT_GRAPH_H
 
-//#include "core/variants/IVariantIterator.h"
 #include "core/graph/IGraph.h"
 #include "core/graph/INode.h"
 
-/* #include <boost/graph/graph_traits.hpp> */
 #include <boost/graph/adjacency_list.hpp>
 
 #include <mutex>
@@ -23,13 +21,12 @@ namespace gwiz
 			virtual ~VariantGraph();
 
 			void printGraph(const char* path);
+			virtual void constructGraph() override;
 
 		protected:
-			VariantGraph() {} // used in tests
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
 			typedef std::shared_ptr< Graph > GraphPtr;
 
-			virtual void constructGraph() override;
 			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
 			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
