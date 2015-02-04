@@ -35,7 +35,7 @@ namespace
 
 		void constructGraph() override
 		{
-			constructGraph();
+			gwiz::vg::VariantGraph::constructGraph();
 		}
 
 		bool getNextCompoundVariant(gwiz::Variant::SharedPtr& variant) override
@@ -52,7 +52,7 @@ namespace
 	//std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTGAGATTACAGGTGTGAACCACTGCACCTGGTCTCAAATCAGAAAATCTTTGAATTCATCTAATGGTCACCTATCCTGTGGGCCCTCACTTTGAGATATTTTGCCTTTTTTGGCCAAACCAATATGTAGCCTCCATGTATTATATGACCTTGCCTGCAACCTCTGCCTTCCCACCTTTAAAAACCCTTACACATAAGCCATCAGGGAGATTAGGCCTTAAGGATTAGCTGCCTGATACTCCTTGCTTGCTGCCTGCAATAAATTCCTCAACTTCTGTCTCAGCAATGCCGATATCAGTGCTTGACTTTGATAGGCTGGGTGGGTGGACCCAAATTTGGTTTGGTGACCCTTTGAGCTTAGATTCAAAATTCTAGTTTTGTCACTCTGCAGTTTTGTGATCTTGAGCAAGTTACTTAACCTCTCTGAGCCTTGTTTGTCATGTGTAATGAAAAGAGCTATACTTACCTTGTGAGGTAGTCCTCAGGATTCAATGAGATAATAAGTACTCACTAAACAAAACTCGTTATTACAAAAGAATCACTTTGTCTCTGAAGTGGGCAATTCAACCCATTTCTAGGAGATTTTAAACATGATTTTAGATATTTGGTGTGATTTTGTGAATGGGTTTATCGTTAATAGCTTTCATGCTCCAGAATTTTCTTGAATAATAGGTTTTTGCAAAGTGCATTCCATGGAATACTCATTTGGGTGACGTTAATAGACATCACTCAAAAGCTGGGTGAATATTACAATGTTTACTTCATCTGTAACAAGCTGAGTAGCTACAGTACATATCTAAGAGGGGGCTCTAATTCTCAATATTTTCCAAATTTATTAGATCACAGACTTTTCTTTTAGTGAAGTGCTTAATGAAACTTAAGTTCTGTGAAAAGTACTTTGAGAAATATTGCTTTAAAAAGAAAAAGATTGAGCCCTGTATCAGGGGAAATATCTAATATTATATTAAACAAAAAAGTCCCA";
 	const std::string m_reference_string = "AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
 
-
+/*
 	TEST(VariantGraphTest, getCompoundVariantEmptyTest)
 	{
 		gwiz::position pos = 6000;
@@ -185,24 +185,25 @@ namespace
 		ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "T");
 		ASSERT_EQ(variantPtr->getAlt().size(), 1);
 	}
-
-	/*
+*/
 	TEST(VariantGraphTest, ConstructGraphYChr)
 	{
 
 		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
-		//gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2655180-2656128");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		// problem is at position: 2820410
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820400-2820410");
+		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820000-2820510");
 
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
+		// std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
+		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		// std::string vcfPath = TEST_1KG_VCF_FILE;
 
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath, regionPtr);
-		auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, vcfFileReader);
-		variantGraph->printGraph("test1.dot");
+		auto variantGraph = std::make_shared< VGTest >(fastaReferencePtr, vcfFileReader);
+		variantGraph->constructGraph();
+		// variantGraph->printGraph("test1.dot");
 
 
 		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
@@ -210,8 +211,6 @@ namespace
 		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
-	*/
-
 
 }
 

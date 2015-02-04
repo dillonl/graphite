@@ -30,6 +30,11 @@ namespace gwiz
 			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
 			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
+		    Graph::vertex_descriptor addReference(std::vector< Graph::vertex_descriptor >& altAndRefVertices, INode::SharedPtr referenceNode);
+			std::vector< Graph::vertex_descriptor > addVariantVertices(std::vector< Graph::vertex_descriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
+			/* position addVariant(Variant::SharedPtr variantPtr, std::vector< INode::SharedPtr >& endVertices, std::vector< INode::SharedPtr >& variantVertices); */
+			/* position addReference(IReference::SharedPtr referencePtr, ); */
+
 			GraphPtr m_graph_ptr;
 
 			bool m_next_variant_init;
