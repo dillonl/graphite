@@ -48,7 +48,7 @@ add_executable(gwiz
 target_link_libraries(gwiz
 	BamTools
 	BamTools-utils
-	fastahack_lib
 	${SCI_BOOST_LIBRARY}
+	fastahack_lib
 )
 
