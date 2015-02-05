@@ -16,6 +16,8 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
+			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
+			typedef std::shared_ptr< Graph > GraphPtr;
 
 			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
 			virtual ~VariantGraph();
@@ -23,10 +25,9 @@ namespace gwiz
 			void printGraph(const char* path);
 			virtual void constructGraph() override;
 
-		protected:
-			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
-			typedef std::shared_ptr< Graph > GraphPtr;
+			Graph::vertex_descriptor getVertexAtPosition(position referencePosition);
 
+		protected:
 			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
 			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
