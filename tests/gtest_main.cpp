@@ -7,9 +7,10 @@
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
+#include "plugins/TestIncludes.h"
 */
 
-#include "plugins/TestIncludes.h"
+#include "SSWTests.hpp"
 
 #include "gtest/gtest.h"
 
