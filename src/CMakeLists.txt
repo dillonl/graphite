@@ -50,5 +50,6 @@ target_link_libraries(gwiz
 	BamTools-utils
 	${SCI_BOOST_LIBRARY}
 	fastahack_lib
+	gssw_lib
 )
 
