@@ -6,5 +6,6 @@
  */
 
 #include "vg/tests/TestIncludes.h"
+#include "adjudicator/tests/TestIncludes.h"
 
 #endif // GWIZ_PLUGIN_TESTS_H

@@ -43,7 +43,6 @@ namespace
 		// Aligns the query to the ref
 		aligner.Align(query.c_str(), ref.c_str(), ref.size(), filter, &alignment);
 
-		PrintAlignment(alignment);
 	}
 
 }

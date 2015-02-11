@@ -1,1 +1,2 @@
 ADD_SUBDIRECTORY(vg)
+ADD_SUBDIRECTORY(adjudicator)
