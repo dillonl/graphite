@@ -18,7 +18,7 @@ namespace adjudicator
 		return false;
 	}
 
-	vg::VariantGraph::Graph::vertex_descriptor AdjudicatorGraph::getReferenceVertexContainsPosition(position pos)
+	vg::ReferenceNode::SharedPtr AdjudicatorGraph::getReferenceVertexContainsPosition(position pos)
 	{
 		return 0;
 	}

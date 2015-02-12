@@ -1,6 +1,7 @@
 #ifndef GWIZ_VG_REFERENCE_NODE
 #define GWIZ_VG_REFERENCE_NODE
 
+#include "core/reference/IReference.h"
 #include "core/graph/INode.h"
 
 namespace gwiz

@@ -2,6 +2,7 @@
 #define GWIZ_INODE_H
 
 #include "core/utils/Types.h"
+#include <string>
 #include <memory>
 
 namespace gwiz

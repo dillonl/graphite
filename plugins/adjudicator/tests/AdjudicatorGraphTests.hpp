@@ -9,47 +9,72 @@
 #include "tests/classes/TestReference.hpp"
 #include "tests/classes/TestVariantList.hpp"
 #include "tests/classes/TestReferenceVariantGenerator.hpp"
-#include "plugins/adjudicator/graph/AdjudicatorGraphTests.hpp"
+#include "plugins/adjudicator/graph/AdjudicatorGraph.h"
 
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
 
-/*
+
 namespace
 {
 
-	class VGTest : public gwiz::vg::AdjudicatorGraph
+	class AdjudicatorGraphTest : public gwiz::adjudicator::AdjudicatorGraph
 	{
 	public:
-		typedef std::shared_ptr< VGTest > VGTestPtr;
+		typedef std::shared_ptr< AdjudicatorGraphTest > AdjudicatorGraphTestPtr;
 
-		VGTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
-			VariantGraph(referencePtr, variantListPtr)
-			{
+		AdjudicatorGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
+			gwiz::adjudicator::AdjudicatorGraph(referencePtr, variantListPtr)
+		{
 
-			}
+		}
 
-		~VGTest()
-			{
-			}
+		~AdjudicatorGraphTest()
+		{
+		}
 
-		void constructGraph() override
-			{
-				gwiz::vg::VariantGraph::constructGraph();
-			}
+		gwiz::vg::ReferenceNode::SharedPtr getReferenceVertexContainsPositionTest(gwiz::position pos)
+		{
+			return getReferenceVertexContainsPosition(pos);
+		}
 
-		bool getNextCompoundVariant(gwiz::Variant::SharedPtr& variant) override
-			{
-				return gwiz::vg::VariantGraph::getNextCompoundVariant(variant);
-			}
-
-		gwiz::Variant::SharedPtr buildCompoundVariant(const gwiz::position startPosition, const std::string& referenceString, const std::vector< gwiz::Variant::SharedPtr >& variants) override
-			{
-				return gwiz::vg::VariantGraph::buildCompoundVariant(startPosition, referenceString, variants);
-			}
 	};
 
+	const std::string m_reference_string = "AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
+
+	TEST(AdjudicatorTests, TestFindPositionSingleVertex)
+	{
+		gwiz::position pos = 6000;
+		gwiz::position firstVariantPositionOffset = 10;
+		gwiz::position secondVariantPositionOffset = 19;
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
+
+		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+		variantGraph->constructGraph();
+		auto referenceNode = variantGraph->getReferenceVertexContainsPositionTest(6000);
+		// ASSERT_EQ(true, true);
+	}
+
+	/*
+	TEST(AdjudicatorTests, TestFindPosition)
+	{
+		gwiz::position pos = 6000;
+		gwiz::position firstVariantPositionOffset = 10;
+		gwiz::position secondVariantPositionOffset = 19;
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
+		std::vector< std::string > variants;
+		variants.push_back("G");
+		variants.push_back("GA");
+		testReferenceVariantGenerator.addVariant(pos + firstVariantPositionOffset, ".", 1, variants);
+		testReferenceVariantGenerator.addVariant(pos + secondVariantPositionOffset, ".", 1, { "G" });
+
+		auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+		variantGraph->constructGraph();
+	}
+	*/
 }
-*/
+
 #endif //GWIZ_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
