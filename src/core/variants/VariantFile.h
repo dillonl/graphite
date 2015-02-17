@@ -1,9 +1,11 @@
 #ifndef GWIZ_VARIANT_FILE_H
 #define GWIZ_VARIANT_FILE_H
 
+#include <boost/noncopyable.hpp>
+
 namespace gwiz
 {
-	class VariantFile
+	class VariantFile : private boost::noncopyable
 	{
 	public:
 		VariantFile(const std::string& file_path);

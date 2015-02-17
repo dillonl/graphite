@@ -1,23 +1,23 @@
 #ifndef GWIZ_IREFERENCE_H
 #define GWIZ_IREFERENCE_H
 
+#include <boost/noncopyable.hpp>
+
 #include <stdint.h>
 #include <memory>
 
 #include "core/region/Region.h"
-#include "core/utils/NonCopyable.h"
 #include "core/utils/Types.h"
 
 namespace gwiz
 {
 
-	class IReference : private noncopyable
+	class IReference : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IReference> SharedPtr;
 
 	    IReference(){}
-		/* IReference(Region::SharedPtr region) : m_region(region) {} */
 		virtual ~IReference() {}
 
 		virtual const char* getSequence() = 0;

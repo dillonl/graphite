@@ -4,7 +4,8 @@
 #include "core/reference/IReference.h"
 #include "core/variants/IVariantList.h"
 #include "core/variants/IVariant.h"
-#include "core/utils/NonCopyable.h"
+
+#include <boost/noncopyable.hpp>
 
 #include <list>
 #include <string>
@@ -14,7 +15,7 @@ namespace gwiz
 {
 	enum class GRAPH_TYPE {SPARSE, DENSE};
 
-	class IGraph : private noncopyable
+	class IGraph : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IGraph> SharedPtr;

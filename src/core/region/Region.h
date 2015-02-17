@@ -1,9 +1,10 @@
 #ifndef GWIZ_REGION_H
 #define GWIZ_REGION_H
 
+#include <boost/noncopyable.hpp>
+
 #include <string>
 
-#include "core/utils/NonCopyable.h"
 #include "core/utils/Types.h"
 #include "RegionParser.hpp"
 
@@ -13,7 +14,7 @@ namespace gwiz
 	/*
 	 * This class represents a reference id, start position and an end position.
 	 */
-	class Region : private noncopyable
+	class Region : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr<Region> SharedPtr;

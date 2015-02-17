@@ -17,10 +17,15 @@ namespace gwiz
 			typedef std::shared_ptr< IVariantNode > SharedPtr;
 		    IVariantNode(Variant::SharedPtr variant, uint32_t altIndex) :
 			    INode(variant->getAlt()[altIndex].c_str(), variant->getAlt()[altIndex].size()),
-			    m_variant(variant)
-			{}
+					m_variant(variant),
+					m_alt_index(altIndex)
+			{
+				m_position = variant->getPosition();
+			}
 
 			~IVariantNode() {}
+
+			const char* getSequence() override { return m_variant->getAlt()[m_alt_index].c_str(); }
 
 			static IVariantNode::SharedPtr BuildVariantNodes(Variant::SharedPtr variant, uint32_t altIndex)
 			{
@@ -29,6 +34,7 @@ namespace gwiz
 
 		private:
 			Variant::SharedPtr m_variant;
+			size_t m_alt_index;
 		};
 	}// end namespace vg
 }// end namespace gwiz

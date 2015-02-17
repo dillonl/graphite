@@ -18,7 +18,11 @@ include_directories(
   ${SCI_BOOST_INCLUDE})
 
 set(Boost_USE_MULTITHREADED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
 #set(CMAKE_BUILD_TYPE Debug)
 
 

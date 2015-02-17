@@ -1,13 +1,15 @@
 #ifndef GWIZ_IFILE_H
 #define GWIZ_IFILE_H
 
+#include <boost/noncopyable.hpp>
+
 #include "core/utils/NonCopyable.h"
 
 #include <memory>
 
 namespace gwiz
 {
-	class IFile : noncopyable
+	class IFile : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IFile> SharedPtr;

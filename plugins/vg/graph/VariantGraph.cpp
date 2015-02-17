@@ -1,8 +1,6 @@
 #include <boost/graph/graphviz.hpp>
 
 #include "VariantGraph.h"
-
-#include "ReferenceNode.h"
 #include "SNPNode.h"
 
 namespace gwiz
@@ -21,7 +19,7 @@ namespace gwiz
 		{
 		}
 
-		VariantGraph::Graph::vertex_descriptor VariantGraph::getVertexAtPosition(position referencePosition)
+		VariantGraph::VariantVertexDescriptor VariantGraph::getVertexAtPosition(position referencePosition)
 		{
 			return 1;
 		}
@@ -31,8 +29,8 @@ namespace gwiz
 			position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 			size_t referenceOffset = 0;
 			size_t referenceSize;
-			Graph::vertex_descriptor referenceVertex;
-			std::vector< Graph::vertex_descriptor > altAndRefVertices;
+			VariantVertexDescriptor referenceVertex;
+			std::vector< VariantVertexDescriptor > altAndRefVertices;
 			Variant::SharedPtr variantPtr;
 			size_t count = 0;
 			while (getNextCompoundVariant(variantPtr))
@@ -40,7 +38,7 @@ namespace gwiz
 				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 				if (referenceSize > 0) // there is no reference to add
 				{
-					auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
+					ReferenceNode::SharedPtr referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
 					referenceVertex = addReference(altAndRefVertices, referenceNode);
 					altAndRefVertices.clear();
 					altAndRefVertices.push_back(referenceVertex);
@@ -52,14 +50,15 @@ namespace gwiz
 			referenceSize = this->m_reference_ptr->getRegion()->getEndPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
-				auto referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
+				ReferenceNode::SharedPtr referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
 				referenceVertex = addReference(altAndRefVertices, referenceNode);
 			}
 		}
 
-		VariantGraph::Graph::vertex_descriptor VariantGraph::addReference(std::vector< VariantGraph::Graph::vertex_descriptor >& altAndRefVertices, INode::SharedPtr referenceNode)
+		VariantGraph::VariantVertexDescriptor VariantGraph::addReference(std::vector< VariantGraph::VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode)
 		{
-			Graph::vertex_descriptor referenceVertex = boost::add_vertex(referenceNode, *m_graph_ptr);
+			// Graph::vertex_descriptor referenceVertex = boost::add_vertex(referenceNode, *m_graph_ptr);
+			VariantVertexDescriptor referenceVertex = addReferenceNode(referenceNode);
 			// add previous variant and reference Vertices to the referenceVertex
 			for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
 			{
@@ -68,19 +67,17 @@ namespace gwiz
 			return referenceVertex;
 		}
 
-		std::vector< VariantGraph::Graph::vertex_descriptor > VariantGraph::addVariantVertices(std::vector< VariantGraph::Graph::vertex_descriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
+		std::vector< VariantGraph::VariantVertexDescriptor > VariantGraph::addVariantVertices(std::vector< VariantGraph::VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
 		{
-			std::vector< Graph::vertex_descriptor > vertices;
+			std::vector< VariantVertexDescriptor > vertices;
 			for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 			{
 				INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
 				vertices.push_back(boost::add_vertex(variantNode, *this->m_graph_ptr));
-				// boost::add_edge(referenceVertex, variantVertex, *this->m_graph_ptr);
-				// altAndRefVertices.push_back(variantVertex); // add this vertex so the next reference can add an edge between itself and this variant
 			}
 			size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 			ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getRef()[0].size());
-			vertices.push_back(boost::add_vertex(variantReferenceNode, *m_graph_ptr));
+			vertices.push_back(addReferenceNode(variantReferenceNode));
 			variantReferenceSize = variantPtr->getRef()[0].size();
 
 			for (auto parentVertexIter = altAndRefVertices.begin(); parentVertexIter != altAndRefVertices.end(); ++parentVertexIter)

@@ -1,6 +1,7 @@
 #ifndef GWIZ_VG_VARIANT_GRAPH_H
 #define GWIZ_VG_VARIANT_GRAPH_H
 
+#include "ReferenceNode.h"
 #include "core/graph/IGraph.h"
 #include "core/graph/INode.h"
 
@@ -18,6 +19,7 @@ namespace gwiz
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
 			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
 			typedef std::shared_ptr< Graph > GraphPtr;
+			typedef vg::VariantGraph::Graph::vertex_descriptor VariantVertexDescriptor;
 
 			VariantGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr);
 			virtual ~VariantGraph();
@@ -25,16 +27,18 @@ namespace gwiz
 			void printGraph(const char* path);
 			virtual void constructGraph() override;
 
-			Graph::vertex_descriptor getVertexAtPosition(position referencePosition);
+			VariantVertexDescriptor getVertexAtPosition(position referencePosition);
 
 		protected:
 			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
 			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
 
-		    Graph::vertex_descriptor addReference(std::vector< Graph::vertex_descriptor >& altAndRefVertices, INode::SharedPtr referenceNode);
-			std::vector< Graph::vertex_descriptor > addVariantVertices(std::vector< Graph::vertex_descriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
-			/* position addVariant(Variant::SharedPtr variantPtr, std::vector< INode::SharedPtr >& endVertices, std::vector< INode::SharedPtr >& variantVertices); */
-			/* position addReference(IReference::SharedPtr referencePtr, ); */
+			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
+			std::vector< VariantVertexDescriptor > addVariantVertices(std::vector< VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
+			virtual inline VariantVertexDescriptor addReferenceNode(ReferenceNode::SharedPtr referenceNodePtr)
+			{
+				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
+			}
 
 			GraphPtr m_graph_ptr;
 
@@ -58,7 +62,8 @@ namespace gwiz
 				template <class Vertex>
 				void operator() (std::ostream& out, Vertex u) {
 					/* out << "[label=" << g[u]->nodeSeq << "]"; */
-					out << "[label=\"" << g[u]->nodeSeq << " " << g[u]->seq_position << "\"]";
+					out << "[label=\"" << std::string(g[u]->getSequence(), g[u]->getLength()) << " " << g[u]->getPosition() << "\"]";
+
 				}
 
 				Graph& g;

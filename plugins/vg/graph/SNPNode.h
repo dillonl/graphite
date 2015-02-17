@@ -17,7 +17,6 @@ namespace gwiz
     		SNPNode(Variant::SharedPtr variant, uint32_t altIndex) :
 				IVariantNode(variant, altIndex)
 			{
-				seq_position = variant->getPosition();
 			}
 			~SNPNode() {}
 

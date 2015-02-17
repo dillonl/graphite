@@ -1,15 +1,16 @@
 #ifndef GWIZ_IEDGE_H
 #define GWIZ_IEDGE_H
 
+#include <boost/noncopyable.hpp>
+
 #include <list>
 #include <memory>
 
-#include "core/utils/Noncopyable.h"
 #include "INode.h"
 
 namespace gwiz
 {
-	class IEdge : noncopyable
+	class IEdge : boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IEdge> SharedPtr;

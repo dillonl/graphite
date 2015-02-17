@@ -1,13 +1,13 @@
 #ifndef GWIZ_IVARIANT_H
 #define GWIZ_IVARIANT_H
 
-#include "core/utils/NonCopyable.h"
+#include <boost/noncopyable.hpp>
 
 #include <memory>
 
 namespace gwiz
 {
-    class IVariant : private noncopyable
+    class IVariant : private boost::noncopyable
     {
         public:
             typedef std::shared_ptr<IVariant> SharedPtr;

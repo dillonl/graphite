@@ -22,7 +22,20 @@ namespace adjudicator
 		bool MarkVariantsWithAlignment(const std::shared_ptr< BamTools::BamAlignment > alignmentPtr);
 
 	protected:
-		vg::ReferenceNode::SharedPtr getReferenceVertexContainsPosition(position pos);
+		inline vg::VariantGraph::VariantVertexDescriptor addReferenceNode(vg::ReferenceNode::SharedPtr referenceNodePtr) override
+		{
+
+			auto vertex = boost::add_vertex(referenceNodePtr, *m_graph_ptr);
+			this->m_reference_vertices.push_back(vertex);
+			return vertex;
+		}
+
+		vg::VariantGraph::VariantVertexDescriptor getReferenceVertexContainsPosition(position pos);
+
+	protected:
+
+	private:
+		std::vector< vg::VariantGraph::VariantVertexDescriptor > m_reference_vertices;
 
 	};
 } // end namespace adjudicator

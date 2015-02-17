@@ -1,15 +1,15 @@
 #ifndef GWIZ_PARAMETERS_H
 #define GWIZ_PARAMETERS_H
 
+#include <boost/noncopyable.hpp>
+
 #include <string>
 #include <map>
-
-#include "core/utils/NonCopyable.h"
 
 namespace gwiz
 {
 
-	class Parameters : private noncopyable
+	class Parameters : private boost::noncopyable
 	{
 	public:
 		static Parameters* Instance();
