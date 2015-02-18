@@ -17,7 +17,7 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
-			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr > Graph;
+			typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr, boost::property< boost::vertex_color_t, boost::default_color_type > > Graph;
 			typedef std::shared_ptr< Graph > GraphPtr;
 			typedef vg::VariantGraph::Graph::vertex_descriptor VariantVertexDescriptor;
 
