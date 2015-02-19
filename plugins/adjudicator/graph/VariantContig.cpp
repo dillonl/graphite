@@ -37,7 +37,7 @@ namespace adjudicator
 		size_t length = currentNode->getLength();
 		if (variantSequence.empty())
 		{
-			length = (currentNode->getPosition() + currentNode->getLength()) - (this->m_region->getStartPosition() - 1);
+			length = (currentNode->getPosition() + currentNode->getLength()) - (this->m_region->getStartPosition());
 		}
 		else if (finalNode)
 		{
@@ -53,9 +53,14 @@ namespace adjudicator
 		{
 			boost::graph_traits< vg::VariantGraph::Graph >::out_edge_iterator vi, vi_end;
 			boost::tie(vi, vi_end) = boost::out_edges(currentVertex, *this->m_graph_ptr);
-			for_each(vi, vi_end, [&](const boost::detail::edge_desc_impl< boost::directed_tag, unsigned long >& desc){
-					addAllPaths(vertexList, variantSequence, boost::target(desc, *this->m_graph_ptr), endVertex);
-				});
+			// for_each(vi, vi_end, [&](const boost::detail::edge_desc_impl< boost::directed_tag, unsigned long >& v){
+			// 		std::cout << "looping" << std::endl;
+			// 		addAllPaths(vertexList, variantSequence, boost::target(v, *this->m_graph_ptr), endVertex);
+			// 	});
+			for (; vi != vi_end; ++vi)
+			{
+				addAllPaths(vertexList, variantSequence, boost::target(*vi, *this->m_graph_ptr), endVertex);
+			}
 		}
 	}
 

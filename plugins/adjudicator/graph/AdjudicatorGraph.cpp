@@ -26,12 +26,11 @@ namespace adjudicator
 	vg::VariantGraph::VariantVertexDescriptor AdjudicatorGraph::getReferenceVertexContainsPosition(position pos)
 	{
 		size_t startIndex = 0;
-		size_t lastIndex = this->m_reference_vertices.size();
+		size_t lastIndex = this->m_reference_vertices.size() - 1;
 		while (startIndex <= lastIndex)
 		{
 			size_t midIndex = (startIndex + lastIndex) / 2;
 			auto midPosition = (*this->m_graph_ptr)[this->m_reference_vertices[midIndex]]->getPosition();
-
 			if (pos > midPosition)
 			{
 				startIndex = midIndex + 1;
@@ -42,11 +41,10 @@ namespace adjudicator
 			}
 			else
 			{
-				// return std::dynamic_pointer_cast< vg::ReferenceNode >((*this->m_graph_ptr)[this->m_reference_vertices[midIndex]]);
 				return this->m_reference_vertices[midIndex];
 			}
 		}
-		return 0;
+		return this->m_reference_vertices[lastIndex];;
 	}
 
 } // end namespace adjudicator

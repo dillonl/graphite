@@ -53,13 +53,19 @@ namespace
 
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
-		auto referenceVertex = variantGraph->getReferenceVertexContainsPositionTest(6000);
+		auto startVertex = variantGraph->getReferenceVertexContainsPositionTest(6000);
+		auto endVertex = variantGraph->getReferenceVertexContainsPositionTest(6018);
+		std::cout << "Start Vertex: " << startVertex << std::endl;
+		std::cout << "End Vertex: " << endVertex << std::endl;
 
-		// auto region = std::make_shared< gwiz::Region >("20", pos, pos + m_var_contig_reference_string.size());
-		// auto variantContig(region, variantGraph->getGraph(), )
+		std::string regionString = "20:" + to_string(pos) + "-" + to_string(pos + variantPositionOffset + 5);
+		auto region = std::make_shared< gwiz::Region >(regionString);
+		auto contig = std::make_shared< VariantContigTest >(region, variantGraph->getGraph(), startVertex, endVertex);
+		contig->buildVariantContig();
 
-		std::cout << "vertex desc: " << sizeof(referenceVertex) << std::endl;
-		auto referenceNode = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >((*variantGraph->getGraph())[referenceVertex]);
+		// std::cout << "vertex desc: " << sizeof(referenceVertex) << std::endl;
+		// auto referenceNode = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >((*variantGraph->getGraph())[referenceVertex]);
+		contig->printAllPaths();
 
 		variantGraph->printGraph("test1.dot");
 
