@@ -27,7 +27,6 @@ namespace
 		AdjudicatorGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
 			gwiz::adjudicator::AdjudicatorGraph(referencePtr, variantListPtr)
 		{
-
 		}
 
 		~AdjudicatorGraphTest()
