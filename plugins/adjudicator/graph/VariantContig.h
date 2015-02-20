@@ -30,6 +30,11 @@ VariantContig(Region::SharedPtr region, vg::VariantGraph::GraphPtr graphPtr, vg:
 				});
 		}
 
+		std::list< std::tuple< std::list< vg::VariantGraph::VariantVertexDescriptor >, std::string > > getContigs()
+		{
+			return m_contigs;
+		}
+
 	protected:
 		void addAllPaths(std::list< vg::VariantGraph::VariantVertexDescriptor > vertexList, std::string variantSequence, vg::VariantGraph::VariantVertexDescriptor currentVertex, vg::VariantGraph::VariantVertexDescriptor endVertex);
 

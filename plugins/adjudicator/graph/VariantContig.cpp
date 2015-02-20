@@ -35,15 +35,16 @@ namespace adjudicator
 		vertexList.push_front(currentVertex);
 		auto currentNode = (*this->m_graph_ptr)[currentVertex];
 		size_t length = currentNode->getLength();
-		if (variantSequence.empty())
+		size_t offset = 0;
+		if (variantSequence.empty()) // if it's the first node
 		{
-			length = (currentNode->getPosition() + currentNode->getLength()) - (this->m_region->getStartPosition());
+			offset = (this->m_region->getStartPosition() - currentNode->getPosition());
 		}
-		else if (finalNode)
+		else if (finalNode) // if it's the last node
 		{
-			length = this->m_region->getEndPosition() - currentNode->getPosition();
+			length = (this->m_region->getEndPosition() - currentNode->getPosition());
 		}
-		variantSequence += std::string(currentNode->getSequence(), length);
+		variantSequence += std::string(currentNode->getSequence() + offset, length);
 		if (finalNode)
 		{
 			auto contig = std::make_tuple(vertexList, variantSequence);
@@ -53,10 +54,6 @@ namespace adjudicator
 		{
 			boost::graph_traits< vg::VariantGraph::Graph >::out_edge_iterator vi, vi_end;
 			boost::tie(vi, vi_end) = boost::out_edges(currentVertex, *this->m_graph_ptr);
-			// for_each(vi, vi_end, [&](const boost::detail::edge_desc_impl< boost::directed_tag, unsigned long >& v){
-			// 		std::cout << "looping" << std::endl;
-			// 		addAllPaths(vertexList, variantSequence, boost::target(v, *this->m_graph_ptr), endVertex);
-			// 	});
 			for (; vi != vi_end; ++vi)
 			{
 				addAllPaths(vertexList, variantSequence, boost::target(*vi, *this->m_graph_ptr), endVertex);

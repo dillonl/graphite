@@ -21,7 +21,27 @@ namespace gwiz
 
 		VariantGraph::VariantVertexDescriptor VariantGraph::getVertexAtPosition(position referencePosition)
 		{
-			return 1;
+			throw "UNIMPLEMENTED";
+			// size_t startIndex = 0;
+			// size_t lastIndex = this->m_reference_vertices.size() - 1;
+			// while (startIndex <= lastIndex)
+			// {
+			// 	size_t midIndex = (startIndex + lastIndex) / 2;
+			// 	auto midPosition = (*this->m_graph_ptr)[this->m_reference_vertices[midIndex]]->getPosition();
+			// 	if (pos > midPosition)
+			// 	{
+			// 		startIndex = midIndex + 1;
+			// 	}
+			// 	else if (pos < midPosition)
+			// 	{
+			// 		lastIndex = midIndex - 1;
+			// 	}
+			// 	else
+			// 	{
+			// 		return this->m_reference_vertices[midIndex];
+			// 	}
+			// }
+			// return this->m_reference_vertices[lastIndex];
 		}
 
 		void VariantGraph::constructGraph()

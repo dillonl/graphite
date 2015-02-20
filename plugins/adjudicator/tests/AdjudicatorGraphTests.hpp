@@ -58,7 +58,6 @@ namespace
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
 		auto referenceVertex = variantGraph->getReferenceVertexContainsPositionTest(6000);
-		std::cout << "vertex desc: " << sizeof(referenceVertex) << std::endl;
 		auto referenceNode = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >((*variantGraph->getGraph())[referenceVertex]);
 
 		bool refEq = memcmp(referenceNode->getSequence(), testReferenceVariantGenerator.getReference()->getSequence(), referenceNode->getLength())  == 0;
