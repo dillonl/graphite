@@ -1,8 +1,6 @@
 #ifndef GWIZ_VCF_FILE_TESTS_HPP
 #define GWIZ_VCF_FILE_TESTS_HPP
 
-#include "gtest/gtest.h"
-
 #include <stdexcept>
 
 #include "core/variants/VCFFileReader.h"

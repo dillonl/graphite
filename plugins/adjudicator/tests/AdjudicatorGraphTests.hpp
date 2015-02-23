@@ -47,6 +47,7 @@ namespace
 
 	const std::string m_adj_reference_string = "AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG";
 
+	/*
 	TEST(AdjudicatorTests, TestFindPositionSingleVertex)
 	{
 		gwiz::position pos = 6000;
@@ -80,6 +81,43 @@ namespace
 
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
+	}
+
+	*/
+
+	TEST(AdjudicatorTests, TestConstructChr20)
+	{
+
+
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+
+		std::string fastaPath = TEST_FASTA_FILE;
+		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
+
+		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
+		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(fastaReferencePtr, vcfFileReader);
+		variantGraph->constructGraph();
+
+		std::cout << "contigs constructed" << std::endl;
+
+		auto contigs = variantGraph->getContigs();
+		size_t contigCount = 0;
+		while (!contigs.empty())
+		{
+			auto contig = contigs.front();
+			contigCount += contig->getContigs().size();
+			contigs.pop();
+		}
+		std::cout << "Contig Count: " << contigCount << std::endl;
+
+		// variantGraph->printGraph("test1.dot");
+
+
+		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+		// testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
+		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+
 	}
 }
 

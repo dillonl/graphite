@@ -1,6 +1,7 @@
 #ifndef GWIZ_ADJUDICATOR_VARIANTCONTIG_H
 #define GWIZ_ADJUDICATOR_VARIANTCONTIG_H
 
+#include <chrono>
 #include <tuple>
 
 #include <boost/noncopyable.hpp>
@@ -18,19 +19,24 @@ namespace adjudicator
 	class VariantContig : boost::noncopyable
 	{
 	public:
-VariantContig(Region::SharedPtr region, vg::VariantGraph::GraphPtr graphPtr, vg::VariantGraph::VariantVertexDescriptor startVertex, vg::VariantGraph::VariantVertexDescriptor endVertex);
+		typedef std::shared_ptr< VariantContig > SharedPtr;
+		typedef std::tuple< std::list< vg::VariantGraph::VariantVertexDescriptor >, std::string > ContigTuple;
+		typedef std::shared_ptr< ContigTuple > ContigTuplePtr;
+
+		VariantContig(uint32_t padding, vg::VariantGraph::GraphPtr graphPtr, vg::VariantGraph::VariantVertexDescriptor startVertex, vg::VariantGraph::VariantVertexDescriptor endVertex);
+
 		~VariantContig();
 
 		void buildVariantContig();
 
 		void printAllPaths()
 		{
-			for_each(m_contigs.begin(), m_contigs.end(), [](const std::tuple< std::list< vg::VariantGraph::VariantVertexDescriptor >, std::string >& contig){
-					std::cout << std::get< 1 >(contig) << std::endl;
+			for_each(m_contigs.begin(), m_contigs.end(), [](const ContigTuplePtr& contig){
+					std::cout << std::get< 1 >(*contig) << std::endl;
 				});
 		}
 
-		std::list< std::tuple< std::list< vg::VariantGraph::VariantVertexDescriptor >, std::string > > getContigs()
+		std::list< ContigTuplePtr > getContigs()
 		{
 			return m_contigs;
 		}
@@ -38,11 +44,11 @@ VariantContig(Region::SharedPtr region, vg::VariantGraph::GraphPtr graphPtr, vg:
 	protected:
 		void addAllPaths(std::list< vg::VariantGraph::VariantVertexDescriptor > vertexList, std::string variantSequence, vg::VariantGraph::VariantVertexDescriptor currentVertex, vg::VariantGraph::VariantVertexDescriptor endVertex);
 
-		Region::SharedPtr m_region;
+		uint32_t m_padding;
         vg::VariantGraph::GraphPtr m_graph_ptr;
         vg::VariantGraph::VariantVertexDescriptor m_start_vertex;
         vg::VariantGraph::VariantVertexDescriptor m_end_vertex;
-		std::list< std::tuple< std::list< vg::VariantGraph::VariantVertexDescriptor >, std::string > > m_contigs;
+		std::list< ContigTuplePtr > m_contigs;
 	};
 
 } // namespace adjudicator

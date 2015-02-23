@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "gtest/gtest.h"
+
 /*
 #include "VCFFileTests.hpp"
 #include "BuildGraphTests.hpp"
@@ -8,7 +10,9 @@
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
 */
-#include "plugins/TestIncludes.h"
+#include "BamAlignmentTests.hpp"
+
+// #include "plugins/TestIncludes.h"
 
 
 #include "gtest/gtest.h"
