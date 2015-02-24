@@ -9,10 +9,10 @@
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
-*/
 #include "BamAlignmentTests.hpp"
+*/
 
-// #include "plugins/TestIncludes.h"
+#include "plugins/TestIncludes.h"
 
 
 #include "gtest/gtest.h"

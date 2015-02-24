@@ -2,10 +2,8 @@
 #define GWIZ_TESTS_BAMALIGNMENTTESTS_HPP
 
 #include "core/alignments/BamAlignmentReader.h"
+#include "core/alignments/BamAlignment.h"
 #include "TestConfig.h"
-
-#include "api/BamReader.h"
-#include "api/BamAlignment.h"
 
 TEST(BamAlignmentTests, OpenBamAlignmentInvalidTest)
 {
@@ -39,9 +37,17 @@ TEST(BamAlignmentTests, OpenBamAlignmentValidTest)
 
 TEST(BamAlignmentTests, ReadOneBamAlignmentTest)
 {
+	bool success = false;
 	std::string path = TEST_BAM_FILE;
 	auto reader = std::make_shared< gwiz::BamAlignmentReader >(path);
-	// EXPECT_TRUE(success);
+
+	gwiz::IAlignment::SharedPtr bamAlignmentPtr;
+	if (reader->getNextAlignment(bamAlignmentPtr)) // not a great test but we'll add better one's later
+	{
+		success = bamAlignmentPtr.get() != NULL;
+	}
+
+	EXPECT_TRUE(success);
 }
 
 #endif //GWIZ_TESTS_BAMALIGNMENTTESTS_HPP

@@ -21,7 +21,7 @@ namespace gwiz
 	    BamAlignmentReader(const std::string& bamPath);
 		virtual ~BamAlignmentReader();
 
-		virtual bool getNextAlignment(IAlignment::SharedPtr alignment) override;
+		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
 
 	private:
 		std::string m_bam_path;

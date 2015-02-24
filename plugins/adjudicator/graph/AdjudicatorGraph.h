@@ -7,6 +7,8 @@
 #include "vg/graph/ReferenceNode.h"
 #include "vg/graph/VariantGraph.h"
 
+#include "core/utils/ThreadPool.hpp"
+
 #include "VariantContig.h"
 
 #include "bamtools/src/api/BamAlignment.h"
@@ -41,7 +43,7 @@ namespace adjudicator
 			return vertex;
 		}
 
-			inline vg::VariantGraph::VariantVertexDescriptor addReferenceNode(vg::ReferenceNode::SharedPtr referenceNodePtr) override
+		inline vg::VariantGraph::VariantVertexDescriptor addReferenceNode(vg::ReferenceNode::SharedPtr referenceNodePtr) override
 		{
 			auto vertex = boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			this->m_reference_vertices.push_back(vertex);
@@ -53,21 +55,23 @@ namespace adjudicator
 			else if (referenceNodePtr->getLength() >= this->m_contig_padding)
 			{
 				auto contig = std::make_shared< VariantContig >(this->m_contig_padding, this->m_graph_ptr, this->m_contig_start_vertex, vertex);
-				if (!this->m_unprocessed_contigs.empty())
-				{
-					/* if (counter == 361) */
-					/* { */
-					/* 	(*this->m_graph_ptr)[this->m_contig_start_vertex]; */
-					/* 	std::cout << this->m_contig_start_vertex << " " <<  vertex << std::endl; */
-					/* } */
-					this->m_unprocessed_contigs.back()->buildVariantContig();
-					/* std::cout << counter << std::endl; */
-					++counter;
-				}
 				this->m_unprocessed_contigs.push(contig);
 				this->m_contig_start_vertex = vertex;
 			}
 			return vertex;
+		}
+
+		inline void variantEdgesAddedBackToReference() override
+		{
+			if (!this->m_unprocessed_contigs.empty())
+			{
+				auto contig = this->m_unprocessed_contigs.front();
+				this->m_unprocessed_contigs.pop();
+				auto contigBuildFunct = boost::bind(&VariantContig::buildVariantContig, contig);
+				ThreadPool::PostJob(contigBuildFunct);
+				/* contig->buildVariantContig(); */
+				m_processed_contigs.push(contig);
+			}
 		}
 
 		vg::VariantGraph::VariantVertexDescriptor getReferenceVertexContainsPosition(position pos);

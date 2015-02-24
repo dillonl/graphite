@@ -41,6 +41,10 @@ namespace adjudicator
 			return m_contigs;
 		}
 
+		std::string getReferenceID();
+		position getStartPosition();
+		position getEndPosition();
+
 	protected:
 		void addAllPaths(std::list< vg::VariantGraph::VariantVertexDescriptor > vertexList, std::string variantSequence, vg::VariantGraph::VariantVertexDescriptor currentVertex, vg::VariantGraph::VariantVertexDescriptor endVertex);
 

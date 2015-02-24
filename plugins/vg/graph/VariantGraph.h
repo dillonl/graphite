@@ -51,6 +51,12 @@ namespace gwiz
 				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			}
 
+			// this function is called when, after a variants have been added and the reference node
+			// have been added, the edges between the variants and the reference node have been added
+			// This allows us to alert subclasses when the variants have been connected back to a
+			// reference node.
+			virtual inline void variantEdgesAddedBackToReference() {}
+
 			GraphPtr m_graph_ptr;
 
 			bool m_next_variant_init;

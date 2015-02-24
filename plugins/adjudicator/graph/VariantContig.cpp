@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <deque>
 #include <map>
+#include <thread>
 
 namespace gwiz
 {
@@ -34,9 +35,25 @@ namespace adjudicator
 	{
 	}
 
+	std::string VariantContig::getReferenceID()
+	{
+		return std::dynamic_pointer_cast< vg::ReferenceNode >((*this->m_graph_ptr)[this->m_start_vertex])->getReferenceID();
+	}
+
+	position VariantContig::getStartPosition()
+	{
+		return std::dynamic_pointer_cast< vg::ReferenceNode >((*this->m_graph_ptr)[this->m_start_vertex])->getPosition();
+	}
+
+	position VariantContig::getEndPosition()
+	{
+		auto referenceNode = std::dynamic_pointer_cast< vg::ReferenceNode >((*this->m_graph_ptr)[this->m_start_vertex]);
+		return referenceNode->getPosition() + referenceNode->getLength();
+	}
+
 	void VariantContig::buildVariantContig()
 	{
-		// std::cout << "building" << std::endl;
+		// std::cout << "buildVariantContig: " << std::this_thread::get_id() << std::endl;
 		this->m_contigs.clear();
 		std::list< vg::VariantGraph::VariantVertexDescriptor > vertexList;
 		std::string variantSequence;

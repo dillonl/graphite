@@ -11,6 +11,8 @@ namespace gwiz
 		{
 			throw "Unable to open bam file";
 		}
+		m_bam_reader.GetHeaderText();
+		m_bam_reader.GetReferenceData();
 	}
 
 	BamAlignmentReader::~BamAlignmentReader()
@@ -18,11 +20,12 @@ namespace gwiz
 		m_bam_reader.Close();
 	}
 
-	bool BamAlignmentReader::getNextAlignment(IAlignment::SharedPtr alignmentPtr)
+	bool BamAlignmentReader::getNextAlignment(IAlignment::SharedPtr& alignmentPtr)
 	{
-		auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+		BamAlignmentPtr bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		bool returnValue = this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr);
 		alignmentPtr = std::make_shared< BamAlignment >(bamAlignmentPtr);
+
 		return returnValue;
 	}
 

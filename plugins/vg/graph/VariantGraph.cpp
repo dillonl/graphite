@@ -62,6 +62,7 @@ namespace gwiz
 					referenceVertex = addReference(altAndRefVertices, referenceNode);
 					altAndRefVertices.clear();
 					altAndRefVertices.push_back(referenceVertex);
+					variantEdgesAddedBackToReference();
 				}
 				size_t variantReferenceSize;
 				altAndRefVertices = addVariantVertices(altAndRefVertices, variantPtr, variantReferenceSize);
@@ -72,6 +73,7 @@ namespace gwiz
 			{
 				ReferenceNode::SharedPtr referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
 				referenceVertex = addReference(altAndRefVertices, referenceNode);
+				variantEdgesAddedBackToReference();
 			}
 		}
 
