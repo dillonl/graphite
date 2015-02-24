@@ -52,7 +52,6 @@ namespace gwiz
 			VariantVertexDescriptor referenceVertex;
 			std::vector< VariantVertexDescriptor > altAndRefVertices;
 			Variant::SharedPtr variantPtr;
-			size_t count = 0;
 			while (getNextCompoundVariant(variantPtr))
 			{
 				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);

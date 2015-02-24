@@ -1,6 +1,10 @@
 #ifndef GWIZ_GSSW_GSSWGRAPH_H
 #define GWIZ_GSSW_GSSWGRAPH_H
 
+#include <deque>
+
+#include "gssw/gssw.h"
+
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
 #include "core/variants/IVariantList.h"
@@ -14,6 +18,7 @@ namespace gssw
 	{
 	public:
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
+		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 
 		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr);
 		virtual ~GSSWGraph();
@@ -21,7 +26,7 @@ namespace gssw
 		virtual void constructGraph() override;
 
 	protected:
-
+		std::deque< GSSWGraphPtr > m_gssw_contigs;
 	};
 
 }
