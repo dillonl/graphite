@@ -42,5 +42,6 @@ target_link_libraries(gwiz_tests
 	${SCI_BOOST_LIBRARY}
 	${PLUGIN_LIBS}
 	fastahack_lib
+	gssw_lib
 	ssw_lib
 )

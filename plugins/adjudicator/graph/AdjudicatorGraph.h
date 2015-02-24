@@ -69,20 +69,17 @@ namespace adjudicator
 
 		void processAllContigs()
 		{
-			/* ThreadPool threadpool; */
 			while (!this->m_unprocessed_contigs.empty())
 			{
 				auto contig = this->m_unprocessed_contigs.front();
 				this->m_unprocessed_contigs.pop();
-				/* contig->buildVariantContig(); */
-				auto contigBuildFunct = boost::bind(&VariantContig::buildVariantContig, contig);
-				/* threadpool.postThreadPoolJob(contigBuildFunct); */
-				ThreadPool::Instance()->postJob(contigBuildFunct);
-				/* contig->buildVariantContig(); */
+				contig->buildVariantContig();
+				/* auto contigBuildFunct = boost::bind(&VariantContig::buildVariantContig, contig); */
+				/* ThreadPool::Instance()->postJob(contigBuildFunct); */
 				m_processed_contigs.push(contig);
 			}
 			std::cout << "finished 1" << std::endl;
-			ThreadPool::Instance()->joinAll();
+			/* ThreadPool::Instance()->joinAll(); */
 			std::cout << "finished 2" << std::endl;
 		}
 
