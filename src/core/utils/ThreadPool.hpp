@@ -13,10 +13,26 @@ namespace gwiz
 	class ThreadPool : private boost::noncopyable
 	{
 	public:
-		static void PostJob(boost::function< void() > funct)
+
+		static ThreadPool* Instance()
 		{
-			static ThreadPool s_threadpool;
-			s_threadpool.postThreadPoolJob(funct);
+			static ThreadPool* s_threadpool = NULL; // lazy initialization
+			if (s_threadpool == NULL)
+			{
+				s_threadpool = new ThreadPool();
+			}
+			return s_threadpool;
+		}
+
+		void postJob(boost::function< void() > funct)
+		{
+			this->m_io_service.dispatch(std::move(funct));
+		}
+
+		void joinAll()
+		{
+			m_io_service.stop();
+			this->m_threadgroup.join_all();
 		}
 
 	private:
@@ -37,14 +53,10 @@ namespace gwiz
 			{
 				m_threadgroup.create_thread(boost::bind(&boost::asio::io_service::run, &m_io_service));
 			}
+			// m_io_service.run();
 		}
 
-		void postThreadPoolJob(boost::function< void() > funct)
-		{
-			this->m_io_service.post(funct);
-		}
-
-		static ThreadPool s_threadpool;
+		static ThreadPool* s_threadpool;
 
 		boost::asio::io_service m_io_service;
 		boost::thread_group m_threadgroup;

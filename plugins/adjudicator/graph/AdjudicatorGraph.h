@@ -1,6 +1,7 @@
 #ifndef GWIZ_ADJUDICATOR_ADJUDICATORGRAPH
 #define GWIZ_ADJUDICATOR_ADJUDICATORGRAPH
 
+#include <chrono>
 #include <thread>
 #include <queue>
 
@@ -61,17 +62,28 @@ namespace adjudicator
 			return vertex;
 		}
 
-		inline void variantEdgesAddedBackToReference() override
+		inline void graphConstructed() override
 		{
-			if (!this->m_unprocessed_contigs.empty())
+			processAllContigs();
+		}
+
+		void processAllContigs()
+		{
+			/* ThreadPool threadpool; */
+			while (!this->m_unprocessed_contigs.empty())
 			{
 				auto contig = this->m_unprocessed_contigs.front();
 				this->m_unprocessed_contigs.pop();
+				/* contig->buildVariantContig(); */
 				auto contigBuildFunct = boost::bind(&VariantContig::buildVariantContig, contig);
-				ThreadPool::PostJob(contigBuildFunct);
+				/* threadpool.postThreadPoolJob(contigBuildFunct); */
+				ThreadPool::Instance()->postJob(contigBuildFunct);
 				/* contig->buildVariantContig(); */
 				m_processed_contigs.push(contig);
 			}
+			std::cout << "finished 1" << std::endl;
+			ThreadPool::Instance()->joinAll();
+			std::cout << "finished 2" << std::endl;
 		}
 
 		vg::VariantGraph::VariantVertexDescriptor getReferenceVertexContainsPosition(position pos);

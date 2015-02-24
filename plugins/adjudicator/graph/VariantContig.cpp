@@ -53,7 +53,6 @@ namespace adjudicator
 
 	void VariantContig::buildVariantContig()
 	{
-		// std::cout << "buildVariantContig: " << std::this_thread::get_id() << std::endl;
 		this->m_contigs.clear();
 		std::list< vg::VariantGraph::VariantVertexDescriptor > vertexList;
 		std::string variantSequence;
@@ -78,7 +77,6 @@ namespace adjudicator
 		variantSequence += std::string(currentNode->getSequence() + offset, length);
 		if (finalNode)
 		{
-			// std::cout << "final node: " << variantSequence << std::endl;
 			auto contig = std::make_shared< ContigTuple >(std::make_tuple(vertexList, variantSequence));
 			this->m_contigs.push_front(contig);
 		}
