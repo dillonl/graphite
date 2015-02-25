@@ -13,7 +13,7 @@ namespace gwiz
 {
 	namespace vg
 	{
-		class VariantGraph : public IGraph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr >::vertex_descriptor >
+		class VariantGraph : public IGraph
 		{
 		public:
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
@@ -33,17 +33,17 @@ namespace gwiz
 			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
 			std::vector< VariantVertexDescriptor > addVariantVertices(std::vector< VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
 
-			virtual VariantVertexDescriptor addVariantNode(INode::SharedPtr variantNodePtr) override
+			virtual VariantVertexDescriptor addVariantNode(INode::SharedPtr variantNodePtr)
 			{
 				return boost::add_vertex(variantNodePtr, *m_graph_ptr);
 			}
 
-			virtual VariantVertexDescriptor addReferenceNodeAtVariantPosition(ReferenceNode::SharedPtr referenceNodePtr) override
+			virtual VariantVertexDescriptor addReferenceNodeAtVariantPosition(ReferenceNode::SharedPtr referenceNodePtr)
 			{
 				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			}
 
-			virtual VariantVertexDescriptor addReferenceNode(ReferenceNode::SharedPtr referenceNodePtr) override
+			virtual VariantVertexDescriptor addReferenceNode(ReferenceNode::SharedPtr referenceNodePtr)
 			{
 				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			}

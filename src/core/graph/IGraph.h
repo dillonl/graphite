@@ -5,7 +5,6 @@
 #include "core/variants/IVariantList.h"
 #include "core/variants/IVariant.h"
 #include "core/graph/INode.h"
-#include "../plugins/vg/graph/ReferenceNode.h"
 
 #include <boost/noncopyable.hpp>
 
@@ -15,7 +14,6 @@
 
 namespace gwiz
 {
-	template <typename T>
 	class IGraph : private boost::noncopyable
 	{
 	public:
@@ -28,11 +26,6 @@ namespace gwiz
 		virtual ~IGraph() {}
 
 	protected:
-		IGraph() {} // used in tests
-
-		virtual T addVariantNode(INode::SharedPtr variantNodePtr);
-		virtual T addReferenceNodeAtVariantPosition(vg::ReferenceNode::SharedPtr referenceNodePtr);
-		virtual T addReferenceNode(vg::ReferenceNode::SharedPtr referenceNodePtr);
 
 		bool getNextCompoundVariant(Variant::SharedPtr& variant)
 		{
@@ -121,6 +114,7 @@ namespace gwiz
 		}
 
 		virtual void constructGraph() = 0;
+
 		IReference::SharedPtr m_reference_ptr;
 		IVariantList::SharedPtr m_variant_list_ptr;
 

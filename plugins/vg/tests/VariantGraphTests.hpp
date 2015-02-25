@@ -35,8 +35,7 @@
 
 		 bool testGetNextCompoundVariant(gwiz::Variant::SharedPtr& variant)
 		 {
-			 return true;
-			 // return gwiz::IGraph::getNextCompoundVariant(variant);
+			 return gwiz::IGraph::getNextCompoundVariant(variant);
 		 }
 
 	 };

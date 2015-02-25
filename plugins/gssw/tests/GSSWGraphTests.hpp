@@ -52,7 +52,6 @@ namespace
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		ASSERT_TRUE(true);
-/*
 
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 
@@ -61,9 +60,9 @@ namespace
 
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(fastaReferencePtr, vcfFileReader);
-		variantGraph->constructGraph();
-
+		auto gsswGraph = std::make_shared< GSSWGraphTest >(fastaReferencePtr, vcfFileReader);
+		gsswGraph->constructGraph();
+/*
 		std::cout << "contigs constructed" << std::endl;
 
 		auto contigs = variantGraph->getContigs();
