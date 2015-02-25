@@ -16,7 +16,6 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
-		/*
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 		size_t referenceOffset = 0;
 		size_t referenceSize;
@@ -24,7 +23,6 @@ namespace gssw
 		while (getNextCompoundVariant(variantPtr))
 		{
 		}
-		*/
 	}
 }
 }

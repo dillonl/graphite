@@ -14,7 +14,7 @@ namespace gwiz
 namespace gssw
 {
 
-	class GSSWGraph : public IGraph
+	class GSSWGraph : public IGraph< void >
 	{
 	public:
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;

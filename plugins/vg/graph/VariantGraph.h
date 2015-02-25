@@ -13,7 +13,7 @@ namespace gwiz
 {
 	namespace vg
 	{
-		class VariantGraph : public IGraph
+		class VariantGraph : public IGraph< boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS, INode::SharedPtr >::vertex_descriptor >
 		{
 		public:
 			typedef std::shared_ptr< VariantGraph > VariantGraphPtr;
@@ -30,23 +30,20 @@ namespace gwiz
 			VariantVertexDescriptor getVertexAtPosition(position referencePosition);
 
 		protected:
-			virtual bool getNextCompoundVariant(Variant::SharedPtr& variant);
-			virtual Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants);
-
 			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
 			std::vector< VariantVertexDescriptor > addVariantVertices(std::vector< VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
 
-			virtual inline VariantVertexDescriptor addVariantNode(INode::SharedPtr variantNodePtr)
+			virtual VariantVertexDescriptor addVariantNode(INode::SharedPtr variantNodePtr) override
 			{
 				return boost::add_vertex(variantNodePtr, *m_graph_ptr);
 			}
 
-			virtual inline VariantVertexDescriptor addReferenceNodeAtVariantPosition(ReferenceNode::SharedPtr referenceNodePtr)
+			virtual VariantVertexDescriptor addReferenceNodeAtVariantPosition(ReferenceNode::SharedPtr referenceNodePtr) override
 			{
 				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			}
 
-			virtual inline VariantVertexDescriptor addReferenceNode(ReferenceNode::SharedPtr referenceNodePtr)
+			virtual VariantVertexDescriptor addReferenceNode(ReferenceNode::SharedPtr referenceNodePtr) override
 			{
 				return boost::add_vertex(referenceNodePtr, *m_graph_ptr);
 			}
@@ -58,16 +55,9 @@ namespace gwiz
 
 			GraphPtr m_graph_ptr;
 
-			bool m_next_variant_init;
 			/* typedef boost::graph_traits< Graph >::vertex_descriptor INodeType; */
 
 			std::mutex m_graph_mutex;
-
-			// This is used in conjunction with getCompoundNode.
-			// This stores the next variant so we don't have to
-			// get the variant twice
-			Variant::SharedPtr m_next_variant;
-			VariantParser< const char* > m_vcf_parser;
 
 		private:
 

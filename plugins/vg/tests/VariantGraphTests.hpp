@@ -11,9 +11,9 @@
  #include "tests/classes/TestReferenceVariantGenerator.hpp"
  #include "plugins/vg/graph/VariantGraph.h"
 
- #include "core/variants/VCFFileReader.h"
- #include "core/variants/IVariant.h"
- #include "core/reference/FastaReference.h"
+#include "core/variants/VCFFileReader.h"
+#include "core/variants/IVariant.h"
+#include "core/reference/FastaReference.h"
 
  namespace
  {
@@ -33,20 +33,12 @@
 		 {
 		 }
 
-		 void constructGraph() override
+		 bool testGetNextCompoundVariant(gwiz::Variant::SharedPtr& variant)
 		 {
-			 gwiz::vg::VariantGraph::constructGraph();
+			 return true;
+			 // return gwiz::IGraph::getNextCompoundVariant(variant);
 		 }
 
-		 bool getNextCompoundVariant(gwiz::Variant::SharedPtr& variant) override
-		 {
-			 return gwiz::vg::VariantGraph::getNextCompoundVariant(variant);
-		 }
-
-		 gwiz::Variant::SharedPtr buildCompoundVariant(const gwiz::position startPosition, const std::string& referenceString, const std::vector< gwiz::Variant::SharedPtr >& variants) override
-		 {
-			 return gwiz::vg::VariantGraph::buildCompoundVariant(startPosition, referenceString, variants);
-		 }
 	 };
 
 	 //std::string m_reference_string = "GGCCTCAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTGAGATTACAGGTGTGAACCACTGCACCTGGTCTCAAATCAGAAAATCTTTGAATTCATCTAATGGTCACCTATCCTGTGGGCCCTCACTTTGAGATATTTTGCCTTTTTTGGCCAAACCAATATGTAGCCTCCATGTATTATATGACCTTGCCTGCAACCTCTGCCTTCCCACCTTTAAAAACCCTTACACATAAGCCATCAGGGAGATTAGGCCTTAAGGATTAGCTGCCTGATACTCCTTGCTTGCTGCCTGCAATAAATTCCTCAACTTCTGTCTCAGCAATGCCGATATCAGTGCTTGACTTTGATAGGCTGGGTGGGTGGACCCAAATTTGGTTTGGTGACCCTTTGAGCTTAGATTCAAAATTCTAGTTTTGTCACTCTGCAGTTTTGTGATCTTGAGCAAGTTACTTAACCTCTCTGAGCCTTGTTTGTCATGTGTAATGAAAAGAGCTATACTTACCTTGTGAGGTAGTCCTCAGGATTCAATGAGATAATAAGTACTCACTAAACAAAACTCGTTATTACAAAAGAATCACTTTGTCTCTGAAGTGGGCAATTCAACCCATTTCTAGGAGATTTTAAACATGATTTTAGATATTTGGTGTGATTTTGTGAATGGGTTTATCGTTAATAGCTTTCATGCTCCAGAATTTTCTTGAATAATAGGTTTTTGCAAAGTGCATTCCATGGAATACTCATTTGGGTGACGTTAATAGACATCACTCAAAAGCTGGGTGAATATTACAATGTTTACTTCATCTGTAACAAGCTGAGTAGCTACAGTACATATCTAAGAGGGGGCTCTAATTCTCAATATTTTCCAAATTTATTAGATCACAGACTTTTCTTTTAGTGAAGTGCTTAATGAAACTTAAGTTCTGTGAAAAGTACTTTGAGAAATATTGCTTTAAAAAGAAAAAGATTGAGCCCTGTATCAGGGGAAATATCTAATATTATATTAAACAAAAAAGTCCCA";
@@ -60,7 +52,7 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_TRUE(variantPtr == NULL);
 	 }
 
@@ -76,10 +68,10 @@
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+         variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), std::string(m_reference_string.c_str() + variantPositionOffset, 1).c_str());
 
-		 variantGraph->getNextCompoundVariant(variantPtr);
+         variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_TRUE(variantPtr == NULL);
 	 }
 
@@ -97,7 +89,7 @@
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
@@ -117,7 +109,7 @@
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 2);
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
@@ -138,7 +130,7 @@
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 10);
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
@@ -160,7 +152,7 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "G");
@@ -179,7 +171,7 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		 gwiz::Variant::SharedPtr variantPtr;
-		 variantGraph->getNextCompoundVariant(variantPtr);
+		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "T");
