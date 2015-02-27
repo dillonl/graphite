@@ -29,4 +29,10 @@ namespace gwiz
 		return returnValue;
 	}
 
+	void BamAlignmentReader::setRegion(Region::SharedPtr region)
+	{
+		int refID = this->m_bam_reader.GetReferenceID(region->getReferenceID());
+		this->m_bam_reader.SetRegion(refID, region->getStartPosition(), refID, region->getEndPosition());
+	}
+
 }

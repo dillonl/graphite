@@ -1,12 +1,14 @@
 #include "GSSWGraph.h"
 #include "vg/graph/ReferenceNode.h"
 
+#include <map>
+
 namespace gwiz
 {
 namespace gssw
 {
-	GSSWGraph::GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
-		IGraph(referencePtr, variantListPtr), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
+	GSSWGraph::GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader) :
+		IGraph(referencePtr, variantListPtr), m_alignment_reader(alignmentReader), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
 
 	{
 		this->m_nt_table = gssw_create_nt_table();
@@ -28,8 +30,11 @@ namespace gssw
 		size_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
+		position previousPosition = 0;
+
 		while (getNextCompoundVariant(variantPtr))
 		{
+			/*
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
@@ -38,10 +43,25 @@ namespace gssw
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 			}
-
+			*/
 		}
 
 		graphConstructed();
+	}
+
+	void GSSWGraph::constructAndAlign()
+	{
+
+	}
+
+	bool GSSWGraph::recenterGraph(IAlignment::SharedPtr alignment)
+	{
+		return false;
+	}
+
+	void GSSWGraph::constructGraph(std::list< Variant::SharedPtr > variants, size_t referencePadding)
+	{
+
 	}
 }
 }

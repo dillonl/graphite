@@ -10,6 +10,7 @@
 
 #include "core/utils/Types.h"
 #include "IAlignmentReader.h"
+#include "core/region/Region.h"
 
 namespace gwiz
 {
@@ -22,6 +23,8 @@ namespace gwiz
 		virtual ~BamAlignmentReader();
 
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
+
+		void setRegion(Region::SharedPtr region);
 
 	private:
 		std::string m_bam_path;

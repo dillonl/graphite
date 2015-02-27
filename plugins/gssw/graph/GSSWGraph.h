@@ -9,6 +9,8 @@
 #include "core/reference/IReference.h"
 #include "core/variants/IVariantList.h"
 
+#include "core/alignments/IAlignmentReader.h"
+
 namespace gwiz
 {
 namespace gssw
@@ -20,15 +22,18 @@ namespace gssw
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 
-		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr);
+		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
+		void constructAndAlign();
 
 	protected:
 		virtual inline void graphConstructed() {}
+		/* virtual void  */
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 
+		IAlignmentReader::SharedPtr m_alignment_reader;
 		int32_t m_match;
 		int32_t m_mismatch;
 		int32_t m_gap_open;
@@ -38,6 +43,9 @@ namespace gssw
 		gssw_graph* m_graph_ptr;
 
 	private:
+		bool recenterGraph(IAlignment::SharedPtr alignment);
+		void constructGraph(std::list< Variant::SharedPtr > variants, size_t referencePadding);
+
 		gssw_node* gssw_node_create(const char* seq,
 									const size_t len,
 									const int8_t* nt_table,
@@ -50,7 +58,7 @@ namespace gssw
 			strncpy(n->seq, seq, len); n->seq[len] = 0;
 			/* n->data = data; */
 			n->num = gssw_create_num(seq, len, nt_table);
-			n->count_prev = 0; // are these be set == 0 by calloc?
+			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
 			return n;
