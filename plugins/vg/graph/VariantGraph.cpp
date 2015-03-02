@@ -54,7 +54,7 @@ namespace gwiz
 			while (getNextCompoundVariant(variantPtr))
 			{
 				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
-				if (referenceSize > 0) // there is no reference to add
+				if (referenceSize > 0) // there is reference to add
 				{
 					ReferenceNode::SharedPtr referenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, referenceSize);
 					referenceVertex = addReference(altAndRefVertices, referenceNode);

@@ -5,7 +5,7 @@ namespace gwiz
 {
 
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :
-		m_bam_path(bamPath)
+		m_bam_path(bamPath), m_average_bam_read_length(0)
 	{
 		if (!m_bam_reader.Open(m_bam_path))
 		{
@@ -13,11 +13,22 @@ namespace gwiz
 		}
 		m_bam_reader.GetHeaderText();
 		m_bam_reader.GetReferenceData();
+		setAverageBamReadLength();
 	}
 
 	BamAlignmentReader::~BamAlignmentReader()
 	{
 		m_bam_reader.Close();
+	}
+
+	void BamAlignmentReader::setAverageBamReadLength()
+	{
+		IAlignment::SharedPtr alignmentPtr;
+		if (getNextAlignment(alignmentPtr))
+		{
+			m_average_bam_read_length = alignmentPtr->getLength();
+			this->m_bam_reader.Rewind();
+		}
 	}
 
 	bool BamAlignmentReader::getNextAlignment(IAlignment::SharedPtr& alignmentPtr)

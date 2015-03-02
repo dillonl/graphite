@@ -22,11 +22,14 @@ namespace gwiz
 	    BamAlignmentReader(const std::string& bamPath);
 		virtual ~BamAlignmentReader();
 
+		virtual size_t getAverageReadLength() override { return m_average_bam_read_length; }
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
 
 		void setRegion(Region::SharedPtr region);
 
 	private:
+		void setAverageBamReadLength();
+		size_t m_average_bam_read_length;
 		std::string m_bam_path;
 		BamTools::BamReader m_bam_reader;
 

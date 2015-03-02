@@ -19,6 +19,7 @@ namespace gwiz
 	    IAlignmentReader() {}
 		virtual ~IAlignmentReader() {}
 
+		virtual size_t getAverageReadLength() = 0;
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) = 0;
 
 	};

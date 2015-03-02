@@ -22,6 +22,16 @@ namespace testing
 		{
 		}
 
+		virtual size_t getAverageReadLength() override
+		{
+			size_t readLength = 0;
+			if (!this->m_alignments.empty())
+			{
+				this->m_alignments.front()->getLength();
+			}
+			return readLength;
+		}
+
 		void addAlignment(const position pos, const std::string& seq)
 		{
 			auto alignment = std::make_shared< TestAlignment >(pos, seq);
