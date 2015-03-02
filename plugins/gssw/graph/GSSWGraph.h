@@ -1,6 +1,7 @@
 #ifndef GWIZ_GSSW_GSSWGRAPH_H
 #define GWIZ_GSSW_GSSWGRAPH_H
 
+#include <tuple>
 #include <deque>
 #include <map>
 
@@ -36,6 +37,7 @@ namespace gssw
 		{
 			auto variantNode = gssw_node_create_alt(variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
 			gssw_graph_add_node(this->m_graph_ptr, variantNode);
+			this->m_node_map[variantNode->id] = variantNodePtr;
 			return variantNode;
 		}
 
