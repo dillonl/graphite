@@ -28,9 +28,6 @@ namespace gwiz
 	protected:
 		Region::SharedPtr m_region;
 
-	private:
-		IReference(const IReference&) = delete;
-		IReference& operator=(const IReference&) = delete;
 	};
 }
 

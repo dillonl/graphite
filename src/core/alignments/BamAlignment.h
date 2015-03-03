@@ -1,6 +1,7 @@
 #ifndef GWIZ_BAMALIGNMENT_H
 #define GWIZ_BAMALIGNMENT_H
 
+#include "core/region/Region.h"
 #include "IAlignment.h"
 
 #include "api/BamReader.h"

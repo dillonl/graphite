@@ -22,6 +22,8 @@ namespace testing
 		{
 		}
 
+		void setRegion(Region::SharedPtr region) {}
+
 		virtual size_t getAverageReadLength() override
 		{
 			size_t readLength = 0;

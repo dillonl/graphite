@@ -1,6 +1,7 @@
 #ifndef GWIZ_GSSW_GSSWGRAPHMANAGER_H
 #define GWIZ_GSSW_GSSWGRAPHMANAGER_H
 
+#include "core/alignments/IAlignmentReaderManager.h"
 #include "GSSWGraph.h"
 
 #include <queue>
@@ -17,7 +18,7 @@ namespace gssw
 	public:
 		typedef std::shared_ptr< GraphManager > SharedPtr;
 
-		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader, size_t padding);
+		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding);
 		~GraphManager() {}
 
 	private:
@@ -26,7 +27,7 @@ namespace gssw
 
 		gwiz::IReference::SharedPtr m_reference_ptr;
 		gwiz::IVariantList::SharedPtr m_variant_list_ptr;
-		IAlignmentReader::SharedPtr m_alignment_reader;
+		IAlignmentReaderManager::SharedPtr m_alignment_reader_manager;
 		size_t m_padding;
 	};
 }

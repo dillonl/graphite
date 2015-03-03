@@ -1,6 +1,8 @@
 #ifndef GWIZ_IALIGNMENTREADERMANAGER_H
 #define GWIZ_IALIGNMENTREADERMANAGER_H
 
+#include "IAlignmentReader.h"
+
 #include <boost/noncopyable.hpp>
 
 #include <memory>
@@ -12,10 +14,10 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< IAlignmentReaderManager > SharedPtr;
 		IAlignmentReaderManager() {}
-		~IAlignmentReaderManager() {}
+		virtual ~IAlignmentReaderManager() {}
 
-		IAlignmentReader::SharedPtr generateAlignmentReader() = 0;
-	}
+		virtual IAlignmentReader::SharedPtr generateAlignmentReader() = 0;
+	};
 }
 
 #endif //GWIZ_IALIGNMENTREADERMANAGER_H

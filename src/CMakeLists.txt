@@ -22,6 +22,7 @@ set(GWIZ_CORE_SOURCES
   core/region/Region.cpp
   core/alignments/BamAlignment.cpp
   core/alignments/BamAlignmentReader.cpp
+  core/alignments/BamAlignmentReaderManager.cpp
 )
 
 set(GWIZ_GRAPH_SOURCES
