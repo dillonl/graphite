@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "gssw/gssw.h"
+#include "gssw/graph/GraphManager.h"
 
 #include "gtest/gtest.h"
 
@@ -17,6 +18,7 @@
 #include "plugins/gssw/graph/GSSWGraph.h"
 
 #include "core/alignments/BamAlignmentReader.h"
+#include "core/alignments/BamAlignmentReaderManager.h"
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
@@ -184,6 +186,21 @@ namespace
 
 	TEST(GSSWTests, TestConstructChr20)
 	{
+		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
+		std::string fastaPath = TEST_FASTA_FILE;
+		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
+		std::string bamPath = TEST_BAM_FILE;
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+		auto vcfFileReaderPtr = std::make_shared<gwiz::VCFFileReader>(vcfPath);
+		auto bamAlignmentReaderManager = std::make_shared< gwiz::BamAlignmentReaderManager >(bamPath);
+		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
+		graphManagerPtr->buildGraphs();
+	}
+
+	TEST(GSSWTests, TestConstructTestData)
+	{
+		/*
 		gwiz::IReference::SharedPtr referencePtr;
 		gwiz::IVariantList::SharedPtr variantListPtr;
 		gwiz::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
@@ -191,6 +208,7 @@ namespace
 
 		auto gsswGraph = std::make_shared< GSSWGraphTest >(referencePtr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
+		*/
 
 /*
 		std::cout << "contigs constructed" << std::endl;

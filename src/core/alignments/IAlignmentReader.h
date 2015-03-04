@@ -17,12 +17,19 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< IAlignmentReader > SharedPtr;
 
-	    IAlignmentReader() {}
-		virtual ~IAlignmentReader() {}
+	    IAlignmentReader()	{	}
 
-		virtual void setRegion(Region::SharedPtr region) = 0;
+		virtual ~IAlignmentReader()	{	}
+
+		virtual void init() {}
+		virtual void releaseReader() {}
+		virtual void setRegion(Region::SharedPtr region) { this->m_region = region; }
+		virtual Region::SharedPtr getRegion() { return this->m_region; }
 		virtual size_t getAverageReadLength() = 0;
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) = 0;
+
+	protected:
+		Region::SharedPtr m_region;
 
 	};
 }

@@ -4,20 +4,31 @@
 namespace gwiz
 {
 
+	int32_t BamAlignmentReader::ReaderCount = 0;
+
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :
 		m_bam_path(bamPath), m_average_bam_read_length(0)
+	{
+	}
+
+	BamAlignmentReader::~BamAlignmentReader()
+	{
+		releaseReader();
+	}
+
+	void BamAlignmentReader::init()
 	{
 		if (!m_bam_reader.Open(m_bam_path))
 		{
 			throw "Unable to open bam file";
 		}
-		m_bam_reader.GetHeaderText();
-		m_bam_reader.GetReferenceData();
+		++BamAlignmentReader::ReaderCount;
 		setAverageBamReadLength();
 	}
 
-	BamAlignmentReader::~BamAlignmentReader()
+	void BamAlignmentReader::releaseReader()
 	{
+		--BamAlignmentReader::ReaderCount;
 		m_bam_reader.Close();
 	}
 
@@ -44,6 +55,7 @@ namespace gwiz
 	{
 		int refID = this->m_bam_reader.GetReferenceID(region->getReferenceID());
 		this->m_bam_reader.SetRegion(refID, region->getStartPosition(), refID, region->getEndPosition());
+		this->m_region = region;
 	}
 
 }

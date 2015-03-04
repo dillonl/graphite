@@ -28,6 +28,8 @@ namespace gssw
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
+
+		bool m_print_stuff = false;
 	protected:
 		std::vector< gssw_node* > addVariantVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
 

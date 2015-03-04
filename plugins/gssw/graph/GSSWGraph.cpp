@@ -27,15 +27,17 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
-		size_t readLength = m_alignment_reader->getAverageReadLength();
+		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
+		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
+
+		size_t readLength = this->m_alignment_reader->getAverageReadLength();
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
-		size_t referenceOffset = 0;
+		size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : 0;
 		size_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
 		size_t graphSize = 0;
 		int count = 0;
-
 		while (getNextCompoundVariant(variantPtr))
 		{
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
@@ -50,7 +52,8 @@ namespace gssw
 			altAndRefVertices = addVariantVertices(altAndRefVertices, variantPtr, variantReferenceSize);
 			referenceOffset += referenceSize + variantReferenceSize;
 		}
-		referenceSize = this->m_reference_ptr->getRegion()->getEndPosition() - (startPosition + referenceOffset);
+		position endPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > alignmentReaderEndPosition) ? alignmentReaderEndPosition : this->m_reference_ptr->getRegion()->getEndPosition();
+		referenceSize = endPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
 		{
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
@@ -101,6 +104,7 @@ namespace gssw
 	{
 		IAlignment::SharedPtr alignmentPtr;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
+		this->m_alignment_reader->init();
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
 			std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
@@ -113,11 +117,11 @@ namespace gssw
 															m_gap_open,
 															m_gap_extension);
 			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			// std::cout << "Position: " << alignmentPtr->getPosition() << std::endl;
+			/*
 			gssw_node_cigar* nc = gm->cigar.elements;
 			for (int i = 0; i < gm->cigar.length; ++i, ++nc)
 			{
-				std::cout << nc->node->seq << "|";
+				// std::cout << nc->node->seq << "|";
 				if (m_node_map.find(nc->node->id) != m_node_map.end())
 				{
 					auto variantNode = m_node_map[nc->node->id];
@@ -132,12 +136,15 @@ namespace gssw
 					variantCounter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
 				}
 			}
-			std::cout << std::endl;
-			std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			gssw_print_graph_mapping(gm);
-			std::cout << std::endl << std::endl;
+			*/
+			// std::cout << std::endl;
+			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
+			// gssw_print_graph_mapping(gm);
+			// std::cout << std::endl << std::endl;
 			gssw_graph_mapping_destroy(gm);
 		}
+		this->m_alignment_reader->releaseReader();
+		/*
 		for (const auto& value : variantCounter)
 		{
 			auto variant = std::get< 0 >(value.second);
@@ -148,6 +155,7 @@ namespace gssw
 			}
 			std::cout << "---" << std::endl;
 		}
+		*/
 	}
 }
 }

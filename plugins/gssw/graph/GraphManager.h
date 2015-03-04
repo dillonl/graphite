@@ -21,8 +21,9 @@ namespace gssw
 		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding);
 		~GraphManager() {}
 
-	private:
 		void buildGraphs();
+
+	private:
 		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
 
 		gwiz::IReference::SharedPtr m_reference_ptr;

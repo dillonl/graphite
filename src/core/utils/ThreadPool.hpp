@@ -6,6 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
+#include <thread>
 #include <memory>
 
 namespace gwiz
@@ -33,6 +34,11 @@ namespace gwiz
 		{
 			m_io_service.stop();
 			this->m_threadgroup.join_all();
+		}
+
+		void startIOService()
+		{
+			m_io_service.run();
 		}
 
 	private:

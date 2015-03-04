@@ -19,9 +19,13 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< BamAlignmentReader > SharedPtr;
 
+		static int32_t ReaderCount;
+
 	    BamAlignmentReader(const std::string& bamPath);
 		virtual ~BamAlignmentReader();
 
+		virtual void init() override;
+		virtual void releaseReader() override;
 		virtual size_t getAverageReadLength() override { return m_average_bam_read_length; }
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
 
