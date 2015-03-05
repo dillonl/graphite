@@ -47,12 +47,9 @@ namespace gssw
 			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;
-				// ThreadPool::Instance()->joinAll();
-				// ThreadPool::Instance()->startIOService();
-				std::cout << "joined!" << std::endl;
 			}
 			// if there is a gap between the variants that is larger than the padding then generate a graph and push it in the queue
-			if ((previousVariantEndPosition > 0) && (contigLength > minContig) && (this->m_padding < variantPositionDifference))
+			if ((contigLength > minContig) && (this->m_padding < variantPositionDifference))
 			{
 				++totalContigs;
 				size_t contigCounter = 1;

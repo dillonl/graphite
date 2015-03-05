@@ -3,6 +3,8 @@
 #include "vg/graph/SNPNode.h"
 #include "vg/graph/IVariantNode.h"
 
+#include <iostream>
+#include <fstream>
 #include <map>
 
 namespace gwiz
@@ -95,14 +97,20 @@ namespace gssw
 		return vertices;
 	}
 
-	bool GSSWGraph::recenterGraph(IAlignment::SharedPtr alignment)
-	{
-		return false;
-	}
+	static std::ofstream vcfCount;
 
 	void GSSWGraph::graphConstructed()
 	{
 		IAlignment::SharedPtr alignmentPtr;
+		if (true)
+		{
+			while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
+			{
+				if (true) { break;}
+			}
+			this->m_alignment_reader->releaseReader();
+			return;
+		}
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
@@ -116,7 +124,6 @@ namespace gssw
 															m_gap_open,
 															m_gap_extension);
 			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			/*
 			gssw_node_cigar* nc = gm->cigar.elements;
 			for (int i = 0; i < gm->cigar.length; ++i, ++nc)
 			{
@@ -135,7 +142,6 @@ namespace gssw
 					variantCounter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
 				}
 			}
-			*/
 			// std::cout << std::endl;
 			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
 			// gssw_print_graph_mapping(gm);
@@ -144,18 +150,21 @@ namespace gssw
 			// std::cout << "Alignment Counter: " << counter++ << std::endl;
 		}
 		this->m_alignment_reader->releaseReader();
-		/*
+		static bool init = false;
+		if (!init)
+		{
+			vcfCount.open("test.txt");
+			init = true;
+		}
 		for (const auto& value : variantCounter)
 		{
 			auto variant = std::get< 0 >(value.second);
-			std::cout << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
+			vcfCount << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
 			for (const auto& alignmentPtr : std::get< 2 >(value.second))
 			{
-				std::cout << "Alignment: " << alignmentPtr->getPosition() << std::endl;
+				vcfCount << "Alignment: " << alignmentPtr->getPosition() << std::endl;
 			}
-			std::cout << "---" << std::endl;
 		}
-		*/
 	}
 }
 }
