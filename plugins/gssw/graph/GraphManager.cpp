@@ -6,6 +6,7 @@
 
 #include <queue>
 
+
 #include <boost/bind.hpp>
 
 namespace gwiz
@@ -27,9 +28,13 @@ namespace gssw
 		position previousVariantEndPosition = 0;
 		Variant::SharedPtr variantPtr;
 		Variant::SharedPtr firstVariantInList;
-		size_t minContig = 1000;
+		size_t minContig = 500;
 		size_t contig = 0;
 		size_t count = 0;
+		size_t maxContig = 0;
+		position maxContigPosition = 0;
+		size_t totalContigs = 0;
+		std::map< size_t, size_t > contigCounterMap;
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
 			++count;
@@ -39,51 +44,34 @@ namespace gssw
 				firstVariantInList = variantPtr;
 			}
 			uint32_t contigLength = (previousVariantEndPosition - firstVariantInList->getPosition());
-			// if (count >= 86458)
-			// if (BamAlignmentReader::ReaderCount > 10)
-			// while (BamAlignmentReader::ReaderCount > 100)
-			// {
-				// std::cout <<  BamAlignmentReader::ReaderCount << std::endl;
-				// std::cout << contigLength << std::endl;
-				// ThreadPool::Instance()->joinAll();
-				// std::cout << "starting back" << std::endl;
-				// ThreadPool::Instance()->startIOService();
-			// }
-			if (count % 100000 == 0)
+			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;
+				ThreadPool::Instance()->joinAll();
+				ThreadPool::Instance()->startIOService();
+				std::cout << "joined!" << std::endl;
 			}
 			// if there is a gap between the variants that is larger than the padding then generate a graph and push it in the queue
 			if ((previousVariantEndPosition > 0) && (contigLength > minContig) && (this->m_padding < variantPositionDifference))
 			{
-				/*
-				if (count == 86458)
+				++totalContigs;
+				size_t contigCounter = 1;
+				if (contigCounterMap.find(contigLength) != contigCounterMap.end())
 				{
-					std::cout << "inside" << std::endl;
-					std::cout << contigLength << std::endl;
+					contigCounter = contigCounterMap[contigLength] + 1;
 				}
-				*/
-				// std::cout << count << " " << contigLength << std::endl;
-
-				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
-
-				// create region for alignmentReader
-				std::string startPosition = std::to_string(firstVariantInList->getPosition() - this->m_padding);
-				std::string endPosition = std::to_string(previousVariantEndPosition);
-				auto region = std::make_shared< Region >(this->m_reference_ptr->getRegion()->getReferenceID() + ":" + startPosition + "-" + endPosition);
-
-				alignmentReaderPtr->setRegion(region); // set alignmentreader's region
-				auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
-				/*
-				if (count >= 98957)
+				contigCounterMap[contigLength] = contigCounter;
+				if (maxContig < contigLength)
 				{
-					std::cout << "WOW: " << count << std::endl;
-					ThreadPool::Instance()->m_print_stuff = true;
+					maxContig = contigLength;
+					maxContigPosition = firstVariantInList->getPosition();
 				}
-				*/
-				// this->m_gssw_graphs.push(gsswGraph);
-				ThreadPool::Instance()->postJob(boost::bind(&GSSWGraph::constructGraph, gsswGraph));
-				// ThreadPool::Instance()->postJob(boost::bind(&IAlignmentReader::releaseReader, alignmentReaderPtr));
+				if (contigLength <= 2000) // just for testing
+				{
+					position startPosition = firstVariantInList->getPosition() - this->m_padding;
+					position endPosition = previousVariantEndPosition;
+					ThreadPool::Instance()->postJob(boost::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr));
+				}
 				variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
 				firstVariantInList = variantPtr; // set the first variant
 				contigLength = 0;
@@ -91,9 +79,40 @@ namespace gssw
 			variantListPtr->addVariant(variantPtr);
 			previousVariantEndPosition = variantPtr->getPosition() + variantPtr->getRef()[0].size();
 		}
+		for (auto value : contigCounterMap)
+		{
+			std::cout << "Contig Size: " << std::get< 0 >(value) << " " << std::get< 1 >(value) << std::endl;
+		}
+
+		std::cout << "Max Contig: " << maxContig << std::endl;
+		std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
+		std::cout << "total contigs: " << totalContigs << std::endl;
 		std::cout << "finished" << std::endl;
 		ThreadPool::Instance()->joinAll();
 		std::cout << "threads finished" << std::endl;
+	}
+
+	void GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
+	{
+		// std::cout << startPosition << " " << endPosition << std::endl;
+		// int x = 0;
+		// std::cin >> x;
+		static uint32_t contigDone = 0;
+		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
+
+		// create region for alignmentReader
+		auto region = std::make_shared< Region >(this->m_reference_ptr->getRegion()->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition));
+		alignmentReaderPtr->init();
+		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
+		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
+		gsswGraph->constructGraph();
+		this->m_gssw_graph_mutex.lock();
+		this->m_gssw_graphs.push(gsswGraph);
+		if (this->m_gssw_graphs.size() % 100 == 0)
+		{
+			std::cout << "Contigs Computed: " << this->m_gssw_graphs.size() << std::endl;
+		}
+		this->m_gssw_graph_mutex.unlock();
 	}
 }
 }

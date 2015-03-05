@@ -22,6 +22,7 @@
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
+#include "core/utils/ThreadPool.hpp"
 
 
 namespace
@@ -186,6 +187,22 @@ namespace
 
 	TEST(GSSWTests, TestConstructChr20)
 	{
+		// boost::function< void, (int) > funct [](int x) { std::cout << "pool: " << x << std::endl; };
+		std::function<void (int*)> f2 = [](int* x){ *x += 1; std::this_thread::sleep_for(std::chrono::seconds(1)); };
+
+		int count = 0;
+		int count2 = 0;
+		for (int i = 0; i < 100; ++i)
+		{
+			++count2;
+			gwiz::ThreadPool::Instance()->postJob(boost::bind(f2, &count));
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(60));
+		// gwiz::ThreadPool::Instance()->joinAll();
+		std::cout << "Count: " << count << std::endl;
+		std::cout << "Count2: " << count2 << std::endl;
+
+		if (true) { return; }
 		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;

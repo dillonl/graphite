@@ -104,7 +104,6 @@ namespace gssw
 	{
 		IAlignment::SharedPtr alignmentPtr;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
-		this->m_alignment_reader->init();
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
 			std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
@@ -142,6 +141,7 @@ namespace gssw
 			// gssw_print_graph_mapping(gm);
 			// std::cout << std::endl << std::endl;
 			gssw_graph_mapping_destroy(gm);
+			// std::cout << "Alignment Counter: " << counter++ << std::endl;
 		}
 		this->m_alignment_reader->releaseReader();
 		/*

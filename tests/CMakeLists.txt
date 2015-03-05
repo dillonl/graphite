@@ -39,9 +39,9 @@ target_link_libraries(gwiz_tests
 	${VCFLIB_LIBRARIES}
 	gwiz_core
 	gwiz_utils
-	${SCI_BOOST_LIBRARY}
 	${PLUGIN_LIBS}
 	fastahack_lib
 	gssw_lib
 	ssw_lib
+	${SCI_BOOST_LIBRARY}
 )

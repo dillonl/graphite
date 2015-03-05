@@ -56,6 +56,7 @@ namespace gwiz
 		void initializeThreadPool()
 		{
 			for(uint32_t i = 0; i < std::thread::hardware_concurrency(); ++i)
+			// for(uint32_t i = 0; i < 1; ++i)
 			{
 				m_threadgroup.create_thread(boost::bind(&boost::asio::io_service::run, &m_io_service));
 			}

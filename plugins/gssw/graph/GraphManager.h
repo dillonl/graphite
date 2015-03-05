@@ -6,6 +6,7 @@
 
 #include <queue>
 #include <memory>
+#include <mutex>
 
 #include <boost/noncopyable.hpp>
 
@@ -24,7 +25,9 @@ namespace gssw
 		void buildGraphs();
 
 	private:
+		void buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);
 		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
+		std::mutex m_gssw_graph_mutex;
 
 		gwiz::IReference::SharedPtr m_reference_ptr;
 		gwiz::IVariantList::SharedPtr m_variant_list_ptr;
