@@ -16,7 +16,7 @@ namespace gwiz
 
 		virtual IAlignmentReader::SharedPtr generateAlignmentReader() override;
 
-	private:
+	protected:
 		std::string m_bam_path;
 	};
 }

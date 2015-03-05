@@ -61,7 +61,7 @@ namespace gssw
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode);
 		}
-		graphConstructed();
+		// graphConstructed();
 	}
 
 	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode)
@@ -102,6 +102,7 @@ namespace gssw
 	void GSSWGraph::graphConstructed()
 	{
 		IAlignment::SharedPtr alignmentPtr;
+		/*
 		if (true)
 		{
 			while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
@@ -111,9 +112,11 @@ namespace gssw
 			this->m_alignment_reader->releaseReader();
 			return;
 		}
+		*/
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
+			std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
 			std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
 			gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
 			gssw_graph_mapping* gm = gssw_graph_trace_back (this->m_graph_ptr,

@@ -23,6 +23,8 @@ set(GWIZ_CORE_SOURCES
   core/alignments/BamAlignment.cpp
   core/alignments/BamAlignmentReader.cpp
   core/alignments/BamAlignmentReaderManager.cpp
+  core/alignments/BamAlignmentReaderPreload.cpp
+  core/alignments/BamAlignmentReaderPreloadManager.cpp
 )
 
 set(GWIZ_GRAPH_SOURCES

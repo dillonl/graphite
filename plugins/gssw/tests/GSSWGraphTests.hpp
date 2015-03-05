@@ -19,6 +19,7 @@
 
 #include "core/alignments/BamAlignmentReader.h"
 #include "core/alignments/BamAlignmentReaderManager.h"
+#include "core/alignments/BamAlignmentReaderPreloadManager.h"
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
 #include "core/reference/FastaReference.h"
@@ -212,8 +213,10 @@ namespace
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReaderPtr = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		auto bamAlignmentReaderManager = std::make_shared< gwiz::BamAlignmentReaderManager >(bamPath);
-		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
+		// auto bamAlignmentReaderManager = std::make_shared< gwiz::BamAlignmentReaderManager >(bamPath);
+		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
+		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
+		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
 		graphManagerPtr->buildGraphs();
 	}
 

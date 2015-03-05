@@ -4,8 +4,6 @@
 namespace gwiz
 {
 
-	int32_t BamAlignmentReader::ReaderCount = 0;
-
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :
 		m_bam_path(bamPath), m_average_bam_read_length(0)
 	{
@@ -22,13 +20,11 @@ namespace gwiz
 		{
 			throw "Unable to open bam file";
 		}
-		++BamAlignmentReader::ReaderCount;
 		setAverageBamReadLength();
 	}
 
 	void BamAlignmentReader::releaseReader()
 	{
-		--BamAlignmentReader::ReaderCount;
 		m_bam_reader.Close();
 	}
 
