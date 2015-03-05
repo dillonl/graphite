@@ -47,8 +47,8 @@ namespace gssw
 			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;
-				ThreadPool::Instance()->joinAll();
-				ThreadPool::Instance()->startIOService();
+				// ThreadPool::Instance()->joinAll();
+				// ThreadPool::Instance()->startIOService();
 				std::cout << "joined!" << std::endl;
 			}
 			// if there is a gap between the variants that is larger than the padding then generate a graph and push it in the queue
@@ -70,7 +70,8 @@ namespace gssw
 				{
 					position startPosition = firstVariantInList->getPosition() - this->m_padding;
 					position endPosition = previousVariantEndPosition;
-					ThreadPool::Instance()->postJob(boost::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr));
+					auto funct = std::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr);
+					ThreadPool::Instance()->enqueue(funct);
 				}
 				variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
 				firstVariantInList = variantPtr; // set the first variant
@@ -79,10 +80,12 @@ namespace gssw
 			variantListPtr->addVariant(variantPtr);
 			previousVariantEndPosition = variantPtr->getPosition() + variantPtr->getRef()[0].size();
 		}
+		/*
 		for (auto value : contigCounterMap)
 		{
 			std::cout << "Contig Size: " << std::get< 0 >(value) << " " << std::get< 1 >(value) << std::endl;
 		}
+		*/
 
 		std::cout << "Max Contig: " << maxContig << std::endl;
 		std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
@@ -97,7 +100,7 @@ namespace gssw
 		// std::cout << startPosition << " " << endPosition << std::endl;
 		// int x = 0;
 		// std::cin >> x;
-		static uint32_t contigDone = 0;
+		static uint32_t contigsDone = 0;
 		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
 		// create region for alignmentReader
@@ -107,10 +110,10 @@ namespace gssw
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
 		this->m_gssw_graph_mutex.lock();
-		this->m_gssw_graphs.push(gsswGraph);
-		if (this->m_gssw_graphs.size() % 100 == 0)
+		// this->m_gssw_graphs.push(gsswGraph);
+		if (++contigsDone % 100 == 0)
 		{
-			std::cout << "Contigs Computed: " << this->m_gssw_graphs.size() << std::endl;
+			std::cout << "Contigs Computed: " << contigsDone << std::endl;
 		}
 		this->m_gssw_graph_mutex.unlock();
 	}
