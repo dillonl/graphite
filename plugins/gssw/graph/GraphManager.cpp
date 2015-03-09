@@ -63,13 +63,10 @@ namespace gssw
 					maxContig = contigLength;
 					maxContigPosition = firstVariantInList->getPosition();
 				}
-				if (contigLength <= 2000) // just for testing
-				{
-					position startPosition = firstVariantInList->getPosition() - this->m_padding;
-					position endPosition = previousVariantEndPosition;
-					auto funct = std::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr);
-					ThreadPool::Instance()->enqueue(funct);
-				}
+				position startPosition = firstVariantInList->getPosition() - this->m_padding;
+				position endPosition = previousVariantEndPosition;
+				auto funct = std::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr);
+				ThreadPool::Instance()->enqueue(funct);
 				variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
 				firstVariantInList = variantPtr; // set the first variant
 				contigLength = 0;
@@ -108,9 +105,16 @@ namespace gssw
 		gsswGraph->constructGraph();
 		this->m_gssw_graph_mutex.lock();
 		// this->m_gssw_graphs.push(gsswGraph);
-		if (++contigsDone % 100 == 0)
+		// if (region->getEndPosition() == 36927311)
+		// if ( contigsDone >= 97310)
+		// {
+		// 	GSSWGraph::PrintStuff = true;
+		// }
+		if (++contigsDone % 1000 == 0)
 		{
 			std::cout << "Contigs Computed: " << contigsDone << std::endl;
+			// auto region = alignmentReaderPtr->getRegion();
+			std::cout << "region: " << region->getStartPosition() << " " << region->getEndPosition() << std::endl;
 		}
 		this->m_gssw_graph_mutex.unlock();
 	}

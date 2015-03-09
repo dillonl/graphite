@@ -11,6 +11,8 @@ namespace gwiz
 {
 namespace gssw
 {
+	bool GSSWGraph::PrintStuff = false;
+
 	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader) :
 		IGraph(referencePtr, variantListPtr), m_alignment_reader(alignmentReader), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
 
@@ -29,22 +31,37 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
+		if (GSSWGraph::PrintStuff)
+		{
+			std::cout << "ConstructGraph Begin" << std::endl;
+		}
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
 		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
-
-		size_t readLength = this->m_alignment_reader->getAverageReadLength();
+		// size_t readLength = this->m_alignment_reader->getAverageReadLength();
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 		size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : 0;
-		size_t referenceSize;
+		int64_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
 		size_t graphSize = 0;
 		int count = 0;
+		static std::mutex mutex;
 		while (getNextCompoundVariant(variantPtr))
 		{
+			mutex.lock();
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
+			if (GSSWGraph::PrintStuff)
+			{
+				std::cout << "Reference Size: " << referenceSize << std::endl;
+			}
 			if (referenceSize > 0)
 			{
+				if (GSSWGraph::PrintStuff)
+				{
+					std::cout << "2c ConstructGraph sp:" << startPosition << std::endl;
+					std::cout << "2c ConstructGraph off" << referenceOffset << std::endl;
+					std::cout << "2a ConstructGraph V:" << variantPtr->getPosition() << " " << referenceSize << std::endl;
+				}
 				auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			    addReference(altAndRefVertices, referenceNode);
 				altAndRefVertices.clear();
@@ -53,6 +70,7 @@ namespace gssw
 			size_t variantReferenceSize;
 			altAndRefVertices = addVariantVertices(altAndRefVertices, variantPtr, variantReferenceSize);
 			referenceOffset += referenceSize + variantReferenceSize;
+			mutex.unlock();
 		}
 		position endPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > alignmentReaderEndPosition) ? alignmentReaderEndPosition : this->m_reference_ptr->getRegion()->getEndPosition();
 		referenceSize = endPosition - (startPosition + referenceOffset);
@@ -61,7 +79,11 @@ namespace gssw
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode);
 		}
-		// graphConstructed();
+		if (GSSWGraph::PrintStuff)
+		{
+			std::cout << "ConstructGraph End" << std::endl;
+		}
+		graphConstructed();
 	}
 
 	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode)
@@ -97,62 +119,49 @@ namespace gssw
 		return vertices;
 	}
 
+	std::shared_ptr< gssw_graph_mapping > GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
+	{
+		std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
+		gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+		gssw_graph_mapping* graphMapping = gssw_graph_trace_back (this->m_graph_ptr,readSeq.c_str(),readSeq.size(),m_match,m_mismatch,m_gap_open,m_gap_extension);
+		auto graphMappingDeletor = [](gssw_graph_mapping* gm) { gssw_graph_mapping_destroy(gm); };
+		return std::shared_ptr< gssw_graph_mapping >(graphMapping, graphMappingDeletor);
+	}
+
+	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
+	{
+		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
+		gssw_node_cigar* nc = graphMapping->cigar.elements;
+		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+		{
+			if (m_node_map.find(nc->node->id) != m_node_map.end())
+			{
+				auto variantNode = m_node_map[nc->node->id];
+				uint32_t counter = 1;
+				std::vector< IAlignment::SharedPtr > alignments;
+				if (variantCounter.find(nc->node->id) != variantCounter.end())
+				{
+					counter = std::get< 1 >(variantCounter[nc->node->id]) + 1;
+					alignments = std::get< 2 >(variantCounter[nc->node->id]);
+				}
+				alignments.push_back(alignmentPtr);
+				variantCounter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
+			}
+		}
+	}
+
 	static std::ofstream vcfCount;
 
 	void GSSWGraph::graphConstructed()
 	{
 		IAlignment::SharedPtr alignmentPtr;
-		/*
-		if (true)
-		{
-			while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
-			{
-				if (true) { break;}
-			}
-			this->m_alignment_reader->releaseReader();
-			return;
-		}
-		*/
-		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
-			std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
-			gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-			gssw_graph_mapping* gm = gssw_graph_trace_back (this->m_graph_ptr,
-															readSeq.c_str(),
-															readSeq.size(),
-															m_match,
-															m_mismatch,
-															m_gap_open,
-															m_gap_extension);
-			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			gssw_node_cigar* nc = gm->cigar.elements;
-			for (int i = 0; i < gm->cigar.length; ++i, ++nc)
-			{
-				// std::cout << nc->node->seq << "|";
-				if (m_node_map.find(nc->node->id) != m_node_map.end())
-				{
-					auto variantNode = m_node_map[nc->node->id];
-					uint32_t counter = 1;
-					std::vector< IAlignment::SharedPtr > alignments;
-					if (variantCounter.find(nc->node->id) != variantCounter.end())
-					{
-						counter = std::get< 1 >(variantCounter[nc->node->id]) + 1;
-						alignments = std::get< 2 >(variantCounter[nc->node->id]);
-					}
-					alignments.push_back(alignmentPtr);
-					variantCounter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
-				}
-			}
-			// std::cout << std::endl;
-			// std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
-			// gssw_print_graph_mapping(gm);
-			// std::cout << std::endl << std::endl;
-			gssw_graph_mapping_destroy(gm);
-			// std::cout << "Alignment Counter: " << counter++ << std::endl;
+			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
+			recordAlignmentVariants(graphMapping, alignmentPtr);
+			// gssw_graph_mapping_destroy(gm);
 		}
-		this->m_alignment_reader->releaseReader();
+		/*
 		static bool init = false;
 		if (!init)
 		{
@@ -168,6 +177,7 @@ namespace gssw
 				vcfCount << "Alignment: " << alignmentPtr->getPosition() << std::endl;
 			}
 		}
+		*/
 	}
 }
 }

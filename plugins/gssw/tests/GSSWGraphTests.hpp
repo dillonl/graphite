@@ -207,6 +207,7 @@ namespace
 		if (true) { return; }
 		*/
 		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
+
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;

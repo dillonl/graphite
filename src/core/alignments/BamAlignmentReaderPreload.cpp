@@ -13,11 +13,14 @@ namespace gwiz
 
 	size_t BamAlignmentReaderPreload::getAverageReadLength()
 	{
+		return 100;
+		/*
 		if (m_average_bam_read_length == 0)
 		{
 			setAverageBamReadLength();
 		}
 		return m_average_bam_read_length;
+		*/
 	}
 
 	void BamAlignmentReaderPreload::setAverageBamReadLength()
@@ -36,21 +39,22 @@ namespace gwiz
 		setIndexClosestToPosition(region->getStartPosition(), this->m_start_index, true);
 		setIndexClosestToPosition(region->getEndPosition(), this->m_end_index, false);
 		this->m_current_index = this->m_start_index;
+		this->m_region = region;
 	}
 
 	bool BamAlignmentReaderPreload::getNextAlignment(IAlignment::SharedPtr& alignmentPtr)
 	{
-		std::cout << "getNextAlignment" << std::endl;
+		// std::cout << "getNextAlignment" << std::endl;
 		if (this->m_current_index <= this->m_end_index)
 		{
-			std::cout << "getNextAlignment true" << std::endl;
+			// std::cout << "getNextAlignment true" << std::endl;
 			alignmentPtr = this->m_alignments_ptr->at(this->m_current_index);
 		    ++this->m_current_index;
 			return true;
 		}
 		else
 		{
-			std::cout << "getNextAlignment false" << std::endl;
+			// std::cout << "getNextAlignment false" << std::endl;
 			alignmentPtr = nullptr;
 			return false;
 		}

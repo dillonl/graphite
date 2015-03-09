@@ -21,6 +21,7 @@ namespace gssw
 	class GSSWGraph : public IGraph
 	{
 	public:
+		static bool PrintStuff;
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 
@@ -42,7 +43,6 @@ namespace gssw
 			return variantNode;
 		}
 
-		/* virtual void  */
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 
 		IAlignmentReader::SharedPtr m_alignment_reader;
@@ -58,6 +58,8 @@ namespace gssw
 
 	private:
 		void graphConstructed();
+		std::shared_ptr< gssw_graph_mapping > traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
+		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 
 		gssw_node* gssw_node_create_alt(const char* seq,
 									const size_t len,
