@@ -31,10 +31,6 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
-		if (GSSWGraph::PrintStuff)
-		{
-			std::cout << "ConstructGraph Begin" << std::endl;
-		}
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
 		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
 		// size_t readLength = this->m_alignment_reader->getAverageReadLength();
@@ -48,29 +44,17 @@ namespace gssw
 		static std::mutex mutex;
 		while (getNextCompoundVariant(variantPtr))
 		{
-			mutex.lock();
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
-			if (GSSWGraph::PrintStuff)
-			{
-				std::cout << "Reference Size: " << referenceSize << std::endl;
-			}
 			if (referenceSize > 0)
 			{
-				if (GSSWGraph::PrintStuff)
-				{
-					std::cout << "2c ConstructGraph sp:" << startPosition << std::endl;
-					std::cout << "2c ConstructGraph off" << referenceOffset << std::endl;
-					std::cout << "2a ConstructGraph V:" << variantPtr->getPosition() << " " << referenceSize << std::endl;
-				}
 				auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			    addReference(altAndRefVertices, referenceNode);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 			}
 			size_t variantReferenceSize;
-			altAndRefVertices = addVariantVertices(altAndRefVertices, variantPtr, variantReferenceSize);
+			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr, variantReferenceSize);
 			referenceOffset += referenceSize + variantReferenceSize;
-			mutex.unlock();
 		}
 		position endPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > alignmentReaderEndPosition) ? alignmentReaderEndPosition : this->m_reference_ptr->getRegion()->getEndPosition();
 		referenceSize = endPosition - (startPosition + referenceOffset);
@@ -78,10 +62,6 @@ namespace gssw
 		{
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode);
-		}
-		if (GSSWGraph::PrintStuff)
-		{
-			std::cout << "ConstructGraph End" << std::endl;
 		}
 		graphConstructed();
 	}
@@ -96,13 +76,13 @@ namespace gssw
 		return referenceNode;
 	}
 
-	std::vector< gssw_node* > GSSWGraph::addVariantVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
+	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
 	{
 	    std::vector< gssw_node* > vertices;
 		for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 		{
 			INode::SharedPtr variantNodePtr = vg::IVariantNode::BuildVariantNodes(variantPtr, i);
-			vertices.push_back(addGSSWVariantNode(variantNodePtr));
+			vertices.push_back(addGSSWAlternateNode(variantNodePtr));
 		}
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 		gssw_node* variantReferenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, variantPtr->getRef()[0].size(), this->m_nt_table, this->m_mat);
@@ -130,7 +110,6 @@ namespace gssw
 
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
 	{
-		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > variantCounter;
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
@@ -139,13 +118,13 @@ namespace gssw
 				auto variantNode = m_node_map[nc->node->id];
 				uint32_t counter = 1;
 				std::vector< IAlignment::SharedPtr > alignments;
-				if (variantCounter.find(nc->node->id) != variantCounter.end())
+				if (m_variant_counter.find(nc->node->id) != m_variant_counter.end())
 				{
-					counter = std::get< 1 >(variantCounter[nc->node->id]) + 1;
-					alignments = std::get< 2 >(variantCounter[nc->node->id]);
+					counter = std::get< 1 >(m_variant_counter[nc->node->id]) + 1;
+					alignments = std::get< 2 >(m_variant_counter[nc->node->id]);
 				}
 				alignments.push_back(alignmentPtr);
-				variantCounter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
+				m_variant_counter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
 			}
 		}
 	}
@@ -159,16 +138,15 @@ namespace gssw
 		{
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
 			recordAlignmentVariants(graphMapping, alignmentPtr);
-			// gssw_graph_mapping_destroy(gm);
 		}
-		/*
+
 		static bool init = false;
 		if (!init)
 		{
 			vcfCount.open("test.txt");
 			init = true;
 		}
-		for (const auto& value : variantCounter)
+		for (const auto& value : m_variant_counter)
 		{
 			auto variant = std::get< 0 >(value.second);
 			vcfCount << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
@@ -177,7 +155,7 @@ namespace gssw
 				vcfCount << "Alignment: " << alignmentPtr->getPosition() << std::endl;
 			}
 		}
-		*/
+
 	}
 }
 }

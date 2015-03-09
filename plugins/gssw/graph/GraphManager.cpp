@@ -103,20 +103,20 @@ namespace gssw
 		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
-		this->m_gssw_graph_mutex.lock();
 		// this->m_gssw_graphs.push(gsswGraph);
 		// if (region->getEndPosition() == 36927311)
 		// if ( contigsDone >= 97310)
 		// {
 		// 	GSSWGraph::PrintStuff = true;
 		// }
+		/*
 		if (++contigsDone % 1000 == 0)
 		{
 			std::cout << "Contigs Computed: " << contigsDone << std::endl;
 			// auto region = alignmentReaderPtr->getRegion();
 			std::cout << "region: " << region->getStartPosition() << " " << region->getEndPosition() << std::endl;
 		}
-		this->m_gssw_graph_mutex.unlock();
+		*/
 	}
 }
 }

@@ -31,11 +31,11 @@ namespace gssw
 		virtual void constructGraph() override;
 
 	protected:
-		std::vector< gssw_node* > addVariantVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
+		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
 
 		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode);
 
-		gssw_node* addGSSWVariantNode(INode::SharedPtr variantNodePtr)
+		gssw_node* addGSSWAlternateNode(INode::SharedPtr variantNodePtr)
 		{
 			auto variantNode = gssw_node_create_alt(variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
 			gssw_graph_add_node(this->m_graph_ptr, variantNode);
@@ -55,6 +55,7 @@ namespace gssw
 		gssw_graph* m_graph_ptr;
 		uint32_t m_next_id = 0;
 		std::map< uint32_t, INode::SharedPtr > m_node_map;
+		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
 
 	private:
 		void graphConstructed();
