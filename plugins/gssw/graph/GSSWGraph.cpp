@@ -130,7 +130,8 @@ namespace gssw
 			auto genotyperAllele = m_genotyper_map.find(nc->node->id);
 			if (genotyperAllele != m_genotyper_map.end())
 			{
-				genotyperAllele->second->incrementReadCount();
+				genotyperAllele->second->addAlignment(alignmentPtr);
+				// genotyperAllele->second->incrementReadCount();
 			}
 		}
 	}

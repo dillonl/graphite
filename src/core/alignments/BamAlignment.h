@@ -21,6 +21,10 @@ namespace gwiz
 		const char* getSequence() override;
 		const position getPosition() override;
 		const size_t getLength() override;
+		const std::string getID() override
+		{
+			return this->m_bam_alignment_ptr->Name;
+		}
 
     private:
         BamAlignmentPtr m_bam_alignment_ptr;

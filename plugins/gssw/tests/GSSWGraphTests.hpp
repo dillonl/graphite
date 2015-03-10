@@ -78,7 +78,7 @@ namespace
 			testReferenceVariantGenerator.addVariant(startPosition + 478, ".", 1, {"C"});
 			testReferenceVariantGenerator.addVariant(startPosition + 482, ".", 1, {"A"});
 			testReferenceVariantGenerator.addVariant(startPosition + 492, ".", 1, {"G"});
-			testReferenceVariantGenerator.addVariant(startPosition + 541, ".", 1, {"A"});
+			testReferenceVariantGenerator.addVariant(startPosition + 541, ".", 1, {"T"});
 			testReferenceVariantGenerator.addVariant(startPosition + 590, ".", 1, {"T"});
 			testReferenceVariantGenerator.addVariant(startPosition + 652, ".", 1, {"A"});
 			testReferenceVariantGenerator.addVariant(startPosition + 654, ".", 1, {"G"});

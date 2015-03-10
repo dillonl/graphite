@@ -20,6 +20,7 @@ namespace gwiz
 		virtual const char* getSequence() = 0;
 		virtual const position getPosition() = 0;
 		virtual const size_t getLength() = 0;
+		virtual const std::string getID() { return ""; }
 
 	};
 }

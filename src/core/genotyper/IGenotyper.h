@@ -44,6 +44,7 @@ return a->getPosition() > b->getPosition();
 			{
                 std::string referenceString = "";
                 std::string variantString = "";
+				std::string alignmentIDString = "";
 				for (auto allele : genotypeVariantPtr->getGenotyperAlleles())
 				{
 					if (allele->getType() == GenotyperAllele::Type::REFERENCE)
@@ -54,8 +55,13 @@ return a->getPosition() > b->getPosition();
 					{
 						variantString += allele->getSequence() + "<" + std::to_string(allele->getReadCount()) + ">\t";
 					}
+
+					for (auto alignmentPtr : allele->getAlignments())
+					{
+						alignmentIDString += alignmentPtr->getID() + ",";
+					}
 				}
-                outputFile << genotypeVariantPtr->getPosition() << "\t" << referenceString << variantString << std::endl;
+                outputFile << genotypeVariantPtr->getPosition() << "\t" << referenceString << variantString << "(" << alignmentIDString << ")" << std::endl;
 			}
 		}
 

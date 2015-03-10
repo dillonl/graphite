@@ -1,6 +1,8 @@
 #ifndef GWIZ_GENOTYPERALLELE_H
 #define GWIZ_GENOTYPERALLELE_H
 
+#include "core/alignments/IAlignment.h"
+
 #include <memory>
 
 #include <boost/noncopyable.hpp>
@@ -27,12 +29,16 @@ namespace gwiz
 		}
 
 		std::string getSequence() const { return m_sequence; }
-		void incrementReadCount() { ++this->m_read_count; }
-		uint32_t getReadCount() { return this->m_read_count; }
+		// void incrementReadCount() { ++this->m_read_count; }
+		// uint32_t getReadCount() { return this->m_read_count; }
+		uint32_t getReadCount() { return this->m_alignments.size(); }
 		position getPosition() {return this->m_position; }
 		Type getType() { return this->m_allele_type; }
+		void addAlignment(IAlignment::SharedPtr alignmentPtr) { this->m_alignments.push_back(alignmentPtr); }
+		std::list< IAlignment::SharedPtr > getAlignments() { return this->m_alignments; }
 
 	protected:
+		std::list< IAlignment::SharedPtr > m_alignments;
 		uint32_t m_read_count;
 		Type m_allele_type;
 		std::string m_sequence;
