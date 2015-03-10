@@ -1,6 +1,7 @@
 #include "core/variants/VariantList.h"
 #include "core/utils/ThreadPool.hpp"
 #include "GraphManager.h"
+#include "core/genotyper/IGenotyper.h"
 
 #include "core/alignments/BamAlignmentReader.h"
 
@@ -87,6 +88,8 @@ namespace gssw
 		std::cout << "finished" << std::endl;
 		ThreadPool::Instance()->joinAll();
 		std::cout << "threads finished" << std::endl;
+		IGenotyper::Instance()->printVariants();
+
 	}
 
 	void GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)

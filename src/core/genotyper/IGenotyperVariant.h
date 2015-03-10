@@ -5,6 +5,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "GenotyperAllele.hpp"
+
 namespace gwiz
 {
 	class IGenotyperVariant : private boost::noncopyable
@@ -20,11 +22,18 @@ namespace gwiz
 		{
 		}
 
-		void addAllele(IGenotyperAllele::SharedPtr allele) = 0;
+		void addAllele(GenotyperAllele::SharedPtr allele)
+		{
+			m_alleles.push_back(allele);
+		}
+
+		std::list< GenotyperAllele::SharedPtr > getGenotyperAlleles() { return this->m_alleles; }
+
+		position getPosition() { return this->m_position; }
 
 	protected:
 		position m_position;
-		std::vector< GenotypeAllele::SharedPtr > m_alleles;
+		std::list< GenotyperAllele::SharedPtr > m_alleles;
 	};
 }
 

@@ -2,6 +2,7 @@
 #include "vg/graph/ReferenceNode.h"
 #include "vg/graph/SNPNode.h"
 #include "vg/graph/IVariantNode.h"
+#include "core/genotyper/IGenotyper.h"
 
 #include <iostream>
 #include <fstream>
@@ -41,17 +42,17 @@ namespace gssw
 		static std::mutex mutex;
 		while (getNextCompoundVariant(variantPtr))
 		{
+			auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
-
 				auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
-			    addReference(altAndRefVertices, referenceNode, variantPtr->getPosition());
+			    addReference(altAndRefVertices, referenceNode, genotyperVariantPtr);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 			}
 			size_t variantReferenceSize;
-			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr, variantReferenceSize);
+			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr, variantReferenceSize, genotyperVariantPtr);
 			referenceOffset += referenceSize + variantReferenceSize;
 		}
 		position endPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > alignmentReaderEndPosition) ? alignmentReaderEndPosition : this->m_reference_ptr->getRegion()->getEndPosition();
@@ -59,15 +60,14 @@ namespace gssw
 		if (referenceSize > 0)
 		{
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
-			addReference(altAndRefVertices, referenceNode, startPosition + referenceOffset);
+			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
 		graphConstructed();
 	}
 
-	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNodePtr, position pos)
+	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr)
 	{
 		gssw_graph_add_node(this->m_graph_ptr, referenceNodePtr);
-		this->m_genotyper_map[referenceNodePtr->id] = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::REFERENCE, std::string(referenceNodePtr->seq), pos);
 		for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
 		{
 			gssw_nodes_add_edge((*iter), referenceNodePtr);
@@ -75,27 +75,34 @@ namespace gssw
 		return referenceNodePtr;
 	}
 
-	gssw_node* GSSWGraph::addAlternateNode(INode::SharedPtr variantNodePtr)
+	gssw_node* GSSWGraph::addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr)
 	{
 		auto variantNode = gssw_node_create_alt(variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
 		gssw_graph_add_node(this->m_graph_ptr, variantNode);
-		this->m_genotyper_map[variantNode->id] = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::ALTERNATE, variantNode->seq, variantNodePtr->getPosition());
+		auto allelePtr = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::ALTERNATE, variantNode->seq, variantNodePtr->getPosition());
+		this->m_genotyper_map[variantNode->id] = allelePtr;
+		genotyperVariantPtr->addAllele(allelePtr);
 		return variantNode;
 	}
 
-	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
+	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr)
 	{
 	    std::vector< gssw_node* > vertices;
 		for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 		{
 			INode::SharedPtr variantNodePtr = vg::IVariantNode::BuildVariantNodes(variantPtr, i);
-			vertices.push_back(addAlternateNode(variantNodePtr));
+			vertices.push_back(addAlternateNode(variantNodePtr, genotyperVariantPtr));
 		}
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
-		gssw_node* variantReferenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, variantPtr->getRef()[0].size(), this->m_nt_table, this->m_mat);
+		variantReferenceSize = variantPtr->getRef()[0].size();
+		gssw_node* variantReferenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, variantReferenceSize, this->m_nt_table, this->m_mat);
+
+		auto allelePtr = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::REFERENCE, variantReferenceNode->seq, genotyperVariantPtr->getPosition());
+		this->m_genotyper_map[variantReferenceNode->id] = allelePtr;
+		genotyperVariantPtr->addAllele(allelePtr);
+
 		gssw_graph_add_node(this->m_graph_ptr, variantReferenceNode);
 		vertices.push_back(variantReferenceNode);
-		variantReferenceSize = variantPtr->getRef()[0].size();
 		for (auto parentVertexIter = altAndRefVertices.begin(); parentVertexIter != altAndRefVertices.end(); ++parentVertexIter)
 		{
 			for (auto childVertexIter = vertices.begin(); childVertexIter != vertices.end(); ++childVertexIter)
@@ -128,8 +135,6 @@ namespace gssw
 		}
 	}
 
-	static std::ofstream outputFile;
-
 	void GSSWGraph::graphConstructed()
 	{
 		IAlignment::SharedPtr alignmentPtr;
@@ -139,6 +144,7 @@ namespace gssw
 			recordAlignmentVariants(graphMapping, alignmentPtr);
 		}
 
+		/*
 		static bool init = false;
 		if (!init)
 		{
@@ -163,6 +169,7 @@ namespace gssw
 			}
 		}
 		outputFile << pos << "\t" << referenceString << variantString << std::endl;
+		*/
 		/*
 		for (const auto& value : m_variant_counter)
 		{

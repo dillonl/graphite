@@ -10,6 +10,7 @@
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
 #include "core/variants/IVariantList.h"
+#include "core/genotyper/IGenotyperVariant.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
 #include "core/alignments/IAlignmentReader.h"
@@ -32,10 +33,10 @@ namespace gssw
 		virtual void constructGraph() override;
 
 	protected:
-		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
+std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
-gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, position pos);
-		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr);
+gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
+gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		IAlignmentReader::SharedPtr m_alignment_reader;
@@ -49,6 +50,7 @@ gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* 
 		uint32_t m_next_id = 0;
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
+        std::list< IGenotyperVariant > m_genotype_variants;
 
 	private:
 		void graphConstructed();
