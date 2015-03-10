@@ -7,14 +7,14 @@
 
 namespace gwiz
 {
-	class IGenotyperAllele : private boost::noncopyable
+	class GenotyperAllele : private boost::noncopyable
 	{
 	public:
-		typedef std::shared_ptr< IGenotyperAllele > SharedPtr;
+		typedef std::shared_ptr< GenotyperAllele > SharedPtr;
 
 		enum class Type {REFERENCE, ALTERNATE};
 
-	    IGenotyperAllele(const Type alleleType, const std::string& sequence, const position pos) :
+	    GenotyperAllele(const Type alleleType, const std::string& sequence, position pos) :
 		    m_read_count(0),
 			m_allele_type(alleleType),
 			m_position(pos),
@@ -22,21 +22,21 @@ namespace gwiz
 		{
 		}
 
-		virtual ~IGenotyperAllele()
+		virtual ~GenotyperAllele()
 		{
 		}
 
 		std::string getSequence() const { return m_sequence; }
-		position getPosition() const { return m_position; }
 		void incrementReadCount() { ++this->m_read_count; }
 		uint32_t getReadCount() { return this->m_read_count; }
-
+		position getPosition() {return this->m_position; }
+		Type getType() { return this->m_allele_type; }
 
 	protected:
 		uint32_t m_read_count;
 		Type m_allele_type;
-		position m_position;
 		std::string m_sequence;
+		position m_position;
 	};
 }
 

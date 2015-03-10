@@ -10,6 +10,7 @@
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
 #include "core/variants/IVariantList.h"
+#include "core/genotyper/GenotyperAllele.hpp"
 
 #include "core/alignments/IAlignmentReader.h"
 
@@ -33,18 +34,10 @@ namespace gssw
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
 
-		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode);
-
-		gssw_node* addGSSWAlternateNode(INode::SharedPtr variantNodePtr)
-		{
-			auto variantNode = gssw_node_create_alt(variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
-			gssw_graph_add_node(this->m_graph_ptr, variantNode);
-			this->m_node_map[variantNode->id] = variantNodePtr;
-			return variantNode;
-		}
+gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, position pos);
+		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
-
 		IAlignmentReader::SharedPtr m_alignment_reader;
 		int32_t m_match;
 		int32_t m_mismatch;
@@ -54,7 +47,7 @@ namespace gssw
 		int8_t* m_mat;
 		gssw_graph* m_graph_ptr;
 		uint32_t m_next_id = 0;
-		std::map< uint32_t, INode::SharedPtr > m_node_map;
+		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
 
 	private:

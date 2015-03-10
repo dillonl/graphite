@@ -11,7 +11,8 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< IGenotyperVariant > SharedPtr;
-		IGenotyperVariant()
+	IGenotyperVariant(position pos) :
+		    m_position(pos)
 		{
 		}
 
@@ -22,7 +23,8 @@ namespace gwiz
 		void addAllele(IGenotyperAllele::SharedPtr allele) = 0;
 
 	protected:
-		std::vector< IGenotypeAllele::SharedPtr > m_alleles;
+		position m_position;
+		std::vector< GenotypeAllele::SharedPtr > m_alleles;
 	};
 }
 

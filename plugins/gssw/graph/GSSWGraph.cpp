@@ -33,22 +33,20 @@ namespace gssw
 	{
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
 		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
-		// size_t readLength = this->m_alignment_reader->getAverageReadLength();
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 		size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : 0;
 		int64_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
-		size_t graphSize = 0;
-		int count = 0;
 		static std::mutex mutex;
 		while (getNextCompoundVariant(variantPtr))
 		{
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
+
 				auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
-			    addReference(altAndRefVertices, referenceNode);
+			    addReference(altAndRefVertices, referenceNode, variantPtr->getPosition());
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 			}
@@ -61,19 +59,28 @@ namespace gssw
 		if (referenceSize > 0)
 		{
 			auto referenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
-			addReference(altAndRefVertices, referenceNode);
+			addReference(altAndRefVertices, referenceNode, startPosition + referenceOffset);
 		}
 		graphConstructed();
 	}
 
-	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode)
+	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNodePtr, position pos)
 	{
-		gssw_graph_add_node(this->m_graph_ptr, referenceNode);
+		gssw_graph_add_node(this->m_graph_ptr, referenceNodePtr);
+		this->m_genotyper_map[referenceNodePtr->id] = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::REFERENCE, std::string(referenceNodePtr->seq), pos);
 		for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
 		{
-			gssw_nodes_add_edge((*iter), referenceNode);
+			gssw_nodes_add_edge((*iter), referenceNodePtr);
 		}
-		return referenceNode;
+		return referenceNodePtr;
+	}
+
+	gssw_node* GSSWGraph::addAlternateNode(INode::SharedPtr variantNodePtr)
+	{
+		auto variantNode = gssw_node_create_alt(variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
+		gssw_graph_add_node(this->m_graph_ptr, variantNode);
+		this->m_genotyper_map[variantNode->id] = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::ALTERNATE, variantNode->seq, variantNodePtr->getPosition());
+		return variantNode;
 	}
 
 	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
@@ -82,7 +89,7 @@ namespace gssw
 		for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
 		{
 			INode::SharedPtr variantNodePtr = vg::IVariantNode::BuildVariantNodes(variantPtr, i);
-			vertices.push_back(addGSSWAlternateNode(variantNodePtr));
+			vertices.push_back(addAlternateNode(variantNodePtr));
 		}
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 		gssw_node* variantReferenceNode = gssw_node_create_alt(this->m_reference_ptr->getSequence() + referenceOffset, variantPtr->getRef()[0].size(), this->m_nt_table, this->m_mat);
@@ -113,23 +120,15 @@ namespace gssw
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
-			if (m_node_map.find(nc->node->id) != m_node_map.end())
+			auto genotyperAllele = m_genotyper_map.find(nc->node->id);
+			if (genotyperAllele != m_genotyper_map.end())
 			{
-				auto variantNode = m_node_map[nc->node->id];
-				uint32_t counter = 1;
-				std::vector< IAlignment::SharedPtr > alignments;
-				if (m_variant_counter.find(nc->node->id) != m_variant_counter.end())
-				{
-					counter = std::get< 1 >(m_variant_counter[nc->node->id]) + 1;
-					alignments = std::get< 2 >(m_variant_counter[nc->node->id]);
-				}
-				alignments.push_back(alignmentPtr);
-				m_variant_counter[nc->node->id] = std::make_tuple(variantNode, counter, alignments);
+				genotyperAllele->second->incrementReadCount();
 			}
 		}
 	}
 
-	static std::ofstream vcfCount;
+	static std::ofstream outputFile;
 
 	void GSSWGraph::graphConstructed()
 	{
@@ -143,18 +142,38 @@ namespace gssw
 		static bool init = false;
 		if (!init)
 		{
-			vcfCount.open("test.txt");
+			outputFile.open("graph_output.txt");
 			init = true;
 		}
+
+		std::string referenceString = "";
+		std::string variantString = "";
+		position pos;
+		for (auto alleleIter : m_genotyper_map)
+		{
+			auto allele = alleleIter.second;
+			if (allele->getType() == GenotyperAllele::Type::REFERENCE)
+			{
+				referenceString = allele->getSequence() + "<" + std::to_string(allele->getReadCount()) + ">\t";
+				pos = allele->getPosition();
+			}
+			else
+			{
+				variantString += allele->getSequence() + "<" + std::to_string(allele->getReadCount()) + ">\t";
+			}
+		}
+		outputFile << pos << "\t" << referenceString << variantString << std::endl;
+		/*
 		for (const auto& value : m_variant_counter)
 		{
 			auto variant = std::get< 0 >(value.second);
-			vcfCount << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
+			outputFile << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
 			for (const auto& alignmentPtr : std::get< 2 >(value.second))
 			{
-				vcfCount << "Alignment: " << alignmentPtr->getPosition() << std::endl;
+				outputFile<< "Alignment: " << alignmentPtr->getPosition() << std::endl;
 			}
 		}
+		*/
 
 	}
 }

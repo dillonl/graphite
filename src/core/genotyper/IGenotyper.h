@@ -21,7 +21,7 @@ namespace gwiz
 		}
 
 	protected:
-		IGenotyperVariant::SharedPtr m_genotyper_variant;
+		std::vector< IGenotyperVariant::SharedPtr > m_genotyper_variant;
 	};
 }
 
