@@ -4,6 +4,7 @@
 #include "vg/graph/IVariantNode.h"
 #include "core/genotyper/IGenotyper.h"
 
+#include <mutex>
 #include <iostream>
 #include <fstream>
 #include <map>

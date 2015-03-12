@@ -3,6 +3,7 @@
 
 #include "IGenotyperVariant.h"
 
+#include <mutex>
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -36,7 +37,7 @@ namespace gwiz
 		void printVariants()
 		{
 this->m_genotyper_variant.sort([](const IGenotyperVariant::SharedPtr& a, const IGenotyperVariant::SharedPtr& b) -> bool {
-return a->getPosition() > b->getPosition();
+return a->getPosition() < b->getPosition();
 });
 			std::ofstream outputFile;
 			outputFile.open("graph_output.txt");
@@ -58,7 +59,7 @@ return a->getPosition() > b->getPosition();
 
 					for (auto alignmentPtr : allele->getAlignments())
 					{
-						alignmentIDString += alignmentPtr->getID() + ",";
+						alignmentIDString += "[" + std::to_string(alignmentPtr->getPosition()) + "]" + alignmentPtr->getID() +  "-" + std::to_string(alignmentPtr->isFirstMate()) + ",";
 					}
 				}
                 outputFile << genotypeVariantPtr->getPosition() << "\t" << referenceString << variantString << "(" << alignmentIDString << ")" << std::endl;

@@ -44,7 +44,7 @@ namespace gssw
 			{
 				firstVariantInList = variantPtr;
 			}
-			uint32_t contigLength = (previousVariantEndPosition - firstVariantInList->getPosition());
+			uint32_t contigLength = (previousVariantEndPosition > 0) ? (previousVariantEndPosition - firstVariantInList->getPosition()) : this->m_padding;
 			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;

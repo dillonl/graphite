@@ -21,6 +21,7 @@ namespace gwiz
 		virtual const position getPosition() = 0;
 		virtual const size_t getLength() = 0;
 		virtual const std::string getID() { return ""; }
+		virtual const bool isFirstMate() { return false;}
 
 	};
 }
