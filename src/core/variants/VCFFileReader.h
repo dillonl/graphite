@@ -30,7 +30,7 @@ namespace gwiz
 		VCFFileReader(const std::string& path);
 		~VCFFileReader();
 
-		inline bool getNextVariant(Variant::SharedPtr& variant) override
+		bool getNextVariant(Variant::SharedPtr& variant) override
 		{
 			const char* line = getNextLine();
 			if (line != NULL)

@@ -19,6 +19,7 @@ set(GWIZ_CORE_SOURCES
   core/reference/FastaReference.cpp
   core/variants/Variant.cpp
   core/variants/VCFFileReader.cpp
+  core/variants/VariantListVCFPreloaded.cpp
   core/region/Region.cpp
   core/alignments/BamAlignment.cpp
   core/alignments/BamAlignmentReader.cpp
