@@ -33,10 +33,10 @@ namespace gssw
 		virtual void constructGraph() override;
 
 	protected:
-std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
+		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
-gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
-gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr);
+		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
+		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		IAlignmentReader::SharedPtr m_alignment_reader;

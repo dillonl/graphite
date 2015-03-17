@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <algorithm>
 
 namespace gwiz
 {
@@ -129,8 +130,12 @@ namespace gssw
 		cigLock.lock();
 		std::string cigarString = "";
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
+		std::string variantTypeTracebackPositions = "";
 		std::string variantTypeTraceback = "";
 		std::string genotypeAlleleString = "";
+		std::string alignmentMappedString = "";
+		// std::string referenceStringTmp = "";
+		uint32_t posOffset = 0;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			cigarString += (cigarString.size() > 0) ? "|" : "";
@@ -145,16 +150,27 @@ namespace gssw
 			{
 				genotyperAllele->second->addAlignment(alignmentPtr);
 			}
+			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
+			alignmentMappedString += std::string(alignmentPtr->getSequence() + posOffset, length) + " ";
 			genotypeAlleleString += std::string(nc->node->seq, nc->node->len) + suffix;
-			std::string typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::REFERENCE) ? "R" : "A";
+			std::string typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "A" : "R";
 			variantTypeTraceback += typeString + suffix;
+			variantTypeTracebackPositions += std::to_string(alignmentPtr->getPosition() + posOffset) + suffix;
+			posOffset += length;
 		}
+		alignmentMappedString = std::string(alignmentMappedString.c_str(), (graphMapping->cigar.length + alignmentPtr->getLength() - 1));
+		std::string spacing(graphMapping->position, ' ');
 		std::cout << "---------------------------------------------------------" << std::endl;
 		std::cout << "Score: " << graphMapping->score << std::endl;
-		std::cout << "Type String: " << variantTypeTraceback << std::endl;
-		std::cout << "Cigar String: " << cigarString << std::endl;
-		std::cout << "Genotype String: " << genotypeAlleleString << std::endl;
-		std::cout << "Alignment String: " << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
+		std::cout << "Variant Type:      " << variantTypeTraceback << std::endl;
+		std::cout << "Variant Positions: " << variantTypeTracebackPositions << std::endl;
+		std::cout << "Cigar String:      " << cigarString << std::endl;
+		std::cout << "Reference String:  " << std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 150) << std::endl;
+		std::cout << "Genotype String:   " << genotypeAlleleString << std::endl;
+		std::cout << "Alignment String:  " << spacing << alignmentMappedString << std::endl;
+		// std::cout << "Alignment String:  " << spacing << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
+		std::cout << "Mapping Position:  " << graphMapping->position << std::endl;
+		std::cout << "Alignment Position: " << alignmentPtr->getPosition() << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl;
 		cigLock.unlock();
 	}
@@ -167,45 +183,6 @@ namespace gssw
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
 			recordAlignmentVariants(graphMapping, alignmentPtr);
 		}
-
-		/*
-		static bool init = false;
-		if (!init)
-		{
-			outputFile.open("graph_output.txt");
-			init = true;
-		}
-
-		std::string referenceString = "";
-		std::string variantString = "";
-		position pos;
-		for (auto alleleIter : m_genotyper_map)
-		{
-			auto allele = alleleIter.second;
-			if (allele->getType() == GenotyperAllele::Type::REFERENCE)
-			{
-				referenceString = allele->getSequence() + "<" + std::to_string(allele->getReadCount()) + ">\t";
-				pos = allele->getPosition();
-			}
-			else
-			{
-				variantString += allele->getSequence() + "<" + std::to_string(allele->getReadCount()) + ">\t";
-			}
-		}
-		outputFile << pos << "\t" << referenceString << variantString << std::endl;
-		*/
-		/*
-		for (const auto& value : m_variant_counter)
-		{
-			auto variant = std::get< 0 >(value.second);
-			outputFile << "Variant Count: " << std::get< 1 >(value.second) << " Variant Seq: " << std::string(variant->getSequence(), variant->getLength()) << " " << variant->getPosition() << std::endl;
-			for (const auto& alignmentPtr : std::get< 2 >(value.second))
-			{
-				outputFile<< "Alignment: " << alignmentPtr->getPosition() << std::endl;
-			}
-		}
-		*/
-
 	}
 }
 }

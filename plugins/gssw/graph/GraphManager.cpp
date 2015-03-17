@@ -45,10 +45,12 @@ namespace gssw
 				firstVariantInList = variantPtr;
 			}
 			uint32_t contigLength = (previousVariantEndPosition > 0) ? (previousVariantEndPosition - firstVariantInList->getPosition()) : this->m_padding;
+			/*
 			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;
 			}
+			*/
 			// if there is a gap between the variants that is larger than the padding then generate a graph and push it in the queue
 			if ((contigLength > minContig) && (this->m_padding < variantPositionDifference))
 			{
