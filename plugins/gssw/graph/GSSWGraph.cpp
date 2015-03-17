@@ -118,23 +118,45 @@ namespace gssw
 	{
 		std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
 		gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-		gssw_graph_mapping* graphMapping = gssw_graph_trace_back (this->m_graph_ptr,readSeq.c_str(),readSeq.size(),m_match,m_mismatch,m_gap_open,m_gap_extension);
+		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr,readSeq.c_str(),readSeq.size(),m_match,m_mismatch,m_gap_open,m_gap_extension);
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm) { gssw_graph_mapping_destroy(gm); };
 		return std::shared_ptr< gssw_graph_mapping >(graphMapping, graphMappingDeletor);
 	}
 
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
 	{
+		static std::mutex cigLock;
+		cigLock.lock();
+		std::string cigarString = "";
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
+		std::string variantTypeTraceback = "";
+		std::string genotypeAlleleString = "";
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
+			cigarString += (cigarString.size() > 0) ? "|" : "";
+			for (int j = 0; j < nc->cigar->length; ++j)
+			{
+				std::string suffix = (j < nc->cigar->length - 1) ? "|" : "";
+				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type + suffix;
+			}
+			std::string suffix = (i < graphMapping->cigar.length - 1) ? "|" : "";
 			auto genotyperAllele = m_genotyper_map.find(nc->node->id);
 			if (genotyperAllele != m_genotyper_map.end())
 			{
 				genotyperAllele->second->addAlignment(alignmentPtr);
-				// genotyperAllele->second->incrementReadCount();
 			}
+			genotypeAlleleString += std::string(nc->node->seq, nc->node->len) + suffix;
+			std::string typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::REFERENCE) ? "R" : "A";
+			variantTypeTraceback += typeString + suffix;
 		}
+		std::cout << "---------------------------------------------------------" << std::endl;
+		std::cout << "Score: " << graphMapping->score << std::endl;
+		std::cout << "Type String: " << variantTypeTraceback << std::endl;
+		std::cout << "Cigar String: " << cigarString << std::endl;
+		std::cout << "Genotype String: " << genotypeAlleleString << std::endl;
+		std::cout << "Alignment String: " << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
+		std::cout << "---------------------------------------------------------" << std::endl;
+		cigLock.unlock();
 	}
 
 	void GSSWGraph::graphConstructed()

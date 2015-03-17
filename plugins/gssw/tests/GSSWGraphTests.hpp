@@ -211,7 +211,7 @@ namespace
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
-		bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
+		// bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReaderPtr = std::make_shared<gwiz::VCFFileReader>(vcfPath);
