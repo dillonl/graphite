@@ -133,9 +133,11 @@ namespace gssw
 		std::string variantTypeTracebackPositions = "";
 		std::string variantTypeTraceback = "";
 		std::string genotypeAlleleString = "";
-		std::string alignmentMappedString = "";
+		std::string alignmentMappedString = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
+		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
 		// std::string referenceStringTmp = "";
 		uint32_t posOffset = 0;
+		uint32_t insertionCounter = 0;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			cigarString += (cigarString.size() > 0) ? "|" : "";
@@ -151,7 +153,13 @@ namespace gssw
 				genotyperAllele->second->addAlignment(alignmentPtr);
 			}
 			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
-			alignmentMappedString += std::string(alignmentPtr->getSequence() + posOffset, length) + " ";
+			if (insertionCounter > 0)
+			{
+				alignmentMappedString.insert(posOffset + (insertionCounter - 1), " ");
+				referenceString.insert(posOffset + graphMapping->position + (insertionCounter - 1), " ");
+			}
+			++insertionCounter;
+			// alignmentMappedString += std::string(alignmentPtr->getSequence() + posOffset, length) + " ";
 			genotypeAlleleString += std::string(nc->node->seq, nc->node->len) + suffix;
 			std::string typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "A" : "R";
 			variantTypeTraceback += typeString + suffix;
@@ -165,7 +173,8 @@ namespace gssw
 		std::cout << "Variant Type:      " << variantTypeTraceback << std::endl;
 		std::cout << "Variant Positions: " << variantTypeTracebackPositions << std::endl;
 		std::cout << "Cigar String:      " << cigarString << std::endl;
-		std::cout << "Reference String:  " << std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 150) << std::endl;
+		// std::cout << "Reference String:  " << std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 150) << std::endl;
+		std::cout << "Reference String:  " << referenceString << std::endl;
 		std::cout << "Genotype String:   " << genotypeAlleleString << std::endl;
 		std::cout << "Alignment String:  " << spacing << alignmentMappedString << std::endl;
 		// std::cout << "Alignment String:  " << spacing << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << std::endl;
