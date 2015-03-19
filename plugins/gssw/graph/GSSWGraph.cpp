@@ -135,21 +135,34 @@ namespace gssw
 		std::string genotypeAlleleString = "";
 		std::string alignmentMappedString = std::string(alignmentPtr->getSequence(), 100);
 		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
-		// std::string referenceStringTmp = "";
+		position firstPosition;
+		// std::string referenceString = "";
+		std::string mappedString = alignmentPtr->isMapped() ? "true" : "false";
+		std::string firstMateString = alignmentPtr->isFirstMate() ? "First" : "Second";
 		uint32_t posOffset = 0;
 		uint32_t insertionCounter = 0;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
-			cigarString += (cigarString.size() > 0) ? "|" : "";
+			// cigarString += (cigarString.size() > 0) ? "|" : "";
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
-				std::string suffix = (j < nc->cigar->length - 1) ? "|" : "";
+				std::string suffix = (j < nc->cigar->length - 1) ? "" : "";
 				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type + suffix;
 			}
 			std::string suffix = (i < graphMapping->cigar.length - 1) ? "|" : "";
+			cigarString += suffix;
 			auto genotyperAllele = m_genotyper_map.find(nc->node->id);
+			if (i == 1)
+			{
+				firstPosition = genotyperAllele->second->getPosition();
+				// referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
+			}
 			if (genotyperAllele != m_genotyper_map.end())
 			{
+				if (referenceString.size() == 0)
+				{
+					// referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()/* + genotyperAllele->second->getSequence().size()*/), 100 + graphMapping->position);
+				}
 				genotyperAllele->second->addAlignment(alignmentPtr);
 			}
 			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
@@ -174,17 +187,21 @@ namespace gssw
 		alignmentMappedString = std::string(alignmentMappedString.c_str(), (graphMapping->cigar.length + alignmentPtr->getLength() - 1));
 		std::string spacing(graphMapping->position, ' ');
 		std::cout << "---------------------------------------------------------" << std::endl;
-		std::cout << "Score: " << graphMapping->score << std::endl;
-		std::cout << "Variant Type:      " << variantTypeTraceback << std::endl;
-		std::cout << "Variant Positions: " << variantTypeTracebackPositions << std::endl;
-		std::cout << "Cigar String:      " << cigarString << std::endl;
-		std::cout << "Reference String:  " << referenceString << std::endl;
-		std::cout << "Genotype String:   " << genotypeAlleleString << std::endl;
-		std::cout << "Alignment String:  " << spacing;
+		std::cout << "Score:              " << graphMapping->score << std::endl;
+		std::cout << "Variant Type:       " << variantTypeTraceback << std::endl;
+		std::cout << "Variant Positions:  " << variantTypeTracebackPositions << std::endl;
+		std::cout << "Cigar String:       " << cigarString << std::endl;
+		std::cout << "Reference String:   " << referenceString << std::endl;
+		std::cout << "Genotype String:    " << genotypeAlleleString << std::endl;
+		std::cout << "Alignment String:   " << spacing;
 		std::cout.write(alignmentMappedString.c_str(), alignmentMappedString.size() - 1);
 		std::cout << std::endl;
-		std::cout << "Mapping Position:  " << graphMapping->position << std::endl;
+		std::cout << "Mapped:             " << mappedString << std::endl;
+		std::cout << "First Mate:         " << firstMateString << std::endl;
+		std::cout << "Mapping Position:   " << graphMapping->position << std::endl;
 		std::cout << "Alignment Position: " << alignmentPtr->getPosition() << std::endl;
+		std::cout << "Test:               " << alignmentPtr->isReverseStrand() << std::endl;
+		// std::cout << "Test:               " << alignmentPtr->getPosition() - (graphMapping->position + 1) << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl;
 		cigLock.unlock();
 	}
