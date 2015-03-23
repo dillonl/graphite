@@ -3,6 +3,7 @@
 #include "vg/graph/SNPNode.h"
 #include "vg/graph/IVariantNode.h"
 #include "core/genotyper/IGenotyper.h"
+#include "AlignmentReporter.h"
 
 #include <mutex>
 #include <iostream>
@@ -134,7 +135,6 @@ namespace gssw
 		std::string variantTypeTraceback = "";
 		std::string genotypeAlleleString = "";
 		std::string alignmentMappedString = std::string(alignmentPtr->getSequence(), 100);
-		// std::string alignmentMappedString = alignmentPtr->getSequence();
 		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
 		std::string mappedString = alignmentPtr->isMapped() ? "Mapped" : "Unmapped";
 		std::string firstMateString = alignmentPtr->isFirstMate() ? "First" : "Second";

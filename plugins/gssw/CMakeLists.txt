@@ -5,6 +5,7 @@
 set(GWIZ_GSSW_GRAPH_SOURCES
 	graph/GSSWGraph.cpp
 	graph/GraphManager.cpp
+	graph/AlignmentReporter.cpp	
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/src/)
