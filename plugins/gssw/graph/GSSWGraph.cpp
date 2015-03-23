@@ -134,74 +134,86 @@ namespace gssw
 		std::string variantTypeTraceback = "";
 		std::string genotypeAlleleString = "";
 		std::string alignmentMappedString = std::string(alignmentPtr->getSequence(), 100);
+		// std::string alignmentMappedString = alignmentPtr->getSequence();
 		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
-		position firstPosition;
-		// std::string referenceString = "";
-		std::string mappedString = alignmentPtr->isMapped() ? "true" : "false";
+		std::string mappedString = alignmentPtr->isMapped() ? "Mapped" : "Unmapped";
 		std::string firstMateString = alignmentPtr->isFirstMate() ? "First" : "Second";
+		uint32_t softclipCorrection = 0;
 		uint32_t posOffset = 0;
 		uint32_t insertionCounter = 0;
+		bool firstTimeThrough = true;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
-			// cigarString += (cigarString.size() > 0) ? "|" : "";
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
-				std::string suffix = (j < nc->cigar->length - 1) ? "" : "";
-				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type + suffix;
+				if (i == 0 && j == 0 && nc->cigar->elements[j].type == 'S')
+				{
+					softclipCorrection = nc->cigar->elements[j].length;
+					auto alignmentSize = alignmentMappedString.size();
+					if (nc->cigar->elements[j].length == 1)
+					{
+						softclipCorrection -= 1;
+					}
+					alignmentMappedString = alignmentMappedString.substr(softclipCorrection, alignmentMappedString.size() - softclipCorrection);
+					cigarString += std::to_string(nc->cigar->elements[j].length) + "SC";
+				}
+				else
+				{
+					cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
+				}
 			}
 			std::string suffix = (i < graphMapping->cigar.length - 1) ? "|" : "";
 			cigarString += suffix;
-			auto genotyperAllele = m_genotyper_map.find(nc->node->id);
-			if (i == 1)
+			std::string typeString = "R";
 			{
-				firstPosition = genotyperAllele->second->getPosition();
-				// referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
-			}
-			if (genotyperAllele != m_genotyper_map.end())
-			{
-				if (referenceString.size() == 0)
+				auto genotyperAllele = m_genotyper_map.find(nc->node->id);
+				if (genotyperAllele != m_genotyper_map.end())
 				{
-					// referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()/* + genotyperAllele->second->getSequence().size()*/), 100 + graphMapping->position);
+					if (firstTimeThrough)
+					{
+						size_t addOne = (i == 0) ? 1 : 0;
+						referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()) - (genotypeAlleleString.size() + addOne), 100 + graphMapping->position);
+						firstTimeThrough = false;
+					}
+					genotyperAllele->second->addAlignment(alignmentPtr);
+					typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "AV" : "RV";
 				}
-				genotyperAllele->second->addAlignment(alignmentPtr);
 			}
 			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
 			if (insertionCounter > 0)
 			{
-				if (posOffset + (insertionCounter - 1) < alignmentMappedString.size())
+				if (posOffset + (insertionCounter - 1) < alignmentMappedString.size() - 1)
 				{
 					alignmentMappedString.insert(posOffset + (insertionCounter - 1), " ");
 				}
-				if (posOffset + graphMapping->position + (insertionCounter - 1) < referenceString.size())
+				if (posOffset + graphMapping->position + (insertionCounter - 1) < referenceString.size() - 1)
 				{
 					referenceString.insert(posOffset + graphMapping->position + (insertionCounter - 1), " ");
 				}
 			}
 			++insertionCounter;
 			genotypeAlleleString += std::string(nc->node->seq, nc->node->len) + suffix;
-			std::string typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "A" : "R";
 			variantTypeTraceback += typeString + suffix;
 			variantTypeTracebackPositions += std::to_string(alignmentPtr->getPosition() + posOffset) + suffix;
 			posOffset += length;
 		}
-		alignmentMappedString = std::string(alignmentMappedString.c_str(), (graphMapping->cigar.length + alignmentPtr->getLength() - 1));
-		std::string spacing(graphMapping->position, ' ');
+		int32_t spaceCount = std::max< int32_t >(graphMapping->position, 0);
+		std::string spacing(spaceCount, ' ');
 		std::cout << "---------------------------------------------------------" << std::endl;
 		std::cout << "Score:              " << graphMapping->score << std::endl;
 		std::cout << "Variant Type:       " << variantTypeTraceback << std::endl;
 		std::cout << "Variant Positions:  " << variantTypeTracebackPositions << std::endl;
 		std::cout << "Cigar String:       " << cigarString << std::endl;
 		std::cout << "Reference String:   " << referenceString << std::endl;
-		std::cout << "Genotype String:    " << genotypeAlleleString << std::endl;
+		std::cout << "Haplotype String:   " << genotypeAlleleString << std::endl;
 		std::cout << "Alignment String:   " << spacing;
 		std::cout.write(alignmentMappedString.c_str(), alignmentMappedString.size() - 1);
 		std::cout << std::endl;
-		std::cout << "Mapped:             " << mappedString << std::endl;
-		std::cout << "First Mate:         " << firstMateString << std::endl;
+		std::cout << "Mapping:            " << mappedString << std::endl;
+		std::cout << "Mate:               " << firstMateString << std::endl;
 		std::cout << "Mapping Position:   " << graphMapping->position << std::endl;
 		std::cout << "Alignment Position: " << alignmentPtr->getPosition() << std::endl;
-		std::cout << "Test:               " << alignmentPtr->isReverseStrand() << std::endl;
-		// std::cout << "Test:               " << alignmentPtr->getPosition() - (graphMapping->position + 1) << std::endl;
+		std::cout << "Reverse Strand:     " << alignmentPtr->isReverseStrand() << std::endl;
 		std::cout << "---------------------------------------------------------" << std::endl;
 		cigLock.unlock();
 	}
@@ -211,6 +223,7 @@ namespace gssw
 		IAlignment::SharedPtr alignmentPtr;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
+			if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
 			recordAlignmentVariants(graphMapping, alignmentPtr);
 		}
