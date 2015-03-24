@@ -85,14 +85,16 @@ namespace gssw
 		}
 		*/
 
-		// std::cout << "Max Contig: " << maxContig << std::endl;
-		// std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
-		// std::cout << "total contigs: " << totalContigs << std::endl;
-		// std::cout << "finished" << std::endl;
+		/*
+		std::cout << "Max Contig: " << maxContig << std::endl;
+		std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
+		std::cout << "total contigs: " << totalContigs << std::endl;
+		std::cout << "finished" << std::endl;
+		*/
 		ThreadPool::Instance()->joinAll();
 		AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 		// std::cout << "threads finished" << std::endl;
-		IGenotyper::Instance()->printVariants();
+		// IGenotyper::Instance()->printVariants();
 
 	}
 

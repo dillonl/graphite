@@ -188,6 +188,7 @@ namespace
 
 	};
 
+	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -199,11 +200,8 @@ namespace
 		gsswGraph->constructGraph();
 
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
-		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderPtr, 25);
-		// graphManagerPtr->buildGraphs();
-		// auto gsswGraph = std::make_shared< GSSWGraphTest >(referencePtr, variantListPtr, alignmentReaderPtr);
-		// gsswGraph->constructGraph();
 	}
+	*/
 
 	TEST(GSSWTests, TestConstructChr20)
 	{
@@ -227,7 +225,7 @@ namespace
 		*/
 		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
 
-		/*
+
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
@@ -240,7 +238,7 @@ namespace
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
 		graphManagerPtr->buildGraphs();
-		*/
+		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 	}
 
 	TEST(GSSWTests, TestConstructTestData)

@@ -18,7 +18,7 @@ namespace gssw
 	public:
 		typedef std::shared_ptr< AlignmentReport > SharedPtr;
 
-		AlignmentReport(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingPtr);
+		AlignmentReport(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingPtr, position graphStartPosition);
 		~AlignmentReport();
 
 		std::string toString();
@@ -28,6 +28,7 @@ namespace gssw
 		IVariantList::SharedPtr m_variant_list_ptr;
 		IAlignment::SharedPtr m_alignment_ptr;
 		std::shared_ptr< gssw_graph_mapping > m_graph_mapping_ptr;
+		position m_graph_start_position;
 	};
 }
 }

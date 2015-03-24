@@ -48,6 +48,7 @@ namespace gssw
 		int8_t* m_mat;
 		gssw_graph* m_graph_ptr;
 		uint32_t m_next_id = 0;
+		position m_graph_start_position;
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
         std::list< IGenotyperVariant > m_genotype_variants;
