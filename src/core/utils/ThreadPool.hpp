@@ -30,6 +30,26 @@ namespace gwiz
 
 		void joinAll()
 		{
+			stop();
+			start();
+		}
+
+		void start()
+		{
+			{
+				std::unique_lock<std::mutex> lock(m_tasks_mutex);
+				this->m_stopped = false;
+				this->m_workers.clear();
+			}
+			init();
+		}
+
+		void stop()
+		{
+			{
+				std::unique_lock<std::mutex> lock(m_tasks_mutex);
+				this->m_stopped = true;
+			}
 			this->m_condition.notify_all();
 			for (std::thread& worker : this->m_workers)
 			{
@@ -37,8 +57,6 @@ namespace gwiz
 			}
 		}
 
-		// template< class F, class... Args >
-		// auto enqueue(F&& funct, Args&& args)->std::future< typename std::result_of< F(Args...) >::type >
 		template<class F, class... Args>
 		auto enqueue(F&& funct, Args&&... args)
 			-> std::future<typename std::result_of<F(Args...)>::type>
@@ -71,16 +89,12 @@ namespace gwiz
 
 		~ThreadPool()
 		{
-			{
-				std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
-				this->m_stopped = true;
-			}
-			joinAll();
+			stop();
 		}
 
 		void init()
 		{
-			size_t numberOfThreads = 1;//std::thread::hardware_concurrency();
+			size_t numberOfThreads = std::thread::hardware_concurrency();
 			for (size_t i = 0; i < numberOfThreads; ++i)
 			{
 				this->m_workers.emplace_back(

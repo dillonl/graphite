@@ -16,8 +16,8 @@ namespace gwiz
 		typedef std::shared_ptr<INode> SharedPtr;
 		INode() {}
     	INode(const char* sequence, size_t length) :
-		    m_sequence(sequence),
-			m_length(length)
+		        m_sequence(sequence),
+				m_length(length)
 		{
 		}
 
@@ -31,7 +31,6 @@ namespace gwiz
 		const char* m_sequence;
 		size_t m_length;
 		position m_position;
-
 	};
 
 } // end namespace gwiz

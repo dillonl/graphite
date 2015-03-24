@@ -21,6 +21,10 @@ namespace gwiz
 		const char* getSequence() override;
 		const position getPosition() override;
 		const size_t getLength() override;
+		const std::string getID() override {return this->m_bam_alignment_ptr->Name;}
+		const bool isFirstMate() override {return this->m_bam_alignment_ptr->IsFirstMate();}
+		const bool isMapped() override { return this->m_bam_alignment_ptr->IsMapped(); }
+		const bool isReverseStrand() override { return this->m_bam_alignment_ptr->IsReverseStrand(); }
 
     private:
         BamAlignmentPtr m_bam_alignment_ptr;

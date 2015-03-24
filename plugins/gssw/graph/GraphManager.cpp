@@ -1,6 +1,8 @@
 #include "core/variants/VariantList.h"
 #include "core/utils/ThreadPool.hpp"
 #include "GraphManager.h"
+#include "AlignmentReporter.h"
+#include "core/genotyper/IGenotyper.h"
 
 #include "core/alignments/BamAlignmentReader.h"
 
@@ -43,11 +45,13 @@ namespace gssw
 			{
 				firstVariantInList = variantPtr;
 			}
-			uint32_t contigLength = (previousVariantEndPosition - firstVariantInList->getPosition());
+			uint32_t contigLength = (previousVariantEndPosition > 0) ? (previousVariantEndPosition - firstVariantInList->getPosition()) : this->m_padding;
+			/*
 			if (count % 10000 == 0)
 			{
 				std::cout << count << std::endl;
 			}
+			*/
 			// if there is a gap between the variants that is larger than the padding then generate a graph and push it in the queue
 			if ((contigLength > minContig) && (this->m_padding < variantPositionDifference))
 			{
@@ -63,13 +67,10 @@ namespace gssw
 					maxContig = contigLength;
 					maxContigPosition = firstVariantInList->getPosition();
 				}
-				if (contigLength <= 2000) // just for testing
-				{
-					position startPosition = firstVariantInList->getPosition() - this->m_padding;
-					position endPosition = previousVariantEndPosition;
-					auto funct = std::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr);
-					ThreadPool::Instance()->enqueue(funct);
-				}
+				position startPosition = firstVariantInList->getPosition() - this->m_padding;
+				position endPosition = previousVariantEndPosition;
+				auto funct = std::bind(&GraphManager::buildGraph, this, startPosition, endPosition, variantListPtr);
+				ThreadPool::Instance()->enqueue(funct);
 				variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
 				firstVariantInList = variantPtr; // set the first variant
 				contigLength = 0;
@@ -84,19 +85,19 @@ namespace gssw
 		}
 		*/
 
-		std::cout << "Max Contig: " << maxContig << std::endl;
-		std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
-		std::cout << "total contigs: " << totalContigs << std::endl;
-		std::cout << "finished" << std::endl;
+		// std::cout << "Max Contig: " << maxContig << std::endl;
+		// std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
+		// std::cout << "total contigs: " << totalContigs << std::endl;
+		// std::cout << "finished" << std::endl;
 		ThreadPool::Instance()->joinAll();
-		std::cout << "threads finished" << std::endl;
+		AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
+		// std::cout << "threads finished" << std::endl;
+		IGenotyper::Instance()->printVariants();
+
 	}
 
 	void GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
 	{
-		// std::cout << startPosition << " " << endPosition << std::endl;
-		// int x = 0;
-		// std::cin >> x;
 		static uint32_t contigsDone = 0;
 		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
@@ -106,13 +107,6 @@ namespace gssw
 		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
-		this->m_gssw_graph_mutex.lock();
-		// this->m_gssw_graphs.push(gsswGraph);
-		if (++contigsDone % 100 == 0)
-		{
-			std::cout << "Contigs Computed: " << contigsDone << std::endl;
-		}
-		this->m_gssw_graph_mutex.unlock();
 	}
 }
 }

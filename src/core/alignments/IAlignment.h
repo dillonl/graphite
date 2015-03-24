@@ -20,6 +20,10 @@ namespace gwiz
 		virtual const char* getSequence() = 0;
 		virtual const position getPosition() = 0;
 		virtual const size_t getLength() = 0;
+		virtual const std::string getID() { return ""; }
+		virtual const bool isFirstMate() { return false;}
+		virtual const bool isMapped() { return false; }
+		virtual const bool isReverseStrand() { return false; }
 
 	};
 }

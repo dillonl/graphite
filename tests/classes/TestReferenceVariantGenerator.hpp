@@ -14,8 +14,9 @@ namespace gwiz
 		TestReferenceVariantGenerator(const std::string& reference, const std::string& chrom, position startPosition) :
 			    m_reference(reference)
 			{
-				m_region = std::make_shared< Region >(chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(startPosition + reference.size()));
+				m_region = std::make_shared< Region >(chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(reference.size()));
 			}
+
 			~TestReferenceVariantGenerator()
 			{
 			}
@@ -32,11 +33,10 @@ namespace gwiz
 					throw "Reference and alt are the same at position: " + std::to_string(position);
 				}
 				std::string variantString = boost::algorithm::join(alts, ",");
-				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + (position - m_region->getStartPosition()), refLength) + "\t" + variantString + "\t\n";
+				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + position, refLength) + "\t" + variantString + "\t\n";
 
 				auto variant = Variant::BuildVariant(variantLine.c_str(), m_vcf_parser);
 				m_variant_list.push_back(variant);
-				// std::cout << "variant added: " << m_variant_list.size() << std::endl;
 			}
 
 			TestVariantList::SharedPtr getVariants()
@@ -55,7 +55,6 @@ namespace gwiz
 
 			std::vector< Variant::SharedPtr > m_variant_list;
 			VariantParser< const char* > m_vcf_parser;
-
 
 		};
 	}

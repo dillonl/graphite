@@ -49,6 +49,7 @@ namespace gwiz
 
 	void BamAlignmentReader::setRegion(Region::SharedPtr region)
 	{
+		this->m_bam_reader.LocateIndex();
 		int refID = this->m_bam_reader.GetReferenceID(region->getReferenceID());
 		this->m_bam_reader.SetRegion(refID, region->getStartPosition(), refID, region->getEndPosition());
 		this->m_region = region;

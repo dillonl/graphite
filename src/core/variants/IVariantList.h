@@ -24,7 +24,7 @@ namespace gwiz
 		IVariantList() {}
 		virtual ~IVariantList() {}
 
-		virtual inline bool getNextVariant(Variant::SharedPtr& variant) = 0;
+		virtual bool getNextVariant(Variant::SharedPtr& variant) = 0;
 	};
 } // end namespace gwiz
 
