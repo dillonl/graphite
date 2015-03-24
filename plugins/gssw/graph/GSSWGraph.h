@@ -57,10 +57,11 @@ namespace gssw
 		std::shared_ptr< gssw_graph_mapping > traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 
-		gssw_node* gssw_node_create_alt(const char* seq,
-									const size_t len,
-									const int8_t* nt_table,
-									const int8_t* score_matrix)
+		gssw_node* gssw_node_create_alt(const GenotyperAllele::Type data,
+										const char* seq,
+										const size_t len,
+										const int8_t* nt_table,
+										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			//int32_t len = strlen(seq);
@@ -68,7 +69,7 @@ namespace gssw
 			n->len = len;
 			n->seq = (char*)malloc(len+1);
 			strncpy(n->seq, seq, len); n->seq[len] = 0;
-			n->data = NULL;
+			n->data = (void*)data;
 			n->num = gssw_create_num(seq, len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;

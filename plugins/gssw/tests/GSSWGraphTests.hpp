@@ -16,6 +16,7 @@
 #include "tests/classes/TestReferenceVariantGenerator.hpp"
 #include "tests/classes/TestAlignmentReader.hpp"
 #include "plugins/gssw/graph/GSSWGraph.h"
+#include "plugins/gssw/graph/AlignmentReporter.h"
 
 #include "core/alignments/BamAlignmentReader.h"
 #include "core/alignments/BamAlignmentReaderManager.h"
@@ -57,10 +58,11 @@ namespace
 
 		static void Build31VariantsTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr, gwiz::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
 		{
-//			                                   CACCTCTCCCCCA
-			std::string referenceString = "ATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGGGATAGACTCCTTCCACTTGGGGGAAGAAGAGGGAAGAGTACAGAGGGCTTTGCCTTGCAACTTGGGTACCAGCTCAGCCACAGTAAAGTAAAGTATCAAAAGTTACCCAGCATGGTGCCAGCTGTGGTGGCCACTGGACTTGCCCTTCCCCCAACTCCAAGCAGCCTGGCACAGAGAGAGAGACTCCTTTTGTTTGGGGGTAAATGAGGGAAGAGAAGAAGAAACTCTGCCTGGTAACCCAGGGAATTTGGCCAAATTTAAACCCCAGCCCACTAAGGTGGTTCCTCTAGGACTCAGCGAGAGTTGCAGTGTTTCTGAGCTTAGGGCACCCTCTAGTGCTGATATAGTTTCAATAATCACAGGCTCAAATCACAACACTCAATCTCCTTCAAATACCTGAAAAGCCTTCCCAAGAAGGATGGGTGCAAACAAGCCCAGATTGTGAAGGCTACAATATGTATCTAACTCTTCAATGCCCAGACATCAACAACCATCTTCAAGAGTTAAGAACATCCAGGGAAATATGACCTCATCAAATGAACTAAATAAGGCATCAGTGACCAATCTGAGAATGATGGAGATATGTGACTTTTTAGACAAATAATTCAAAATAGCTGTCTTGATGAAGCTCAACAAACTTCAAGACAACACAGAGAAAGAATTCAGAATTACATCAGAGAAGTTTCACAAAGAAATTGAAGTAATTTCTAAAAAATCAAGCAGAAATTCTGGCACTGAAAAGTTTGATTGTCAAAGTGAAAAATGCATAAGAGTCTTTCAACGGCAGAATTGATCAAGCAGAAGGAACTGGTGAGAACTGGCTATCCAAATATACACGAAGCCAAAAAAAGAATTAAAAAAGAATAAAGTATGCCTACAAAATGTAGAAAATAGTCTCAAAAGGGTAAATCCAAGAGTTATTGGTCTTAAAGAGGATGTAGAGGGAGAGAAAAGGGTAAATAG";
+			std::string referenceSequence = "ATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGGGATAGACTCCTTCCACTTGGGGGAAGAAGAGGGAAGAGTACAGAGGGCTTTGCCTTGCAACTTGGGTACCAGCTCAGCCACAGTAAAGTAAAGTATCAAAAGTTACCCAGCATGGTGCCAGCTGTGGTGGCCACTGGACTTGCCCTTCCCCCAACTCCAAGCAGCCTGGCACAGAGAGAGAGACTCCTTTTGTTTGGGGGTAAATGAGGGAAGAGAAGAAGAAACTCTGCCTGGTAACCCAGGGAATTTGGCCAAATTTAAACCCCAGCCCACTAAGGTGGTTCCTCTAGGACTCAGCGAGAGTTGCAGTGTTTCTGAGCTTAGGGCACCCTCTAGTGCTGATATAGTTTCAATAATCACAGGCTCAAATCACAACACTCAATCTCCTTCAAATACCTGAAAAGCCTTCCCAAGAAGGATGGGTGCAAACAAGCCCAGATTGTGAAGGCTACAATATGTATCTAACTCTTCAATGCCCAGACATCAACAACCATCTTCAAGAGTTAAGAACATCCAGGGAAATATGACCTCATCAAATGAACTAAATAAGGCATCAGTGACCAATCTGAGAATGATGGAGATATGTGACTTTTTAGACAAATAATTCAAAATAGCTGTCTTGATGAAGCTCAACAAACTTCAAGACAACACAGAGAAAGAATTCAGAATTACATCAGAGAAGTTTCACAAAGAAATTGAAGTAATTTCTAAAAAATCAAGCAGAAATTCTGGCACTGAAAAGTTTGATTGTCAAAGTGAAAAATGCATAAGAGTCTTTCAACGGCAGAATTGATCAAGCAGAAGGAACTGGTGAGAACTGGCTATCCAAATATACACGAAGCCAAAAAAAGAATTAAAAAAGAATAAAGTATGCCTACAAAATGTAGAAAATAGTCTCAAAAGGGTAAATCCAAGAGTTATTGGTCTTAAAGAGGATGTAGAGGGAGAGAAAAGGGTAAATAG";
 
 			gwiz::position startPosition = 200000;
+			std::string referenceString = std::string(startPosition, 'x');
+			referenceString += referenceSequence;
 			gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", startPosition);
             testReferenceVariantGenerator.addVariant(startPosition + 14, ".", 1, {"G"});
 			testReferenceVariantGenerator.addVariant(startPosition + 26, ".", 1, {"G"});
@@ -96,8 +98,7 @@ namespace
 
 			alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
 			alignmentReaderPtr->addAlignment(199924, "GGACCTTTCTCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGG");
-			alignmentReaderPtr->addAlignment(199933, "TCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGC"); //30M, 6X
-			//                                                                                                        ATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGGGATAGACTCCTTCCACTTGGGGGAAGAAGAGGGAAGAGTACAGAGGGCTTTGCCTTGCAAC
+			alignmentReaderPtr->addAlignment(199933, "TCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGC");
 			alignmentReaderPtr->addAlignment(199936, "GCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCAACTCTCCCCCAACCCCAAGCAAAGCAGCCTG");
 			alignmentReaderPtr->addAlignment(199938, "AGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGG");
 			alignmentReaderPtr->addAlignment(199951, "GGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGGGATAGACTCCTTC");
@@ -175,6 +176,7 @@ namespace
 
 			referencePtr = testReferenceVariantGenerator.getReference();
 			variantListPtr = testReferenceVariantGenerator.getVariants();
+			alignmentReaderPtr->setRegion(referencePtr->getRegion());
 
 			/*
 			std::cout << "start position: " << referencePtr->getRegion()->getStartPosition() << std::endl;
@@ -185,6 +187,23 @@ namespace
 		}
 
 	};
+
+	TEST(GSSWTests, TestAlignmentReport)
+	{
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		gwiz::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
+		GSSWGraphTest::Build31VariantsTestData(referencePtr, variantListPtr, alignmentReaderPtr);
+
+		auto gsswGraph = std::make_shared< gwiz::gssw::GSSWGraph >(referencePtr, variantListPtr, alignmentReaderPtr);
+		gsswGraph->constructGraph();
+
+		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
+		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderPtr, 25);
+		// graphManagerPtr->buildGraphs();
+		// auto gsswGraph = std::make_shared< GSSWGraphTest >(referencePtr, variantListPtr, alignmentReaderPtr);
+		// gsswGraph->constructGraph();
+	}
 
 	TEST(GSSWTests, TestConstructChr20)
 	{
@@ -208,6 +227,7 @@ namespace
 		*/
 		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
 
+		/*
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
@@ -220,6 +240,7 @@ namespace
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
 		graphManagerPtr->buildGraphs();
+		*/
 	}
 
 	TEST(GSSWTests, TestConstructTestData)

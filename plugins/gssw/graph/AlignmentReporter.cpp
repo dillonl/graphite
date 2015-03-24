@@ -17,9 +17,22 @@ namespace gssw
 		return s_instance;
 	}
 
-	void AlignmentReporter::AddAlignmentEvidence(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingSharePtr)
+	void AlignmentReporter::printAlignmentReportsToStream(std::ostream& out)
 	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_reports_mutex); // unlocks when out of scope
+		while (!this->m_alignment_reports.empty())
+		{
+			auto alignmentReportPtr = this->m_alignment_reports.back();
+			this->m_alignment_reports.pop_back();
+			auto alignmentReportString = alignmentReportPtr->toString();
+			out.write(alignmentReportString.c_str(), alignmentReportString.size());
+		}
+	}
 
+	void AlignmentReporter::addAlignmentReport(AlignmentReport::SharedPtr alignmentReportPtr)
+	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_reports_mutex); // unlocks when out of scope
+		this->m_alignment_reports.emplace_front(alignmentReportPtr);
 	}
 
 }

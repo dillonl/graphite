@@ -1,6 +1,7 @@
 #include "core/variants/VariantList.h"
 #include "core/utils/ThreadPool.hpp"
 #include "GraphManager.h"
+#include "AlignmentReporter.h"
 #include "core/genotyper/IGenotyper.h"
 
 #include "core/alignments/BamAlignmentReader.h"
@@ -84,21 +85,19 @@ namespace gssw
 		}
 		*/
 
-		std::cout << "Max Contig: " << maxContig << std::endl;
-		std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
-		std::cout << "total contigs: " << totalContigs << std::endl;
-		std::cout << "finished" << std::endl;
+		// std::cout << "Max Contig: " << maxContig << std::endl;
+		// std::cout << "Max Contig Position: " << maxContigPosition << std::endl;
+		// std::cout << "total contigs: " << totalContigs << std::endl;
+		// std::cout << "finished" << std::endl;
 		ThreadPool::Instance()->joinAll();
-		std::cout << "threads finished" << std::endl;
+		AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
+		// std::cout << "threads finished" << std::endl;
 		IGenotyper::Instance()->printVariants();
 
 	}
 
 	void GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
 	{
-		// std::cout << startPosition << " " << endPosition << std::endl;
-		// int x = 0;
-		// std::cin >> x;
 		static uint32_t contigsDone = 0;
 		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
@@ -108,20 +107,6 @@ namespace gssw
 		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
-		// this->m_gssw_graphs.push(gsswGraph);
-		// if (region->getEndPosition() == 36927311)
-		// if ( contigsDone >= 97310)
-		// {
-		// 	GSSWGraph::PrintStuff = true;
-		// }
-		/*
-		if (++contigsDone % 1000 == 0)
-		{
-			std::cout << "Contigs Computed: " << contigsDone << std::endl;
-			// auto region = alignmentReaderPtr->getRegion();
-			std::cout << "region: " << region->getStartPosition() << " " << region->getEndPosition() << std::endl;
-		}
-		*/
 	}
 }
 }

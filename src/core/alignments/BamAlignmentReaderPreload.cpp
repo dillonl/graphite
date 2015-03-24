@@ -3,7 +3,11 @@
 namespace gwiz
 {
 	BamAlignmentReaderPreload::BamAlignmentReaderPreload(std::shared_ptr< std::vector< BamAlignment::SharedPtr > > alignmentsPtr) :
-		m_alignments_ptr(alignmentsPtr), m_current_index(0), m_start_index(0), m_end_index(alignmentsPtr->size() - 1), m_average_bam_read_length(0)
+		m_alignments_ptr(alignmentsPtr),
+		m_current_index(0),
+		m_start_index(0),
+		m_end_index(alignmentsPtr->size() - 1),
+		m_average_bam_read_length(0)
 	{
 	}
 

@@ -14,7 +14,20 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< GenotyperAllele > SharedPtr;
 
-		enum class Type {REFERENCE, ALTERNATE};
+		enum class Type {REFERENCE, VARIANT_ALTERNATE, VARIANT_REFERENCE};
+
+		static std::string TypeToString(Type type)
+		{
+			switch (type)
+			{
+			case Type::VARIANT_ALTERNATE:
+				return "VA";
+			case Type::VARIANT_REFERENCE:
+				return "VR";
+			default:
+				return "R";
+			}
+		}
 
 	    GenotyperAllele(const Type alleleType, const std::string& sequence, position pos) :
 		    m_read_count(0),
