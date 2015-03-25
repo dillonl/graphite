@@ -1,6 +1,8 @@
 #include "AlignmentReport.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
+#include <map>
+
 namespace gwiz
 {
 namespace gssw
@@ -30,6 +32,8 @@ namespace gssw
 		std::string cigarString = "";
 		std::string alignmentString = this->m_alignment_ptr->getSequence();
 		std::vector< position > nodeSeparatorPositions;
+		std::map< position, std::string > referenceSpacing; // contains the positional spacing since ref and alts can be different lengths
+		std::map< position, std::string > tracebackSpacing; // contains the positional spacing since ref and alts can be different lengths
 		size_t nodeOffset = 0;
 		for (int i = 0; i < this->m_graph_mapping_ptr->cigar.length; ++i, ++nc)
 		{
@@ -48,12 +52,21 @@ namespace gssw
 				}
 				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
 			}
+			if (startPosition == 0) { startPosition = nc->node->position; }
+			auto nodeVariantType = static_cast< GenotyperAllele::Type >((long)nc->node->data);
 			cigarString +=  separator;
 			nodeSeparatorPositions.emplace_back(nc->node->position);
-			// nodeSeparatorIndices.emplace_back(i + nodeOffset);
-			if (startPosition == 0) { startPosition = nc->node->position; }
+			std::cout << "refLen: " << nc->node->ref_len << std::endl;
+			std::cout << "nodeLen: " << nc->node->len << std::endl;
+
+			/*
+			if (nc->node->ref_len > nc->node->len)
+			{ tracebackSpacing[nc->node->position] = std::string(nc->node->ref_len - nc->node->len, ' '); }
+			else if (nc->node->ref_len < nc->node->len)
+			{ referenceSpacing[nc->node->position] = std::string(nc->node->len - nc->node->ref_len, ' '); }
+			*/
 			tracebackString += nc->node->seq;
-			nodeTracebackString += std::string(GenotyperAllele::TypeToString(static_cast< GenotyperAllele::Type >((long)nc->node->data))) + separator;
+			nodeTracebackString += std::string(GenotyperAllele::TypeToString(nodeVariantType)) + separator;
 			nodeOffset += nc->node->len - 1;
 		}
 		nodeTracebackString = (nodeTracebackString.size() > 2) ? nodeTracebackString.substr(0, nodeTracebackString.size() - 2) : nodeTracebackString;
@@ -65,14 +78,11 @@ namespace gssw
 
 		for (int i = nodeSeparatorPositions.size() - 1; i > 0; --i)
 		{
-			// size_t index = nodeSeparatorIndices.at(i);
 			size_t index = nodeSeparatorPositions.at(i) - startPosition;
-			if (tracebackString.size() > index) { tracebackString.insert(index, separator); }
-			if (referenceString.size() > index) { referenceString.insert(index, separator); }
+			if (tracebackString.size() > index) { tracebackString.insert(index, separator + tracebackSpacing[nodeSeparatorPositions.at(i)]); }
+			if (referenceString.size() > index) { referenceString.insert(index, separator + referenceSpacing[nodeSeparatorPositions.at(i)]); }
 			if (alignmentString.size() > index) { alignmentString.insert(index, separator); }
 		}
-
-		// if (true) { return ""; }
 
 		std::string reportString = "";
 		std::string eol = "\r\n";

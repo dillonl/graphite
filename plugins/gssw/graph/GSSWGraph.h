@@ -36,7 +36,7 @@ namespace gssw
 		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
 		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
-		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr);
+		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		IAlignmentReader::SharedPtr m_alignment_reader;
@@ -59,6 +59,7 @@ namespace gssw
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
+										const uint32_t referenceLength,
 										const GenotyperAllele::Type data,
 										const char* seq,
 										const size_t len,
@@ -67,6 +68,7 @@ namespace gssw
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			//int32_t len = strlen(seq);
+			n->ref_len = referenceLength;
 			n->position = position;
 			n->id = m_next_id++;
 			n->len = len;

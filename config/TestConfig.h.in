@@ -12,5 +12,7 @@
 #define TEST_BAM_INDEX_FILE "@CMAKE_SOURCE_DIR@/data/NA12878.chrom20.ILLUMINA.bwa.CEU.low_coverage.20121211.bam.bai";
 #define TEST_BAM_BAS_FILE "@CMAKE_SOURCE_DIR@/data/NA12878.chrom20.ILLUMINA.bwa.CEU.low_coverage.20121211.bam.bas";
 
+#define TEST_SMALL_MEI_VCF_FILE "@CMAKE_SOURCE_DIR@/data/smallMEIs.flt.vcf";
+
 
 #endif // GWIZ_TEST_CONFIG_H

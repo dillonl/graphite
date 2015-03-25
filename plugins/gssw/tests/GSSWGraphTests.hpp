@@ -65,6 +65,7 @@ namespace
 			referenceString += referenceSequence;
 			gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", 1);
             testReferenceVariantGenerator.addVariant(startPosition + 14, ".", 1, {"G"});
+			testReferenceVariantGenerator.addVariant(startPosition + 18, ".", 1, {"GAAAG"});
 			testReferenceVariantGenerator.addVariant(startPosition + 26, ".", 1, {"G"});
 			testReferenceVariantGenerator.addVariant(startPosition + 30, ".", 1, {"A"});
 			testReferenceVariantGenerator.addVariant(startPosition + 104, ".", 1, {"T"});
@@ -97,7 +98,7 @@ namespace
 			testReferenceVariantGenerator.addVariant(startPosition + 981, ".", 1, {"C"});
 
 			alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-			alignmentReaderPtr->addAlignment(199924, "GGACCTTTCTCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGG");
+			alignmentReaderPtr->addAlignment(199924, "GGACCTTTCTCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAGAAAGCTCTAGG");
 			alignmentReaderPtr->addAlignment(199933, "TCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGC");
 			alignmentReaderPtr->addAlignment(199936, "GCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCAACTCTCCCCCAACCCCAAGCAAAGCAGCCTG");
 			alignmentReaderPtr->addAlignment(199938, "AGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGG");
@@ -182,6 +183,7 @@ namespace
 
 	};
 
+	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -192,14 +194,16 @@ namespace
 		auto gsswGraph = std::make_shared< gwiz::gssw::GSSWGraph >(referencePtr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
 
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
+		std::ofstream outStream;
+		outStream.open("og.txt", std::ios::out);
+		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		outStream.close();
 	}
-
-	/*
+*/
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
+		std::string vcfPath = TEST_SMALL_MEI_VCF_FILE; //TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
 		// bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
@@ -210,9 +214,9 @@ namespace
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
 		graphManagerPtr->buildGraphs();
+		std::cout << "Done" << std::endl;
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 	}
-	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{
