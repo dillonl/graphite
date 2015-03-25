@@ -63,7 +63,7 @@ namespace
 			gwiz::position startPosition = 200000;
 			std::string referenceString = std::string(startPosition, 'x');
 			referenceString += referenceSequence;
-			gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", startPosition);
+			gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", 1);
             testReferenceVariantGenerator.addVariant(startPosition + 14, ".", 1, {"G"});
 			testReferenceVariantGenerator.addVariant(startPosition + 26, ".", 1, {"G"});
 			testReferenceVariantGenerator.addVariant(startPosition + 30, ".", 1, {"A"});
@@ -176,19 +176,12 @@ namespace
 
 			referencePtr = testReferenceVariantGenerator.getReference();
 			variantListPtr = testReferenceVariantGenerator.getVariants();
-			alignmentReaderPtr->setRegion(referencePtr->getRegion());
+			alignmentReaderPtr->setRegion(referencePtr->getRegion()->getReferenceID());
 
-			/*
-			std::cout << "start position: " << referencePtr->getRegion()->getStartPosition() << std::endl;
-			std::cout << "end position: " << referencePtr->getRegion()->getEndPosition() << std::endl;
-			std::cout << "ref len: " << referencePtr->getRegion()->getEndPosition() - referencePtr->getRegion()->getStartPosition() << std::endl;
-			std::cout << "length: " << referenceString.size() << std::endl;
-			*/
 		}
 
 	};
 
-	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -201,31 +194,10 @@ namespace
 
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 	}
-	*/
 
+	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
-		// boost::function< void, (int) > funct [](int x) { std::cout << "pool: " << x << std::endl; };
-		/*
-		std::function<void (int*)> f2 = [](int* x){ *x += 1; std::this_thread::sleep_for(std::chrono::seconds(1)); };
-
-		int count = 0;
-		int count2 = 0;
-		for (int i = 0; i < 100; ++i)
-		{
-			++count2;
-			gwiz::ThreadPool::Instance()->postJob(boost::bind(f2, &count));
-		}
-		std::this_thread::sleep_for(std::chrono::seconds(60));
-		// gwiz::ThreadPool::Instance()->joinAll();
-		std::cout << "Count: " << count << std::endl;
-		std::cout << "Count2: " << count2 << std::endl;
-
-		if (true) { return; }
-		*/
-		// IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
-
-
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
@@ -240,6 +212,7 @@ namespace
 		graphManagerPtr->buildGraphs();
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 	}
+	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{
@@ -252,28 +225,6 @@ namespace
 		auto gsswGraph = std::make_shared< GSSWGraphTest >(referencePtr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
 		*/
-
-/*
-		std::cout << "contigs constructed" << std::endl;
-
-		auto contigs = variantGraph->getContigs();
-		size_t contigCount = 0;
-		while (!contigs.empty())
-		{
-			auto contig = contigs.front();
-			contigCount += contig->getContigs().size();
-			contigs.pop();
-		}
-		std::cout << "Contig Count: " << contigCount << std::endl;
-*/
-
-		// variantGraph->printGraph("test1.dot");
-
-
-		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
-		// testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
-		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
-
 	}
 
 }

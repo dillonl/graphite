@@ -4,7 +4,7 @@
 #include "IVariantList.h"
 
 #include <memory>
-#include <queue>
+#include <vector>
 
 namespace gwiz
 {
@@ -12,27 +12,33 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< VariantList > SharedPtr;
-		VariantList() {}
+	    VariantList() : m_current_index(0) {}
 		~VariantList() {}
 
 		inline bool getNextVariant(Variant::SharedPtr& variantPtr) override
 		{
-			bool hasVariants = !this->m_variants.empty();
+			bool hasVariants = this->m_current_index < this->m_variants.size();
 			if (hasVariants)
 			{
-				variantPtr = this->m_variants.front();
-				this->m_variants.pop();
+				variantPtr = this->m_variants[this->m_current_index];
+				++this->m_current_index;
 			}
 			return hasVariants;
 		}
 
 		inline void addVariant(const Variant::SharedPtr variant)
 		{
-			this->m_variants.push(variant);
+			this->m_variants.emplace_back(variant);
+		}
+
+		inline void rewind()
+		{
+			m_current_index = 0;
 		}
 
 	private:
-		std::queue< Variant::SharedPtr > m_variants;
+		size_t m_current_index;
+		std::vector< Variant::SharedPtr > m_variants;
 	};
 }
 

@@ -20,7 +20,7 @@ namespace gssw
 
 	std::string AlignmentReport::toString()
 	{
-		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();;
+		position startPosition = 0;
 		size_t startSoftClipLength = 0;
 		size_t endSoftClipLength = 0;
 		gssw_node_cigar* nc = this->m_graph_mapping_ptr->cigar.elements;
@@ -29,8 +29,7 @@ namespace gssw
 		std::string tracebackString = "";
 		std::string cigarString = "";
 		std::string alignmentString = this->m_alignment_ptr->getSequence();
-		// std::string referenceString = std::string((this->m_reference_ptr->getSequence() + this->m_alignment_ptr->getPosition() - 1), alignmentString.size());
-		std::vector< size_t > nodeSeparatorIndices;
+		std::vector< position > nodeSeparatorPositions;
 		size_t nodeOffset = 0;
 		for (int i = 0; i < this->m_graph_mapping_ptr->cigar.length; ++i, ++nc)
 		{
@@ -50,7 +49,9 @@ namespace gssw
 				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
 			}
 			cigarString +=  separator;
-			nodeSeparatorIndices.emplace_back(i + nodeOffset);
+			nodeSeparatorPositions.emplace_back(nc->node->position);
+			// nodeSeparatorIndices.emplace_back(i + nodeOffset);
+			if (startPosition == 0) { startPosition = nc->node->position; }
 			tracebackString += nc->node->seq;
 			nodeTracebackString += std::string(GenotyperAllele::TypeToString(static_cast< GenotyperAllele::Type >((long)nc->node->data))) + separator;
 			nodeOffset += nc->node->len - 1;
@@ -58,14 +59,14 @@ namespace gssw
 		nodeTracebackString = (nodeTracebackString.size() > 2) ? nodeTracebackString.substr(0, nodeTracebackString.size() - 2) : nodeTracebackString;
 		cigarString = (cigarString.size() > 2) ? cigarString.substr(0, cigarString.size() - 2) : cigarString;
 
-		// std::string referenceString = std::string((this->m_reference_ptr->getSequence() + this->m_alignment_ptr->getPosition()), tracebackString.size());
-		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + this->m_graph_start_position), tracebackString.size());
-		// referenceString = std::string(this->m_graph_mapping_ptr->position, ' ') + referenceString.substr(startSoftClipLength);
+		position referenceStartPosition = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
+		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + referenceStartPosition), tracebackString.size());
 		alignmentString = std::string(this->m_graph_mapping_ptr->position, ' ') + alignmentString.substr(startSoftClipLength);
 
-		for (int i = nodeSeparatorIndices.size() - 1; i > 0; --i)
+		for (int i = nodeSeparatorPositions.size() - 1; i > 0; --i)
 		{
-			size_t index = nodeSeparatorIndices.at(i);
+			// size_t index = nodeSeparatorIndices.at(i);
+			size_t index = nodeSeparatorPositions.at(i) - startPosition;
 			if (tracebackString.size() > index) { tracebackString.insert(index, separator); }
 			if (referenceString.size() > index) { referenceString.insert(index, separator); }
 			if (alignmentString.size() > index) { alignmentString.insert(index, separator); }

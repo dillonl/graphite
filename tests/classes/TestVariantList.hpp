@@ -28,16 +28,18 @@ namespace gwiz
 
 			bool getNextVariant(Variant::SharedPtr& variant) override
 			{
-				if (this->m_variant_index == this->m_variant_ptr_list.size())
-				{
-					return false;
-				}
-				else
+				bool hasVariants = (this->m_variant_index < this->m_variant_ptr_list.size());
+				if (hasVariants)
 				{
 					variant = this->m_variant_ptr_list[this->m_variant_index];
 					++this->m_variant_index;
-					return true;
 				}
+				return hasVariants;
+			}
+
+			void rewind() override
+			{
+				this->m_variant_index = 0;
 			}
 
 			size_t size()

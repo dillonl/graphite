@@ -85,6 +85,7 @@ struct gssw_profile{
 //typedef struct node s_node;
 typedef struct _gssw_node gssw_node;
 typedef struct _gssw_node {
+	int32_t position;
     void* data;
     uint32_t id;
     char* seq; // sequence

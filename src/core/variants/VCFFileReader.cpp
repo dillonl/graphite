@@ -50,6 +50,11 @@ namespace gwiz
 		this->m_current_position = this->m_start_position;
 	}
 
+	void VCFFileReader::rewind()
+	{
+		this->m_current_position = this->m_start_position;
+	}
+
 	size_t VCFFileReader::getHeaderSize()
 	{
 		const char* start_pos = this->m_file->const_data();

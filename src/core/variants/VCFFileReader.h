@@ -47,6 +47,7 @@ namespace gwiz
 
 		void Open() override;
 		void Open(Region::SharedPtr region);
+		void rewind() override;
 	protected:
 
 

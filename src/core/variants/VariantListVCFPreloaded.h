@@ -18,6 +18,8 @@ namespace gwiz
 		bool getVariant(Variant::SharedPtr& variant, const uint32_t index) override;
 
 		void process();
+		void rewind() override;
+
 
 	protected:
 		std::vector< Variant::SharedPtr > m_variants;

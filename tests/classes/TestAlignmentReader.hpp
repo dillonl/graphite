@@ -22,9 +22,9 @@ namespace testing
 		{
 		}
 
-		void setRegion(Region::SharedPtr region)
+		void setRegion(const std::string& referenceID)
 		{
-			this->m_region = region;
+			this->m_region = std::make_shared< Region >(referenceID + ":" + std::to_string(this->m_alignments.front()->getPosition()) + "-" + std::to_string(this->m_alignments.back()->getPosition()));
 		}
 
 		virtual size_t getAverageReadLength() override

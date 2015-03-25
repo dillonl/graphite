@@ -25,6 +25,7 @@ namespace gwiz
 		virtual ~IVariantList() {}
 
 		virtual bool getNextVariant(Variant::SharedPtr& variant) = 0;
+		virtual void rewind() = 0;
 	};
 } // end namespace gwiz
 

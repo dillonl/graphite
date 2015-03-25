@@ -16,6 +16,10 @@ namespace gwiz
 	{
 	}
 
+	void VariantListVCFPreloaded::rewind()
+	{
+	}
+
 	void VariantListVCFPreloaded::process()
 	{
 	}
