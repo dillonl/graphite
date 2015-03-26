@@ -32,9 +32,11 @@ namespace gssw
 		std::string cigarString = "";
 		std::string alignmentString = this->m_alignment_ptr->getSequence();
 		std::vector< position > nodeSeparatorPositions;
-		std::map< position, std::string > referenceSpacing; // contains the positional spacing since ref and alts can be different lengths
-		std::map< position, std::string > tracebackSpacing; // contains the positional spacing since ref and alts can be different lengths
+		position referenceStartPosition = 0;
+		std::string referenceString = "";
 		size_t nodeOffset = 0;
+		size_t refOffset = 0;
+		size_t nodeSeparatorOffset = 0;
 		for (int i = 0; i < this->m_graph_mapping_ptr->cigar.length; ++i, ++nc)
 		{
 			for (int j = 0; j < nc->cigar->length; ++j)
@@ -52,36 +54,38 @@ namespace gssw
 				}
 				cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
 			}
-			if (startPosition == 0) { startPosition = nc->node->position; }
+			if (startPosition == 0)
+			{
+				startPosition = nc->node->position;
+				referenceStartPosition = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
+			}
 			auto nodeVariantType = static_cast< GenotyperAllele::Type >((long)nc->node->data);
 			cigarString +=  separator;
-			nodeSeparatorPositions.emplace_back(nc->node->position);
-			std::cout << "refLen: " << nc->node->ref_len << std::endl;
-			std::cout << "nodeLen: " << nc->node->len << std::endl;
 
-			/*
-			if (nc->node->ref_len > nc->node->len)
-			{ tracebackSpacing[nc->node->position] = std::string(nc->node->ref_len - nc->node->len, ' '); }
-			else if (nc->node->ref_len < nc->node->len)
-			{ referenceSpacing[nc->node->position] = std::string(nc->node->len - nc->node->ref_len, ' '); }
-			*/
+			referenceString += std::string(this->m_reference_ptr->getSequence() + (referenceStartPosition + refOffset), nc->node->ref_len);
 			tracebackString += nc->node->seq;
+			nodeSeparatorPositions.emplace_back(nc->node->position + nodeSeparatorOffset);
+			if (nc->node->ref_len > nc->node->len) { nodeSeparatorOffset = nc->node->ref_len - nc->node->len; tracebackString += std::string(nc->node->ref_len - nc->node->len, ' '); }
+			else if (nc->node->ref_len < nc->node->len) { nodeSeparatorOffset = nc->node->len - nc->node->ref_len; referenceString += std::string(nc->node->len - nc->node->ref_len, ' '); }
+			if (i < this->m_graph_mapping_ptr->cigar.length && i != this->m_graph_mapping_ptr->cigar.length - 1)
+			{
+				referenceString += separator;
+				tracebackString += separator;
+			}
+
 			nodeTracebackString += std::string(GenotyperAllele::TypeToString(nodeVariantType)) + separator;
 			nodeOffset += nc->node->len - 1;
+			refOffset += nc->node->ref_len;
 		}
 		nodeTracebackString = (nodeTracebackString.size() > 2) ? nodeTracebackString.substr(0, nodeTracebackString.size() - 2) : nodeTracebackString;
 		cigarString = (cigarString.size() > 2) ? cigarString.substr(0, cigarString.size() - 2) : cigarString;
 
-		position referenceStartPosition = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
-		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + referenceStartPosition), tracebackString.size());
 		alignmentString = std::string(this->m_graph_mapping_ptr->position, ' ') + alignmentString.substr(startSoftClipLength);
 
-		for (int i = nodeSeparatorPositions.size() - 1; i > 0; --i)
+		size_t sepPos = 0;
+		while ((sepPos = tracebackString.find(separator, sepPos + 1)) != std::string::npos && sepPos < alignmentString.size())
 		{
-			size_t index = nodeSeparatorPositions.at(i) - startPosition;
-			if (tracebackString.size() > index) { tracebackString.insert(index, separator + tracebackSpacing[nodeSeparatorPositions.at(i)]); }
-			if (referenceString.size() > index) { referenceString.insert(index, separator + referenceSpacing[nodeSeparatorPositions.at(i)]); }
-			if (alignmentString.size() > index) { alignmentString.insert(index, separator); }
+			alignmentString.insert(sepPos, separator);
 		}
 
 		std::string reportString = "";
