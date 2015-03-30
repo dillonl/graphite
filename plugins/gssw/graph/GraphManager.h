@@ -22,10 +22,11 @@ namespace gssw
 		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding);
 		~GraphManager() {}
 
-		void buildGraphs();
+		void buildGraphs(size_t overlap, size_t graphSize);
 
 	private:
 		void buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);
+
 		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;
 

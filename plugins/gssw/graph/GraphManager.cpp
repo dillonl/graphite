@@ -24,19 +24,17 @@ namespace gssw
 	{
 	}
 
-	void GraphManager::buildGraphs()
+	void GraphManager::buildGraphs(size_t overlap, size_t graphSize)
 	{
-		size_t overlap = 1000;
-		size_t contigSize = 4000;
+		size_t graphSizeMinusOverlap = (graphSize - overlap);
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
-		position endPosition = startPosition + contigSize;
 
 		auto variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
+		size_t currentGraphSize = 0;
 		Variant::SharedPtr variantPtr;
-		size_t currentContigSize = 0;
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
-			auto smallestVariantSize = variantPtr->getSmallestVariantSize();
+			auto smallestVariantSize = variantPtr->getSmallestAlleleSize();
 
 		}
 

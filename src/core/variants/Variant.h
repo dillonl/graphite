@@ -49,8 +49,8 @@ namespace gwiz
 		std::vector< std::string > const getRef() { return m_ref; }
 		std::vector< std::string > const getAlt() { return m_alt; }
 
-		size_t getSmallestVariantSize() override;
-		size_t getLargestVariantSize() override;
+		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
+		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 	private:
 
 		VARIANT_TYPE m_variant_type;

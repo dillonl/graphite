@@ -10,7 +10,7 @@ namespace gwiz
 	{
 	}
 
-	size_t Variant::getSmallestVariantSize()
+	size_t Variant::getSmallestAlleleSize()
 	{
 		size_t smallest = this->m_ref[0].size();
 		for (auto variant : this->m_alt)
@@ -20,7 +20,7 @@ namespace gwiz
 		return smallest;
 	}
 
-	size_t Variant::getLargestVariantSize()
+	size_t Variant::getLargestAlleleSize()
 	{
 		size_t largest = this->m_ref[0].size();
 		for (auto variant : this->m_alt)

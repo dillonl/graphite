@@ -14,8 +14,8 @@ namespace gwiz
             IVariant() {}
             virtual ~IVariant() {}
 
-            virtual size_t getSmallestVariantSize() = 0;
-            virtual size_t getLargestVariantSize() = 0;
+            virtual size_t getSmallestAlleleSize() = 0;
+            virtual size_t getLargestAlleleSize() = 0;
         private:
     };
 }
