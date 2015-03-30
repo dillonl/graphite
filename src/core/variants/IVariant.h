@@ -13,6 +13,9 @@ namespace gwiz
             typedef std::shared_ptr<IVariant> SharedPtr;
             IVariant() {}
             virtual ~IVariant() {}
+
+            virtual size_t getSmallestVariantSize() = 0;
+            virtual size_t getLargestVariantSize() = 0;
         private:
     };
 }

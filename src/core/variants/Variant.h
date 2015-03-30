@@ -48,6 +48,9 @@ namespace gwiz
 		std::string getID() const { return m_id; }
 		std::vector< std::string > const getRef() { return m_ref; }
 		std::vector< std::string > const getAlt() { return m_alt; }
+
+		size_t getSmallestVariantSize() override;
+		size_t getLargestVariantSize() override;
 	private:
 
 		VARIANT_TYPE m_variant_type;
