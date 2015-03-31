@@ -26,6 +26,8 @@ namespace gwiz
 
 		virtual bool getNextVariant(Variant::SharedPtr& variant) = 0;
 		virtual void rewind() = 0;
+		virtual IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) = 0;
+		virtual size_t getCount() = 0;
 	};
 } // end namespace gwiz
 

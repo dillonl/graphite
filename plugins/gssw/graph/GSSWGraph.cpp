@@ -71,7 +71,6 @@ namespace gssw
 			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
 		graphConstructed();
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 	}
 
 	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr)

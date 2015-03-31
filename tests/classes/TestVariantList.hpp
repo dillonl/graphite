@@ -47,6 +47,13 @@ namespace gwiz
 				return this->m_variant_ptr_list.size();
 			}
 
+			IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override
+			{
+				return nullptr;
+			}
+
+			size_t getCount() override { return m_variant_ptr_list.size(); }
+
 		private:
 			size_t m_variant_index;
 			std::vector< Variant::SharedPtr > m_variant_ptr_list;

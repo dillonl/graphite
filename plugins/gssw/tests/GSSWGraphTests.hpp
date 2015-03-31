@@ -201,7 +201,6 @@ namespace
 		gwiz::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", 1);
-
 		alignmentReaderPtr->addAlignment(20000, std::string("AAAGAGGATG"));
 		alignmentReaderPtr->setRegion("20");
 
@@ -210,7 +209,36 @@ namespace
 		// test setup end
 
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, 10);
-		gsswGraphManager->buildGraphs(5, 20);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5);
+
+		gwiz::Variant::SharedPtr variantPtr;
+		ASSERT_FALSE(variantList->getNextVariant(variantPtr));
+	}
+
+	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariant)
+	{
+		// test setup start
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+
+		gwiz::position startPosition = 200000;
+		std::string referenceSequence = "AAAGAGGATG";
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
+		alignmentReaderPtr->addAlignment(startPosition, std::string("AAAGAGGATG"));
+		alignmentReaderPtr->setRegion("20");
+
+		referencePtr = testReferenceVariantGenerator.getReference();
+		variantListPtr = testReferenceVariantGenerator.getVariants();
+		// test setup end
+
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, 10);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5);
+
+		gwiz::Variant::SharedPtr variantPtr;
+		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
 
 	}
 

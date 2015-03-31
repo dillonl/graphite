@@ -2,6 +2,8 @@
 #define GWIZ_GSSW_GSSWGRAPHMANAGER_H
 
 #include "core/alignments/IAlignmentReaderManager.h"
+#include "core/variants/VariantList.h"
+
 #include "GSSWGraph.h"
 
 #include <queue>
@@ -22,10 +24,16 @@ namespace gssw
 		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding);
 		~GraphManager() {}
 
-		void buildGraphs(size_t overlap, size_t graphSize);
+		/*
+		 * graphSize: is the exact number of base pairs the graph should contain length-wise. Where there are
+		 *            variants the smallest sized variant is used when adding up the graphSize.
+		 *
+		 * overlap: The number of base pairs that will overlap between graphs.
+		 */
+		IVariantList::SharedPtr buildGraphs(Region::SharedPtr region, size_t graphSize, size_t overlap);
 
 	private:
-		void buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);
+		IVariantList::SharedPtr buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);
 
 		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;

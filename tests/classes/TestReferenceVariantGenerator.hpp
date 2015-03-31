@@ -11,10 +11,10 @@ namespace gwiz
 		class TestReferenceVariantGenerator
 		{
 		public:
-		TestReferenceVariantGenerator(const std::string& reference, const std::string& chrom, position startPosition) :
-			    m_reference(reference)
+			TestReferenceVariantGenerator(const std::string& reference, const std::string& chrom, position startPosition) :
+				m_reference(reference), m_start_position(startPosition)
 			{
-				m_region = std::make_shared< Region >(chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(reference.size()));
+				m_region = std::make_shared< Region >(chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(startPosition + reference.size()));
 			}
 
 			~TestReferenceVariantGenerator()
@@ -27,13 +27,13 @@ namespace gwiz
 				{
 					throw "Position of variant is past the end position of the reference region";
 				}
-				std::string ref = std::string(this->m_reference[position - this->m_region->getStartPosition()], 1);
-				if (std::find(alts.begin(), alts.end(), ref) != alts.end())
+				std::string referenceString = std::string(m_reference.c_str() + (position - m_start_position), refLength);
+				if (std::find(alts.begin(), alts.end(), referenceString) != alts.end())
 				{
 					throw "Reference and alt are the same at position: " + std::to_string(position);
 				}
 				std::string variantString = boost::algorithm::join(alts, ",");
-				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + std::string(m_reference.c_str() + position, refLength) + "\t" + variantString + "\t\n";
+				std::string variantLine = m_region->getReferenceID() + "\t" + std::to_string(position) + "\t" + id + "\t" + referenceString + "\t" + variantString + "\t\n";
 
 				auto variant = Variant::BuildVariant(variantLine.c_str(), m_vcf_parser);
 				m_variant_list.push_back(variant);
@@ -52,6 +52,7 @@ namespace gwiz
 		private:
 			std::string m_reference;
 			Region::SharedPtr m_region;
+			position m_start_position;
 
 			std::vector< Variant::SharedPtr > m_variant_list;
 			VariantParser< const char* > m_vcf_parser;

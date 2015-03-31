@@ -48,6 +48,8 @@ namespace gwiz
 		void Open() override;
 		void Open(Region::SharedPtr region);
 		void rewind() override;
+		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override { return nullptr; }
+		size_t getCount() override { throw "Not implemented"; }
 	protected:
 
 

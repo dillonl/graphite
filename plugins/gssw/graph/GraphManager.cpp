@@ -24,18 +24,32 @@ namespace gssw
 	{
 	}
 
-	void GraphManager::buildGraphs(size_t overlap, size_t graphSize)
+	IVariantList::SharedPtr GraphManager::buildGraphs(Region::SharedPtr regionPtr, size_t graphSize, size_t overlap)
 	{
-		size_t graphSizeMinusOverlap = (graphSize - overlap);
-		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
+		auto reportedVariants = std::make_shared< VariantList >();
 
-		auto variantListPtr = std::make_shared< VariantList >(); // contains the variants for contiguous sections of variants
-		size_t currentGraphSize = 0;
-		Variant::SharedPtr variantPtr;
-		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
+		std::string referenceID = regionPtr->getReferenceID();
+		position startPosition = regionPtr->getStartPosition();
+		position endPosition = regionPtr->getEndPosition();
+		position currentPosition = startPosition;
+		int64_t distance = endPosition - startPosition; // this number may become negative
+
+		while (currentPosition < endPosition)
 		{
-			auto smallestVariantSize = variantPtr->getSmallestAlleleSize();
+			auto endGraphPosition = (currentPosition + graphSize > endPosition) ? endPosition : (currentPosition + graphSize);
+			auto graphRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition) + "-" + std::to_string(endGraphPosition)));
+			auto variantsListPtr = this->m_variant_list_ptr->getVariantsInRegion(graphRegion);
+			if (variantsListPtr->getCount() == 0) { continue; }
+			auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
+
+			// create region for alignmentReader
+			alignmentReaderPtr->init();
+			alignmentReaderPtr->setRegion(graphRegion); // set alignmentreader's region
+			auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, alignmentReaderPtr);
+
+			currentPosition += graphSize - overlap;
 		}
+		return reportedVariants;
 	}
 
 
@@ -96,8 +110,9 @@ namespace gssw
 	}
 */
 
-	void GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
+	IVariantList::SharedPtr GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
 	{
+		auto reportedVariants = std::make_shared< VariantList >();
 		static uint32_t contigsDone = 0;
 		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
@@ -107,6 +122,7 @@ namespace gssw
 		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
+		return reportedVariants;
 	}
 }
 }
