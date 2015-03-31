@@ -15,6 +15,7 @@
 #include "tests/classes/TestVariantList.hpp"
 #include "tests/classes/TestReferenceVariantGenerator.hpp"
 #include "tests/classes/TestAlignmentReader.hpp"
+#include "tests/classes/TestAlignmentReaderManager.hpp"
 #include "plugins/gssw/graph/GSSWGraph.h"
 #include "plugins/gssw/graph/AlignmentReporter.h"
 
@@ -56,9 +57,11 @@ namespace
 		}
 		*/
 
+		/*
 		static void GenerateGenericGraphTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr)
 		{
 		}
+		*/
 
 		static void Build31VariantsTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr, gwiz::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
 		{
@@ -187,6 +190,30 @@ namespace
 
 	};
 
+	TEST(GSSWGraphManagerTests, TestBuildGraphNoVariants)
+	{
+		// test setup start
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+
+		gwiz::position startPosition = 200000;
+		std::string referenceSequence = "AAAGAGGATG";
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", 1);
+
+		alignmentReaderPtr->addAlignment(20000, std::string("AAAGAGGATG"));
+		alignmentReaderPtr->setRegion("20");
+
+		referencePtr = testReferenceVariantGenerator.getReference();
+		variantListPtr = testReferenceVariantGenerator.getVariants();
+		// test setup end
+
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, 10);
+		gsswGraphManager->buildGraphs(5, 20);
+
+	}
+
 	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
@@ -205,6 +232,7 @@ namespace
 	}
 	*/
 
+	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
@@ -226,6 +254,7 @@ namespace
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		outStream.close();
 	}
+	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{

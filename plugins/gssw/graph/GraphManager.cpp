@@ -35,9 +35,7 @@ namespace gssw
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
 			auto smallestVariantSize = variantPtr->getSmallestAlleleSize();
-
 		}
-
 	}
 
 

@@ -9,8 +9,8 @@ namespace testing
 	{
 	public:
 		typedef std::shared_ptr< TestAlignmentReaderManager > SharedPtr;
-		TestAlignmentReaderManager();
-		~TestAlignmentReaderManager();
+		TestAlignmentReaderManager() {}
+		~TestAlignmentReaderManager() {}
 
 		void addAlignments(IAlignmentReader::SharedPtr alignmentReader)
 		{
