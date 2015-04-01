@@ -74,7 +74,7 @@ namespace gwiz
 		while (startIndex <= lastIndex)
 		{
 			size_t midIndex = (startIndex + lastIndex) / 2;
-			auto midPosition = (subtractLength) ? this->m_alignments_ptr->at(midIndex)->getPosition() - this->m_alignments_ptr->at(midIndex)->getLength() : this->m_alignments_ptr->at(midIndex)->getPosition();;
+			auto midPosition = (subtractLength) ? this->m_alignments_ptr->at(midIndex)->getPosition() - this->m_alignments_ptr->at(midIndex)->getLength() : this->m_alignments_ptr->at(midIndex)->getPosition();
 			if (pos > midPosition)
 			{
 				startIndex = midIndex + 1;
