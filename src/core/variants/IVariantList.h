@@ -1,5 +1,5 @@
-#ifndef GWIZ_IVARIANT_READER_H
-#define GWIZ_IVARIANT_READER_H
+#ifndef GWIZ_IVARIANTLIST_H
+#define GWIZ_IVARIANTLIST_H
 
 #include <boost/noncopyable.hpp>
 
@@ -8,7 +8,8 @@
 
 #include "core/region/Region.h"
 
-#include <list>
+#include <vector>
+#include <algorithm>
 
 namespace gwiz
 {
@@ -28,7 +29,9 @@ namespace gwiz
 		virtual void rewind() = 0;
 		virtual IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) = 0;
 		virtual size_t getCount() = 0;
+	protected:
+
 	};
 } // end namespace gwiz
 
-#endif //GWIZ_IVARIANT_READER_H
+#endif //GWIZ_IVARIANTLIST_H

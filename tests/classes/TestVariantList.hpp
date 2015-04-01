@@ -1,7 +1,7 @@
 #ifndef GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
 #define GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
 
-#include "core/variants/IVariantList.h"
+#include "core/variants/VariantList.h"
 
 namespace gwiz
 {
@@ -12,7 +12,7 @@ namespace gwiz
 		 * This class is only for testing.
 		 */
 
-		class TestVariantList : public IVariantList
+		class TestVariantList : public VariantList
 		{
 		public:
 			typedef std::shared_ptr< TestVariantList > SharedPtr;
@@ -47,42 +47,9 @@ namespace gwiz
 				return this->m_variant_ptr_list.size();
 			}
 
-			IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override
-			{
-
-				return nullptr;
-			}
-
 			size_t getCount() override { return m_variant_ptr_list.size(); }
 
 		private:
-			/*
-			 * NOTE: Currently this only works with just one chromosome
-			 */
-			size_t setIndexClosestToPosition(position pos)
-			{
-				size_t startIndex = 0;
-				size_t lastIndex = this->m_variant_ptr_list->size() - 1;
-				while (startIndex <= lastIndex)
-				{
-					size_t midIndex = (startIndex + lastIndex) / 2;
-					auto midPosition = this->m_variant_ptr_list->at(midIndex)->getLength();
-					// auto midPosition = (subtractLength) ? this->m_variant_ptr_list->at(midIndex)->getPosition() - this->m_variant_ptr_list->at(midIndex)->getLength() : this->m_variant_ptr_list->at(midIndex)->getPosition();
-					if (pos > midPosition)
-					{
-						startIndex = midIndex + 1;
-					}
-					else if (pos < midPosition)
-					{
-						lastIndex = midIndex - 1;
-					}
-					else
-					{
-						return midIndex;
-					}
-				}
-				return lastIndex;
-			}
 
 			size_t m_variant_index;
 			std::vector< Variant::SharedPtr > m_variant_ptr_list;

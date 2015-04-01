@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 namespace gwiz
 {
@@ -36,14 +37,22 @@ namespace gwiz
 			m_current_index = 0;
 		}
 
-		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override
+		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr) override
 		{
-			return nullptr;
+			position startPosition = regionPtr->getStartPosition();
+			position endPosition = regionPtr->getEndPosition();
+			std::pair< std::vector< Variant::SharedPtr >::iterator, std::vector< Variant::SharedPtr >::iterator > bounds;
+			bounds = std::equal_range(this->m_variants.begin(), this->m_variants.end(), nullptr, [startPosition, endPosition](const Variant::SharedPtr& variantPtr, const Variant::SharedPtr& ignore) {
+					return startPosition <= variantPtr->getPosition() && variantPtr->getPosition() <= endPosition;
+				});
+			auto variantListPtr = std::make_shared< VariantList >();
+			variantListPtr->m_variants = std::vector< Variant::SharedPtr >(bounds.first, bounds.second);
+			return variantListPtr;
 		}
 
 		size_t getCount() override { return m_variants.size(); }
 
-	private:
+	protected:
 		size_t m_current_index;
 		std::vector< Variant::SharedPtr > m_variants;
 	};
