@@ -12,7 +12,8 @@
 #include "BamAlignmentTests.hpp"
 */
 
-#include "plugins/TestIncludes.h"
+#include "VariantListVCFPreloadedTests.hpp"
+// #include "plugins/TestIncludes.h"
 
 
 #include "gtest/gtest.h"

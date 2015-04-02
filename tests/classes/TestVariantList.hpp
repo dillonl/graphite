@@ -16,43 +16,15 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< TestVariantList > SharedPtr;
-		    TestVariantList(std::vector< Variant::SharedPtr > variantPtrList) :
-			    m_variant_index(0),
-			    m_variant_ptr_list(variantPtrList)
+		    TestVariantList(std::vector< Variant::SharedPtr >& variantPtrList)
 			{
+				m_current_index = 0;
+				m_variants_ptr_list = std::vector< Variant::SharedPtr >(variantPtrList.begin(), variantPtrList.end());
 			}
 
 			~TestVariantList()
 			{
 			}
-
-			bool getNextVariant(Variant::SharedPtr& variant) override
-			{
-				bool hasVariants = (this->m_variant_index < this->m_variant_ptr_list.size());
-				if (hasVariants)
-				{
-					variant = this->m_variant_ptr_list[this->m_variant_index];
-					++this->m_variant_index;
-				}
-				return hasVariants;
-			}
-
-			void rewind() override
-			{
-				this->m_variant_index = 0;
-			}
-
-			size_t size()
-			{
-				return this->m_variant_ptr_list.size();
-			}
-
-			size_t getCount() override { return m_variant_ptr_list.size(); }
-
-		private:
-
-			size_t m_variant_index;
-			std::vector< Variant::SharedPtr > m_variant_ptr_list;
 
 		};
 

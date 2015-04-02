@@ -1,11 +1,11 @@
 #ifndef GWIZ_VARIANTLISTVCFPRELOADED_H
 #define GWIZ_VARIANTLISTVCFPRELOADED_H
 
-#include "IVariantListPreloaded.h"
+#include "VariantList.h"
 
 namespace gwiz
 {
-	class VariantListVCFPreloaded : public IVariantListPreloaded //, public VCFFileReader
+	class VariantListVCFPreloaded : public VariantList
 	{
 	public:
 		typedef std::shared_ptr< VariantListVCFPreloaded > SharedPtr;
@@ -13,16 +13,16 @@ namespace gwiz
 		VariantListVCFPreloaded(const std::string& path);
 		~VariantListVCFPreloaded();
 
-		bool getNextVariant(Variant::SharedPtr& variant) override;
-		bool getPreviousVariant(Variant::SharedPtr& variant) override;
-		bool getVariant(Variant::SharedPtr& variant, const uint32_t index) override;
+		/* bool getNextVariant(Variant::SharedPtr& variant) override; */
+		/* bool getPreviousVariant(Variant::SharedPtr& variant) override; */
+		/* bool getVariant(Variant::SharedPtr& variant, const uint32_t index) override; */
 
-		void process();
-		void rewind() override;
-
+		void loadVariantsFromFile();
 
 	protected:
 		std::vector< Variant::SharedPtr > m_variants;
+		std::string m_path;
+		Region::SharedPtr m_region_ptr;
 		bool m_processed;
 	};
 }
