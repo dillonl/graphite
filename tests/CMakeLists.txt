@@ -31,7 +31,6 @@ add_executable(gwiz_tests
   ${GWIZ_TEST_SOURCES}
 )
 
-MESSAGE("PLUGIN: ${PLUGIN_LIBS}")
 target_link_libraries(gwiz_tests
 	gtest
 	BamTools

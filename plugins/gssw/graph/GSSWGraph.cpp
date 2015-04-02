@@ -17,8 +17,8 @@ namespace gssw
 {
 	bool GSSWGraph::PrintStuff = false;
 
-	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader) :
-		IGraph(referencePtr, variantListPtr), m_alignment_reader(alignmentReader), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
+	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
+		IGraph(referencePtr, variantListPtr), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
 
 	{
 		this->m_nt_table = gssw_create_nt_table();

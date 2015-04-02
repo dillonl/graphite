@@ -3,6 +3,7 @@
 
 #include "IVariantList.h"
 
+#include <typeinfo>
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -27,9 +28,33 @@ namespace gwiz
 			return hasVariants;
 		}
 
-		inline void addVariant(const Variant::SharedPtr variant)
+		inline void addVariant(const Variant::SharedPtr variant) override
 		{
 			this->m_variants_ptr_list.emplace_back(variant);
+		}
+
+		inline void addVariants(IVariantList::SharedPtr variantsListPtr) override
+		{
+			auto variantsListPtrCast = std::dynamic_pointer_cast< VariantList >(variantsListPtr);
+			if (variantsListPtrCast)
+			{
+				this->m_variants_ptr_list.insert(this->m_variants_ptr_list.end(), variantsListPtrCast->m_variants_ptr_list.begin(), variantsListPtrCast->m_variants_ptr_list.end());
+			}
+			else
+			{
+				Variant::SharedPtr variantPtr;
+				while (variantsListPtr->getNextVariant(variantPtr))
+				{
+					addVariant(variantPtr);
+				}
+			}
+		}
+
+		void sort()
+		{
+			std::sort(this->m_variants_ptr_list.begin(), this->m_variants_ptr_list.end(), [](const Variant::SharedPtr& v1, const Variant::SharedPtr& v2) {
+					return v1->getPosition() < v2->getPosition();
+				});
 		}
 
 		inline void rewind()

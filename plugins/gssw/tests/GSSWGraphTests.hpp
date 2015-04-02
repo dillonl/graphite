@@ -18,6 +18,7 @@
 #include "tests/classes/TestAlignmentReaderManager.hpp"
 #include "plugins/gssw/graph/GSSWGraph.h"
 #include "plugins/gssw/graph/AlignmentReporter.h"
+#include "plugins/gssw/graph/GSSWAdjudicator.h"
 
 #include "core/alignments/BamAlignmentReader.h"
 #include "core/alignments/BamAlignmentReaderManager.h"
@@ -36,8 +37,8 @@ namespace
 	public:
 		typedef std::shared_ptr< GSSWGraphTest > GSSWGraphTestPtr;
 
-		GSSWGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, gwiz::IAlignmentReader::SharedPtr alignmentReader) :
-			gwiz::gssw::GSSWGraph(referencePtr, variantListPtr, alignmentReader)
+		GSSWGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
+			gwiz::gssw::GSSWGraph(referencePtr, variantListPtr)
 		{
 		}
 
@@ -208,7 +209,8 @@ namespace
 		variantListPtr = testReferenceVariantGenerator.getVariants();
 		// test setup end
 
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, 10);
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 0);
 
 		gwiz::Variant::SharedPtr variantPtr;
@@ -234,7 +236,8 @@ namespace
 		variantListPtr = testReferenceVariantGenerator.getVariants();
 		// test setup end
 
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, 10);
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
 
 		gwiz::Variant::SharedPtr variantPtr;

@@ -28,6 +28,9 @@ namespace gwiz
 		virtual bool getNextVariant(Variant::SharedPtr& variant) = 0;
 		virtual void rewind() = 0;
 		virtual IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) = 0;
+		virtual void addVariants(IVariantList::SharedPtr variantsListPtr) {}
+		virtual void addVariant(Variant::SharedPtr variantPtr) {}
+		virtual void sortVariants() {}
 		virtual size_t getCount() = 0;
 	protected:
 

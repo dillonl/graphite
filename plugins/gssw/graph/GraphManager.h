@@ -3,6 +3,7 @@
 
 #include "core/alignments/IAlignmentReaderManager.h"
 #include "core/variants/VariantList.h"
+#include "core/adjudicator/IGraphAdjudicator.h"
 
 #include "GSSWGraph.h"
 
@@ -21,7 +22,7 @@ namespace gssw
 	public:
 		typedef std::shared_ptr< GraphManager > SharedPtr;
 
-		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding);
+		GraphManager(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, IGraphAdjudicator::SharedPtr graphAdjudicatorPtr);
 		~GraphManager() {}
 
 		/*
@@ -38,10 +39,10 @@ namespace gssw
 		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;
 
-		gwiz::IReference::SharedPtr m_reference_ptr;
-		gwiz::IVariantList::SharedPtr m_variant_list_ptr;
+		IReference::SharedPtr m_reference_ptr;
+		IVariantList::SharedPtr m_variant_list_ptr;
 		IAlignmentReaderManager::SharedPtr m_alignment_reader_manager;
-		size_t m_padding;
+		IGraphAdjudicator::SharedPtr m_graph_adjudicator_ptr;
 	};
 }
 }

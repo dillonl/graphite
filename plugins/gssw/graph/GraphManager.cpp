@@ -16,11 +16,11 @@ namespace gwiz
 namespace gssw
 {
 
-	GraphManager::GraphManager(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, size_t padding) :
+	GraphManager::GraphManager(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, IGraphAdjudicator::SharedPtr graphAdjudicatorPtr) :
 		m_reference_ptr(referencePtr),
 		m_variant_list_ptr(variantListPtr),
 		m_alignment_reader_manager(alignmentReaderManager),
-		m_padding(padding)
+		m_graph_adjudicator_ptr(graphAdjudicatorPtr)
 	{
 	}
 
@@ -40,16 +40,17 @@ namespace gssw
 			auto graphRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition) + "-" + std::to_string(endGraphPosition)));
 			auto variantsListPtr = this->m_variant_list_ptr->getVariantsInRegion(graphRegion);
 			if (variantsListPtr->getCount() == 0) { continue; }
-			auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
+			ThreadPool::Instance()->enqueue([&, reportedVariants, variantsListPtr](){
+					auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
-			auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
-			// create region for alignmentReader
-			alignmentReaderPtr->init();
-			alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
-			auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr);
-			gsswGraph->constructGraph();
-			auto variantsPtrList = gsswGraph->adjudicateGraph(alignmentReaderPtr);
-
+					auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
+					// create region for alignmentReader
+					alignmentReaderPtr->init();
+					alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
+					auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr);
+					gsswGraph->constructGraph();
+					auto variantsPtrList =  this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);
+				});
 			currentPosition += graphSize - overlap;
 		}
 		return reportedVariants;
@@ -115,6 +116,7 @@ namespace gssw
 
 	IVariantList::SharedPtr GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
 	{
+		/*
 		auto reportedVariants = std::make_shared< VariantList >();
 		static uint32_t contigsDone = 0;
 		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
@@ -126,6 +128,8 @@ namespace gssw
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
 		gsswGraph->constructGraph();
 		return reportedVariants;
+		*/
+		return nullptr;
 	}
 }
 }
