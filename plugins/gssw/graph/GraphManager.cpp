@@ -24,7 +24,7 @@ namespace gssw
 	{
 	}
 
-	IVariantList::SharedPtr GraphManager::buildGraphs(Region::SharedPtr regionPtr, size_t graphSize, size_t overlap)
+	IVariantList::SharedPtr GraphManager::buildGraphs(Region::SharedPtr regionPtr, size_t graphSize, size_t overlap, size_t alignmentPadding)
 	{
 		auto reportedVariants = std::make_shared< VariantList >();
 
@@ -42,10 +42,13 @@ namespace gssw
 			if (variantsListPtr->getCount() == 0) { continue; }
 			auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
+			auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 			// create region for alignmentReader
 			alignmentReaderPtr->init();
-			alignmentReaderPtr->setRegion(graphRegion); // set alignmentreader's region
-			auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, alignmentReaderPtr);
+			alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
+			auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr);
+			gsswGraph->constructGraph();
+			auto variantsPtrList = gsswGraph->adjudicateGraph(alignmentReaderPtr);
 
 			currentPosition += graphSize - overlap;
 		}

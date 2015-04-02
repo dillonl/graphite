@@ -33,6 +33,18 @@ namespace gssw
 		free(this->m_mat);
 	}
 
+	IVariantList::SharedPtr	GSSWGraph::adjudicateGraph(IAlignmentReader::SharedPtr alignmentReader)
+	{
+		IAlignment::SharedPtr alignmentPtr;
+		while (alignmentReader->getNextAlignment(alignmentPtr))
+		{
+			// if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
+			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
+			recordAlignmentVariants(graphMapping, alignmentPtr);
+		}
+		return nullptr;
+	}
+
 	void GSSWGraph::constructGraph()
 	{
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
@@ -235,6 +247,7 @@ namespace gssw
 
 	void GSSWGraph::graphConstructed()
 	{
+		/*
 		IAlignment::SharedPtr alignmentPtr;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
@@ -242,6 +255,7 @@ namespace gssw
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
 			recordAlignmentVariants(graphMapping, alignmentPtr);
 		}
+		*/
 	}
 }
 }

@@ -27,10 +27,11 @@ namespace gssw
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 
-		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, IAlignmentReader::SharedPtr alignmentReader);
+		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
+		IVariantList::SharedPtr	adjudicateGraph(IAlignmentReader::SharedPtr alignmentReader);
 
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);

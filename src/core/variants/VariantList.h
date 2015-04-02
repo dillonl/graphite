@@ -41,12 +41,16 @@ namespace gwiz
 		{
 			position startPosition = regionPtr->getStartPosition();
 			position endPosition = regionPtr->getEndPosition();
-			std::pair< std::vector< Variant::SharedPtr >::iterator, std::vector< Variant::SharedPtr >::iterator > bounds;
-			bounds = std::equal_range(this->m_variants_ptr_list.begin(), this->m_variants_ptr_list.end(), nullptr, [startPosition, endPosition](const Variant::SharedPtr& variantPtr, const Variant::SharedPtr& ignore) {
-					return startPosition <= variantPtr->getPosition() && variantPtr->getPosition() <= endPosition;
+
+			auto lowerBound = std::lower_bound(this->m_variants_ptr_list.begin(), this->m_variants_ptr_list.end(), nullptr, [startPosition](const Variant::SharedPtr& variantPtr, const Variant::SharedPtr& ignore) {
+					return startPosition > variantPtr->getPosition();
 				});
+			auto upperBound = std::upper_bound(this->m_variants_ptr_list.begin(), this->m_variants_ptr_list.end(), nullptr, [endPosition](const Variant::SharedPtr& ignore, const Variant::SharedPtr& variantPtr) {
+					return variantPtr->getPosition() > endPosition;
+				});
+
 			auto variantListPtr = std::make_shared< VariantList >();
-			variantListPtr->m_variants_ptr_list = std::vector< Variant::SharedPtr >(bounds.first, bounds.second);
+			variantListPtr->m_variants_ptr_list = std::vector< Variant::SharedPtr >(lowerBound, upperBound);
 			return variantListPtr;
 		}
 

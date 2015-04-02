@@ -30,7 +30,7 @@ namespace gssw
 		 *
 		 * overlap: The number of base pairs that will overlap between graphs.
 		 */
-		IVariantList::SharedPtr buildGraphs(Region::SharedPtr region, size_t graphSize, size_t overlap);
+		IVariantList::SharedPtr buildGraphs(Region::SharedPtr region, size_t graphSize, size_t overlap, size_t alignmentPadding);
 
 	private:
 		IVariantList::SharedPtr buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);

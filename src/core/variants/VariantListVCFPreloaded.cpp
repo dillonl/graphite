@@ -26,28 +26,18 @@ namespace gwiz
 			// add all variants unless region is set
 			if (this->m_region_ptr != nullptr)
 			{
-				// if the variant isn't the same referenceID or if the variant position is less than the start position then continue
-				if (std::strcmp(this->m_region_ptr->getReferenceID().c_str(), variantPtr->getChrom().c_str()) != 0 || this->m_region_ptr->getStartPosition() > variantPtr->getPosition())
+				// if the variant isn't the same referenceID or if the variant position is less than the start position then continue;
+				if (std::strcmp(this->m_region_ptr->getReferenceID().c_str(), variantPtr->getChrom().c_str()) != 0 || (this->m_region_ptr->getStartPosition() > variantPtr->getPosition() && this->m_region_ptr->getStartPosition() > 0 && this->m_region_ptr->getEndPosition() > 0))
 				{
 					continue;
 				}
-				// dont continue if the variants are past the end position
+				// dont continue; if the variants are past the end position
 				if (variantPtr->getPosition() > this->m_region_ptr->getEndPosition())
 				{
 					break;
 				}
 			}
 			this->m_variants_ptr_list.push_back(variantPtr);
-
-			/*
-			if (this->m_region_ptr == nullptr ||
-				(std::strcmp(this->m_region_ptr->getReferenceID().c_str(), variantPtr->getChrom().c_str()) == 0 &&
-				 this->m_region_ptr->getStartPosition() <= variantPtr->getPosition()  &&
-				 variantPtr->getPosition() <= this->m_region_ptr->getEndPosition()))
-			{
-				this->m_variants_ptr_list.push_back(variantPtr);
-			}
-			*/
 		}
 	}
 }

@@ -10,10 +10,10 @@
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
 #include "BamAlignmentTests.hpp"
+#include "VariantListVCFPreloadedTests.hpp"
 */
 
-#include "VariantListVCFPreloadedTests.hpp"
-// #include "plugins/TestIncludes.h"
+#include "plugins/TestIncludes.h"
 
 
 #include "gtest/gtest.h"

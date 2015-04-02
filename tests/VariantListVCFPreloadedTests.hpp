@@ -8,15 +8,12 @@
 
 #include "TestConfig.h"
 
+/*
 TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedNoRegion)
 {
 	std::string chrom = "Y";
 	gwiz::position startPosition = 2655180;
 	gwiz::position endPosition = 28770931;
-	/*
-    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	*/
 	std::string path = TEST_1KG_CHRY_VCF_FILE;
 	auto vcfFileReader = std::make_shared<gwiz::VariantListVCFPreloaded>(path);
 	vcfFileReader->loadVariantsFromFile();
@@ -40,8 +37,8 @@ TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedNoRegion)
 TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedRegion)
 {
 	std::string chrom = "Y";
-	gwiz::position startPosition = 2658789;
-	gwiz::position endPosition = 2662351;
+	gwiz::position startPosition = 2655800;
+	gwiz::position endPosition = 2656127;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(regionString);
 	std::string path = TEST_1KG_CHRY_VCF_FILE;
@@ -61,7 +58,52 @@ TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedRegion)
 		prevVariantPtr = variantPtr; // so we can check the last position
 	}
 	ASSERT_EQ(prevVariantPtr->getPosition(), endPosition);
-	ASSERT_EQ(count, 21);
+	ASSERT_EQ(count, 5);
+}
+
+TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedRegionWrongChrom)
+{
+	std::string chrom = "20";
+	gwiz::position startPosition = 2655800;
+	gwiz::position endPosition = 2656127;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(regionString);
+	std::string path = TEST_1KG_CHRY_VCF_FILE;
+	auto vcfFileReader = std::make_shared<gwiz::VariantListVCFPreloaded>(path, regionPtr);
+	vcfFileReader->loadVariantsFromFile();
+	gwiz::Variant::SharedPtr variantPtr;
+	gwiz::Variant::SharedPtr prevVariantPtr;
+	vcfFileReader->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr, nullptr);
+}
+*/
+TEST(VariantListVCFPreloadedTests, TestVariantListVCFPreloadedNoRegionGetVariantsInRegion)
+{
+	std::string chrom = "Y";
+	gwiz::position startPosition = 2655800;
+	gwiz::position endPosition = 2656127;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(regionString);
+
+	std::string path = TEST_1KG_CHRY_VCF_FILE;
+	auto vcfFileReader = std::make_shared<gwiz::VariantListVCFPreloaded>(path);
+	vcfFileReader->loadVariantsFromFile();
+	auto variantsInRegion = vcfFileReader->getVariantsInRegion(regionPtr);
+	gwiz::Variant::SharedPtr variantPtr;
+	gwiz::Variant::SharedPtr prevVariantPtr;
+	variantsInRegion->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), startPosition);
+	size_t count = 1;
+	while (variantsInRegion->getNextVariant(variantPtr))
+	{
+		++count;
+		ASSERT_STREQ(chrom.c_str(), variantPtr->getChrom().c_str());
+		ASSERT_LE(startPosition, variantPtr->getPosition());
+		ASSERT_GE(endPosition, variantPtr->getPosition());
+		prevVariantPtr = variantPtr; // so we can check the last position
+	}
+	ASSERT_EQ(prevVariantPtr->getPosition(), endPosition);
+	ASSERT_EQ(count, variantsInRegion->getCount());
 }
 
 /*
