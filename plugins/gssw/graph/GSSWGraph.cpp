@@ -15,9 +15,8 @@ namespace gwiz
 {
 namespace gssw
 {
-	bool GSSWGraph::PrintStuff = false;
 
-	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr) :
+	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr/*, position startPosition, size_t graphSize*/) :
 		IGraph(referencePtr, variantListPtr), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
 
 	{
@@ -35,16 +34,19 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
-		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
-		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
+		/*
+		// position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
+		// position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
 
-		size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : alignmentReaderStartPosition;
+		// size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : alignmentReaderStartPosition;
+		size_t referenceOffset = 0;
 		int64_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
 
-		this->m_graph_start_position = referenceOffset;
+		// this->m_graph_start_position = referenceOffset;
+		std::cout << "1hello" << std::endl;
 
 		while (getNextCompoundVariant(variantPtr))
 		{
@@ -70,6 +72,7 @@ namespace gssw
 			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
 		graphConstructed();
+		*/
 	}
 
 	gssw_node* GSSWGraph::addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr)
@@ -132,9 +135,9 @@ namespace gssw
 
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
 	{
-		this->m_variant_list_ptr->rewind();
-		auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping, this->m_graph_start_position);
-		AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
+		// this->m_variant_list_ptr->rewind();
+		// auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping, this->m_graph_start_position);
+		// AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
 	}
 
 	/*

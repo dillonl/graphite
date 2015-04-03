@@ -23,7 +23,6 @@ namespace gssw
 	class GSSWGraph : public IGraph
 	{
 	public:
-		static bool PrintStuff;
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
@@ -40,7 +39,6 @@ namespace gssw
 		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
-		IAlignmentReader::SharedPtr m_alignment_reader;
 		int32_t m_match;
 		int32_t m_mismatch;
 		int32_t m_gap_open;
@@ -49,7 +47,6 @@ namespace gssw
 		int8_t* m_mat;
 		gssw_graph* m_graph_ptr;
 		uint32_t m_next_id = 0;
-		position m_graph_start_position;
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
         std::list< IGenotyperVariant > m_genotype_variants;

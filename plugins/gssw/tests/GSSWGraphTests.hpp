@@ -229,11 +229,11 @@ namespace
 		std::string referenceSequence = "AAAGAGGATG";
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
-		alignmentReaderPtr->addAlignment(startPosition, std::string("AAGGAGGATG"));
-
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->addAlignment(startPosition, std::string("AAGGAGGATG"));
 		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
+		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 		// test setup end
 
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();

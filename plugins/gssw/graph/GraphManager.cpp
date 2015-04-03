@@ -35,8 +35,6 @@ namespace gssw
 		position currentPosition = startPosition;
 		int64_t distance = endPosition - startPosition; // this number may become negative
 
-		std::cout << "cp " << currentPosition << std::endl;
-		std::cout << "ep " << endPosition << std::endl;
 		while (currentPosition < endPosition)
 		{
 			auto endGraphPosition = (currentPosition + graphSize > endPosition) ? endPosition : (currentPosition + graphSize);
@@ -45,7 +43,6 @@ namespace gssw
 			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
 				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
-
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 				// create region for alignmentReader
 				alignmentReaderPtr->init();
@@ -55,7 +52,6 @@ namespace gssw
 				ThreadPool::Instance()->enqueue(funct);
 			}
 			currentPosition += graphSize - overlap;
-			std::cout << "currentPosition " << currentPosition << std::endl;
 		}
 		ThreadPool::Instance()->joinAll();
 		return reportedVariants;
@@ -65,6 +61,7 @@ namespace gssw
 	{
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr);
 		gsswGraph->constructGraph();
+
 		auto variantsPtrList =  this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);
 
 		{
