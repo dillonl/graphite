@@ -35,23 +35,29 @@ namespace gssw
 		position currentPosition = startPosition;
 		int64_t distance = endPosition - startPosition; // this number may become negative
 
+		std::cout << "cp " << currentPosition << std::endl;
+		std::cout << "ep " << endPosition << std::endl;
 		while (currentPosition < endPosition)
 		{
 			auto endGraphPosition = (currentPosition + graphSize > endPosition) ? endPosition : (currentPosition + graphSize);
 			auto graphRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition) + "-" + std::to_string(endGraphPosition)));
 			auto variantsListPtr = this->m_variant_list_ptr->getVariantsInRegion(graphRegion);
-			if (variantsListPtr->getCount() == 0) { continue; }
-			auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
+			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
+			{
+				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 
-			auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
-			// create region for alignmentReader
-			alignmentReaderPtr->init();
-			alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
+				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
+				// create region for alignmentReader
+				alignmentReaderPtr->init();
+				alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
 
-			auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, std::ref(reportedVariantsMutex));
-			ThreadPool::Instance()->enqueue(funct);
+				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, std::ref(reportedVariantsMutex));
+				ThreadPool::Instance()->enqueue(funct);
+			}
 			currentPosition += graphSize - overlap;
+			std::cout << "currentPosition " << currentPosition << std::endl;
 		}
+		ThreadPool::Instance()->joinAll();
 		return reportedVariants;
 	}
 

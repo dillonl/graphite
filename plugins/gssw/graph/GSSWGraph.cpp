@@ -33,23 +33,6 @@ namespace gssw
 		free(this->m_mat);
 	}
 
-	IVariantList::SharedPtr	GSSWGraph::adjudicateGraph(IAlignmentReader::SharedPtr alignmentReader)
-	{
-		IAlignment::SharedPtr alignmentPtr;
-		while (alignmentReader->getNextAlignment(alignmentPtr))
-		{
-			// if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
-			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
-			gssw_node_cigar* nc = graphMapping->cigar.elements;
-			for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
-			{
-				auto nodeID = nc->node->id;
-			}
-			recordAlignmentVariants(graphMapping, alignmentPtr);
-		}
-		return nullptr;
-	}
-
 	void GSSWGraph::constructGraph()
 	{
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
@@ -138,7 +121,7 @@ namespace gssw
 		return vertices;
 	}
 
-	std::shared_ptr< gssw_graph_mapping > GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
+	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
 	{
 		std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
 		gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);

@@ -26,13 +26,13 @@ namespace gssw
 		static bool PrintStuff;
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
+		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
 		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
-		IVariantList::SharedPtr	adjudicateGraph(IAlignmentReader::SharedPtr alignmentReader);
-
+		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
@@ -56,7 +56,6 @@ namespace gssw
 
 	private:
 		void graphConstructed();
-		std::shared_ptr< gssw_graph_mapping > traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,

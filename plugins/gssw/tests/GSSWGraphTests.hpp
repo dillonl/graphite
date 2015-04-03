@@ -201,12 +201,12 @@ namespace
 
 		gwiz::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", 1);
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		alignmentReaderPtr->addAlignment(20000, std::string("AAAGAGGATG"));
-		alignmentReaderPtr->setRegion("20");
 
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
 		// test setup end
 
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
@@ -230,10 +230,10 @@ namespace
 		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
 		alignmentReaderPtr->addAlignment(startPosition, std::string("AAGGAGGATG"));
-		alignmentReaderPtr->setRegion("20");
 
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
 		// test setup end
 
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
