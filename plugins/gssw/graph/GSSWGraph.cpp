@@ -40,6 +40,11 @@ namespace gssw
 		{
 			// if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
+			gssw_node_cigar* nc = graphMapping->cigar.elements;
+			for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+			{
+				auto nodeID = nc->node->id;
+			}
 			recordAlignmentVariants(graphMapping, alignmentPtr);
 		}
 		return nullptr;
@@ -50,7 +55,6 @@ namespace gssw
 		position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
 		position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();
 		position startPosition = this->m_reference_ptr->getRegion()->getStartPosition();
-		static std::mutex mutex;
 
 		size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : alignmentReaderStartPosition;
 		int64_t referenceSize;
