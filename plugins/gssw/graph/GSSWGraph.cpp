@@ -16,8 +16,14 @@ namespace gwiz
 namespace gssw
 {
 
-	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr/*, position startPosition, size_t graphSize*/) :
-		IGraph(referencePtr, variantListPtr), m_match(2), m_mismatch(2), m_gap_open(3), m_gap_extension(1)
+	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize) :
+		IGraph(referencePtr, variantListPtr),
+		m_match(2),
+		m_mismatch(2),
+		m_gap_open(3),
+		m_gap_extension(1),
+		m_start_position(startPosition),
+		m_graph_size(graphSize)
 
 	{
 		this->m_nt_table = gssw_create_nt_table();
@@ -34,6 +40,8 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
+		std::cout << "Start Position: " << m_start_position << std::endl;
+		std::cout << "Graph Size: " << m_graph_size << std::endl;
 		/*
 		// position alignmentReaderStartPosition = this->m_alignment_reader->getRegion()->getStartPosition();
 		// position alignmentReaderEndPosition = this->m_alignment_reader->getRegion()->getEndPosition();

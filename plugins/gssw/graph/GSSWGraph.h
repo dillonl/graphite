@@ -27,7 +27,7 @@ namespace gssw
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
-		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr);
+		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
@@ -45,6 +45,8 @@ namespace gssw
 		int32_t m_gap_extension;
 		int8_t* m_nt_table;
 		int8_t* m_mat;
+		size_t m_graph_size;
+		position m_start_position;
 		gssw_graph* m_graph_ptr;
 		uint32_t m_next_id = 0;
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;

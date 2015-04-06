@@ -34,7 +34,7 @@ namespace gssw
 		IVariantList::SharedPtr buildGraphs(Region::SharedPtr region, size_t graphSize, size_t overlap, size_t alignmentPadding);
 
 	private:
-		void constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, std::mutex& reportedVariantsMutex);
+		void constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize,std::mutex& reportedVariantsMutex);
 
 		IVariantList::SharedPtr buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr);
 

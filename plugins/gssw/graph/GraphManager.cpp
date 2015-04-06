@@ -48,7 +48,7 @@ namespace gssw
 				alignmentReaderPtr->init();
 				alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
 
-				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, std::ref(reportedVariantsMutex));
+				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize, std::ref(reportedVariantsMutex));
 				ThreadPool::Instance()->enqueue(funct);
 			}
 			currentPosition += graphSize - overlap;
@@ -57,9 +57,9 @@ namespace gssw
 		return reportedVariants;
 	}
 
-	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, std::mutex& reportedVariantsMutex)
+	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize, std::mutex& reportedVariantsMutex)
 	{
-		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr);
+		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
 
 		auto variantsPtrList =  this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);

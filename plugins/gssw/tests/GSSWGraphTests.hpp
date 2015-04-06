@@ -37,6 +37,7 @@ namespace
 	public:
 		typedef std::shared_ptr< GSSWGraphTest > GSSWGraphTestPtr;
 
+		/*
 		GSSWGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
 			gwiz::gssw::GSSWGraph(referencePtr, variantListPtr)
 		{
@@ -45,7 +46,7 @@ namespace
 		~GSSWGraphTest()
 		{
 		}
-
+		*/
 		/*
 		gwiz::gssw::GSSWGraph::VariantVertexDescriptor getReferenceVertexContainsPositionTest(gwiz::position pos)
 		{
