@@ -33,7 +33,7 @@ namespace gssw
 		virtual void constructGraph() override;
 		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 	protected:
-		std::vector< gssw_node* > addAlternateVertices(std::vector< gssw_node* > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
+		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
 		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
 		gssw_node* addAlternateNode(INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
@@ -52,6 +52,7 @@ namespace gssw
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
         std::list< IGenotyperVariant > m_genotype_variants;
+		std::map< uint32_t, Variant > m_variants_map;
 
 	private:
 		void graphConstructed();
@@ -66,7 +67,6 @@ namespace gssw
 										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
-			//int32_t len = strlen(seq);
 			n->ref_len = referenceLength;
 			n->position = position;
 			n->id = m_next_id++;

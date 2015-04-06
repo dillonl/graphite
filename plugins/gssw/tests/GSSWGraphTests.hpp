@@ -213,6 +213,7 @@ namespace
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 0);
+		std::cout << "first" << std::endl;
 
 		gwiz::Variant::SharedPtr variantPtr;
 		ASSERT_FALSE(variantList->getNextVariant(variantPtr));

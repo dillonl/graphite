@@ -14,7 +14,7 @@ namespace testing
 	{
 	public:
 		typedef std::shared_ptr< TestAlignmentReader > SharedPtr;
-		TestAlignmentReader()
+		TestAlignmentReader() : m_current_alignment_index(0)
 		{
 		}
 
@@ -32,7 +32,7 @@ namespace testing
 			size_t readLength = 0;
 			if (!this->m_alignments.empty())
 			{
-				this->m_alignments.front()->getLength();
+				this->m_alignments.at(0)->getLength();
 			}
 			return readLength;
 		}
@@ -40,21 +40,26 @@ namespace testing
 		void addAlignment(const position pos, const std::string& seq)
 		{
 			auto alignment = std::make_shared< TestAlignment >(pos, seq);
-			this->m_alignments.push(alignment);
+			this->m_alignments.emplace_back(alignment);
 
 		}
 
 		bool getNextAlignment(IAlignment::SharedPtr& alignment)
 		{
-			if (!this->m_alignments.empty())
+			if (this->m_current_alignment_index < this->m_alignments.size())
 			{
-				alignment = this->m_alignments.front();
-				this->m_alignments.pop();
+				alignment = this->m_alignments.at(m_current_alignment_index);
+				++m_current_alignment_index;
+				return true;
 			}
-			return !this->m_alignments.empty();
+			else
+			{
+				return false;
+			}
 		}
 
-		std::queue< IAlignment::SharedPtr > m_alignments;
+		std::vector< IAlignment::SharedPtr > m_alignments;
+		size_t m_current_alignment_index;
 	};
 }
 }

@@ -1,5 +1,6 @@
 #include "GSSWAdjudicator.h"
 #include "GSSWGraph.h"
+#include "core/variants/VariantList.h"
 
 namespace gwiz
 {
@@ -15,6 +16,7 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
+		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (graphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
@@ -26,7 +28,6 @@ namespace gssw
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto nodeID = nc->node->id;
-					std::cout << "NodeID: " << nodeID << std::endl;
 				}
 			}
 		}
@@ -34,7 +35,7 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
-		return nullptr;
+		return variantList;
 	}
 }
 }
