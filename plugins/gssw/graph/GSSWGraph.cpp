@@ -138,11 +138,12 @@ namespace gssw
 	{
 		auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping);
 		AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
-	}
 
-	/*
+
+/*
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
-	{
+*/
+
 		static std::mutex cigLock;
 		cigLock.lock();
 		std::string cigarString = "";
@@ -192,7 +193,7 @@ namespace gssw
 						firstTimeThrough = false;
 					}
 					genotyperAllele->second->addAlignment(alignmentPtr);
-					typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "AV" : "RV";
+					/* typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "AV" : "RV";*/
 				}
 			}
 			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
@@ -233,17 +234,15 @@ namespace gssw
 		std::cout << "---------------------------------------------------------" << std::endl;
 		cigLock.unlock();
 	}
-	*/
+
 
 	void GSSWGraph::graphConstructed()
-	{
+		{
+		gssw_graph_print(this->m_graph_ptr);
 		IAlignment::SharedPtr alignmentPtr;
 		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
 		{
 			if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
 			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
 			recordAlignmentVariants(graphMapping, alignmentPtr);
-		}
-	}
-}
-}
+		}}}}
