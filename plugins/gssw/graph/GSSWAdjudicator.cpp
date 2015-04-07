@@ -27,7 +27,13 @@ namespace gssw
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
-					auto nodeID = nc->node->id;
+					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
+					if (variantPtr != nullptr)
+					{
+						// std::cout << "seq: " << nc->node->seq << std::endl;
+						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len));
+						variantList->addVariant(variantPtr);
+					}
 				}
 			}
 		}

@@ -94,9 +94,9 @@ namespace gwiz
 				vertices.push_back(addVariantNode(variantNode));
 			}
 			size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
-			ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getRef()[0].size());
+			ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getRef().size());
 			vertices.push_back(addReferenceNodeAtVariantPosition(variantReferenceNode));
-			variantReferenceSize = variantPtr->getRef()[0].size();
+			variantReferenceSize = variantPtr->getRef().size();
 
 			for (auto parentVertexIter = altAndRefVertices.begin(); parentVertexIter != altAndRefVertices.end(); ++parentVertexIter)
 			{

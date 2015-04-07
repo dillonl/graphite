@@ -192,6 +192,7 @@ namespace
 
 	};
 
+	/*
 	TEST(GSSWGraphManagerTests, TestBuildGraphNoVariants)
 	{
 		// test setup start
@@ -213,7 +214,6 @@ namespace
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 0);
-		std::cout << "first" << std::endl;
 
 		gwiz::Variant::SharedPtr variantPtr;
 		ASSERT_FALSE(variantList->getNextVariant(variantPtr));
@@ -244,6 +244,125 @@ namespace
 
 		gwiz::Variant::SharedPtr variantPtr;
 		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
+
+	}
+
+	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatch)
+	{
+		// test setup start
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+
+		gwiz::position startPosition = 200000;
+		std::string referenceSequence = "AAAGAGGATG";
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
+		referencePtr = testReferenceVariantGenerator.getReference();
+		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->addAlignment(startPosition, std::string("AAAGAG"));
+		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
+		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
+		// test setup end
+
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
+
+		std::map< std::string, uint32_t > alleleCount;
+		alleleCount["A"] = 1;
+		alleleCount["G"] = 0;
+
+
+		gwiz::Variant::SharedPtr variantPtr;
+		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
+		for (auto variantAllele : variantPtr->getAlt())
+		{
+			ASSERT_FALSE(alleleCount.find(variantAllele) == alleleCount.end());
+			ASSERT_EQ(alleleCount[variantAllele], variantPtr->getAlleleCount(variantAllele));
+		}
+		ASSERT_EQ(alleleCount[variantPtr->getRef()], variantPtr->getAlleleCount(variantPtr->getRef()));
+
+	}
+
+	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatchTwoReads)
+	{
+		// test setup start
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+
+		gwiz::position startPosition = 200000;
+		std::string referenceSequence = "AAAGAGGATG";
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
+		referencePtr = testReferenceVariantGenerator.getReference();
+		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->addAlignment(startPosition, std::string("AAGGA"));
+		alignmentReaderPtr->addAlignment(startPosition, std::string("GGATG"));
+		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
+		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
+		// test setup end
+
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
+
+		std::map< std::string, uint32_t > alleleCount;
+		alleleCount["A"] = 0;
+		alleleCount["G"] = 1;
+
+
+		gwiz::Variant::SharedPtr variantPtr;
+		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
+		for (auto variantAllele : variantPtr->getAlt())
+		{
+			ASSERT_FALSE(alleleCount.find(variantAllele) == alleleCount.end());
+			ASSERT_EQ(alleleCount[variantAllele], variantPtr->getAlleleCount(variantAllele));
+		}
+		ASSERT_EQ(alleleCount[variantPtr->getRef()], variantPtr->getAlleleCount(variantPtr->getRef()));
+
+	}
+*/
+	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatchTwoGraphs)
+	{
+		// test setup start
+		gwiz::IReference::SharedPtr referencePtr;
+		gwiz::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+
+		gwiz::position startPosition = 200000;
+		std::string referenceSequence = "AAAGAGGATGATGTGCAAATA";
+		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		testReferenceVariantGenerator.addVariant(startPosition + 15, ".", 1, {"G"});
+		referencePtr = testReferenceVariantGenerator.getReference();
+		variantListPtr = testReferenceVariantGenerator.getVariants();
+		alignmentReaderPtr->addAlignment(startPosition, std::string("AAGGA"));
+		alignmentReaderPtr->addAlignment(startPosition + 10, std::string("ATGTGGAAA"));
+		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
+		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
+		// test setup end
+
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 2);
+
+		std::map< std::string, uint32_t > alleleCount;
+		alleleCount["C"] = 0;
+		alleleCount["G"] = 1;
+
+
+		gwiz::Variant::SharedPtr variantPtr;
+		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
+		for (auto variantAllele : variantPtr->getAlt())
+		{
+			ASSERT_FALSE(alleleCount.find(variantAllele) == alleleCount.end());
+			ASSERT_EQ(alleleCount[variantAllele], variantPtr->getAlleleCount(variantAllele));
+		}
+		ASSERT_EQ(alleleCount[variantPtr->getRef()], variantPtr->getAlleleCount(variantPtr->getRef()));
 
 	}
 

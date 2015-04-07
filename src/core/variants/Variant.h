@@ -53,13 +53,33 @@ namespace gwiz
 			this->m_allele_count[allele] = count + 1;
 		}
 
+		uint32_t getAlleleCount(const std::string& allele)
+		{
+			size_t count = 0;
+			if (this->m_allele_count.find(allele) != this->m_allele_count.end())
+			{
+				count = this->m_allele_count[allele];
+			}
+			return count;
+		}
+
+		void printAlleleCount()
+		{
+			for (auto alleleCounter : this->m_allele_count)
+			{
+				std::cout << "allele: " << alleleCounter.first << " <" << alleleCounter.second << ">" << std::endl;
+			}
+			std::cout << "allele: " << getRef() << " <" << this->m_allele_count[getRef()] << ">" << std::endl;
+		}
+
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }
 		std::string getID() const { return m_id; }
-		std::vector< std::string > const getRef() { return m_ref; }
+		/* std::vector< std::string > const getRef() { return m_ref; } */
+		std::string const getRef() { return m_ref[0]; }
 		std::vector< std::string > const getAlt() { return m_alt; }
-		std::map< std::string, size_t > m_allele_count;
+		std::map< std::string, uint32_t > m_allele_count;
 
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)

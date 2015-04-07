@@ -38,7 +38,7 @@ namespace gwiz
 			variant = this->m_next_variant; // set the variant to be returned
 			if (this->m_next_variant == NULL) { return false; } // if the variant is NULL then return false, this indicates we are past the region of interest
 
-			std::string referenceString = variant->getRef()[0];
+			std::string referenceString = variant->getRef();
 			std::vector< Variant::SharedPtr > variants;
 			Variant::SharedPtr nextVariant;
 			bool variantAdded = false;
@@ -64,7 +64,7 @@ namespace gwiz
 					variants.push_back(variant); // we will build a compound variant with all these variants
 					variantAdded = true;
 				}
-				std::string nextReferenceString = nextVariant->getRef()[0];
+				std::string nextReferenceString = nextVariant->getRef();
 				position nextVariantEndPosition = (nextVariant->getPosition() + nextReferenceString.size());
 				// if the next variant has reference at a further position then add it to the end of the referenceString
 				if (nextVariantEndPosition > variantEndPosition)
@@ -103,7 +103,7 @@ namespace gwiz
 					// basically we are replacing the variant's reference with the alt within the aggrigated reference (referenceString)
 					// it's complicated to explain in words but if you follow the code it isn't too bad
 					std::string variantString = referenceString;
-					variantString.erase((*variantIter)->getPosition() - startPosition, (*variantIter)->getRef()[0].size());
+					variantString.erase((*variantIter)->getPosition() - startPosition, (*variantIter)->getRef().size());
 					variantString.insert((*variantIter)->getPosition() - startPosition, altString);
 					line += variantString + ",";
 				}

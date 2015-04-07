@@ -54,6 +54,7 @@ namespace gssw
 			currentPosition += graphSize - overlap;
 		}
 		ThreadPool::Instance()->joinAll();
+		reportedVariants->sort();
 		return reportedVariants;
 	}
 
