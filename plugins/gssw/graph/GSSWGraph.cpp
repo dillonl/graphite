@@ -142,9 +142,9 @@ namespace gssw
 
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
 	{
-		// this->m_variant_list_ptr->rewind();
-		// auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping, this->m_graph_start_position);
-		// AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
+		 this->m_variant_list_ptr->rewind();
+		 auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping, this->m_start_position);
+		 AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
 	}
 
 	Variant::SharedPtr GSSWGraph::getVariantFromNodeID(const uint32_t nodeID)

@@ -33,6 +33,7 @@ namespace gssw
 		virtual void constructGraph() override;
 		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 		Variant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
+		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
@@ -57,7 +58,6 @@ namespace gssw
 
 	private:
 		void graphConstructed();
-		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const uint32_t referenceLength,

@@ -25,6 +25,7 @@
 #include "core/alignments/BamAlignmentReaderPreloadManager.h"
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
+#include "core/variants/VariantListVCFPreloaded.h"
 #include "core/reference/FastaReference.h"
 #include "core/utils/ThreadPool.hpp"
 
@@ -326,6 +327,7 @@ namespace
 
 	}
 */
+	/*
 	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatchTwoGraphs)
 	{
 		// test setup start
@@ -348,7 +350,7 @@ namespace
 
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
-		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 2);
+		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 15, 5, 2);
 
 		std::map< std::string, uint32_t > alleleCount;
 		alleleCount["C"] = 0;
@@ -365,6 +367,7 @@ namespace
 		ASSERT_EQ(alleleCount[variantPtr->getRef()], variantPtr->getAlleleCount(variantPtr->getRef()));
 
 	}
+	*/
 
 	/*
 	TEST(GSSWTests, TestAlignmentReport)
@@ -384,29 +387,34 @@ namespace
 	}
 	*/
 
-	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
-		std::string vcfPath = TEST_SMALL_MEI_VCF_FILE;
-		// std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
+		// std::string vcfPath = TEST_SMALL_MEI_VCF_FILE;
+		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
 		// bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReaderPtr = std::make_shared< gwiz::VCFFileReader >(vcfPath);
+		auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
 		// auto bamAlignmentReaderManager = std::make_shared< gwiz::BamAlignmentReaderManager >(bamPath);
 		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
-		auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
-		graphManagerPtr->buildGraphs();
+		vcfFileReaderPtr->loadVariantsFromFile();
+
+		std::cout << "done" << std::endl;
+		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
+		auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
+
+		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, 25);
+		// graphManagerPtr->buildGraphs();
 
 		std::ofstream outStream;
 		outStream.open("og.txt", std::ios::out);
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		outStream.close();
 	}
-	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{

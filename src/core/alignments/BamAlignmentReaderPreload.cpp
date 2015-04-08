@@ -38,12 +38,30 @@ namespace gwiz
 		}
 	}
 
-	void BamAlignmentReaderPreload::setRegion(Region::SharedPtr region)
+	void BamAlignmentReaderPreload::setRegion(Region::SharedPtr regionPtr)
 	{
+		position startPosition = regionPtr->getStartPosition();
+		position endPosition = regionPtr->getEndPosition();
+
+		auto lowerBound = std::lower_bound(this->m_alignments_ptr->begin(), this->m_alignments_ptr->end(), nullptr, [startPosition](const BamAlignment::SharedPtr& alignmentPtr, const BamAlignment::SharedPtr& ignore) {
+				return startPosition > alignmentPtr->getPosition();
+			});
+		auto upperBound = std::upper_bound(this->m_alignments_ptr->begin(), this->m_alignments_ptr->end(), nullptr, [endPosition](const BamAlignment::SharedPtr& ignore, const BamAlignment::SharedPtr& alignmentPtr) {
+				return alignmentPtr->getPosition() > endPosition;
+			});
+
+		// auto variantListPtr = std::make_shared< VariantList >();
+		// variantListPtr->m_variants_ptr_list = std::vector< Variant::SharedPtr >(lowerBound, upperBound);
+		// return variantListPtr;
+
+		/*
 		setIndexClosestToPosition(region->getStartPosition(), this->m_start_index, true);
 		setIndexClosestToPosition(region->getEndPosition(), this->m_end_index, false);
+		*/
+		this->m_start_index = lowerBound - this->m_alignments_ptr->begin();
+		this->m_end_index = upperBound - this->m_alignments_ptr->begin();
 		this->m_current_index = this->m_start_index;
-		this->m_region = region;
+		this->m_region = regionPtr;
 	}
 
 	bool BamAlignmentReaderPreload::getNextAlignment(IAlignment::SharedPtr& alignmentPtr)
