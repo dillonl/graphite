@@ -44,14 +44,13 @@ namespace gssw
 		std::lock_guard< std::mutex > lock(constructMutex);
 		position startPosition = this->m_start_position;
 		position endPosition = this->m_start_position + this->m_graph_size;
+		size_t graphStartOffset = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
 
 		// size_t referenceOffset = (startPosition < alignmentReaderStartPosition) ? (alignmentReaderStartPosition - startPosition) : alignmentReaderStartPosition;
-		size_t referenceOffset = 0;
+		size_t referenceOffset = 0;//startPosition;
 		int64_t referenceSize;
 		Variant::SharedPtr variantPtr;
 		std::vector< gssw_node* > altAndRefVertices;
-
-		// this->m_graph_start_position = referenceOffset;
 
 		while (getNextCompoundVariant(variantPtr))
 		{
@@ -59,7 +58,7 @@ namespace gssw
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
-				auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
+				auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			    addReference(altAndRefVertices, referenceNode, genotyperVariantPtr);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
@@ -74,7 +73,7 @@ namespace gssw
 		referenceSize = currentEndPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
 		{
-			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
+			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
 		graphConstructed();
@@ -111,7 +110,7 @@ namespace gssw
 			vertices.push_back(addAlternateNode(variantPtr, variantNodePtr, genotyperVariantPtr, variantReferenceSize));
 		}
 		variantReferenceSize = variantPtr->getRef().size();
-		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantReferenceSize, GenotyperAllele::Type::VARIANT_REFERENCE, this->m_reference_ptr->getSequence() + referenceOffset, variantReferenceSize, this->m_nt_table, this->m_mat);
+		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantReferenceSize, GenotyperAllele::Type::VARIANT_REFERENCE, variantPtr->getRef().c_str(), variantReferenceSize, this->m_nt_table, this->m_mat);
 		this->m_variants_map[variantReferenceNode->id] = variantPtr;
 		// gssw_node* variantReferenceNode = gssw_node_create_alt(GenotyperAllele::Type::VARIANT_REFERENCE, this->m_reference_ptr->getSequence() + variantPtr->getPosition(), variantReferenceSize, this->m_nt_table, this->m_mat);
 

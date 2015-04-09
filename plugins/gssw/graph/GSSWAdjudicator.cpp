@@ -22,10 +22,10 @@ namespace gssw
 
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
-		std::cout << "adj" << std::endl;
+		// std::cout << "adj" << std::endl;
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
-			std::cout << "adj2" << std::endl;
+			// std::cout << "adj2" << std::endl;
 			IAlignment::SharedPtr alignmentPtr;
 			while (alignmentsReaderPtr->getNextAlignment(alignmentPtr))
 			{
@@ -48,6 +48,7 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
+		std::cout << "printing report" << std::endl;
 		AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 		return variantList;
 	}

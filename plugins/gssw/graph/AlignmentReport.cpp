@@ -60,11 +60,13 @@ namespace gssw
 				referenceStartPosition = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
 			}
 			auto nodeVariantType = static_cast< GenotyperAllele::Type >((long)nc->node->data);
+
 			cigarString +=  separator;
 
 			referenceString += std::string(this->m_reference_ptr->getSequence() + (referenceStartPosition + refOffset), nc->node->ref_len);
 			tracebackString += nc->node->seq;
 			nodeSeparatorPositions.emplace_back(nc->node->position + nodeSeparatorOffset);
+
 			if (nc->node->ref_len > nc->node->len) { nodeSeparatorOffset = nc->node->ref_len - nc->node->len; tracebackString += std::string(nc->node->ref_len - nc->node->len, ' '); }
 			else if (nc->node->ref_len < nc->node->len) { nodeSeparatorOffset = nc->node->len - nc->node->ref_len; referenceString += std::string(nc->node->len - nc->node->ref_len, ' '); }
 			if (i < this->m_graph_mapping_ptr->cigar.length && i != this->m_graph_mapping_ptr->cigar.length - 1)
@@ -94,11 +96,13 @@ namespace gssw
 		reportString += "Score:                " + std::to_string(this->m_graph_mapping_ptr->score) + eol;
 		reportString += "Node Cigar String:    " + cigarString + eol;
 		reportString += "Node Type Traceback:  " + nodeTracebackString + eol;
+		// reportString += "Reference             " + std::string(this->m_reference_ptr->getSequence() + (startPosition - this->m_reference_ptr->getRegion()->getStartPosition()), 3000) + eol;
 		reportString += "Reference:            " + referenceString + eol;
 		reportString += "Node Traceback:       " + tracebackString + eol;
 		reportString += "Alignment:            " + alignmentString + eol;
+		reportString += "Reference Position:   " + std::to_string(this->m_reference_ptr->getRegion()->getStartPosition()) + eol;
 		reportString += "Alignment Position:   " + std::to_string(this->m_alignment_ptr->getPosition()) + eol;
-		reportString += "Reference Position:   " + std::to_string(startPosition) + eol;
+		reportString += "Graph Position:       " + std::to_string(startPosition) + eol;
 		reportString += "Graph Mapping Offset: " + std::to_string(this->m_graph_mapping_ptr->position) + eol;
 		reportString += "---------------------------------------------------------" + eol;
 
