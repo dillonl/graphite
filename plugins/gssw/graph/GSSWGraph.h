@@ -34,6 +34,7 @@ namespace gssw
 		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 		Variant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
+		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
@@ -60,6 +61,7 @@ namespace gssw
 		void graphConstructed();
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
+										const char* referenceSeq,
 										const uint32_t referenceLength,
 										const GenotyperAllele::Type data,
 										const char* seq,
@@ -69,6 +71,8 @@ namespace gssw
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			n->ref_len = referenceLength;
+			n->ref_seq = (char*)malloc(n->ref_len + 1);
+			strncpy(n->ref_seq, referenceSeq, n->ref_len); n->ref_seq[n->ref_len] = 0;
 			n->position = position;
 			n->id = m_next_id++;
 			n->len = len;

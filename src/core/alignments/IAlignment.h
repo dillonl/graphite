@@ -24,6 +24,7 @@ namespace gwiz
 		virtual const bool isFirstMate() { return false;}
 		virtual const bool isMapped() { return false; }
 		virtual const bool isReverseStrand() { return false; }
+		virtual const uint16_t getOriginalMapQuality() { return 0; }
 
 	};
 }

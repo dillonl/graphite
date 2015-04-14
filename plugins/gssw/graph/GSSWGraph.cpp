@@ -18,10 +18,10 @@ namespace gssw
 
 	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize) :
 		IGraph(referencePtr, variantListPtr),
-		m_match(2),
-		m_mismatch(2),
-		m_gap_open(3),
-		m_gap_extension(1),
+		m_match(4),
+		m_mismatch(1),
+		m_gap_open(2),
+		m_gap_extension(2),
 		m_start_position(startPosition),
 		m_graph_size(graphSize)
 
@@ -58,7 +58,7 @@ namespace gssw
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
-				auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
+				auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			    addReference(altAndRefVertices, referenceNode, genotyperVariantPtr);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
@@ -73,7 +73,7 @@ namespace gssw
 		referenceSize = currentEndPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
 		{
-			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
+			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
 		graphConstructed();
@@ -91,7 +91,7 @@ namespace gssw
 
 	gssw_node* GSSWGraph::addAlternateNode(Variant::SharedPtr variantPtr, INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize)
 	{
-		auto variantNode = gssw_node_create_alt((variantNodePtr->getPosition()), variantReferenceSize, GenotyperAllele::Type::VARIANT_ALTERNATE, variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
+		auto variantNode = gssw_node_create_alt((variantNodePtr->getPosition()), variantPtr->getRef().c_str(), variantPtr->getRef().size(), GenotyperAllele::Type::VARIANT_ALTERNATE, variantNodePtr->getSequence(), variantNodePtr->getLength(), this->m_nt_table, this->m_mat);
 		gssw_graph_add_node(this->m_graph_ptr, variantNode);
 		auto allelePtr = std::make_shared< GenotyperAllele >(GenotyperAllele::Type::VARIANT_ALTERNATE, variantNode->seq, variantNodePtr->getPosition());
 		this->m_genotyper_map[variantNode->id] = allelePtr;
@@ -110,7 +110,7 @@ namespace gssw
 			vertices.push_back(addAlternateNode(variantPtr, variantNodePtr, genotyperVariantPtr, variantReferenceSize));
 		}
 		variantReferenceSize = variantPtr->getRef().size();
-		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantReferenceSize, GenotyperAllele::Type::VARIANT_REFERENCE, variantPtr->getRef().c_str(), variantReferenceSize, this->m_nt_table, this->m_mat);
+		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRef().c_str(), variantReferenceSize, GenotyperAllele::Type::VARIANT_REFERENCE, variantPtr->getRef().c_str(), variantReferenceSize, this->m_nt_table, this->m_mat);
 		this->m_variants_map[variantReferenceNode->id] = variantPtr;
 		// gssw_node* variantReferenceNode = gssw_node_create_alt(GenotyperAllele::Type::VARIANT_REFERENCE, this->m_reference_ptr->getSequence() + variantPtr->getPosition(), variantReferenceSize, this->m_nt_table, this->m_mat);
 

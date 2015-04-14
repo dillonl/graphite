@@ -42,7 +42,7 @@ namespace gwiz
 		size_t counter = 0;
 		while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
 		{
-			if (counter++ > 1000) { break; }
+			// if (counter++ > 1000) { break; }
 			this->m_alignments_ptr->push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
 			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}

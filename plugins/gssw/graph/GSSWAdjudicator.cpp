@@ -15,6 +15,17 @@ namespace gssw
 	{
 	}
 
+	void GSSWAdjudicator::printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment)
+	{
+		auto gsswGraph = graphPtr->getGSSWGraph();
+		for (uint32_t i = 0; i < gsswGraph->size; ++i)
+		{
+			auto node = gsswGraph->nodes[i];
+			std::cout << "pos: " << node->position << std::endl;
+			gssw_print_score_matrix(node->seq, node->len, alignment.c_str(), alignment.size(), node->alignment);
+		}
+	}
+
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
 		static std::mutex adjLock;
@@ -32,6 +43,7 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
+				printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);

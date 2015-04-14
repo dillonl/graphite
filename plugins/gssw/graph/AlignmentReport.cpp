@@ -1,6 +1,8 @@
 #include "AlignmentReport.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
+#include <boost/algorithm/string/join.hpp>
+
 #include <map>
 
 namespace gwiz
@@ -37,6 +39,8 @@ namespace gssw
 		size_t nodeOffset = 0;
 		size_t refOffset = 0;
 		size_t nodeSeparatorOffset = 0;
+
+		std::string referenceOffsets;
 		for (int i = 0; i < this->m_graph_mapping_ptr->cigar.length; ++i, ++nc)
 		{
 			for (int j = 0; j < nc->cigar->length; ++j)
@@ -63,7 +67,15 @@ namespace gssw
 
 			cigarString +=  separator;
 
-			referenceString += std::string(this->m_reference_ptr->getSequence() + (referenceStartPosition + refOffset), nc->node->ref_len);
+			/*
+			referenceOffsets += std::to_string(referenceStartPosition + refOffset) + separator;
+			size_t totalRefOffset = (referenceStartPosition + refOffset);
+			if (totalRefOffset < this->m_reference_ptr->getRegion()->getEndPosition() - this->m_reference_ptr->getRegion()->getStartPosition())
+			{
+				referenceString += std::string(this->m_reference_ptr->getSequence() + (referenceStartPosition + refOffset), nc->node->ref_len);
+			}
+			*/
+			referenceString += nc->node->ref_seq;
 			tracebackString += nc->node->seq;
 			nodeSeparatorPositions.emplace_back(nc->node->position + nodeSeparatorOffset);
 
@@ -83,6 +95,7 @@ namespace gssw
 		cigarString = (cigarString.size() > 2) ? cigarString.substr(0, cigarString.size() - 2) : cigarString;
 
 		alignmentString = std::string(this->m_graph_mapping_ptr->position, ' ') + alignmentString.substr(startSoftClipLength);
+		// referenceString = std::string(this->m_reference_ptr->getSequence() +(startPosition - this->m_reference_ptr->getRegion()->getStartPosition()), tracebackString.size());
 
 		size_t sepPos = 0;
 		while ((sepPos = tracebackString.find(separator, sepPos + 1)) != std::string::npos && sepPos < alignmentString.size())
@@ -90,20 +103,25 @@ namespace gssw
 			alignmentString.insert(sepPos, separator);
 		}
 
+		std::string isMapped = (this->m_alignment_ptr->isMapped()) ? "Mapped" : "Unmapped";
+		std::string mate = (this->m_alignment_ptr->isFirstMate()) ? "First" : "Second";
+		std::string reverseStrand = (this->m_alignment_ptr->isReverseStrand()) ? "Reverse" : "Normal";
+
 		std::string reportString = "";
 		std::string eol = "\r\n";
 		reportString += "---------------------------------------------------------" + eol;
-		reportString += "Score:                " + std::to_string(this->m_graph_mapping_ptr->score) + eol;
+		reportString += "Score:                " + std::to_string(this->m_graph_mapping_ptr->score) + "/202" + eol;
 		reportString += "Node Cigar String:    " + cigarString + eol;
 		reportString += "Node Type Traceback:  " + nodeTracebackString + eol;
-		// reportString += "Reference             " + std::string(this->m_reference_ptr->getSequence() + (startPosition - this->m_reference_ptr->getRegion()->getStartPosition()), 3000) + eol;
 		reportString += "Reference:            " + referenceString + eol;
 		reportString += "Node Traceback:       " + tracebackString + eol;
 		reportString += "Alignment:            " + alignmentString + eol;
-		reportString += "Reference Position:   " + std::to_string(this->m_reference_ptr->getRegion()->getStartPosition()) + eol;
-		reportString += "Alignment Position:   " + std::to_string(this->m_alignment_ptr->getPosition()) + eol;
+		reportString += "Alignment(RAW):       " + std::string(this->m_alignment_ptr->getSequence(), this->m_alignment_ptr->getLength()) + eol;
 		reportString += "Graph Position:       " + std::to_string(startPosition) + eol;
-		reportString += "Graph Mapping Offset: " + std::to_string(this->m_graph_mapping_ptr->position) + eol;
+		reportString += "Mapped State:         " + isMapped + eol;
+		reportString += "Mate Order:           " + mate + eol;
+		reportString += "Strand:               " + reverseStrand + eol;
+		reportString += "Original Map Quality: " + std::to_string(this->m_alignment_ptr->getOriginalMapQuality()) + eol;
 		reportString += "---------------------------------------------------------" + eol;
 
 		return reportString;

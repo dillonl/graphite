@@ -85,6 +85,7 @@ struct gssw_profile{
 //typedef struct node s_node;
 typedef struct _gssw_node gssw_node;
 typedef struct _gssw_node {
+	char* ref_seq; // the reference sequence (only to be used by GSSWGraph library)
 	uint32_t ref_len; // the length of the reference sequence (only to be used by GSSWGraph library)
 	int32_t position;
     void* data;

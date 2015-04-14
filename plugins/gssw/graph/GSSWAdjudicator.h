@@ -2,6 +2,7 @@
 #define GWIZ_GSSW_GSSWADJUDICATOR_H
 
 #include "core/adjudicator/IGraphAdjudicator.h"
+#include "GSSWGraph.h"
 
 namespace gwiz
 {
@@ -15,6 +16,8 @@ namespace gssw
 		~GSSWAdjudicator();
 
 		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) override;
+	private:
+		void printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment);
 	};
 }
 }

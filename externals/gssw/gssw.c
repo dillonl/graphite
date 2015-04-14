@@ -735,29 +735,33 @@ void gssw_print_score_matrix (const char* ref,
 
     int32_t i, j;
 
-    fprintf(stdout, "\t");
+    /* fprintf(stdout, "\t"); */
+	fprintf(stdout, "   ");
     for (i = 0; LIKELY(i < refLen); ++i) {
-        fprintf(stdout, "%c\t\t", ref[i]);
+        /* fprintf(stdout, "%c\t\t", ref[i]); */
+		fprintf(stdout, "%c  ", ref[i]);
     }
     fprintf(stdout, "\n");
 
     if (gssw_is_byte(alignment)) {
         uint8_t* mH = alignment->mH;
         for (j = 0; LIKELY(j < readLen); ++j) {
-            fprintf(stdout, "%c\t", read[j]);
+            /* fprintf(stdout, "%c\t", read[j]); */
+			fprintf(stdout, "%c  ", read[j]);
             for (i = 0; LIKELY(i < refLen); ++i) {
-                fprintf(stdout, "(%u, %u) %u\t", i, j,
-                        ((uint8_t*)mH)[i*readLen + j]);
+                /* fprintf(stdout, "(%u, %u) %u\t", i, j, ((uint8_t*)mH)[i*readLen + j]); */
+				fprintf(stdout, "%02u ", ((uint8_t*)mH)[i*readLen + j]);
             }
             fprintf(stdout, "\n");
         }
     } else {
         uint16_t* mH = alignment->mH;
         for (j = 0; LIKELY(j < readLen); ++j) {
-            fprintf(stdout, "%c\t", read[j]);
+            /* fprintf(stdout, "%c\t", read[j]); */
+			fprintf(stdout, "%c  ", read[j]);
             for (i = 0; LIKELY(i < refLen); ++i) {
-                fprintf(stdout, "(%u, %u) %u\t", i, j,
-                        ((uint16_t*)mH)[i*readLen + j]);
+                /* fprintf(stdout, "(%u, %u) %u\t", i, j, ((uint16_t*)mH)[i*readLen + j]); */
+				fprintf(stdout, "%02u ", ((uint16_t*)mH)[i*readLen + j]);
             }
             fprintf(stdout, "\n");
         }

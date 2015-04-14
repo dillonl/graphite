@@ -25,6 +25,7 @@ namespace gwiz
 		const bool isFirstMate() override {return this->m_bam_alignment_ptr->IsFirstMate();}
 		const bool isMapped() override { return this->m_bam_alignment_ptr->IsMapped(); }
 		const bool isReverseStrand() override { return this->m_bam_alignment_ptr->IsReverseStrand(); }
+		const uint16_t getOriginalMapQuality() override { return this->m_bam_alignment_ptr->MapQuality; }
 
     private:
         BamAlignmentPtr m_bam_alignment_ptr;
