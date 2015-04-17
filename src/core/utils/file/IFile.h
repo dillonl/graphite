@@ -2,9 +2,7 @@
 #define GWIZ_IFILE_H
 
 #include <boost/noncopyable.hpp>
-
-#include "core/utils/NonCopyable.h"
-
+#include <string>
 #include <memory>
 
 namespace gwiz

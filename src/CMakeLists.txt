@@ -12,6 +12,7 @@ set(GWIZ_TOOLS_SOURCES
 set(GWIZ_UTILS_SOURCES
   core/utils/Parameters.cpp
   core/utils/file/ASCIIFileReader.cpp
+  core/utils/file/ASCIIFileWriter.cpp
 )
 
 set(GWIZ_CORE_SOURCES
