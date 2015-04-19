@@ -28,8 +28,8 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
-		static std::mutex adjLock;
-		std::unique_lock< std::mutex > lock(adjLock);
+		// static std::mutex adjLock;
+		//std::unique_lock< std::mutex > lock(adjLock);
 
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
@@ -43,7 +43,7 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
-				printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
+				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
@@ -60,7 +60,6 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
-		std::cout << "printing report" << std::endl;
 		AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 		return variantList;
 	}

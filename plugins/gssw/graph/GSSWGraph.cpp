@@ -18,10 +18,10 @@ namespace gssw
 
 	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize) :
 		IGraph(referencePtr, variantListPtr),
-		m_match(4),
-		m_mismatch(1),
-		m_gap_open(2),
-		m_gap_extension(2),
+		m_match(2),
+		m_mismatch(2),
+		m_gap_open(3),
+		m_gap_extension(1),
 		m_start_position(startPosition),
 		m_graph_size(graphSize)
 
@@ -40,8 +40,8 @@ namespace gssw
 
 	void GSSWGraph::constructGraph()
 	{
-		static std::mutex constructMutex;
-		std::lock_guard< std::mutex > lock(constructMutex);
+		// static std::mutex constructMutex;
+		// std::lock_guard< std::mutex > lock(constructMutex);
 		position startPosition = this->m_start_position;
 		position endPosition = this->m_start_position + this->m_graph_size;
 		size_t graphStartOffset = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();

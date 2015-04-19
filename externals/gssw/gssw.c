@@ -1185,6 +1185,19 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
         uint16_t l = 0, d = 0, max_score = 0;
         uint8_t max_diag = 1;
 
+		uint16_t actual_score = ((uint8_t*)n->alignment->mH)[readEnd];
+		uint16_t possible_match = (actual_score < match) ? 0 : actual_score - match;
+		uint16_t possible_mismatch = actual_score + mismatch;
+		uint16_t possible_gap_open = actual_score + gap_open;
+		uint16_t possible_gap_extension = actual_score + gap_extension;
+		/*
+		fprintf(stdout, "actual high score: %u\n", actual_score);
+		fprintf(stdout, "match:             %u\n", possible_match);
+		fprintf(stdout, "mismatch:          %u\n", possible_mismatch);
+		fprintf(stdout, "gap open:          %u\n", possible_gap_open);
+		fprintf(stdout, "gap extension:     %u\n", possible_gap_extension);
+		*/
+
         // determine direction across edge
 
         // rationale: we have to check the left and diagonal directions
@@ -1197,18 +1210,28 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
             for (i = 0; i < n->count_prev; ++i) {
                 gssw_node* cn = n->prev[i];
 
+				d = ((uint8_t*)cn->alignment->mH)[readLen*(cn->len-1) + (readEnd-1)];
                 l = ((uint8_t*)cn->alignment->mH)[readLen*(cn->len-1) + readEnd];
-                d = ((uint8_t*)cn->alignment->mH)[readLen*(cn->len-1) + (readEnd-1)];
+				if (d == possible_match || d == possible_mismatch)
+				{
+					max_score = d;
+					max_diag = 1;
+					max_prev = cn;
+					break;
+				}
+				if (l == possible_gap_open || l == possible_gap_extension)
+				{
+					max_score = l;
+					max_diag = 0;
+					max_prev = cn;
+					break;
+				}
 
-                //char t = cn->seq[cn->len-1];
-                //char q_d = read[readEnd-1];
-                //char q_l = read[readEnd];
-                //fprintf(stderr, "t=%c q_d=%c q_l=%c d=%i l=%i max_score=%i\n",
-                //        t, q_d, q_l, d, l, max_score);
-                // we need to check if we have a match and a gap which are both possible 
+                // we need to check if we have a match and a gap which are both possible
                 // under the scores and the relationship between the query and target strings
                 // if both are possible, we should prefer the match
 
+				/*
                 if (d > max_score) {
                     max_score = d;
                     max_prev = cn;
@@ -1218,12 +1241,29 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
                     max_prev = cn;
                     max_diag = 0 || max_diag;
                 }
+				*/
             }
         } else {
             for (i = 0; i < n->count_prev; ++i) {
                 gssw_node* cn = n->prev[i];
                 l = ((uint16_t*)cn->alignment->mH)[readLen*(cn->len-1) + readEnd];
                 d = ((uint16_t*)cn->alignment->mH)[readLen*(cn->len-1) + (readEnd-1)];
+
+				if (d == possible_match || d == possible_mismatch)
+				{
+					max_score = d;
+					max_diag = 1;
+					max_prev = cn;
+					break;
+				}
+				if (l == possible_gap_open || l == possible_gap_extension)
+				{
+					max_score = l;
+					max_diag = 0;
+					max_prev = cn;
+					break;
+				}
+				/*
                 if (d > max_score) {
                     max_score = d;
                     max_prev = cn;
@@ -1233,6 +1273,7 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
                     max_prev = cn;
                     max_diag = 0 || max_diag;
                 }
+				*/
             }
         }
     
