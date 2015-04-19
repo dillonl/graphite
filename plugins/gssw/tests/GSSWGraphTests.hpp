@@ -450,15 +450,21 @@ namespace
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		vcfFileReaderPtr->loadVariantsFromFile();
 
-		std::cout << "done" << std::endl;
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-		std::ofstream outStream;
-		outStream.open("og.txt", std::ios::out);
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
-		outStream.close();
+		// std::ofstream outStream;
+		// outStream.open("og.txt", std::ios::out);
+		// gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		// outStream.close();
+
+		std::cout << "starting to print vcf" << std::endl;
+
+		std::ofstream outVCF;
+		outVCF.open("test.vcf", std::ios::out);
+		variantList->printToVCF(outVCF);
+		outVCF.close();
 	}
 
 	TEST(GSSWTests, TestConstructTestData)

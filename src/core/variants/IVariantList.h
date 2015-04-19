@@ -32,6 +32,8 @@ namespace gwiz
 		virtual void addVariant(Variant::SharedPtr variantPtr) {}
 		virtual void sortVariants() {}
 		virtual size_t getCount() = 0;
+
+		virtual void printToVCF(std::ostream& out) = 0;
 	protected:
 
 	};

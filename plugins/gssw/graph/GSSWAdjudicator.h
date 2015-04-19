@@ -18,6 +18,7 @@ namespace gssw
 		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) override;
 	private:
 		void printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment);
+		uint32_t m_max_mapping_score;
 	};
 }
 }

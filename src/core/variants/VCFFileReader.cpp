@@ -154,7 +154,7 @@ namespace gwiz
 		size_t distance = endPosition - startPosition;
 		uint32_t ONE_HUNDRED_MEGA_BYTES = 100000000;
 		uint32_t maxNumberOfThreads = std::max< uint32_t >(std::thread::hardware_concurrency(), 10);
-		uint32_t numberOfThreads = std::min<uint32_t>(maxNumberOfThreads, std::max<uint32_t>((this->m_file_size/100000000), 1)); // 1 thread per 100mb of data (min = 1 max = maxNumberofthreads)
+		uint32_t numberOfThreads = std::min<uint32_t>(maxNumberOfThreads, std::max<uint32_t>((this->m_file_size/ONE_HUNDRED_MEGA_BYTES), 1)); // 1 thread per 100mb of data (min = 1 max = maxNumberofthreads)
 		size_t chunk = (distance/numberOfThreads); // size of the chunk of memory to work on
 		std::vector< std::thread > threads;
 		const char* startLine = startPosition;
@@ -175,6 +175,11 @@ namespace gwiz
 			throw "Region " + region->getRegionString() + " was not found.";
 		}
 		return true;
+	}
+
+	void VCFFileReader::printToVCF(std::ostream& out)
+	{
+		throw "VCFFileReader printToVCF not implemented";
 	}
 
 } // end namespace gwiz

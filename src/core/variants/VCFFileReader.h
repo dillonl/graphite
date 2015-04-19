@@ -50,6 +50,8 @@ namespace gwiz
 		void rewind() override;
 		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override { return nullptr; }
 		size_t getCount() override { throw "Not implemented"; }
+
+		void printToVCF(std::ostream& out) override;
 	protected:
 
 

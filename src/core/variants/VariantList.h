@@ -81,6 +81,15 @@ namespace gwiz
 
 		size_t getCount() override { return m_variants_ptr_list.size(); }
 
+		void printToVCF(std::ostream& out) override
+		{
+			for (auto& variantPtr : this->m_variants_ptr_list)
+			{
+				auto vcfString = variantPtr->toString();
+				out.write(vcfString.c_str(), vcfString.size());
+			}
+		}
+
 	protected:
 		size_t m_current_index;
 		std::vector< Variant::SharedPtr > m_variants_ptr_list;

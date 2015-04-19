@@ -49,7 +49,7 @@ namespace gwiz
 			// that represents the entire overlapped variants reference.
 			// for those overlapped variants add them to a vector so
 			// a "compound variant" can be generated.
-			while(m_variant_list_ptr->getNextVariant(nextVariant))
+			while (m_variant_list_ptr->getNextVariant(nextVariant))
 			{
 				position variantEndPosition = (variant->getPosition() + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 				if (variantEndPosition < nextVariant->getPosition())
@@ -93,23 +93,28 @@ namespace gwiz
 			position pos = variants[0]->getPosition();
 			std::string id = ".";
 			std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
+			std::map< std::string, const char* > altMap; // maps new alt with the original vcf line
 			// loop over all the variants
-			for (auto variantIter = variants.begin(); variantIter != variants.end(); ++variantIter)
+			for (auto variantPtr : variants)
 			{
 				// loop over all the alts in the variants
-				for (uint32_t i = 0; i < (*variantIter)->getAlt().size(); ++i)
+				for (auto altString : variantPtr->getAlt())
 				{
-					std::string altString = (*variantIter)->getAlt()[i];
 					// basically we are replacing the variant's reference with the alt within the aggrigated reference (referenceString)
 					// it's complicated to explain in words but if you follow the code it isn't too bad
 					std::string variantString = referenceString;
-					variantString.erase((*variantIter)->getPosition() - startPosition, (*variantIter)->getRef().size());
-					variantString.insert((*variantIter)->getPosition() - startPosition, altString);
+					variantString.erase(variantPtr->getPosition() - startPosition, variantPtr->getRef().size());
+					variantString.insert(variantPtr->getPosition() - startPosition, altString);
 					line += variantString + ",";
+					altMap[variantString] = variantPtr->getVCFLineFromAlternate(altString);
 				}
 			}
 			line.replace(line.size() - 1, 1, "\t\n"); // replace the past comma with a tab
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
+			{
+				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second);
+			}
 			return variant;
 		}
 
