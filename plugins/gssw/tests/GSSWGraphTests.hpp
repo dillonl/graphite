@@ -395,6 +395,7 @@ namespace
 	}
 	*/
 
+	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -420,8 +421,8 @@ namespace
 		variantList->printToVCF(outVCF);
 		outVCF.close();
 	}
+	*/
 
-	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
@@ -441,10 +442,10 @@ namespace
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-		// std::ofstream outStream;
-		// outStream.open("og.txt", std::ios::out);
-		// gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
-		// outStream.close();
+		std::ofstream outStream;
+		outStream.open("og.txt", std::ios::out);
+		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		outStream.close();
 
 		std::cout << "starting to print vcf" << std::endl;
 
@@ -453,7 +454,6 @@ namespace
 		variantList->printToVCF(outVCF);
 		outVCF.close();
 	}
-	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{
