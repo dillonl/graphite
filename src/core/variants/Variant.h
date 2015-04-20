@@ -86,7 +86,7 @@ namespace gwiz
 		{
 			for (auto alleleCountIter : this->m_allele_count)
 			{
-				auto allelePercent = (this->m_total_allele_count > 0) ? alleleCountIter.second / this->m_total_allele_count : 0;
+				uint32_t allelePercent = (this->m_total_allele_count > 0) ? (static_cast< float >(alleleCountIter.second) / this->m_total_allele_count) * 100 : 0;
 				std::tuple< std::string, uint32_t > alleleTuple(alleleCountIter.first, allelePercent);
 				allelePercentages.emplace_back(alleleTuple);
 			}

@@ -394,7 +394,8 @@ namespace
 
 	}
 	*/
-/*
+
+	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -410,28 +411,15 @@ namespace
 
 		auto variantList = gsswGraphManager->buildGraphs(referencePtr->getRegion(), 3000, 1000, 100);
 
-		std::ofstream outStream;
-		outStream.open("og.txt", std::ios::out);
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
-		outStream.close();
-	}
-*/
+		// std::ofstream outStream;
+		// outStream.open("og.txt", std::ios::out);
+		// gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		// outStream.close();
 
-	/*
-	TEST(GSSWTests, TestAlignmentReport)
-	{
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		gwiz::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
-		GSSWGraphTest::Build31VariantsTestData(referencePtr, variantListPtr, alignmentReaderPtr);
-
-		auto gsswGraph = std::make_shared< gwiz::gssw::GSSWGraph >(referencePtr, variantListPtr, alignmentReaderPtr);
-		gsswGraph->constructGraph();
-
-		std::ofstream outStream;
-		outStream.open("og.txt", std::ios::out);
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
-		outStream.close();
+		std::ofstream outVCF;
+		outVCF.open("test.vcf", std::ios::out);
+		variantList->printToVCF(outVCF);
+		outVCF.close();
 	}
 	*/
 

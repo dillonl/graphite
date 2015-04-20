@@ -9,6 +9,7 @@ namespace gssw
 {
 	GSSWAdjudicator::GSSWAdjudicator() :
 		m_max_mapping_score(202)
+		// m_max_mapping_score(10)
 	{
 	}
 
@@ -29,8 +30,7 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
-		// static std::mutex adjLock;
-		//std::unique_lock< std::mutex > lock(adjLock);
+		static std::mutex adjLock;
 
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
@@ -42,20 +42,21 @@ namespace gssw
 			while (alignmentsReaderPtr->getNextAlignment(alignmentPtr))
 			{
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
-				gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
+				// gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				if (graphMappingPtr->score < (this->m_max_mapping_score * 0.9)) // skip low scoring	mappings
 				{
 					continue;
 				}
+				// std::cout << graphMappingPtr->score << " " <<   (this->m_max_mapping_score * 0.9) << std::endl;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						// std::cout << "seq: " << nc->node->seq << std::endl;
-						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len));
+						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len)); // record the variant (ref or alt) that went through the node
+						std::unique_lock< std::mutex > lock(adjLock);
 						variantList->addVariant(variantPtr);
 					}
 				}

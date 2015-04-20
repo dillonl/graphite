@@ -83,9 +83,13 @@ namespace gwiz
 
 		void printToVCF(std::ostream& out) override
 		{
-			for (auto& variantPtr : this->m_variants_ptr_list)
+			/* std::cout << "printing: " << this->m_variants_ptr_list.size() << std::endl; */
+			/* for (auto& variantPtr : this->m_variants_ptr_list) */
+			for (size_t i = 0; i < this->m_variants_ptr_list.size(); ++i)
 			{
+				auto variantPtr = this->m_variants_ptr_list[i];
 				auto vcfString = variantPtr->toString();
+				std::cout << "writing " << vcfString << std::endl;
 				out.write(vcfString.c_str(), vcfString.size());
 			}
 		}

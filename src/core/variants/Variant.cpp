@@ -40,12 +40,13 @@ namespace gwiz
 		uint32_t minAllowablePercentage = 30; // the minimum percentage acceptable before printing
 		for (auto& allelePercentageTuple : allelePercentages)
 		{
+			std::cout << "tostring: " << std::get< 1 >(allelePercentageTuple) << std::endl;
 			if (std::get< 1 >(allelePercentageTuple) > minAllowablePercentage)
 			{
 				vcfLines += std::get< 0 >(allelePercentageTuple);
 				++printCount;
 			}
-			if (printCount >= maxAllelePrint) { break; }
+			if (printCount >= maxAllelePrint) { break; } // only need to print 2 (diploid)
 		}
 		return vcfLines;
 	}
