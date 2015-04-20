@@ -93,7 +93,7 @@ namespace gwiz
 			position pos = variants[0]->getPosition();
 			std::string id = ".";
 			std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
-			std::map< std::string, const char* > altMap; // maps new alt with the original vcf line
+			std::map< std::string, std::string > altMap; // maps new alt with the original vcf line
 			// loop over all the variants
 			for (auto variantPtr : variants)
 			{
@@ -113,7 +113,7 @@ namespace gwiz
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
 			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
 			{
-				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second);
+				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second.c_str());
 			}
 			return variant;
 		}

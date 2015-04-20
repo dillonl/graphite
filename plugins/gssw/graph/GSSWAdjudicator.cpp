@@ -8,8 +8,8 @@ namespace gwiz
 namespace gssw
 {
 	GSSWAdjudicator::GSSWAdjudicator() :
-		m_max_mapping_score(202)
-		// m_max_mapping_score(10)
+		// m_max_mapping_score(202)
+		m_max_mapping_score(10)
 	{
 	}
 

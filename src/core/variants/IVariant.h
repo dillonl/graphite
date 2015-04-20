@@ -11,14 +11,20 @@ namespace gwiz
     {
         public:
             typedef std::shared_ptr<IVariant> SharedPtr;
-            IVariant() {}
+            IVariant()
+            {
+                static uint32_t idCounter = 0;
+                this->m_variant_id = ++idCounter;
+            }
             virtual ~IVariant() {}
 
             virtual size_t getSmallestAlleleSize() = 0;
             virtual size_t getLargestAlleleSize() = 0;
+            uint32_t getVariantID() { return this->m_variant_id; }
 
             virtual std::string toString() = 0;
         private:
+            uint32_t m_variant_id;
     };
 }
 

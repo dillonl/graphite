@@ -31,7 +31,7 @@ namespace gwiz
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const char* vcf_line, VariantParser< const char* >& parser)
+		inline static Variant::SharedPtr BuildVariant(const char* const vcf_line, VariantParser< const char* >& parser)
 		{
 			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
 			auto variantPtr = std::make_shared< Variant >();
@@ -47,12 +47,12 @@ namespace gwiz
 			return variantPtr;
 		}
 
-		inline void setVCFLineFromAlternate(const std::string& alt, const char* vcf_line)
+		inline void setVCFLineFromAlternate(const std::string& alt, const char* vcfLine)
 		{
-			this->m_vcf_lines_map[alt] = vcf_line;
+			this->m_vcf_lines_map[alt] = std::string(vcfLine);
 		}
 
-		inline const char* getVCFLineFromAlternate(const std::string& alt)
+		inline const std::string getVCFLineFromAlternate(const std::string& alt)
 		{
 			if (this->m_vcf_lines_map.find(alt) == this->m_vcf_lines_map.end())
 			{
@@ -126,7 +126,7 @@ namespace gwiz
 		std::string m_id;
 		std::vector< std::string > m_ref;
 		std::vector< std::string > m_alt;
-		std::map< std::string, const char* > m_vcf_lines_map;
+		std::map< std::string, std::string > m_vcf_lines_map;
 	};
 
 }

@@ -395,7 +395,6 @@ namespace
 	}
 	*/
 
-	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
 		gwiz::IReference::SharedPtr referencePtr;
@@ -421,8 +420,8 @@ namespace
 		variantList->printToVCF(outVCF);
 		outVCF.close();
 	}
-	*/
 
+	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
@@ -454,6 +453,7 @@ namespace
 		variantList->printToVCF(outVCF);
 		outVCF.close();
 	}
+	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{

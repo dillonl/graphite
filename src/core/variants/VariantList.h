@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <map>
 
 namespace gwiz
 {
@@ -83,14 +84,15 @@ namespace gwiz
 
 		void printToVCF(std::ostream& out) override
 		{
-			/* std::cout << "printing: " << this->m_variants_ptr_list.size() << std::endl; */
-			/* for (auto& variantPtr : this->m_variants_ptr_list) */
-			for (size_t i = 0; i < this->m_variants_ptr_list.size(); ++i)
+			std::map< uint32_t, bool > variantPrintedMap;
+			for (auto& variantPtr : this->m_variants_ptr_list)
 			{
-				auto variantPtr = this->m_variants_ptr_list[i];
+				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end()) { continue; }
 				auto vcfString = variantPtr->toString();
-				std::cout << "writing " << vcfString << std::endl;
+				/* std::cout << "writing... " << vcfString << std::endl; */
 				out.write(vcfString.c_str(), vcfString.size());
+				out.write("\n", 1);
+				variantPrintedMap[variantPtr->getVariantID()] = true;
 			}
 		}
 
