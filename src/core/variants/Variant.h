@@ -42,14 +42,14 @@ namespace gwiz
 			}
 			for (auto alternateString : variantPtr->getAlt())
 			{
-				variantPtr->setVCFLineFromAlternate(alternateString, vcf_line);
+				variantPtr->setVCFLineFromAlternate(alternateString, vcf_line, end_line - vcf_line);
 			}
 			return variantPtr;
 		}
 
-		inline void setVCFLineFromAlternate(const std::string& alt, const char* vcfLine)
+		inline void setVCFLineFromAlternate(const std::string& alt, const char* vcfLine, size_t length)
 		{
-			this->m_vcf_lines_map[alt] = std::string(vcfLine);
+			this->m_vcf_lines_map[alt] = std::string(vcfLine, length);
 		}
 
 		inline const std::string getVCFLineFromAlternate(const std::string& alt)

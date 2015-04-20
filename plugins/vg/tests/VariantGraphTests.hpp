@@ -9,10 +9,11 @@
  #include "tests/classes/TestReference.hpp"
  #include "tests/classes/TestVariantList.hpp"
  #include "tests/classes/TestReferenceVariantGenerator.hpp"
- #include "plugins/vg/graph/VariantGraph.h"
+#include "plugins/vg/graph/VariantGraph.h"
 
 #include "core/variants/VCFFileReader.h"
 #include "core/variants/IVariant.h"
+#include "core/variants/VariantListVCFPreloaded.h"
 #include "core/reference/FastaReference.h"
 
  namespace
@@ -68,7 +69,7 @@
 
 		 gwiz::Variant::SharedPtr variantPtr;
          variantGraph->testGetNextCompoundVariant(variantPtr);
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), std::string(m_reference_string.c_str() + variantPositionOffset, 1).c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), std::string(m_reference_string.c_str() + variantPositionOffset, 1).c_str());
 
          variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_TRUE(variantPtr == NULL);
@@ -91,7 +92,7 @@
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "A");
 		 ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "G");
 	 }
@@ -111,7 +112,7 @@
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 2);
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "AC");
 		 ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "GA");
 	 }
@@ -132,7 +133,7 @@
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 10);
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "TT");
 		 // ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "AGGT");
 		 ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "TGAAAGTTAT");
@@ -153,7 +154,7 @@
 		 gwiz::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "G");
 		 ASSERT_STREQ(variantPtr->getAlt()[1].c_str(), "GA");
 		 ASSERT_EQ(variantPtr->getAlt().size(), 2);
@@ -172,7 +173,7 @@
 		 gwiz::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
-		 ASSERT_STREQ(variantPtr->getRef()[0].c_str(), reference.c_str());
+		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
 		 ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "T");
 		 ASSERT_EQ(variantPtr->getAlt().size(), 1);
 	 }
@@ -335,18 +336,17 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		 variantGraph->constructGraph();
-		 variantGraph->printGraph("test1.dot");
+		 // variantGraph->printGraph("test1.dot");
 	 }
 
-	 /*
 
 	TEST(VariantGraphTest, ConstructGraphYChr)
 	{
 
-		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-62965354");
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-61343");
+		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		// problem is at position: 2820410
-		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820000-2820510");
+		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820000-2821510");
 
 		std::string fastaPath = TEST_FASTA_FILE;
 		// std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
@@ -354,11 +354,13 @@
 		// std::string vcfPath = TEST_1KG_VCF_FILE;
 
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
-		auto variantGraph = std::make_shared< VGTest >(fastaReferencePtr, vcfFileReader);
+        auto vcfFileReader = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
+        auto variantGraph = std::make_shared< VGTest >(fastaReferencePtr, vcfFileReader);
+		vcfFileReader->loadVariantsFromFile();
 		variantGraph->constructGraph();
+		std::cout << "graph constructed" << std::endl;
 
-		// variantGraph->printGraph("test1.dot");
+		variantGraph->printGraph("test1.dot");
 
 
 		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
@@ -366,7 +368,6 @@
 		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
-	 */
 
 
 }

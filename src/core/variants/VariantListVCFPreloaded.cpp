@@ -19,10 +19,12 @@ namespace gwiz
 
 	void VariantListVCFPreloaded::loadVariantsFromFile()
 	{
+		// std::cout << "loading..." << std::endl;
 		auto vcfFileReader = std::make_shared< VCFFileReader >(this->m_path);
 		Variant::SharedPtr variantPtr;
 		while (vcfFileReader->getNextVariant(variantPtr))
 		{
+			// std::cout << "variant position: " << variantPtr->getPosition() << " " << this->m_region_ptr->getEndPosition() << std::endl;
 			// add all variants unless region is set
 			if (this->m_region_ptr != nullptr)
 			{

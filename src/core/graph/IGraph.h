@@ -113,7 +113,7 @@ namespace gwiz
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
 			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
 			{
-				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second.c_str());
+				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second.c_str(), altTuple.second.size());
 			}
 			return variant;
 		}
