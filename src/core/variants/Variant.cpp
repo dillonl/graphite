@@ -31,6 +31,30 @@ namespace gwiz
 		return largest;
 	}
 
+	std::string Variant::getGenotype()
+	{
+		std::string genotypeString = "";
+		if (this->m_allele_count[this->getRef()] > 0)
+		{
+			uint32_t allelePercent = (this->m_total_allele_count > 0) ? (static_cast< float >(this->m_allele_count[this->getRef()]) / this->m_total_allele_count) * 100 : 0;
+			genotypeString = (allelePercent > 33) ? "0" : "";
+			if (allelePercent > 75) { return "0|0"; }
+		}
+		size_t count = 1;
+		for (auto alt : getAlt())
+		{
+			if (this->m_allele_count[alt] > 0)
+			{
+				uint32_t allelePercent = (this->m_total_allele_count > 0) ? (static_cast< float >(this->m_allele_count[alt]) / this->m_total_allele_count) * 100 : 0;
+				genotypeString = (allelePercent > 33) ? std::to_string(count) : genotypeString;
+				if (allelePercent > 75) { return std::to_string(count) + "|" + std::to_string(count); }
+			}
+			if (genotypeString.size() > 3) { break; }
+			++count;
+		}
+		return genotypeString;
+	}
+
 	std::string Variant::toString()
 	{
 		std::string vcfLines = "";

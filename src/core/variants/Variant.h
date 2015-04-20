@@ -105,6 +105,8 @@ namespace gwiz
 			std::cout << "allele: " << getRef() << " <" << this->m_allele_count[getRef()] << ">" << std::endl;
 		}
 
+		std::string getGenotype();
+
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }

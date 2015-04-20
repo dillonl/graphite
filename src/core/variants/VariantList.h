@@ -88,10 +88,13 @@ namespace gwiz
 			for (auto& variantPtr : this->m_variants_ptr_list)
 			{
 				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end()) { continue; }
-				auto vcfString = variantPtr->toString();
+				/* auto vcfString = variantPtr->toString(); */
 				/* std::cout << "writing... " << vcfString << std::endl; */
-				out.write(vcfString.c_str(), vcfString.size());
-				out.write("\n", 1);
+
+				/* std::cout << variantPtr->getPosition() << " " << variantPtr->getRef() << " " << variantPtr->getAlt */
+
+                /* out.write(vcfString.c_str(), vcfString.size()); */
+				/* out.write("\n", 1); */
 				variantPrintedMap[variantPtr->getVariantID()] = true;
 			}
 		}
