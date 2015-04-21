@@ -39,12 +39,24 @@ namespace gwiz
 		size_t count = 1;
 		for (auto& alt : getAlt())
 		{
-			alleleCountString += "A" + std::to_string(count) + "+:" + std::to_string(this->m_allele_count[alt]) + " ";
-			alleleCountString += "A" + std::to_string(count) + "-:" + std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
+			alleleCountString += "A+" + std::to_string(count) + ": " + std::to_string(this->m_allele_count[alt]) + " ";
+			alleleCountString += "A-" + std::to_string(count) + ": " +  std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
 			++count;
 		}
 		alleleCountString.pop_back(); // removes the last space off the end
 		return alleleCountString;
+	}
+
+	std::string Variant::alleleString()
+	{
+		std::string alleleString = "";
+		alleleString += getRef() + "\t";
+		for (auto& alt : getAlt())
+		{
+			alleleString += alt + "\t";
+		}
+		alleleString.pop_back(); // removes the last space off the end
+		return alleleString;
 	}
 
 	std::string Variant::toString()
@@ -60,7 +72,7 @@ namespace gwiz
 			// std::cout << std::get< 0 >(allelePercentageTuple) << " " << std::get< 1 >(allelePercentageTuple) << std::endl;
 			if (std::get< 1 >(allelePercentageTuple) > minAllowablePercentage)
 			{
-				vcfLines += std::to_string(getPosition()) + " " + getAlleleCountString() + "\n";
+				vcfLines += std::to_string(getPosition()) + "\t" + alleleString() + "\t" + getAlleleCountString() + "\n";
 				// vcfLines += getVCFLineFromAlternate(std::get< 0 >(allelePercentageTuple));
 				++printCount;
 			}
