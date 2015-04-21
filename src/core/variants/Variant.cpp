@@ -31,28 +31,19 @@ namespace gwiz
 		return largest;
 	}
 
-	std::string Variant::getGenotype()
+	std::string Variant::getAlleleCountString()
 	{
-		std::string genotypeString = "";
-		if (this->m_allele_count[this->getRef()] > 0)
-		{
-			uint32_t allelePercent = (this->m_total_allele_count > 0) ? (static_cast< float >(this->m_allele_count[this->getRef()]) / this->m_total_allele_count) * 100 : 0;
-			genotypeString = (allelePercent > 33) ? "0" : "";
-			if (allelePercent > 75) { return "0|0"; }
-		}
+		std::string alleleCountString = "";
+		alleleCountString += "R+:" + std::to_string(this->m_allele_count[getRef()]) + " ";
+		alleleCountString += "R-:" + std::to_string(this->m_allele_reverse_strand_count[getRef()]) + " ";
 		size_t count = 1;
-		for (auto alt : getAlt())
+		for (auto& alt : getAlt())
 		{
-			if (this->m_allele_count[alt] > 0)
-			{
-				uint32_t allelePercent = (this->m_total_allele_count > 0) ? (static_cast< float >(this->m_allele_count[alt]) / this->m_total_allele_count) * 100 : 0;
-				genotypeString = (allelePercent > 33) ? std::to_string(count) : genotypeString;
-				if (allelePercent > 75) { return std::to_string(count) + "|" + std::to_string(count); }
-			}
-			if (genotypeString.size() > 3) { break; }
+			alleleCountString += "A" + std::to_string(count) + "+:" + std::to_string(this->m_allele_count[alt]) + " ";
+			alleleCountString += "A" + std::to_string(count) + "-:" + std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
 			++count;
 		}
-		return genotypeString;
+		return std::string(alleleCountString, alleleCountString.size() - 1); // removes the last space off the end
 	}
 
 	std::string Variant::toString()
@@ -68,7 +59,8 @@ namespace gwiz
 			// std::cout << std::get< 0 >(allelePercentageTuple) << " " << std::get< 1 >(allelePercentageTuple) << std::endl;
 			if (std::get< 1 >(allelePercentageTuple) > minAllowablePercentage)
 			{
-				vcfLines += getVCFLineFromAlternate(std::get< 0 >(allelePercentageTuple));
+				vcfLines += std::to_string(getPosition()) + " " + getAlleleCountString() + "\n";
+				// vcfLines += getVCFLineFromAlternate(std::get< 0 >(allelePercentageTuple));
 				++printCount;
 			}
 			if (printCount >= maxAllelePrint) { break; } // only need to print 2 (diploid)

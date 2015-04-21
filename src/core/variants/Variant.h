@@ -8,6 +8,7 @@
 #include <memory>
 #include <map>
 
+#include "core/alignments/IAlignment.h"
 #include "IVariant.h"
 #include "VCFParser.hpp"
 #include "core/reference/Reference.h"
@@ -61,14 +62,16 @@ namespace gwiz
 			return this->m_vcf_lines_map[alt];
 		}
 
-		inline void increaseCount(const std::string& allele)
+		inline void increaseCount(const std::string& allele, bool isReverseStrand)
 		{
 			size_t count = 0;
-			if (this->m_allele_count.find(allele) == this->m_allele_count.end())
+			auto alleleCounter = (isReverseStrand) ? &m_allele_reverse_strand_count : &m_allele_count;
+			auto alleleCount = alleleCounter->find(allele);
+			if (alleleCount == alleleCounter->end())
 			{
-				count = this->m_allele_count[allele];
+				count = alleleCounter->find(allele)->second;
 			}
-			this->m_allele_count[allele] = count + 1;
+			alleleCounter->insert(std::pair< std::string, uint32_t >(allele, count + 1));
 			++this->m_total_allele_count;
 		}
 
@@ -105,7 +108,7 @@ namespace gwiz
 			std::cout << "allele: " << getRef() << " <" << this->m_allele_count[getRef()] << ">" << std::endl;
 		}
 
-		std::string getGenotype();
+		std::string getAlleleCountString();
 
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
@@ -114,6 +117,7 @@ namespace gwiz
 		std::string const getRef() { return m_ref[0]; }
 		std::vector< std::string > const getAlt() { return m_alt; }
 		std::map< std::string, uint32_t > m_allele_count;
+		std::map< std::string, uint32_t > m_allele_reverse_strand_count;
 		uint32_t m_total_allele_count; // an efficiency that technically could be calculated from m_allele_count
 
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)

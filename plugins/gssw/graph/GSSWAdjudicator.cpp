@@ -55,7 +55,7 @@ namespace gssw
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len)); // record the variant (ref or alt) that went through the node
+						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len), alignmentPtr->isReverseStrand()); // record the variant (ref or alt) that went through the node
 						std::unique_lock< std::mutex > lock(adjLock);
 						variantList->addVariant(variantPtr);
 					}
