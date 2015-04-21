@@ -65,13 +65,24 @@ namespace gwiz
 		inline void increaseCount(const std::string& allele, bool isReverseStrand)
 		{
 			size_t count = 0;
-			auto alleleCounter = (isReverseStrand) ? &m_allele_reverse_strand_count : &m_allele_count;
-			auto alleleCount = alleleCounter->find(allele);
-			if (alleleCount != alleleCounter->end())
+			if (isReverseStrand)
 			{
-				count = alleleCount->second;
+				auto alleleCount = m_allele_reverse_strand_count.find(allele);
+				if (alleleCount != m_allele_reverse_strand_count.end())
+				{
+					count = alleleCount->second;
+				}
+				m_allele_reverse_strand_count[allele] = count + 1;
 			}
-			alleleCounter->insert(std::pair< std::string, uint32_t >(allele, count + 1));
+			else
+			{
+				auto alleleCount = m_allele_count.find(allele);
+				if (alleleCount != m_allele_count.end())
+				{
+					count = alleleCount->second;
+				}
+				m_allele_count[allele] = count + 1;
+			}
 			++this->m_total_allele_count;
 		}
 
