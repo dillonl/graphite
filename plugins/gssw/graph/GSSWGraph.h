@@ -35,6 +35,7 @@ namespace gssw
 		Variant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
+		int32_t getMatchValue() { return m_match; }
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 

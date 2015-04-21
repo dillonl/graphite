@@ -7,9 +7,7 @@ namespace gwiz
 {
 namespace gssw
 {
-	GSSWAdjudicator::GSSWAdjudicator() :
-		m_max_mapping_score(202)
-		// m_max_mapping_score(10)
+	GSSWAdjudicator::GSSWAdjudicator()
 	{
 	}
 
@@ -45,7 +43,7 @@ namespace gssw
 				// gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				if (graphMappingPtr->score < (this->m_max_mapping_score * 0.9)) // skip low scoring	mappings
+				if (graphMappingPtr->score < ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.9)) // skip low scoring	mappings
 				{
 					continue;
 				}
