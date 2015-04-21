@@ -39,8 +39,8 @@ namespace gwiz
 		size_t count = 1;
 		for (auto& alt : getAlt())
 		{
-			alleleCountString += "A+" + std::to_string(count) + ": " + std::to_string(this->m_allele_count[alt]) + " ";
-			alleleCountString += "A-" + std::to_string(count) + ": " +  std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
+			alleleCountString += "A" + std::to_string(count) + "+: " + std::to_string(this->m_allele_count[alt]) + " ";
+			alleleCountString += "A" + std::to_string(count) + "-: " +  std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
 			++count;
 		}
 		alleleCountString.pop_back(); // removes the last space off the end
@@ -53,7 +53,7 @@ namespace gwiz
 		alleleString += getRef() + "\t";
 		for (auto& alt : getAlt())
 		{
-			alleleString += alt + "\t";
+			alleleString += alt + ",";
 		}
 		alleleString.pop_back(); // removes the last space off the end
 		return alleleString;

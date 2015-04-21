@@ -67,7 +67,7 @@ namespace gwiz
 			size_t count = 0;
 			auto alleleCounter = (isReverseStrand) ? &m_allele_reverse_strand_count : &m_allele_count;
 			auto alleleCount = alleleCounter->find(allele);
-			if (alleleCount == alleleCounter->end())
+			if (alleleCount != alleleCounter->end())
 			{
 				count = alleleCounter->find(allele)->second;
 			}
