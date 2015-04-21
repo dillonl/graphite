@@ -43,7 +43,8 @@ namespace gwiz
 			alleleCountString += "A" + std::to_string(count) + "-:" + std::to_string(this->m_allele_reverse_strand_count[alt]) + " ";
 			++count;
 		}
-		return std::string(alleleCountString, alleleCountString.size() - 1); // removes the last space off the end
+		alleleCountString.pop_back(); // removes the last space off the end
+		return alleleCountString;
 	}
 
 	std::string Variant::toString()
