@@ -72,7 +72,7 @@ namespace gwiz
 			// std::cout << std::get< 0 >(allelePercentageTuple) << " " << std::get< 1 >(allelePercentageTuple) << std::endl;
 			if (std::get< 1 >(allelePercentageTuple) > minAllowablePercentage)
 			{
-				vcfLines += std::to_string(getPosition()) + "\t" + alleleString() + "\t" + getAlleleCountString() + "\n";
+				vcfLines += std::to_string(getPosition()) + "\t" + alleleString() + "\t" + getAlleleCountString() + "\t" + std::to_string(this->m_total_allele_count) + "\n";
 				// vcfLines += getVCFLineFromAlternate(std::get< 0 >(allelePercentageTuple));
 				++printCount;
 			}

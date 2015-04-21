@@ -69,7 +69,7 @@ namespace gwiz
 			auto alleleCount = alleleCounter->find(allele);
 			if (alleleCount != alleleCounter->end())
 			{
-				count = alleleCounter->find(allele)->second;
+				count = alleleCount->second;
 			}
 			alleleCounter->insert(std::pair< std::string, uint32_t >(allele, count + 1));
 			++this->m_total_allele_count;
