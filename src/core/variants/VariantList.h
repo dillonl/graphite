@@ -87,7 +87,7 @@ namespace gwiz
 			std::map< uint32_t, bool > variantPrintedMap;
 			for (auto& variantPtr : this->m_variants_ptr_list)
 			{
-				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end()) { continue; }
+				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end() || !variantPtr->hasAlts()) { continue; }
 				auto vcfString = variantPtr->toString();
                 out.write(vcfString.c_str(), vcfString.size());
 				variantPrintedMap[variantPtr->getVariantID()] = true;

@@ -59,6 +59,17 @@ namespace gwiz
 		return alleleString;
 	}
 
+	bool Variant::hasAlts()
+	{
+		for (auto& alt : getAlt())
+		{
+			auto ac = this->m_allele_count.find(alt);
+			auto arc = this->m_allele_reverse_strand_count.find(alt);
+			if (ac->second > 0 || arc->second > 0) { return true; }
+		}
+		return false;
+	}
+
 	std::string Variant::toString()
 	{
 		std::string vcfLines = "";

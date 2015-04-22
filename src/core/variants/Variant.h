@@ -121,6 +121,7 @@ namespace gwiz
 
 		std::string getAlleleCountString();
 		std::string alleleString();
+		bool hasAlts();
 
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
