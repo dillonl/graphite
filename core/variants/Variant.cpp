@@ -75,6 +75,6 @@ namespace gwiz
 	void Variant::printVariant(std::ostream& out)
 	{
 		std::string passFail = (this->m_pass) ? "PASS" : "FAIL";
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\tNA\t" << passFail << "\tDP=" << this->m_total_allele_count << ";DP4" << getAlleleCountString() << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\tNA\t" << passFail << "\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << std::endl;
 	}
 }

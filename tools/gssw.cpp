@@ -17,20 +17,21 @@ int main(int argc, char** argv)
 	std::string vcfPath = gwiz::Parameters::Instance()->getInVCFPath();
 	std::string bamPath = gwiz::Parameters::Instance()->getBAMPath();
 	std::string outputVCFPath = gwiz::Parameters::Instance()->getOutVCFPath();
+	std::string region = gwiz::Parameters::Instance()->getRegion();
 
-	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(region);
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 	auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
 	auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 	vcfFileReaderPtr->loadVariantsFromFile();
 
-	std::cout << "Finished loading BAM and VCF" << std::endl;
+	// std::cout << "Finished loading BAM and VCF" << std::endl;
 
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 	auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-	std::cout << "starting to print vcf" << std::endl;
+	// std::cout << "starting to print vcf" << std::endl;
 
 	if (outputVCFPath.size() > 0)
 	{

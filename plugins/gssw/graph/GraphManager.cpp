@@ -41,11 +41,13 @@ namespace gssw
 			auto variantsListPtr = this->m_variant_list_ptr->getVariantsInRegion(graphRegion);
 			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
+				/*
 				static uint32_t counter = 0;
 				if (++counter % 1000 == 0)
 				{
 					std::cout << "count: " << counter << std::endl;
 				}
+				*/
 				// std::cout << "asdf1" << std::endl;
 
 				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader

@@ -102,10 +102,11 @@ namespace gwiz
 	void Parameters::printUsage()
 	{
 		std::cout << "Options:" << std::endl;
-		std::cout << "\th\tPrints this statement." << std::endl;
-		std::cout << "\tb\tPath to input BAM file" << std::endl;
-		std::cout << "\tv\tPath to input VCF file" << std::endl;
-		std::cout << "\to\tPath to output VCF file [optional - default is stdout]" << std::endl;
+		std::cout << "\t-h\tPrints this statement." << std::endl;
+		std::cout << "\t-b\tPath to input BAM file" << std::endl;
+		std::cout << "\t-r\tRegion information" << std::endl;
+		std::cout << "\t-v\tPath to input VCF file" << std::endl;
+		std::cout << "\t-o\tPath to output VCF file [optional - default is stdout]" << std::endl;
 	}
 
 	// A non-member function to check if a file exists

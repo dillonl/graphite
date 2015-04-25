@@ -76,11 +76,13 @@ namespace gssw
 			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode, nullptr);
 		}
+		/*
 		static uint32_t constructCount = 0;
 		if (++constructCount % 1000 == 0)
 		{
 			std::cout << "graphs constructed: " << constructCount << std::endl;
 		}
+		*/
 		graphConstructed();
 	}
 
