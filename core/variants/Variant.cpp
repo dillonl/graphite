@@ -3,7 +3,8 @@
 namespace gwiz
 {
 	Variant::Variant() :
-		m_total_allele_count(0)
+		m_total_allele_count(0),
+		m_pass(false)
 	{
 	}
 

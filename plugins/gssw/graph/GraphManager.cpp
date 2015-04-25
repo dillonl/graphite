@@ -77,34 +77,17 @@ namespace gssw
 
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize)
 	{
-		static std::mutex variantLock;
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
 
 		auto variantsPtrList =  this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);
 
 		{
-			std::lock_guard< std::mutex > lock(variantLock); // this is released when it falls out of scope
+			this->m_gssw_graph_mutex.lock();
 			reportedVariants->addVariants(variantsPtrList);
+			this->m_gssw_graph_mutex.unlock();
 		}
 	}
 
-	IVariantList::SharedPtr GraphManager::buildGraph(position startPosition, position endPosition, IVariantList::SharedPtr variantListPtr)
-	{
-		/*
-		auto reportedVariants = std::make_shared< VariantList >();
-		static uint32_t contigsDone = 0;
-		auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
-
-		// create region for alignmentReader
-		auto region = std::make_shared< Region >(this->m_reference_ptr->getRegion()->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition));
-		alignmentReaderPtr->init();
-		alignmentReaderPtr->setRegion(region); // set alignmentreader's region
-		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantListPtr, alignmentReaderPtr);
-		gsswGraph->constructGraph();
-		return reportedVariants;
-		*/
-		return nullptr;
-	}
 }
 }

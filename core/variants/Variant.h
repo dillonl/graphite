@@ -135,6 +135,7 @@ namespace gwiz
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }
+		bool getPass() const { return m_pass; }
 		std::string getID() const { return m_id; }
 		std::string const getRef() { return m_ref[0]; }
 		std::vector< std::string > const getAlt() { return m_alt; }

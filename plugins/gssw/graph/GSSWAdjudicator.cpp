@@ -28,34 +28,39 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
-		static std::mutex adjLock;
-
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
-		// std::cout << "adj" << std::endl;
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
-			// std::cout << "adj2" << std::endl;
 			IAlignment::SharedPtr alignmentPtr;
 			while (alignmentsReaderPtr->getNextAlignment(alignmentPtr))
 			{
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
-				// gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				if (graphMappingPtr->score < ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75)) // skip low scoring	mappings
+				bool pass = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75)); // pass if the criteria is met
+				/*
+				if (pass)
 				{
 					continue;
 				}
-				// std::cout << graphMappingPtr->score << " " <<   (this->m_max_mapping_score * 0.9) << std::endl;
+				*/
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						std::unique_lock< std::mutex > lock(adjLock);
-						variantPtr->increaseCount(nc->node->seq, nc->node->len, alignmentPtr); // record the variant (ref or alt) that went through the node
+						if (pass && !variantPtr->getPass()) // since this variant is adjudicated by multiple alignments set it to pass only if the variants pass is false (we do not want to set a passing variant to false)
+						{
+							variantPtr->setPass(pass);
+						}
+						this->m_adjudication_lock.lock();
+						if (pass) // only count the variants tha pass
+						{
+							variantPtr->increaseCount(nc->node->seq, nc->node->len, alignmentPtr); // record the variant (ref or alt) that went through the node
+						}
 						variantList->addVariant(variantPtr);
+						this->m_adjudication_lock.unlock();
 					}
 				}
 			}
