@@ -4,6 +4,8 @@
 #include "core/adjudicator/IGraphAdjudicator.h"
 #include "GSSWGraph.h"
 
+#include <mutex>
+
 namespace gwiz
 {
 namespace gssw
