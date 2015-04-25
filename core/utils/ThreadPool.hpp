@@ -94,7 +94,7 @@ namespace gwiz
 
 		void init()
 		{
-			size_t numberOfThreads = std::thread::hardware_concurrency();
+			size_t numberOfThreads = std::thread::hardware_concurrency() * 2;
 			for (size_t i = 0; i < numberOfThreads; ++i)
 			{
 				this->m_workers.emplace_back(

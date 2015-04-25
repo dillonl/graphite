@@ -18,9 +18,9 @@ namespace gssw
 
 	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize) :
 		IGraph(referencePtr, variantListPtr),
-		m_match(2),
-		m_mismatch(2),
-		m_gap_open(3),
+		m_match(1),
+		m_mismatch(4),
+		m_gap_open(6),
 		m_gap_extension(1),
 		m_start_position(startPosition),
 		m_graph_size(graphSize)
@@ -75,6 +75,11 @@ namespace gssw
 		{
 			auto referenceNode = gssw_node_create_alt((startPosition + referenceOffset), this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, GenotyperAllele::Type::REFERENCE, this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize, this->m_nt_table, this->m_mat);
 			addReference(altAndRefVertices, referenceNode, nullptr);
+		}
+		static uint32_t constructCount = 0;
+		if (++constructCount % 1000 == 0)
+		{
+			std::cout << "graphs constructed: " << constructCount << std::endl;
 		}
 		graphConstructed();
 	}

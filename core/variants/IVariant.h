@@ -22,7 +22,7 @@ namespace gwiz
             virtual size_t getLargestAlleleSize() = 0;
             uint32_t getVariantID() { return this->m_variant_id; }
 
-            virtual std::string toString() = 0;
+			virtual void printVariant(std::ostream& out) = 0;
         private:
             uint32_t m_variant_id;
     };

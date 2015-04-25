@@ -41,10 +41,13 @@ namespace gwiz
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
+			/*
 			for (auto alternateString : variantPtr->getAlt())
 			{
 				variantPtr->setVCFLineFromAlternate(alternateString, vcf_line, end_line - vcf_line);
 			}
+			*/
+			variantPtr->initializeAlleleCounters();
 			return variantPtr;
 		}
 
@@ -62,26 +65,21 @@ namespace gwiz
 			return this->m_vcf_lines_map[alt];
 		}
 
-		inline void increaseCount(const std::string& allele, bool isReverseStrand)
+		inline void increaseCount(const char* allele, size_t alleleSize, IAlignment::SharedPtr alignmentPtr)
 		{
+			auto alignmentID = alignmentPtr->getID();
+			if (this->m_alignment_ids.find(alignmentID) != this->m_alignment_ids.end()) { return; } // because of graph overlap we make sure we aren't counting alignments we've already counted
+			this->m_alignment_ids.emplace(alignmentID, true);
 			size_t count = 0;
-			if (isReverseStrand)
+			if (alignmentPtr->isReverseStrand())
 			{
-				auto alleleCount = m_allele_reverse_strand_count.find(allele);
-				if (alleleCount != m_allele_reverse_strand_count.end())
-				{
-					count = alleleCount->second;
-				}
-				m_allele_reverse_strand_count[allele] = count + 1;
+				count = m_allele_reverse_strand_count[std::string(allele, alleleSize)] + 1;
+				m_allele_reverse_strand_count[std::string(allele, alleleSize)] = count;
 			}
 			else
 			{
-				auto alleleCount = m_allele_count.find(allele);
-				if (alleleCount != m_allele_count.end())
-				{
-					count = alleleCount->second;
-				}
-				m_allele_count[allele] = count + 1;
+				count = m_allele_count[std::string(allele, alleleSize)] + 1;
+				m_allele_count[std::string(allele, alleleSize)] = count;
 			}
 			++this->m_total_allele_count;
 		}
@@ -89,9 +87,15 @@ namespace gwiz
 		uint32_t getAlleleCount(const std::string& allele)
 		{
 			size_t count = 0;
-			if (this->m_allele_count.find(allele) != this->m_allele_count.end())
+			auto alleleCount = m_allele_count.find(allele);
+			if (alleleCount != this->m_allele_count.end())
 			{
-				count = this->m_allele_count[allele];
+				count = alleleCount->second;
+			}
+			auto alleleCountReverse = m_allele_reverse_strand_count.find(allele);
+			if (alleleCountReverse != m_allele_reverse_strand_count.end())
+			{
+				count += alleleCountReverse->second;
 			}
 			return count;
 		}
@@ -119,6 +123,11 @@ namespace gwiz
 			std::cout << "allele: " << getRef() << " <" << this->m_allele_count[getRef()] << ">" << std::endl;
 		}
 
+		void setPass(bool pass)
+		{
+			this->m_pass = pass;
+		}
+
 		std::string getAlleleCountString();
 		std::string alleleString();
 		bool hasAlts();
@@ -131,13 +140,24 @@ namespace gwiz
 		std::vector< std::string > const getAlt() { return m_alt; }
 		std::map< std::string, uint32_t > m_allele_count;
 		std::map< std::string, uint32_t > m_allele_reverse_strand_count;
+		std::map< std::string, bool > m_alignment_ids;
 		uint32_t m_total_allele_count; // an efficiency that technically could be calculated from m_allele_count
 
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 
-		std::string toString() override;
+		void printVariant(std::ostream& out) override;
 	private:
+		inline void initializeAlleleCounters()
+		{
+			m_allele_count[getRef()] = 0;
+			m_allele_reverse_strand_count[getRef()] = 0;
+			for (const auto& alt : getAlt())
+			{
+				m_allele_count[alt] = 0;
+				m_allele_reverse_strand_count[alt] = 0;
+			}
+		}
 
 		VARIANT_TYPE m_variant_type;
 		uint32_t m_position;
@@ -146,6 +166,7 @@ namespace gwiz
 		std::vector< std::string > m_ref;
 		std::vector< std::string > m_alt;
 		std::map< std::string, std::string > m_vcf_lines_map;
+		bool m_pass;
 	};
 
 }

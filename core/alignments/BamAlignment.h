@@ -21,7 +21,7 @@ namespace gwiz
 		const char* getSequence() override;
 		const position getPosition() override;
 		const size_t getLength() override;
-		const std::string getID() override {return this->m_bam_alignment_ptr->Name;}
+		const std::string getID() override { return (this->m_bam_alignment_ptr->IsPrimaryAlignment()) ? this->m_bam_alignment_ptr->Name + "1" : this->m_bam_alignment_ptr->Name + "0"; }
 		const bool isFirstMate() override {return this->m_bam_alignment_ptr->IsFirstMate();}
 		const bool isMapped() override { return this->m_bam_alignment_ptr->IsMapped(); }
 		const bool isReverseStrand() override { return this->m_bam_alignment_ptr->IsReverseStrand(); }

@@ -4,6 +4,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <string>
+#include <memory>
 
 #include "core/utils/Types.h"
 #include "RegionParser.hpp"
@@ -17,7 +18,7 @@ namespace gwiz
 	class Region : private boost::noncopyable
 	{
 	public:
-		typedef std::shared_ptr<Region> SharedPtr;
+		typedef std::shared_ptr< Region > SharedPtr;
 		Region(const std::string& regionString);
 		Region() = delete; // force region_string usage
 		~Region();

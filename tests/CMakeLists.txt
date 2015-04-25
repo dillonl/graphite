@@ -36,11 +36,10 @@ target_link_libraries(gwiz_tests
 	BamTools
 	BamTools-utils
 	${VCFLIB_LIBRARIES}
-	gwiz_core
-	gwiz_utils
+	${CORE_LIB}
 	${PLUGIN_LIBS}
 	fastahack_lib
-	gssw_lib
+	${GSSW_LIB}
 	ssw_lib
 	${SCI_BOOST_LIBRARY}
 )

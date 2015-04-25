@@ -27,7 +27,7 @@ namespace gssw
 	IVariantList::SharedPtr GraphManager::buildGraphs(Region::SharedPtr regionPtr, size_t graphSize, size_t overlap, size_t alignmentPadding)
 	{
 		auto reportedVariants = std::make_shared< VariantList >();
-		std::mutex reportedVariantsMutex;
+		// std::mutex reportedVariantsMutex;
 
 		std::string referenceID = regionPtr->getReferenceID();
 		position startPosition = regionPtr->getStartPosition();
@@ -41,6 +41,11 @@ namespace gssw
 			auto variantsListPtr = this->m_variant_list_ptr->getVariantsInRegion(graphRegion);
 			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
+				static uint32_t counter = 0;
+				if (++counter % 1000 == 0)
+				{
+					std::cout << "count: " << counter << std::endl;
+				}
 				// std::cout << "asdf1" << std::endl;
 
 				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
@@ -54,7 +59,8 @@ namespace gssw
 
 				// std::cout << "asdf4" << std::endl;
 
-				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize, std::ref(reportedVariantsMutex));
+				// auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize, std::ref(reportedVariantsMutex));
+				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize);
 				ThreadPool::Instance()->enqueue(funct);
 				// std::cout << "asdf5" << std::endl;
 
@@ -66,8 +72,10 @@ namespace gssw
 		return reportedVariants;
 	}
 
-	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize, std::mutex& reportedVariantsMutex)
+	// void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize, std::mutex& reportedVariantsMutex)
+	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize)
 	{
+		static std::mutex variantLock;
 		// std::cout << "aag1" << std::endl;
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
@@ -76,7 +84,8 @@ namespace gssw
 
 		// std::cout << "aag2" << std::endl;
 		{
-			std::lock_guard< std::mutex > lock(reportedVariantsMutex); // this is released when it falls out of scope
+			// std::lock_guard< std::mutex > lock(reportedVariantsMutex); // this is released when it falls out of scope
+			std::lock_guard< std::mutex > lock(variantLock); // this is released when it falls out of scope
 			reportedVariants->addVariants(variantsPtrList);
 		}
 	}

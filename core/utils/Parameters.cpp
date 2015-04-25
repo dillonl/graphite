@@ -46,8 +46,10 @@ namespace gwiz
 		static struct option long_options[] =
 			{
 				{"help", no_argument, 0, 'h'},
-				{"bam_source", required_argument, 0, 's'},
-				{"bam_glia", required_argument, 0, 'g'},
+				{"bam", required_argument, 0, 'b'},
+				{"fasta", required_argument, 0, 'f'},
+				{"vcf", required_argument, 0, 'v'},
+				{"output_vcf", required_argument, 0, 'o'},
 				{"region", required_argument, 0, 'r'},
 				{NULL, 0, 0, 0}
 			};

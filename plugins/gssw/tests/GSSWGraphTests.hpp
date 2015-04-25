@@ -429,7 +429,14 @@ namespace
 		// std::string vcfPath = TEST_SMALL_MEI_VCF_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
-		// bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
+
+		/*
+		bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
+		vcfPath = "/home/dlee/Projects/gwiz/data/freebayes.NA12878.unfiltered.vcf";
+		// kingspeek19.chpc.utah.edu
+		// kingspeek20.chpc.utah.edu
+		*/
+
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 		auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
@@ -438,21 +445,25 @@ namespace
 		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		vcfFileReaderPtr->loadVariantsFromFile();
 
+		std::cout << "Finished loading BAM and VCF" << std::endl;
+
 		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
+
+		std::cout << "starting to print vcf" << std::endl;
+
+		std::ofstream outVCF;
+		outVCF.open("output.vcf", std::ios::out);
+		variantList->printToVCF(outVCF);
+		outVCF.close();
+
+		std::cout << "printing other output" << std::endl;
 
 		std::ofstream outStream;
 		outStream.open("og.txt", std::ios::out);
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		outStream.close();
-
-		std::cout << "starting to print vcf" << std::endl;
-
-		std::ofstream outVCF;
-		outVCF.open("test.vcf", std::ios::out);
-		variantList->printToVCF(outVCF);
-		outVCF.close();
 	}
 
 	TEST(GSSWTests, TestConstructTestData)

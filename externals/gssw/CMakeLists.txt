@@ -4,3 +4,5 @@ set(GSSW_SOURCES
 )
 
 add_library(gssw_lib ${GSSW_SOURCES})
+
+SET(GSSW_LIB gssw_lib CACHE STRING "THE GSSW LIBRARY")

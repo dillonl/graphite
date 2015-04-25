@@ -43,7 +43,7 @@ namespace gssw
 				// gsswGraphPtr->recordAlignmentVariants(graphMappingPtr, alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				if (graphMappingPtr->score < ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.9)) // skip low scoring	mappings
+				if (graphMappingPtr->score < ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75)) // skip low scoring	mappings
 				{
 					continue;
 				}
@@ -53,8 +53,8 @@ namespace gssw
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						variantPtr->increaseCount(std::string(nc->node->seq, nc->node->len), alignmentPtr->isReverseStrand()); // record the variant (ref or alt) that went through the node
 						std::unique_lock< std::mutex > lock(adjLock);
+						variantPtr->increaseCount(nc->node->seq, nc->node->len, alignmentPtr); // record the variant (ref or alt) that went through the node
 						variantList->addVariant(variantPtr);
 					}
 				}

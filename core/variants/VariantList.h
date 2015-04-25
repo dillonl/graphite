@@ -82,14 +82,23 @@ namespace gwiz
 
 		size_t getCount() override { return m_variants_ptr_list.size(); }
 
+		void printVCFHeader(std::ostream& out)
+		{
+			out << "##fileformat=VCFv4.2" << std::endl;
+			out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">" << std::endl;
+			out << "##INFO=<ID=DP4,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
+			out << "#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO" << std::endl;
+		}
+
 		void printToVCF(std::ostream& out) override
 		{
+			printVCFHeader(out);
 			std::map< uint32_t, bool > variantPrintedMap;
 			for (auto& variantPtr : this->m_variants_ptr_list)
 			{
-				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end() || !variantPtr->hasAlts()) { continue; }
-				auto vcfString = variantPtr->toString();
-                out.write(vcfString.c_str(), vcfString.size());
+				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end()) { continue; }
+				/* if (!variantPtr->hasAlts()) { continue; } */
+				variantPtr->printVariant(out);
 				variantPrintedMap[variantPtr->getVariantID()] = true;
 			}
 		}
