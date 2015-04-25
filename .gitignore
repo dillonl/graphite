@@ -12,6 +12,9 @@ GPATH
 GRTAGS
 GTAGS
 
+#Ignore .DS_Store
+.DS_Store
+
 # ignore emacs files
 \#*
 *~
