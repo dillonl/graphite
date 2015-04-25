@@ -58,6 +58,8 @@ namespace testing
 			}
 		}
 
+		virtual size_t getReadCount() override { return m_alignments.size(); }
+
 		std::vector< IAlignment::SharedPtr > m_alignments;
 		size_t m_current_alignment_index;
 	};

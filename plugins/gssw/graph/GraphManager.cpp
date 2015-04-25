@@ -56,6 +56,7 @@ namespace gssw
 				alignmentReaderPtr->init();
 				// std::cout << "asdf3" << std::endl;
 				alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
+				if (alignmentReaderPtr->getReadCount() == 0) { continue; } // if there are no reads then continue
 
 				// std::cout << "asdf4" << std::endl;
 
@@ -72,19 +73,15 @@ namespace gssw
 		return reportedVariants;
 	}
 
-	// void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize, std::mutex& reportedVariantsMutex)
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr reportedVariants, IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize)
 	{
 		static std::mutex variantLock;
-		// std::cout << "aag1" << std::endl;
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
 
 		auto variantsPtrList =  this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);
 
-		// std::cout << "aag2" << std::endl;
 		{
-			// std::lock_guard< std::mutex > lock(reportedVariantsMutex); // this is released when it falls out of scope
 			std::lock_guard< std::mutex > lock(variantLock); // this is released when it falls out of scope
 			reportedVariants->addVariants(variantsPtrList);
 		}

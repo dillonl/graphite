@@ -17,6 +17,7 @@ namespace gwiz
 		virtual void setRegion(Region::SharedPtr region) override;
 		virtual size_t getAverageReadLength() override;
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
+		virtual size_t getReadCount() override { return m_alignments_ptr->size(); }
 
 	private:
 		void setAverageBamReadLength();

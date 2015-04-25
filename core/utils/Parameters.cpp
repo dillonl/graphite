@@ -8,9 +8,10 @@ namespace gwiz
 	Parameters* Parameters::s_instance = NULL;
 
 	Parameters::Parameters() :
-		m_command_options("hs:g:r:"),
-		m_bam_source_path(""),
-		m_bam_glia_path(""),
+		m_command_options("h:b:f:v:o:r:"),
+		m_bam_path(""),
+		m_in_vcf_path(""),
+		m_out_vcf_path(""),
 		m_region("")
 	{
 	}
@@ -61,19 +62,29 @@ namespace gwiz
 			case 'h':
 				printUsage();
 				exit(0);
-			case 's':
-				if (!setBamSourcePath(optarg))
+			case 'f':
+				if (!setPath(this->m_fasta_path, optarg))
 				{
-					std::cout << "Invalid Bam Source Path: " << optarg << std::endl;
+					std::cout << "Invalid Fasta Path: " << optarg << std::endl;
 					exit(0);
 				}
 				break;
-			case 'g':
-				if (!setBamGliaPath(optarg))
+			case 'b':
+				if (!setPath(this->m_bam_path, optarg))
 				{
-					std::cout << "Invalid Bam Glia Path: " << optarg << std::endl;
+					std::cout << "Invalid Bam Path: " << optarg << std::endl;
 					exit(0);
 				}
+				break;
+			case 'v':
+				if (!setPath(this->m_in_vcf_path, optarg))
+				{
+					std::cout << "Invalid Input VCF Path: " << optarg << std::endl;
+					exit(0);
+				}
+				break;
+			case 'o':
+				this->m_out_vcf_path = optarg;
 				break;
 			case 'r':
 				this->m_region = optarg;
@@ -90,7 +101,11 @@ namespace gwiz
 
 	void Parameters::printUsage()
 	{
-
+		std::cout << "Options:" << std::endl;
+		std::cout << "\th\tPrints this statement." << std::endl;
+		std::cout << "\tb\tPath to input BAM file" << std::endl;
+		std::cout << "\tv\tPath to input VCF file" << std::endl;
+		std::cout << "\to\tPath to output VCF file [optional - default is stdout]" << std::endl;
 	}
 
 	// A non-member function to check if a file exists
@@ -107,24 +122,11 @@ namespace gwiz
 		}
 	}
 
-	bool Parameters::setBamSourcePath(const std::string& path)
+	bool Parameters::setPath(std::string& outPath, const std::string& inPath)
 	{
-		if (DoesFileExist(path))
+		if (DoesFileExist(inPath))
 		{
-			this->m_bam_source_path = path;
-			return true;
-	    }
-		else
-		{
-			return false;
-		}
-	}
-
-	bool Parameters::setBamGliaPath(const std::string& path)
-	{
-		if (DoesFileExist(path))
-		{
-			this->m_bam_glia_path = path;
+			outPath = inPath;
 			return true;
 	    }
 		else

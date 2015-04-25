@@ -30,6 +30,7 @@ namespace gwiz
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignment) override;
 
 		void setRegion(Region::SharedPtr region) override;
+		virtual size_t getReadCount() override { throw "getReadCount not implemented for BamAlignmentReader, use preloaded reader for count"; }
 
 	private:
 		void setAverageBamReadLength();

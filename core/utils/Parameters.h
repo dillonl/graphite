@@ -18,22 +18,24 @@ namespace gwiz
 		void setParams(const int argc, char** argv);
 		void printUsage();
 
-		std::string getBamSourcePath() { return m_bam_source_path; }
-		std::string getBamGliaPath() { return m_bam_glia_path; }
+		std::string getBAMPath() { return m_bam_path; }
+		std::string getFastaPath() { return m_fasta_path; }
+		std::string getInVCFPath() { return m_in_vcf_path; }
+		std::string getOutVCFPath() { return m_out_vcf_path; }
 		std::string getRegion() { return m_region; }
 
 	private:
 		Parameters();
 		~Parameters();
-
-		bool setBamSourcePath(const std::string& path);
-		bool setBamGliaPath(const std::string& path);
+		bool setPath(std::string& outPath, const std::string& inPath);
 
 		std::map<std::string, std::string> m_params;
 		std::string m_command_options;
 
-		std::string m_bam_source_path;
-		std::string m_bam_glia_path;
+		std::string m_bam_path;
+		std::string m_fasta_path;
+		std::string m_in_vcf_path;
+		std::string m_out_vcf_path;
 		std::string m_region;
 
 		static Parameters* s_instance;
