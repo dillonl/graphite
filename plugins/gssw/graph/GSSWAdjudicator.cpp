@@ -52,7 +52,7 @@ namespace gssw
 					{
 						if (pass && !variantPtr->getPass()) // since this variant is adjudicated by multiple alignments set it to pass only if the variants pass is false (we do not want to set a passing variant to false)
 						{
-							variantPtr->setPass(pass);
+							variantPtr->setPass(true);
 						}
 						this->m_adjudication_lock.lock();
 						if (pass) // only count the variants tha pass
