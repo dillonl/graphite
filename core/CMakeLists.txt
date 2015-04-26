@@ -9,6 +9,7 @@ endif()
 set(GWIZ_UTILS_SOURCES
   utils/Parameters.cpp
   utils/file/ASCIIFileReader.cpp
+  utils/file/ASCIIGZFileReader.cpp
   )
 
 set(GWIZ_CORE_REFERENCE_SOURCES

@@ -8,13 +8,12 @@
 #include "VariantsTest.hpp"
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
-#include "FileTests.hpp"
 #include "BamAlignmentTests.hpp"
 #include "VariantListVCFPreloadedTests.hpp"
-*/
-
 #include "plugins/TestIncludes.h"
 
+*/
+#include "FileTests.hpp"
 
 #include "gtest/gtest.h"
 

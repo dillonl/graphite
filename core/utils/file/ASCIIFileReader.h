@@ -38,7 +38,7 @@ namespace gwiz
 		 * multithreaded functionality.
 		 * Advances file position.
 		 */
-		inline const char* getNextLine()
+		inline const char* getNextLine() override
 		{
 			if (!this->m_opened || this->m_current_position >= this->m_end_position) { return NULL; }
 			const char* current_line = this->m_current_position;

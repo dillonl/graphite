@@ -256,6 +256,12 @@ IF(BUILD_WITH_PYTHON)
                         COMPILE_DEFINITIONS_DEBUG "BOOST_DEBUG_PYTHON")
 ENDIF(BUILD_WITH_PYTHON)
 
+###########################################
+# Add iostreams to the boost library
+TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} boost_iostreams)
+
+
+
 # required by threading library for clock_gettime
 IF(UNIX AND NOT APPLE AND NOT CYGWIN)
   TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} rt)

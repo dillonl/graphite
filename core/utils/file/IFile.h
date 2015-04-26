@@ -19,6 +19,7 @@ namespace gwiz
 
 		virtual void Open() = 0;
 		virtual void Close() = 0;
+		virtual const char* getNextLine() = 0;
 
 	protected:
 		inline bool fileExists(const std::string& name)

@@ -2,8 +2,44 @@
 #define GWIZ_TESTS_FILETESTS_HPP
 
 #include "core/utils/file/ASCIIFileReader.h"
+#include "core/utils/file/ASCIIGZFileReader.h"
 #include "TestConfig.h"
 
+TEST(ASCIIGZFileReaderTests, OpenValidFileTest)
+{
+	bool success = true;
+	try
+	{
+		std::string path = TEST_LINE_NUMBERS_GZ_FILE;
+		auto asciiGZReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+		asciiGZReaderPtr->Open();
+	}
+	catch (std::ios_base::failure& exc)
+	{
+		success = false;
+	}
+	EXPECT_TRUE(success);
+}
+
+TEST(ASCIIGZFileReaderTests, getNextLineFileTest)
+{
+	bool success = false;
+	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
+	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	asciiReaderPtr->Open();
+	const char* line;
+	uint32_t count = 1;
+	while ((line = asciiReaderPtr->getNextLine()) != nullptr)
+	{
+		std::string countString = std::to_string(count);
+		ASSERT_STREQ(line, countString.c_str());
+		++count;
+		success = true;
+	}
+	EXPECT_TRUE(success);
+}
+
+/*
 TEST(ASCIIFileReaderTests, OpenValidFileTest)
 {
 	bool success = true;
