@@ -9,7 +9,8 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-
+#include <boost/iostreams/seek.hpp>
+/* #include <boost/iostreams/positioning.hpp> */
 namespace gwiz
 {
 	class ASCIIGZFileReader : public IFile
@@ -25,14 +26,16 @@ namespace gwiz
 
 		inline const char* getNextLine() override
 		{
-			for(std::string str; std::getline(*this->m_in_stream_ptr, str); )
+			std::cout << "hello" << std::endl;
+			for(std::string str; std::getline(*this->m_iostream_ptr, str); )
 			{
-				/* std::cout << "Processed line " << str << '\n'; */
+				std::cout << "Processed line " << str << '\n';
 			}
 			return nullptr;
 		}
 
 	private:
+		std::shared_ptr< std::iostream > m_iostream_ptr;
 		std::shared_ptr< std::ifstream > m_ifstream_ptr;
 		std::shared_ptr< boost::iostreams::filtering_istream > m_in_stream_ptr;
 	};

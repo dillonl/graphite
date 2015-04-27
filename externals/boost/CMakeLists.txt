@@ -75,8 +75,8 @@ SET(BOOST_SRCS
   libs/iostreams/src/mapped_file.cpp
 # the PREFIX mangling does do not combine with boost
 # need to alter code to fix this
-#  libs/iostreams/src/zlib.cpp
-#  libs/iostreams/src/bzip2.cpp
+  libs/iostreams/src/zlib.cpp
+  libs/iostreams/src/bzip2.cpp
   libs/iostreams/src/gzip.cpp
 
   libs/program_options/src/cmdline.cpp 
@@ -248,7 +248,7 @@ ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
 
 INCLUDE_DIRECTORIES(${SCI_ZLIB_INCLUDE})
 ADD_LIBRARY(${SCI_BOOST_LIBRARY} STATIC ${BOOST_SRCS})
-#TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} ${SCI_ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} ${SCI_ZLIB_LIBRARY})
 IF(BUILD_WITH_PYTHON)
   TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} ${SCI_PYTHON_LIBRARY})
   SET_TARGET_PROPERTIES(${SCI_BOOST_LIBRARY}
@@ -258,7 +258,7 @@ ENDIF(BUILD_WITH_PYTHON)
 
 ###########################################
 # Add iostreams to the boost library
-TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} boost_iostreams)
+#TARGET_LINK_LIBRARIES(${SCI_BOOST_LIBRARY} ${SCI_ZLIB_LIBRARY})
 
 
 
