@@ -4,16 +4,17 @@
 
 /*
 #include "VCFFileTests.hpp"
-#include "BuildGraphTests.hpp"
-#include "VariantsTest.hpp"
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
 #include "BamAlignmentTests.hpp"
 #include "VariantListVCFPreloadedTests.hpp"
 #include "plugins/TestIncludes.h"
+#include "FileTests.hpp"
+#include "VariantsTest.hpp"
 
 */
-#include "FileTests.hpp"
+#include "BuildGraphTests.hpp"
+
 
 #include "gtest/gtest.h"
 

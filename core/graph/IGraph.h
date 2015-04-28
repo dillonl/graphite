@@ -27,7 +27,7 @@ namespace gwiz
 
 	protected:
 
-		bool getNextCompoundVariant(Variant::SharedPtr& variant)
+		inline bool getNextCompoundVariant(Variant::SharedPtr& variant)
 		{
 			// the first time we call this function we need to get the first variant
 			if (!m_next_variant_init)
@@ -43,6 +43,8 @@ namespace gwiz
 			Variant::SharedPtr nextVariant;
 			bool variantAdded = false;
 			position startPosition = variant->getPosition();
+			position compoundStartPosition = startPosition;
+			position variantEndPosition = (startPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 
 			// loop through variants until the variants stop overlapping.
 			// As we loop through build a concatenated reference string
@@ -51,7 +53,6 @@ namespace gwiz
 			// a "compound variant" can be generated.
 			while (m_variant_list_ptr->getNextVariant(nextVariant))
 			{
-				position variantEndPosition = (variant->getPosition() + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 				if (variantEndPosition < nextVariant->getPosition())
 				{
 					break;
@@ -65,12 +66,13 @@ namespace gwiz
 					variantAdded = true;
 				}
 				std::string nextReferenceString = nextVariant->getRef();
-				position nextVariantEndPosition = (nextVariant->getPosition() + nextReferenceString.size());
+				position nextVariantEndPosition = (nextVariant->getPosition() + nextReferenceString.size()) - 1;
 				// if the next variant has reference at a further position then add it to the end of the referenceString
 				if (nextVariantEndPosition > variantEndPosition)
 				{
 					position referenceDelta = (nextVariantEndPosition - variantEndPosition);
-					referenceString += nextReferenceString.substr(referenceDelta);
+					referenceString += nextReferenceString.substr(nextReferenceString.size() - referenceDelta);
+					variantEndPosition = (compoundStartPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 				}
 				variants.push_back(nextVariant); // we will build a compound variant with all these variants
 				if (nextVariant->getPosition() < startPosition)

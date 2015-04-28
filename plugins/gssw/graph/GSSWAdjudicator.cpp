@@ -38,13 +38,7 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				bool pass = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75)); // pass if the criteria is met
-				/*
-				if (pass)
-				{
-					continue;
-				}
-				*/
+				bool pass = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75));
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
