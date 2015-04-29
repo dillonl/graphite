@@ -24,6 +24,14 @@ namespace gwiz
 
 		void Close() override;
 
+		inline bool getNextLine(std::string& line) override
+		{
+			std::getline(*this->m_in_stream_ptr, line);
+			std::cout << "Line: " << line;
+			return true;
+		}
+
+		/*
 		inline const char* getNextLine() override
 		{
 			std::cout << "hello" << std::endl;
@@ -33,6 +41,7 @@ namespace gwiz
 			}
 			return nullptr;
 		}
+		*/
 
 	private:
 		std::shared_ptr< std::iostream > m_iostream_ptr;

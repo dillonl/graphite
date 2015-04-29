@@ -32,12 +32,24 @@ namespace gwiz
 		 */
 		void Close() override;
 
+		inline bool getNextLine(std::string& line) override
+		{
+			if (!this->m_opened || this->m_current_position >= this->m_end_position) { return false; }
+			const char* current_line = this->m_current_position;
+			const char* char_line = static_cast< const char* >(memchr(this->m_current_position, '\n', (this->m_end_file_ptr - this->m_current_position)));
+			size_t lineSize = (char_line - this->m_current_position) + 1;
+			line = std::string(this->m_current_position, lineSize);
+			this->m_current_position += lineSize;
+			return true;
+		}
+
 		/*
 		 * Returns a handle to the m_line pointer.
 		 * This may need to be modified to support
 		 * multithreaded functionality.
 		 * Advances file position.
 		 */
+		/*
 		inline const char* getNextLine() override
 		{
 			if (!this->m_opened || this->m_current_position >= this->m_end_position) { return NULL; }
@@ -47,6 +59,7 @@ namespace gwiz
 			this->m_current_position += lineSize;
 			return current_line;
 		}
+		*/
 
 	protected:
 		std::shared_ptr<boost::iostreams::mapped_file> m_file;

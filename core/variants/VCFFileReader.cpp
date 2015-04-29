@@ -1,3 +1,5 @@
+#include "core/utils/file/ASCIIFileReader.h"
+#include "core/utils/file/ASCIIGZFileReader.h"
 #include "VCFFileReader.h"
 
 #include <fstream>
@@ -15,15 +17,30 @@
 namespace gwiz
 {
 	VCFFileReader::VCFFileReader(const std::string& path, Region::SharedPtr region) :
-		ASCIIFileReader(path)
+		m_region_ptr(region)
 	{
-		Open(region);
+		setFileReader(path);
+		// Open(region);
+		Open();
 	}
 
-	VCFFileReader::VCFFileReader(const std::string& path) :
-		ASCIIFileReader(path)
+	VCFFileReader::VCFFileReader(const std::string& path)
 	{
+		setFileReader(path);
 		Open();
+	}
+
+	void VCFFileReader::setFileReader(const std::string& path)
+	{
+		std::string fileExtension = path.substr(path.find_last_of('.') + 1);
+		if (strcmp(fileExtension.c_str(), "gz") == 0) // if it's a gz file
+		{
+			m_file_ptr = std::make_shared< ASCIIGZFileReader >(path);
+		}
+		else // if it's not gz'd
+		{
+			m_file_ptr = std::make_shared< ASCIIFileReader >(path);
+		}
 	}
 
 
@@ -33,14 +50,16 @@ namespace gwiz
 
 	void VCFFileReader::Open()
 	{
-		ASCIIFileReader::Open();
-		this->m_current_position = this->m_file->const_data() + getHeaderSize(); // advance past the header
-		this->m_end_position = this->m_file->const_data() + this->m_file_size; // set the end position to the eof
+		m_file_ptr->Open();
+		readHeader();
+		// this->m_current_position = this->m_file->const_data() + getHeaderSize(); // advance past the header
+		// this->m_end_position = this->m_file->const_data() + this->m_file_size; // set the end position to the eof
 	}
 
+	/*
 	void VCFFileReader::Open(Region::SharedPtr region)
 	{
-		ASCIIFileReader::Open();
+		m_file_ptr->Open();
 		if (region->getStartPosition() == 0 && region->getEndPosition() == 0)
 		{
 			region->setStartPosition(1);
@@ -49,12 +68,15 @@ namespace gwiz
 		registerRegion(region);
 		this->m_current_position = this->m_start_position;
 	}
+	*/
 
 	void VCFFileReader::rewind()
 	{
-		this->m_current_position = this->m_start_position;
+		throw "Rewind in VCFFileReader not implemented";
+		// this->m_current_position = this->m_start_position;
 	}
 
+	/*
 	size_t VCFFileReader::getHeaderSize()
 	{
 		const char* start_pos = this->m_file->const_data();
@@ -63,6 +85,7 @@ namespace gwiz
 		end_pos = static_cast<const char*>(memchr(end_pos, '\n', std::numeric_limits< position >::max()));
 		return (end_pos + 1) - start_pos;
 	}
+	*/
 
 	/*
 	 * Later we might create a VCFHeader class
@@ -72,12 +95,11 @@ namespace gwiz
 	 */
 	void VCFFileReader::readHeader()
 	{
-		const char* line;
-		std::string end_header_value = "#CHROM";
-		do
+		std::string line;
+		std::string headerEnd = "#CHROM";
+		while (m_file_ptr->getNextLine(line) && strncmp(line.c_str(), headerEnd.c_str(), headerEnd.size()) != 0)
 		{
-			line = getNextLine();
-		} while (line != NULL && strncmp(line, end_header_value.c_str(), end_header_value.size()));
+		}
 	}
 
 	position VCFFileReader::getPositionFromLine(const char* line)
@@ -96,6 +118,8 @@ namespace gwiz
 			);
 		return pos;
 	}
+
+	/*
 
 	bool VCFFileReader::setRegionPositions(Region::SharedPtr regionPtr, const char* startLine, const char* endLine)
 	{
@@ -176,6 +200,7 @@ namespace gwiz
 		}
 		return true;
 	}
+	*/
 
 	void VCFFileReader::printToVCF(std::ostream& out)
 	{

@@ -1,8 +1,8 @@
 #ifndef GWIZ_VCFFILEREADER_H
 #define GWIZ_VCFFILEREADER_H
 
-#include "core/utils/file/ASCIIFileReader.h"
 #include "core/variants/IVariantList.h"
+#include "core/utils/file/IFile.h"
 
 #include "core/variants/VCFParser.hpp"
 #include "core/variants/ChromParser.hpp"
@@ -22,7 +22,8 @@
 
 namespace gwiz
 {
-	class VCFFileReader : public ASCIIFileReader, public IVariantList
+	/* class VCFFileReader : public ASCIIFileReader, public IVariantList */
+	class VCFFileReader : public IVariantList
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;
@@ -32,10 +33,11 @@ namespace gwiz
 
 		bool getNextVariant(Variant::SharedPtr& variant) override
 		{
-			const char* line = getNextLine();
-			if (line != NULL)
+			/* const char* line = getNextLine(); */
+			std::string line;
+			if (m_file_ptr->getNextLine(line))
 			{
-				variant = variant->BuildVariant(line, m_vcf_parser); // static function call to BuildVariant
+				variant = variant->BuildVariant(line.c_str(), m_vcf_parser); // static function call to BuildVariant
 				return true;
 			}
 			else
@@ -45,22 +47,24 @@ namespace gwiz
 			}
 		}
 
-		void Open() override;
-		void Open(Region::SharedPtr region);
+		void Open();
+		/* void Open(Region::SharedPtr region); */
 		void rewind() override;
 		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr region) override { return nullptr; }
 		size_t getCount() override { throw "Not implemented"; }
 
 		void printToVCF(std::ostream& out) override;
 	protected:
-
+		void setFileReader(const std::string& path);
+		IFile::SharedPtr m_file_ptr;
+		Region::SharedPtr m_region_ptr;
 
 	private:
-		size_t getHeaderSize();
+		/* size_t getHeaderSize(); */
         void readHeader();
 		position getPositionFromLine(const char* line);
-		bool setRegionPositions(Region::SharedPtr regionPtr, const char* startLine, const char* endLine);
-		bool registerRegion(Region::SharedPtr region);
+		/* bool setRegionPositions(Region::SharedPtr regionPtr, const char* startLine, const char* endLine); */
+		/* bool registerRegion(Region::SharedPtr region); */
 
 		VariantParser< const char* > m_vcf_parser;
 

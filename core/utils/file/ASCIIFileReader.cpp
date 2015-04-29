@@ -36,6 +36,7 @@ namespace gwiz
 		this->m_current_position = this->m_file->const_data();
 		this->m_end_file_ptr = (this->m_current_position + this->m_file_size);
 		this->m_opened = true;
+		this->m_end_position = this->m_file->const_data() + this->m_file_size; // set the end position to the eof
 		// this->m_end_position = this->m_end_file_ptr;
 	}
 
