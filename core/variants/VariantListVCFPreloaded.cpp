@@ -24,7 +24,6 @@ namespace gwiz
 		Variant::SharedPtr variantPtr;
 		while (vcfFileReader->getNextVariant(variantPtr))
 		{
-			std::cout << variantPtr->getPosition() << std::endl;
 			// std::cout << "variant position: " << variantPtr->getPosition() << " " << this->m_region_ptr->getEndPosition() << std::endl;
 			// add all variants unless region is set
 			if (this->m_region_ptr != nullptr)

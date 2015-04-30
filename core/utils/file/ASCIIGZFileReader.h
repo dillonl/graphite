@@ -26,9 +26,9 @@ namespace gwiz
 
 		inline bool getNextLine(std::string& line) override
 		{
-			std::getline(*this->m_in_stream_ptr, line);
-			std::cout << "Line: " << line;
-			return true;
+			auto value = (bool)std::getline(*this->m_in_stream_ptr, line);
+			line += "\n";
+			return value;
 		}
 
 		/*

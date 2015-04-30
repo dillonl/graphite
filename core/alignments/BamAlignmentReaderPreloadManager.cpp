@@ -7,13 +7,13 @@ namespace gwiz
 	{
 
 		std::cout << this->m_alignments_ptr.get() << std::endl;
-		processBam();
+		// processBam();
 	}
 
 	BamAlignmentReaderPreloadManager::BamAlignmentReaderPreloadManager(const std::string& bamPath, Region::SharedPtr region) :
 		m_bam_path(bamPath), m_region(region), m_alignments_ptr(std::make_shared< std::vector< BamAlignment::SharedPtr > >())
 	{
-		processBam();
+		// processBam();
 	}
 
 	BamAlignmentReaderPreloadManager::~BamAlignmentReaderPreloadManager()
@@ -44,6 +44,25 @@ namespace gwiz
 		{
 			// if (counter++ > 1000) { break; }
 			this->m_alignments_ptr->push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
+			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+		}
+	}
+
+	void BamAlignmentReaderPreloadManager::getAlignmentsInRegion(std::vector< BamAlignment::SharedPtr >& alignments, Region::SharedPtr regionPtr)
+	{
+		BamTools::BamReader bamReader;
+		if (regionPtr != nullptr)
+		{
+			bamReader.LocateIndex();
+			int refID = bamReader.GetReferenceID(regionPtr->getReferenceID());
+			// add 1 to the start and end positions because this is 0 based
+			bamReader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
+		}
+
+		BamAlignmentPtr bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+		while(bamReader.GetNextAlignment(*bamAlignmentPtr))
+		{
+			alignments.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
 			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}
 	}

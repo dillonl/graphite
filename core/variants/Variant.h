@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <unordered_map>
 
 #include "core/alignments/IAlignment.h"
 #include "IVariant.h"
@@ -22,7 +23,7 @@ namespace gwiz
 		INS,
 		DEL,
 		DUP,
-		INV,
+		INV
 	};
 
 	class Variant : public IVariant
@@ -36,11 +37,18 @@ namespace gwiz
 		{
 			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
 			auto variantPtr = std::make_shared< Variant >();
-			variantPtr->m_variant_type = VARIANT_TYPE::SNP;
-			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, variantPtr->m_ref, variantPtr->m_alt))
+			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, variantPtr->m_ref, variantPtr->m_alt, variantPtr->m_qual, variantPtr->m_filter, variantPtr->m_info_fields))
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
+			variantPtr->m_variant_type = VARIANT_TYPE::SNP;
+			/*
+			auto svTypeIter = this->m_info_fields.find("SVTYPE");
+			if (svTypeIter != this->m_info_fields.end())
+			{
+
+			}
+			*/
 			/*
 			for (auto alternateString : variantPtr->getAlt())
 			{
@@ -128,6 +136,14 @@ namespace gwiz
 			this->m_pass = pass;
 		}
 
+		void incrementLowQualityCount(IAlignment::SharedPtr alignmentPtr)
+		{
+			auto alignmentID = alignmentPtr->getID();
+			if (this->m_alignment_ids_low_quality.find(alignmentID) != this->m_alignment_ids_low_quality.end()) { return; } // because of graph overlap we make sure we aren't counting alignments we've already counted
+			this->m_alignment_ids_low_quality.emplace(alignmentID, true);
+			++m_total_allele_count_low_quality;
+		}
+
 		std::string getAlleleCountString();
 		std::string alleleString();
 		bool hasAlts();
@@ -136,13 +152,18 @@ namespace gwiz
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }
 		bool getPass() const { return m_pass; }
+		std::string getQual() const { return m_qual; }
+		std::string getFilter() const { return m_filter; }
+		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
 		std::string const getRef() { return m_ref[0]; }
 		std::vector< std::string > const getAlt() { return m_alt; }
 		std::map< std::string, uint32_t > m_allele_count;
 		std::map< std::string, uint32_t > m_allele_reverse_strand_count;
 		std::map< std::string, bool > m_alignment_ids;
+		std::map< std::string, bool > m_alignment_ids_low_quality;
 		uint32_t m_total_allele_count; // an efficiency that technically could be calculated from m_allele_count
+		uint32_t m_total_allele_count_low_quality; // all reads that pass through this variant are counted (even if their quality is too low to be counted in m_total_allele_count)
 
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
@@ -164,8 +185,11 @@ namespace gwiz
 		uint32_t m_position;
 		std::string m_chrom;
 		std::string m_id;
+		std::string m_qual;
+		std::string m_filter;
 		std::vector< std::string > m_ref;
 		std::vector< std::string > m_alt;
+		std::unordered_map< std::string, std::string > m_info_fields;
 		std::map< std::string, std::string > m_vcf_lines_map;
 		bool m_pass;
 	};

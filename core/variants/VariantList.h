@@ -86,7 +86,8 @@ namespace gwiz
 		{
 			out << "##fileformat=VCFv4.2" << std::endl;
 			out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">" << std::endl;
-			out << "##INFO=<ID=DP4,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
+			out << "##INFO=<ID=TC,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
+			out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth including non-counted low quality reads\">" << std::endl;
 			out << "#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO" << std::endl;
 		}
 

@@ -20,10 +20,12 @@ namespace gwiz
 		virtual ~BamAlignmentReaderPreloadManager();
 
 		virtual IAlignmentReader::SharedPtr generateAlignmentReader() override;
-
-	private:
 		void processBam();
 
+	private:
+		void getAlignmentsInRegion(std::vector< BamAlignment::SharedPtr >& alignments, Region::SharedPtr regionPtr);
+
+		std::vector< BamAlignment::SharedPtr > m_alignments;
 		std::shared_ptr< std::vector< BamAlignment::SharedPtr > > m_alignments_ptr;
 		std::string m_bam_path;
 		Region::SharedPtr m_region;

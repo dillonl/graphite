@@ -100,16 +100,14 @@ namespace
 	TEST_F(VariantsTest, ParseVariantRefTest)
 	{
 		std::vector<std::string> refVCF = {"G"}; // this matches the first variant line of the test_vcf_file
-		std::vector<std::string> notRefVCF = {"A"};
 
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
 		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
-		std::vector<std::string> ref = variantPtr->getRef();
-		ASSERT_EQ(ref,refVCF);
-		ASSERT_NE(ref,notRefVCF);
-		ASSERT_NE(refVCF,notRefVCF);
+		std::string ref = variantPtr->getRef();
+		ASSERT_STREQ(ref.c_str(),"G");
+		ASSERT_STRNE(ref.c_str(),"A");
 	}
 
 	TEST_F(VariantsTest, ParseVariantAltTest)
@@ -125,6 +123,53 @@ namespace
 		ASSERT_EQ(alt,altVCF);
 		ASSERT_NE(alt,notAltVCF);
 		ASSERT_NE(altVCF,notAltVCF);
+	}
+
+	TEST_F(VariantsTest, ParseVariantQualTest)
+	{
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+
+		std::string qual = variantPtr->getQual();
+		ASSERT_STREQ(qual.c_str(),"34439.5");;
+	}
+
+	TEST_F(VariantsTest, ParseVariantFilterTest)
+	{
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+
+		std::string filter = variantPtr->getFilter();
+		ASSERT_STREQ(filter.c_str(),"PASS");
+	}
+
+	TEST_F(VariantsTest, ParseVariantInfoTest)
+	{
+		std::map< std::string, std::string > infoMap;
+		infoMap["AA"] = "G";
+		infoMap["AC"] = "22";
+		infoMap["AF"] = "0.0178427";
+		infoMap["AN"] = "1233";
+		infoMap["DP"] = "84761";
+		infoMap["NS"] = "1233";
+		infoMap["AMR_AF"] = "0.0000";
+		infoMap["AFR_AF"] = "0.0000";
+		infoMap["EUR_AF"] = "0.0000";
+		infoMap["SAS_AF"] = "0.0000";
+		infoMap["EAS_AF"] = "0.0451";
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+
+		auto infoFields = variantPtr->getInfoFields();
+		for (auto infoFieldIter : infoMap)
+		{
+			ASSERT_TRUE(infoFields.find(infoFieldIter.first) != infoFields.end());
+			ASSERT_STREQ(infoFields[infoFieldIter.first].c_str(), infoFieldIter.second.c_str());
+		}
+		ASSERT_EQ(infoFields.size(), 11);
 	}
 
 }

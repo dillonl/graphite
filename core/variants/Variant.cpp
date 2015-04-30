@@ -3,6 +3,7 @@
 namespace gwiz
 {
 	Variant::Variant() :
+		m_total_allele_count_low_quality(0),
 		m_total_allele_count(0),
 		m_pass(false)
 	{
@@ -76,6 +77,7 @@ namespace gwiz
 	void Variant::printVariant(std::ostream& out)
 	{
 		std::string passFail = (this->m_pass) ? "PASS" : "FAIL";
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t" << passFail << "\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << std::endl;
+		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t" << passFail << "\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << std::endl;
 	}
 }

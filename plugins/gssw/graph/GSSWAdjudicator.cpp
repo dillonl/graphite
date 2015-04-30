@@ -53,6 +53,10 @@ namespace gssw
 						{
 							variantPtr->increaseCount(nc->node->seq, nc->node->len, alignmentPtr); // record the variant (ref or alt) that went through the node
 						}
+						else
+						{
+							variantPtr->incrementLowQualityCount(alignmentPtr);
+						}
 						variantList->addVariant(variantPtr);
 						this->m_adjudication_lock.unlock();
 					}

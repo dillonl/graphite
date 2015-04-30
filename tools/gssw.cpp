@@ -9,6 +9,7 @@
 #include "gssw/graph/GraphManager.h"
 #include "gssw/graph/GSSWAdjudicator.h"
 
+#include <thread>
 
 int main(int argc, char** argv)
 {
@@ -21,11 +22,17 @@ int main(int argc, char** argv)
 
 	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(region);
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+
 	auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
 	auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
-	vcfFileReaderPtr->loadVariantsFromFile();
 
-	// std::cout << "Finished loading BAM and VCF" << std::endl;
+	std::thread vcfLoadThread(&gwiz::VariantListVCFPreloaded::loadVariantsFromFile, vcfFileReaderPtr);
+	std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
+	vcfLoadThread.join();
+	std::cout << "Finished loading vcf" << std::endl;
+	loadBamsThread.join();
+
+	std::cout << "Finished loading BAM and VCF" << std::endl;
 
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
