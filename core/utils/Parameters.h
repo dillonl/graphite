@@ -23,6 +23,7 @@ namespace gwiz
 		std::string getInVCFPath() { return m_in_vcf_path; }
 		std::string getOutVCFPath() { return m_out_vcf_path; }
 		std::string getRegion() { return m_region; }
+		uint32_t getThreadCount() { return m_thread_count; }
 
 	private:
 		Parameters();
@@ -37,6 +38,7 @@ namespace gwiz
 		std::string m_in_vcf_path;
 		std::string m_out_vcf_path;
 		std::string m_region;
+		uint32_t m_thread_count;
 
 		static Parameters* s_instance;
 	};

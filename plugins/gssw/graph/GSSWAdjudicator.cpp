@@ -9,6 +9,8 @@ namespace gssw
 {
 	GSSWAdjudicator::GSSWAdjudicator()
 	{
+		static int id = 0;
+		m_id = ++id;
 	}
 
 	GSSWAdjudicator::~GSSWAdjudicator()
@@ -28,6 +30,7 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
+		// ADD AN ID TO TRACK WHEN THIS FALLS OUT OF SCOPE
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
@@ -38,28 +41,27 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				bool pass = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75));
+				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75));
+				std::unordered_map< uint32_t, int32_t > alignmentIDVariants;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						if (pass && !variantPtr->getPass()) // since this variant is adjudicated by multiple alignments set it to pass only if the variants pass is false (we do not want to set a passing variant to false)
-						{
-							variantPtr->setPass(true);
-						}
 						this->m_adjudication_lock.lock();
-						if (pass) // only count the variants tha pass
-						{
-							variantPtr->increaseCount(nc->node->seq, nc->node->len, alignmentPtr); // record the variant (ref or alt) that went through the node
-						}
-						else
-						{
-							variantPtr->incrementLowQualityCount(alignmentPtr);
-						}
+						alignmentPtr->setMapped(mapped);
+						alignmentIDVariants.emplace(std::make_pair(variantPtr->getVariantID(), graphMappingPtr->score));
+						variantPtr->addPotentialAlignment(alignmentPtr, std::string(nc->node->seq, nc->node->len));
 						variantList->addVariant(variantPtr);
 						this->m_adjudication_lock.unlock();
 					}
+				}
+				{
+					// std::cout << "locking: " << m_id << std::endl;
+					this->m_adjudication_lock.lock();
+					alignmentPtr->setMappingScoreAndVariants(graphMappingPtr->score, alignmentIDVariants);
+					this->m_adjudication_lock.unlock();
+					// std::cout << "unlocking: " << m_id << std::endl;
 				}
 			}
 		}

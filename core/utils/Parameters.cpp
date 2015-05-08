@@ -3,12 +3,14 @@
 #include <getopt.h>
 #include <iostream>
 
+#include <boost/lexical_cast.hpp>
+
 namespace gwiz
 {
 	Parameters* Parameters::s_instance = NULL;
 
 	Parameters::Parameters() :
-		m_command_options("h:b:f:v:o:r:"),
+		m_command_options("h:b:f:v:o:r:t:"),
 		m_bam_path(""),
 		m_in_vcf_path(""),
 		m_out_vcf_path(""),
@@ -52,6 +54,7 @@ namespace gwiz
 				{"vcf", required_argument, 0, 'v'},
 				{"output_vcf", required_argument, 0, 'o'},
 				{"region", required_argument, 0, 'r'},
+				{"threadcount", required_argument, 0, 't'},
 				{NULL, 0, 0, 0}
 			};
 		char c;
@@ -89,6 +92,16 @@ namespace gwiz
 			case 'r':
 				this->m_region = optarg;
 				break;
+			case 't':
+				try
+				{
+					this->m_thread_count = boost::lexical_cast< uint32_t >(optarg);
+				}
+				catch(boost::bad_lexical_cast& e)
+				{
+					std::cout << "Thread count isn't a number" << std::endl;
+				}
+				break;
 			default:
 				std::cout << "Invalid Parameter" << std::endl;
 				printUsage();
@@ -106,7 +119,9 @@ namespace gwiz
 		std::cout << "\t-b\tPath to input BAM file" << std::endl;
 		std::cout << "\t-r\tRegion information" << std::endl;
 		std::cout << "\t-v\tPath to input VCF file" << std::endl;
+		std::cout << "\t-f\tPath to input FASTA file" << std::endl;
 		std::cout << "\t-o\tPath to output VCF file [optional - default is stdout]" << std::endl;
+		std::cout << "\t-t\tThread count [optional - default is number of cores x 2]" << std::endl;
 	}
 
 	// A non-member function to check if a file exists

@@ -51,6 +51,9 @@ namespace
 	};
 
     static std::string VCF_LINE_1 = "Y\t2655180\trs11575897\tG\tA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
+	static std::string VCF_LINE_2 = "Y\t2655180\trs11575897\tG\tA,TTA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
+	static std::string VCF_LINE_3 = "20\t249590\tBI_GS_DEL1_B5_P2733_211\tC\t<CN0>\t100\tPASS\tSVTYPE=DEL;CIEND=-7,7;CIPOS=-7,7;END=250420;CS=DEL_union;MC=EM_DL_DEL10608605;AC=1;AF=0.00019968;NS=2504;AN=5008;EAS_AF=0.0;EUR_AF=0.0;AFR_AF=0.0;AMR_AF=0.0;SAS_AF=0.001\tGT\t0|0"; // is not the complete first line
+	static std::string VCF_LINE_4 = "20\t254691\t.\tG\tA\t100\tPASS\tAC=4;AF=0.000798722;AN=5008;NS=2504;DP=14874;EAS_AF=0;AMR_AF=0;AFR_AF=0.003;EUR_AF=0;SAS_AF=0;AA=G|||\tGT\t0|0\t0|0\t0|0\t0|0\t0|0";
 
 	TEST_F(VariantsTest, ParseVariantChromTest)
 	{
@@ -125,6 +128,19 @@ namespace
 		ASSERT_NE(altVCF,notAltVCF);
 	}
 
+	TEST_F(VariantsTest, ParseVariantMultipleAltTest)
+	{
+		std::vector<std::string> altVCF = {"A","TTA"};
+
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+
+		std::vector<std::string> alt = variantPtr->getAlt();
+		ASSERT_STREQ(alt[0].c_str(), "A");
+		ASSERT_STREQ(alt[1].c_str(), "TTA");
+	}
+
 	TEST_F(VariantsTest, ParseVariantQualTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
@@ -170,6 +186,26 @@ namespace
 			ASSERT_STREQ(infoFields[infoFieldIter.first].c_str(), infoFieldIter.second.c_str());
 		}
 		ASSERT_EQ(infoFields.size(), 11);
+	}
+
+	TEST_F(VariantsTest, ParseVariantSymbolidTest)
+	{
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_3.c_str(), vcfParser);
+
+		ASSERT_STREQ(variantPtr->getRef().c_str(), "C");
+		ASSERT_STREQ(variantPtr->getAlt()[0].c_str(), "<CN0>");
+	}
+
+	TEST_F(VariantsTest, ParseVariantQual2Test)
+	{
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_4.c_str(), vcfParser);
+
+		std::string qual = variantPtr->getQual();
+		ASSERT_STREQ(qual.c_str(),"100");
 	}
 
 }

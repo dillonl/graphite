@@ -18,6 +18,7 @@ namespace gssw
 		~GSSWAdjudicator();
 
 		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) override;
+		int m_id;
 	private:
 		void printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment);
 		bool isAmbiguousFinalNodeCall(gssw_node* node)
@@ -28,6 +29,7 @@ namespace gssw
 				gssw_node* tmpNode;
 				/* for (int i = 0; i <  */
 			}
+			return false;
 		}
 		std::mutex m_adjudication_lock;
 	};

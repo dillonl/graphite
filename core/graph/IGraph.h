@@ -90,6 +90,12 @@ namespace gwiz
 
 		Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants)
 		{
+			/*
+			if (true)
+			{
+				return variants[0];
+			}
+			*/
 			position referenceEndPosition = referenceString.size() + startPosition;
 			std::string chrom = variants[0]->getChrom();
 			position pos = variants[0]->getPosition();
@@ -111,7 +117,12 @@ namespace gwiz
 					altMap[variantString] = variantPtr->getVCFLineFromAlternate(altString);
 				}
 			}
-			line.replace(line.size() - 1, 1, "\t\n"); // replace the past comma with a tab
+			/* line.replace(line.size() - 1, 1, "\t\n"); // replace the past comma with a tab */
+			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
+			std::string quality = "0";
+			std::string filter = "PASS";
+			std::string info = "C=TRUE";
+			line += quality + "\t" + filter + "\t" + info + "\t";
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
 			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
 			{

@@ -8,6 +8,7 @@
 #include "core/utils/Parameters.h"
 #include "gssw/graph/GraphManager.h"
 #include "gssw/graph/GSSWAdjudicator.h"
+#include "core/utils/ThreadPool.hpp"
 
 #include <thread>
 
@@ -19,6 +20,10 @@ int main(int argc, char** argv)
 	std::string bamPath = gwiz::Parameters::Instance()->getBAMPath();
 	std::string outputVCFPath = gwiz::Parameters::Instance()->getOutVCFPath();
 	std::string region = gwiz::Parameters::Instance()->getRegion();
+	if (gwiz::Parameters::Instance()->getThreadCount() > 0)
+	{
+		gwiz::ThreadPool::Instance()->setThreadCount(gwiz::Parameters::Instance()->getThreadCount());
+	}
 
 	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(region);
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);

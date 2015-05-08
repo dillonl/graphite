@@ -79,9 +79,17 @@ namespace gwiz
 			return res;
 		}
 
+		void setThreadCount(uint32_t threadCount)
+		{
+			this->m_thread_count = threadCount;
+			stop();
+			start();
+		}
+
 	private:
 
 		ThreadPool() :
+			m_thread_count(std::thread::hardware_concurrency() * 2),
 			m_stopped(false)
 		{
 			init();
@@ -94,8 +102,7 @@ namespace gwiz
 
 		void init()
 		{
-			size_t numberOfThreads = std::thread::hardware_concurrency() * 2;
-			for (size_t i = 0; i < numberOfThreads; ++i)
+			for (size_t i = 0; i < this->m_thread_count; ++i)
 			{
 				this->m_workers.emplace_back(
 					[this]
@@ -125,6 +132,7 @@ namespace gwiz
 		std::mutex m_tasks_mutex;
 		std::condition_variable m_condition;
 		bool m_stopped;
+		uint32_t m_thread_count;
     };
 
 }

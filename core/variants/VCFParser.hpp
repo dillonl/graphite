@@ -20,27 +20,32 @@ namespace gwiz
 {
 
 	template<typename Iterator>
-	struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() >
+	// struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() >
+	struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::string& >() >
 	{
 		VariantParser() : VariantParser::base_type(start)
 			{
 				using namespace boost::spirit;
 
-				std::string refAltMatchString = "actgnACTGN";
-				auto refAltMatch = (+qi::char_(refAltMatchString) >> *(',' >> +qi::char_(refAltMatchString))) || +qi::graph;
+				std::string dnaMatchString = "actgnACTGN";
+				// auto altMatcher = (+qi::char_(dnaMatchString) % ',') | (+qi::graph % ',');
+				auto refMatcher = +qi::char_(dnaMatchString);
+				auto altMatcher = (+qi::char_(dnaMatchString) >> *(',' >> +qi::char_(dnaMatchString))) | (+qi::graph % ',');
 				tab = qi::lit('\t');
 				chrom %= +qi::graph;
 				pos %= qi::uint_;
 				id %= +qi::graph;
-				ref %= refAltMatch;
-				alt %= refAltMatch;
-				qual = +qi::graph;
+				ref = refMatcher;
+				alt = altMatcher;
+				qual = +qi::char_("a-zA-Z_0-9\\./(),-");
 				filter = +qi::graph;
-
+				info = +qi::graph;
+/*
 				info = pair >> *((qi::lit(';') | '&') >> pair);
 				pair = key >> -('=' >> value);
-				key = qi::char_("a-zA-Z_0-9\\./(),") >> *qi::char_("a-zA-Z_0-9\\./(),");
-				value = +qi::char_("a-zA-Z_0-9\\./(),");
+				key = qi::char_("a-zA-Z_0-9\\./(),-") >> *qi::char_("a-zA-Z_0-9\\./(),-");
+				value = +qi::char_("a-zA-Z_0-9\\./(),-");
+*/
 				start %= chrom > tab > pos > tab > id > tab > ref > tab > alt > tab > qual > tab > filter > tab > info;
 
 				// names for error output
@@ -61,7 +66,7 @@ namespace gwiz
 						<< boost::phoenix::val("Error! Column ")
 						<< _4                               // what failed?
 						<< boost::phoenix::val(" is incorrectly formatted: \"")
-						<< _1
+						<< _1 // prints the error line
 						<< std::endl
 						);
 
@@ -76,12 +81,15 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, std::vector<std::string>() > alt;
 		boost::spirit::qi::rule<Iterator, std::string()> qual;
 		boost::spirit::qi::rule<Iterator, std::string()> filter;
+		boost::spirit::qi::rule<Iterator, std::string() > info;
+			/*
 		boost::spirit::qi::rule<Iterator, std::unordered_map< std::string, std::string >() > info;
 		boost::spirit::qi::rule<Iterator, std::pair< std::string, std::string >() > pair;
 		boost::spirit::qi::rule<Iterator, std::string() > key, value;
+			*/
 
-		boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() > start;
-			// boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string& >() > start;
+			// boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() > start;
+			boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
 	};
 
 } // end namespace gwiz

@@ -62,9 +62,9 @@ namespace gssw
 
 				// std::cout << "asdf4" << std::endl;
 
-				// auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize, std::ref(reportedVariantsMutex));
 				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, reportedVariants, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize);
 				ThreadPool::Instance()->enqueue(funct);
+
 				// std::cout << "asdf5" << std::endl;
 
 			}
