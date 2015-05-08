@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <mutex>
 
 #include "core/utils/Types.h"
 
