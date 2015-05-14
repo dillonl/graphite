@@ -30,7 +30,6 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
-		// ADD AN ID TO TRACK WHEN THIS FALLS OUT OF SCOPE
 		auto variantList = std::make_shared< VariantList >();
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
@@ -43,25 +42,25 @@ namespace gssw
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.75));
 				std::unordered_map< uint32_t, int32_t > alignmentIDVariants;
+				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						this->m_adjudication_lock.lock();
-						alignmentPtr->setMapped(mapped);
-						alignmentIDVariants.emplace(std::make_pair(variantPtr->getVariantID(), graphMappingPtr->score));
-						variantPtr->addPotentialAlignment(alignmentPtr, std::string(nc->node->seq, nc->node->len));
+						// std::lock_guard< std::mutex > lock(this->m_adjudication_lock);
+						if (mapped)
+						{
+							variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
+						}
+						variantPtr->addPotentialAlignment(alignmentPtr);
 						variantList->addVariant(variantPtr);
-						this->m_adjudication_lock.unlock();
 					}
 				}
+				if (mapped)
 				{
-					// std::cout << "locking: " << m_id << std::endl;
-					this->m_adjudication_lock.lock();
-					alignmentPtr->setMappingScoreAndVariants(graphMappingPtr->score, alignmentIDVariants);
-					this->m_adjudication_lock.unlock();
-					// std::cout << "unlocking: " << m_id << std::endl;
+					// std::lock_guard< std::mutex > lock(this->m_adjudication_lock);
+					alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
 				}
 			}
 		}
@@ -69,7 +68,6 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
-		// AlignmentReporter::Instance()->printAlignmentReportsToStream(std::cout);
 		return variantList;
 	}
 }

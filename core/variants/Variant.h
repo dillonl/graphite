@@ -1,6 +1,7 @@
 #ifndef GWIZ_VARIANT_H
 #define GWIZ_VARIANT_H
 
+#include <mutex>
 #include <exception>
 #include <cstring>
 #include <string>
@@ -13,7 +14,6 @@
 #include "IVariant.h"
 #include "VCFParser.hpp"
 #include "core/reference/Reference.h"
-#include "core/alignments/IAlignment.h"
 
 
 namespace gwiz
@@ -33,7 +33,7 @@ namespace gwiz
 	class Variant : public IVariant
 	{
 	public:
-		typedef std::shared_ptr<Variant> SharedPtr;
+		typedef std::shared_ptr< Variant > SharedPtr;
 		Variant();
 		~Variant();
 
@@ -104,7 +104,6 @@ namespace gwiz
 				/* std::string endPosition = this->m_info_fields["END"]; */
 				this->m_alt.clear();
 				this->m_alt.push_back(this->getRef());
-				this->m_ref.clear();
 				const char* reference = referencePtr->getSequence() + (this->m_position - referencePtr->getRegion()->getStartPosition());
 				size_t alleleSize = endPosition - this->m_position;
 				size_t offset =  referencePtr->getRegion()->getStartPosition() - this->m_position;
@@ -114,7 +113,7 @@ namespace gwiz
 				std::cout << referenceAllele << std::endl;
 				std::cout << "-------" << std::endl;
 				*/
-				this->m_ref.emplace_back(std::string(reference, alleleSize));
+				this->m_ref = std::string(reference, alleleSize);
 			}
 			else
 			{
@@ -140,53 +139,19 @@ namespace gwiz
 			return this->m_vcf_lines_map[alt];
 		}
 
-		inline void increaseCount(std::string allele, IAlignment::SharedPtr alignmentPtr)
-		{
-			uint32_t alleleIndex = alignmentPtr->isReverseStrand() ? 0 : 1;
-			if (!alignmentPtr->isReverseStrand())
-			{
-				++std::get< 0 >(m_allele_count[allele]);
-			}
-			else
-			{
-				++std::get< 1 >(m_allele_count[allele]);
-			}
-			++this->m_total_allele_count;
-		}
-
-		/*
-		uint32_t getAlleleCount(const std::string& allele)
-		{
-			auto alleleCount = m_allele_count.find(allele);
-			if (!alignmentPtr->isReverseStrand())
-			{
-				count = std::get< 0 >(m_allele_count[allele]);
-			}
-			else
-			{
-				count = std::get< 1 >(m_allele_count[allele]);
-			}
-			return count;
-		}
-		*/
+		void increaseCount(std::shared_ptr< IAlignment > alignmentPtr);
 
 		void setFilter(std::string filter)
 		{
 			this->m_filter = filter;
 		}
 
-		void incrementLowQualityCount(IAlignment::SharedPtr alignmentPtr)
-		{
-			auto alignmentID = alignmentPtr->getID();
-			if (this->m_alignment_ids_low_quality.find(alignmentID) != this->m_alignment_ids_low_quality.end()) { return; } // because of graph overlap we make sure we aren't counting alignments we've already counted
-			this->m_alignment_ids_low_quality.emplace(alignmentID, true);
-			++m_total_allele_count_low_quality;
-		}
+		void incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr);
 
 		std::string getAlleleCountString();
 		std::string alleleString();
 		bool hasAlts();
-		void addPotentialAlignment(const IAlignment::SharedPtr alignmentPtr, const std::string& allele);
+		void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr);
 
 		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
@@ -195,7 +160,7 @@ namespace gwiz
 		std::string getFilter() const { return m_filter; }
 		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
-		std::string const getRef() { return m_ref[0]; }
+		std::string const getRef() { return m_ref; }
 		std::vector< std::string > const getAlt() { return m_alt; }
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
@@ -205,6 +170,8 @@ namespace gwiz
 		void calculateAlleleCounts();
 		void initializeAlleleCounters();
 
+		std::mutex m_allele_count_mutex;
+		std::mutex m_potential_alignment_mutex;
 		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > m_allele_count; // the key is the allele and the value is a tuple of forward at 0 index and reverse for 1 index
 		std::map< std::string, bool > m_alignment_ids;
 		std::map< std::string, bool > m_alignment_ids_low_quality;
@@ -217,10 +184,10 @@ namespace gwiz
 		std::string m_id;
 		std::string m_qual;
 		std::string m_filter;
-		std::vector< std::string > m_ref;
+		std::string m_ref;
 		std::vector< std::string > m_alt;
 		std::unordered_map< std::string, std::string > m_info_fields;
-		std::unordered_map< IAlignment::SharedPtr, std::string > m_potential_alignments;
+		std::vector< std::shared_ptr< IAlignment > > m_potential_alignments;
 		std::map< std::string, std::string > m_vcf_lines_map;
 	};
 

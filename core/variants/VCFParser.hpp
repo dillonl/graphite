@@ -21,7 +21,7 @@ namespace gwiz
 
 	template<typename Iterator>
 	// struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() >
-	struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::string& >() >
+	struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() >
 	{
 		VariantParser() : VariantParser::base_type(start)
 			{
@@ -35,8 +35,8 @@ namespace gwiz
 				chrom %= +qi::graph;
 				pos %= qi::uint_;
 				id %= +qi::graph;
-				ref = refMatcher;
-				alt = altMatcher;
+				ref %= refMatcher;
+				alt %= altMatcher;
 				qual = +qi::char_("a-zA-Z_0-9\\./(),-");
 				filter = +qi::graph;
 				info = +qi::graph;
@@ -77,7 +77,7 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, std::string()> chrom;
 		boost::spirit::qi::rule<Iterator, uint32_t()> pos;
 		boost::spirit::qi::rule<Iterator, std::string()> id;
-		boost::spirit::qi::rule<Iterator, std::vector<std::string>() > ref;
+		boost::spirit::qi::rule<Iterator, std::string()> ref;
 		boost::spirit::qi::rule<Iterator, std::vector<std::string>() > alt;
 		boost::spirit::qi::rule<Iterator, std::string()> qual;
 		boost::spirit::qi::rule<Iterator, std::string()> filter;
@@ -89,7 +89,7 @@ namespace gwiz
 			*/
 
 			// boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() > start;
-			boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
+			boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
 	};
 
 } // end namespace gwiz

@@ -90,12 +90,6 @@ namespace gwiz
 
 		Variant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< Variant::SharedPtr >& variants)
 		{
-			/*
-			if (true)
-			{
-				return variants[0];
-			}
-			*/
 			position referenceEndPosition = referenceString.size() + startPosition;
 			std::string chrom = variants[0]->getChrom();
 			position pos = variants[0]->getPosition();
@@ -123,11 +117,17 @@ namespace gwiz
 			std::string filter = "PASS";
 			std::string info = "C=TRUE";
 			line += quality + "\t" + filter + "\t" + info + "\t";
+			if (true)
+			{
+				return variants[0];
+			}
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+			/*
 			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
 			{
 				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second.c_str(), altTuple.second.size());
 			}
+			*/
 			return variant;
 		}
 

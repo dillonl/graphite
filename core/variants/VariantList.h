@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <mutex>
 
 namespace gwiz
 {
@@ -20,18 +21,26 @@ namespace gwiz
 
 		inline bool getNextVariant(Variant::SharedPtr& variantPtr) override
 		{
+			std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 24" << std::endl;
+			this->m_variants_ptr_list_mutex.lock();
 			bool hasVariants = this->m_current_index < this->m_variants_ptr_list.size();
 			if (hasVariants)
 			{
 				variantPtr = this->m_variants_ptr_list[this->m_current_index];
 				++this->m_current_index;
 			}
+			std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 24" << std::endl;
+			this->m_variants_ptr_list_mutex.unlock();
 			return hasVariants;
 		}
 
 		inline void addVariant(const Variant::SharedPtr variant) override
 		{
+			std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 39" << std::endl;
+			this->m_variants_ptr_list_mutex.lock();
 			this->m_variants_ptr_list.emplace_back(variant);
+			std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 42" << std::endl;
+			this->m_variants_ptr_list_mutex.unlock();
 		}
 
 		inline void addVariants(IVariantList::SharedPtr variantsListPtr) override
@@ -39,7 +48,12 @@ namespace gwiz
 			auto variantsListPtrCast = std::dynamic_pointer_cast< VariantList >(variantsListPtr);
 			if (variantsListPtrCast)
 			{
+				std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 51" << std::endl;
+				this->m_variants_ptr_list_mutex.lock();
 				this->m_variants_ptr_list.insert(this->m_variants_ptr_list.end(), variantsListPtrCast->m_variants_ptr_list.begin(), variantsListPtrCast->m_variants_ptr_list.end());
+				std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 54" << std::endl;
+				this->m_variants_ptr_list_mutex.unlock();
+
 			}
 			else
 			{
@@ -53,9 +67,13 @@ namespace gwiz
 
 		void sort()
 		{
+			std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 70" << std::endl;
+			this->m_variants_ptr_list_mutex.lock();
 			std::sort(this->m_variants_ptr_list.begin(), this->m_variants_ptr_list.end(), [](const Variant::SharedPtr& v1, const Variant::SharedPtr& v2) {
 					return v1->getPosition() < v2->getPosition();
 				});
+			std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 75" << std::endl;
+			this->m_variants_ptr_list_mutex.unlock();
 		}
 
 		inline void rewind()
@@ -65,6 +83,8 @@ namespace gwiz
 
 		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr) override
 		{
+			std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 86" << std::endl;
+			this->m_variants_ptr_list_mutex.lock();
 			position startPosition = regionPtr->getStartPosition();
 			position endPosition = regionPtr->getEndPosition();
 
@@ -77,6 +97,8 @@ namespace gwiz
 
 			auto variantListPtr = std::make_shared< VariantList >();
 			variantListPtr->m_variants_ptr_list = std::vector< Variant::SharedPtr >(lowerBound, upperBound);
+			std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 100" << std::endl;
+			this->m_variants_ptr_list_mutex.unlock();
 			return variantListPtr;
 		}
 
@@ -95,6 +117,8 @@ namespace gwiz
 		{
 			printVCFHeader(out);
 			std::map< uint32_t, bool > variantPrintedMap;
+			std::cout << "this->m_variants_ptr_list_mutex.lock(); VL.h 120" << std::endl;
+			this->m_variants_ptr_list_mutex.lock();
 			for (auto& variantPtr : this->m_variants_ptr_list)
 			{
 				if (variantPrintedMap.find(variantPtr->getVariantID()) != variantPrintedMap.end()) { continue; }
@@ -102,11 +126,14 @@ namespace gwiz
 				variantPtr->printVariant(out);
 				variantPrintedMap[variantPtr->getVariantID()] = true;
 			}
+			std::cout << "this->m_variants_ptr_list_mutex.unlock(); VL.h 129" << std::endl;
+			this->m_variants_ptr_list_mutex.unlock();
 		}
 
 	protected:
 		size_t m_current_index;
 		std::vector< Variant::SharedPtr > m_variants_ptr_list;
+		std::mutex m_variants_ptr_list_mutex;
 	};
 }
 
