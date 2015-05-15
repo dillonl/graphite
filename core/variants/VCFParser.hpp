@@ -37,7 +37,7 @@ namespace gwiz
 				id %= +qi::graph;
 				ref %= refMatcher;
 				alt %= altMatcher;
-				qual = +qi::char_("a-zA-Z_0-9\\./(),-");
+				qual = +qi::graph;
 				filter = +qi::graph;
 				info = +qi::graph;
 /*

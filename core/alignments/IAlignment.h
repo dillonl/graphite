@@ -35,13 +35,9 @@ namespace gwiz
 		 */
 		void setMappingInformation(uint32_t score, std::vector< std::tuple< uint32_t, std::string > >& variantInformation)
 		{
-			std::cout << "this->m_mutex.lock(); ia.h 38" << std::endl;
-			this->m_mutex.lock();
-			/* std::lock_guard< std::mutex > lock(this->m_mutex); */
+			std::lock_guard< std::mutex > lock(this->m_mutex);
 			if (score < this->m_score)
 			{
-				std::cout << "this->m_mutex.unlock(); ia.h 43" << std::endl;
-				this->m_mutex.unlock();
 				return;
 			}
 			this->m_mapped = true;
@@ -51,31 +47,21 @@ namespace gwiz
 			{
 				this->m_mapped_variants_information[std::get< 0 >(variantInfo)] = std::get< 1 >(variantInfo);
 			}
-			std::cout << "this->m_mutex.unlock(); ia.h 49" << std::endl;
-			this->m_mutex.unlock();
 		}
 
 		int32_t getVariantMappingScore(const uint32_t variantID)
 		{
-			/* std::lock_guard< std::mutex > lock(this->m_mutex); */
-			std::cout << "this->m_mutex.lock(); ia.h 56" << std::endl;
-			this->m_mutex.lock();
+			std::lock_guard< std::mutex > lock(this->m_mutex);
 			auto variantIDIter = this->m_mapped_variants_information.find(variantID);
 			int32_t score = (variantIDIter == this->m_mapped_variants_information.end()) ? -1 : this->m_score;
-			std::cout << "this->m_mutex.unlock(); ia.h 60" << std::endl;
-			this->m_mutex.unlock();
 			return score;
 		}
 
 		std::string getVariantAllele(uint32_t variantID)
 		{
-			/* std::lock_guard< std::mutex > lock(this->m_mutex); */
-			std::cout << "this->m_mutex.lock(); ia.h 68" << std::endl;
-			this->m_mutex.lock();
+			std::lock_guard< std::mutex > lock(this->m_mutex);
 			auto variantIDIter = this->m_mapped_variants_information.find(variantID);
 			std::string variantAllele = (variantIDIter == this->m_mapped_variants_information.end()) ? "" : variantIDIter->second;
-			std::cout << "this->m_mutex.unlock(); ia.h 72" << std::endl;
-			this->m_mutex.unlock();
 			return variantAllele;
 		}
 

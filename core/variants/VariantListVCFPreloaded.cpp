@@ -27,7 +27,7 @@ namespace gwiz
 			// add all variants unless region is set
 			if (this->m_region_ptr != nullptr)
 			{
-				bool sameReferenceID = (std::strcmp(this->m_region_ptr->getReferenceID().c_str(), variantPtr->getChrom().c_str()) != 0);
+				bool sameReferenceID = (std::strcmp(this->m_region_ptr->getReferenceID().c_str(), variantPtr->getChrom().c_str()) == 0);
 				if (sameReferenceID && (this->m_region_ptr->getEndPosition() < variantPtr->getPosition())) // dont continue; if the variants are past the end position
 				{
 					break;

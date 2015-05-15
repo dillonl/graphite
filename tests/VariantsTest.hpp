@@ -141,6 +141,20 @@ namespace
 		ASSERT_STREQ(alt[1].c_str(), "TTA");
 	}
 
+	TEST_F(VariantsTest, ParseVariantMultipleAltDupsTest)
+	{
+		std::vector<std::string> altVCF = {"A","TTA", "TTA"};
+
+		gwiz::VariantParser< const char* > vcfParser;
+		gwiz::Variant::SharedPtr variantPtr;
+		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+
+		std::vector<std::string> alt = variantPtr->getAlt();
+		ASSERT_STREQ(alt[0].c_str(), "A");
+		ASSERT_STREQ(alt[1].c_str(), "TTA");
+		ASSERT_EQ(alt.size(), 2);
+	}
+
 	TEST_F(VariantsTest, ParseVariantQualTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;

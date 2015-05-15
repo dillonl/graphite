@@ -423,19 +423,13 @@ namespace
 	}
 	*/
 
+	/*
 	TEST(GSSWTests, TestConstructChr20)
 	{
 		std::string fastaPath = TEST_FASTA_FILE;
 		// std::string vcfPath = TEST_SMALL_MEI_VCF_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
-
-		/*
-		bamPath = "/d1/data/project_bam/platinum_genomes/NA12878_2_sorted_Dedup_realign_recal.bam";
-		vcfPath = "/home/dlee/Projects/gwiz/data/freebayes.NA12878.unfiltered.vcf";
-		// kingspeek19.chpc.utah.edu
-		// kingspeek20.chpc.utah.edu
-		*/
 
 		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
 		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
@@ -465,6 +459,7 @@ namespace
 		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		outStream.close();
 	}
+	*/
 
 	TEST(GSSWTests, TestConstructTestData)
 	{

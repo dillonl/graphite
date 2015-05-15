@@ -15,36 +15,26 @@ namespace gwiz
 
 	void Variant::initializeAlleleCounters()
 	{
-		// std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		std::cout << "this->m_allele_count_mutex.lock(); V.cpp 19" << std::endl;
-		this->m_allele_count_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		m_allele_count[getRef()] = std::make_tuple(0, 0);
 		for (const auto& alt : getAlt())
 		{
 			m_allele_count[alt] = std::make_tuple(0, 0);
 		}
-		std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 26" << std::endl;
-		this->m_allele_count_mutex.unlock();
 	}
 
 	void Variant::incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr)
 	{
-		// std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		std::cout << "this->m_allele_count_mutex.lock(); V.cpp 33" << std::endl;
-		this->m_allele_count_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		auto alignmentID = alignmentPtr->getID();
 		if (this->m_alignment_ids_low_quality.find(alignmentID) != this->m_alignment_ids_low_quality.end()) { return; } // because of graph overlap we make sure we aren't counting alignments we've already counted
 		this->m_alignment_ids_low_quality.emplace(alignmentID, true);
 		++m_total_allele_count_low_quality;
-		std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 39" << std::endl;
-		this->m_allele_count_mutex.unlock();
 	}
 
 	void Variant::increaseCount(std::shared_ptr< IAlignment > alignmentPtr)
 	{
-		// std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		std::cout << "this->m_allele_count_mutex.lock(); V.cpp 46" << std::endl;
-		this->m_allele_count_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		std::string allele = alignmentPtr->getVariantAllele(getVariantID());
 		if (!alignmentPtr->isReverseStrand())
 		{
@@ -55,8 +45,6 @@ namespace gwiz
 			++std::get< 1 >(m_allele_count[allele]);
 		}
 		++this->m_total_allele_count;
-		std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 58" << std::endl;
-		this->m_allele_count_mutex.unlock();
 	}
 
 	size_t Variant::getSmallestAlleleSize()
@@ -81,8 +69,7 @@ namespace gwiz
 
 	std::string Variant::getAlleleCountString()
 	{
-		std::cout << "this->m_allele_count_mutex.lock(); V.cpp 84" << std::endl;
-		this->m_allele_count_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		std::string alleleCountString = "";
 		auto refAlleleTuple = this->m_allele_count[getRef()];
 		alleleCountString += std::to_string(std::get< 0 >(refAlleleTuple)) + ",";
@@ -94,8 +81,6 @@ namespace gwiz
 			alleleCountString += std::to_string(std::get< 0 >(altAlleleTuple)) + ",";
 			alleleCountString += std::to_string(std::get< 1 >(altAlleleTuple));
 		}
-		std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 97" << std::endl;
-		this->m_allele_count_mutex.unlock();
 		return alleleCountString;
 	}
 
@@ -113,8 +98,7 @@ namespace gwiz
 
 	bool Variant::hasAlts()
 	{
-		std::cout << "this->m_allele_count_mutex.lock(); V.cpp 116" << std::endl;
-		this->m_allele_count_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		for (auto& alt : getAlt())
 		{
 			auto ac = this->m_allele_count.find(alt);
@@ -126,26 +110,18 @@ namespace gwiz
 				return true;
 			}
 		}
-		std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 129" << std::endl;
-		this->m_allele_count_mutex.unlock();
 		return false;
 	}
 
 	void Variant::addPotentialAlignment(const IAlignment::SharedPtr alignmentPtr)
 	{
-		// std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
-		std::cout << "this->m_potential_alignment_mutex.lock(); V.cpp 137" << std::endl;
-		this->m_potential_alignment_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
 		this->m_potential_alignments.emplace_back(alignmentPtr);
-		std::cout << "this->m_potential_alignment_mutex.unlock(); V.cpp 137" << std::endl;
-		this->m_potential_alignment_mutex.unlock();
 	}
 
 	void Variant::calculateAlleleCounts()
 	{
-		// std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
-		std::cout << "this->m_potential_alignment_mutex.lock(); V.cpp 147" << std::endl;
-		this->m_potential_alignment_mutex.lock();
+		std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
 		std::unordered_map< IAlignment::SharedPtr, bool > seenAlignments;
 		for (const auto alignmentPtr : this->m_potential_alignments)
 		{
@@ -157,8 +133,6 @@ namespace gwiz
 				increaseCount(alignmentPtr);
 			}
 		}
-		std::cout << "this->m_potential_alignment_mutex.unlock(); V.cpp 160" << std::endl;
-		this->m_potential_alignment_mutex.unlock();
 	}
 
 	void Variant::printVariant(std::ostream& out)
