@@ -53,7 +53,8 @@ namespace gssw
 		std::vector< gssw_node* > altAndRefVertices;
 
 
-		while (getNextCompoundVariant(variantPtr))
+		// while (getNextCompoundVariant(variantPtr))
+		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
 			if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
 			auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());

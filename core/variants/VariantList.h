@@ -28,6 +28,10 @@ namespace gwiz
 				variantPtr = this->m_variants_ptr_list[this->m_current_index];
 				++this->m_current_index;
 			}
+			else
+			{
+				variantPtr = nullptr;
+			}
 			return hasVariants;
 		}
 

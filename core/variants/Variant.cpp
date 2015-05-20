@@ -7,6 +7,9 @@ namespace gwiz
 		m_total_allele_count_low_quality(0),
 		m_total_allele_count(0)
 	{
+		static uint32_t uniqueID;
+		m_unique_id = uniqueID;
+		++uniqueID;
 	}
 
 	Variant::~Variant()
@@ -105,7 +108,6 @@ namespace gwiz
 			if ((ac != this->m_allele_count.end() && std::get< 0 >(ac->second) > 0) ||
 				(ac != this->m_allele_count.end() && std::get< 1 >(ac->second) > 0))
 			{
-				std::cout << "this->m_allele_count_mutex.unlock(); V.cpp 124" << std::endl;
 				this->m_allele_count_mutex.unlock();
 				return true;
 			}
@@ -139,7 +141,7 @@ namespace gwiz
 	{
 		calculateAlleleCounts();
 		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << "\t" << std::to_string(this->m_unique_id) << std::endl;
 	}
 
 }

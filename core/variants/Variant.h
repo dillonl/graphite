@@ -49,9 +49,11 @@ namespace gwiz
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
 			variantPtr->m_variant_type = VARIANT_TYPE::SNP;
 			variantPtr->initializeAlleleCounters();
+			// ** code below remove duplicate variants
 			std::sort(variantPtr->m_alt.begin(), variantPtr->m_alt.end());
 			auto it = std::unique(variantPtr->m_alt.begin(), variantPtr->m_alt.end());
 			variantPtr->m_alt.erase(it, variantPtr->m_alt.end());
+			// ** code above remove duplicate variants
 			return variantPtr;
 		}
 
@@ -192,6 +194,7 @@ namespace gwiz
 		std::unordered_map< std::string, std::string > m_info_fields;
 		std::vector< std::shared_ptr< IAlignment > > m_potential_alignments;
 		std::map< std::string, std::string > m_vcf_lines_map;
+		uint32_t m_unique_id;
 	};
 
 }

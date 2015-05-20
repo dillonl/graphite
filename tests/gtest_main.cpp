@@ -10,10 +10,9 @@
 #include "VariantListVCFPreloadedTests.hpp"
 #include "plugins/TestIncludes.h"
 #include "FileTests.hpp"
-#include "BuildGraphTests.hpp"
-
 */
-#include "VariantsTest.hpp"
+#include "BuildGraphTests.hpp"
+// #include "VariantsTest.hpp"
 
 
 #include "gtest/gtest.h"
