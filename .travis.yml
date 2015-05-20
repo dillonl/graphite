@@ -13,4 +13,4 @@ before_script:
   -  mkdir bin
   -  cd bin
   -  cmake ../
-script: make -j10
+script: make
