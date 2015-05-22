@@ -26,6 +26,7 @@ namespace gwiz
 		return std::make_shared< BamAlignmentReaderPreload >(this->m_alignments_ptr);
 	}
 
+	/*
 	void BamAlignmentReaderPreloadManager::processBam()
 	{
 		if (!this->m_bam_reader.Open(m_bam_path))
@@ -81,6 +82,30 @@ namespace gwiz
 				this->m_alignments_ptr->push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
 				bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 			}
+		}
+	}
+	*/
+
+	void BamAlignmentReaderPreloadManager::processBam()
+	{
+		if (!this->m_bam_reader.Open(m_bam_path))
+		{
+			throw "Unable to open bam file";
+		}
+		if (this->m_region != nullptr)
+		{
+			this->m_bam_reader.LocateIndex();
+			int refID = this->m_bam_reader.GetReferenceID(this->m_region->getReferenceID());
+			// add 1 to the start and end positions because this is 0 based
+			this->m_bam_reader.SetRegion(refID, this->m_region->getStartPosition(), refID, this->m_region->getEndPosition());
+		}
+		BamAlignmentPtr bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+		size_t counter = 0;
+		while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
+		{
+			// if (counter++ > 1000) { break; }
+			this->m_alignments_ptr->push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
+			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}
 	}
 
