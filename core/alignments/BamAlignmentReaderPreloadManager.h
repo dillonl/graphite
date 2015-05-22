@@ -23,7 +23,7 @@ namespace gwiz
 		void processBam();
 
 	private:
-		void getAlignmentsInRegion(std::vector< BamAlignment::SharedPtr >& alignments, Region::SharedPtr regionPtr);
+		std::vector< BamAlignment::SharedPtr > getAlignmentsInRegion(Region::SharedPtr regionPtr);
 
 		std::vector< BamAlignment::SharedPtr > m_alignments;
 		std::shared_ptr< std::vector< BamAlignment::SharedPtr > > m_alignments_ptr;

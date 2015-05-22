@@ -265,4 +265,66 @@ namespace
 
 		ASSERT_EQ(variantPtr5, nullptr);
 	}
+
+	TEST_F(BuildGraphTests, BuildGraph6)
+	{
+		gwiz::VariantParser< const char* > vcfParser;
+		auto variantLinePtr1 = gwiz::Variant::BuildVariant("1\t249240051\t.\tTG\tTAG\t773.046\t.\tAB=0.506944;ABP=3.07062;AC=1;AF=0.5;AN=2;AO=73;CIGAR=1M1I1M;DP=144;DPB=191;DPRA=0;EPP=6.60959;EPPR=3.21711;GTI=0;LEN=1;MEANALT=8;MQM=21.7534", vcfParser);
+		auto variantLinePtr2 = gwiz::Variant::BuildVariant("2\t249240099\t.\tTG\tTAG,TAGG\t151.835\t.\tAB=0.238636,0.227273;ABP=55.2243,59.8634;AC=1,1;AF=0.5,0.5;AN=2;AO=21,20;CIGAR=1M1I1M,1M2I1M;DP=88;DPB=149.5;DPRA=0,0;EPP=3.1137,3.0", vcfParser);
+		/*
+		auto variantLinePtr3 = gwiz::Variant::BuildVariant("1\t249240303\t.\tT\tTA\t1045.73\t.\tAC=1;AF=0.500;AN=2;BaseQRankSum=0.552;ClippingRankSum=-1.541;DP=42;FS=0.000;MLEAC=1;MLEAF=0.500;MQ=34.41;MQ0=0;MQRankSum=-1.465;QD=24.90;Rea", vcfParser);
+		auto variantLinePtr4 = gwiz::Variant::BuildVariant("1\t249240303\t.\tTG\tTAG\t654.301\t.\tAB=0.309028;ABP=94.2423;AC=1;AF=0.5;AN=2;AO=89;CIGAR=1M1I1M;DP=288;DPB=403.5;DPRA=0;EPP=8.49998;EPPR=8.28388;GTI=0;LEN=1;MEANALT=13;MQM=19.4", vcfParser);
+		auto variantLinePtr5 = gwiz::Variant::BuildVariant("1\t249240537\t.\tGGTG\tGG,GGGG\t66.6045\t.\tAB=0.382353,0.264706;ABP=7.09778,19.3602;AC=1,1;AF=0.5,0.5;AN=2;AO=13,9;CIGAR=1M2D1M,2M1X1M;DP=34;DPB=29.75;DPRA=0,0;EPP=11.1951,3.25157;EPP", vcfParser);
+		*/
+
+		auto variantsListPtr = std::make_shared< gwiz::VariantList >();
+		variantsListPtr->addVariant(variantLinePtr1);
+		variantsListPtr->addVariant(variantLinePtr2);
+		/*
+		variantsListPtr->addVariant(variantLinePtr3);
+		variantsListPtr->addVariant(variantLinePtr4);
+		variantsListPtr->addVariant(variantLinePtr5);
+		*/
+
+		gwiz::Variant::SharedPtr variantPtr1;
+		gwiz::Variant::SharedPtr variantPtr2;
+		/*
+		gwiz::Variant::SharedPtr variantPtr3;
+		gwiz::Variant::SharedPtr variantPtr4;
+		gwiz::Variant::SharedPtr variantPtr5;
+		*/
+		variantsListPtr->getNextCompoundVariant(variantPtr1);
+		variantsListPtr->getNextCompoundVariant(variantPtr2);
+		/*
+		variantsListPtr->getNextCompoundVariant(variantPtr3);
+		variantsListPtr->getNextCompoundVariant(variantPtr4);
+		variantsListPtr->getNextCompoundVariant(variantPtr5);
+		*/
+
+		ASSERT_EQ(variantPtr1->getPosition(), 249240051);
+		ASSERT_STREQ(variantPtr1->getRef().c_str(),    "TG");
+		ASSERT_TRUE(std::find(variantPtr1->getAlt().begin(), variantPtr1->getAlt().end(), "TAG") != variantPtr1->getAlt().end());
+		ASSERT_EQ(variantPtr1->getAlt().size(), 1);
+
+		/*
+		ASSERT_EQ(variantPtr2->getPosition(), 249240099);
+		ASSERT_STREQ(variantPtr2->getRef().c_str(),    "TG");
+		ASSERT_TRUE(std::find(variantPtr2->getAlt().begin(), variantPtr2->getAlt().end(), "TAG") != variantPtr2->getAlt().end());
+		ASSERT_TRUE(std::find(variantPtr2->getAlt().begin(), variantPtr2->getAlt().end(), "TAGG") != variantPtr2->getAlt().end());
+		ASSERT_EQ(variantPtr2->getAlt().size(), 2);
+
+		ASSERT_EQ(variantPtr3->getPosition(), 249240303);
+		ASSERT_STREQ(variantPtr3->getRef().c_str(),    "TG");
+		ASSERT_TRUE(std::find(variantPtr3->getAlt().begin(), variantPtr3->getAlt().end(), "TAG") != variantPtr3->getAlt().end());
+		ASSERT_EQ(variantPtr3->getAlt().size(), 1);
+
+		ASSERT_EQ(variantPtr4->getPosition(), 249240537);
+		ASSERT_STREQ(variantPtr4->getRef().c_str(),    "GGTG");
+		ASSERT_TRUE(std::find(variantPtr4->getAlt().begin(), variantPtr4->getAlt().end(), "GG") != variantPtr4->getAlt().end());
+		ASSERT_TRUE(std::find(variantPtr4->getAlt().begin(), variantPtr4->getAlt().end(), "GGGG") != variantPtr4->getAlt().end());
+		ASSERT_EQ(variantPtr4->getAlt().size(), 2);
+		*/
+
+		ASSERT_EQ(variantPtr2, nullptr);
+	}
 }

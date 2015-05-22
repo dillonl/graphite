@@ -10,4 +10,5 @@ cd bin
 cmake ../
 
 To run GWiz's adjudication:
+
 ./gssw

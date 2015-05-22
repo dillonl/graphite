@@ -52,6 +52,7 @@ namespace gwiz
 			Variant::SharedPtr nextVariant;
 			bool variantAdded = false;
 			position startPosition = variant->getPosition();
+			std::string variantChrom = variant->getChrom();
 			position compoundStartPosition = startPosition;
 			position variantEndPosition = (startPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 
@@ -62,8 +63,9 @@ namespace gwiz
 			// a "compound variant" can be generated.
 			while (getNextVariant(nextVariant))
 			{
-				if (variantEndPosition < nextVariant->getPosition())
+				if (variantEndPosition < nextVariant->getPosition() || strcmp(variantChrom.c_str(), nextVariant->getChrom().c_str()) != 0)
 				{
+					/* variant = nullptr; */
 					break;
 				}
 				// this is a minor efficiency, even though this is a bit ugly
@@ -88,7 +90,9 @@ namespace gwiz
 				{
 					startPosition = nextVariant->getPosition();
 				}
+				variantChrom = nextVariant->getChrom();
 			}
+
 			if (!variants.empty())
 			{
 				variant = buildCompoundVariant(startPosition, referenceString, variants);

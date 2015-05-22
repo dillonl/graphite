@@ -59,14 +59,14 @@ namespace gwiz
 
 		template<class F, class... Args>
 		auto enqueue(F&& funct, Args&&... args)
-			-> std::future<typename std::result_of<F(Args...)>::type>
+			-> std::shared_ptr< std::future< typename std::result_of< F(Args...) >::type > >
 		{
 			using return_type = typename std::result_of< F(Args...) >::type;
 
 			auto task = std::make_shared< std::packaged_task< return_type() > >(
 				std::bind(std::forward< F >(funct), std::forward< Args >(args)...)
 				);
-			std::future< return_type > res = task->get_future();
+			std::shared_ptr< std::future< return_type > > res = std::make_shared< std::future< return_type > >(task->get_future());
 			{
 				std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
 				if (this->m_stopped)

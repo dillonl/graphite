@@ -22,9 +22,8 @@ namespace gwiz
 		// std::cout << "loading..." << std::endl;
 		auto vcfFileReader = std::make_shared< VCFFileReader >(this->m_path);
 		Variant::SharedPtr variantPtr;
-		uint32_t count = 1;
-		// while (vcfFileReader->getNextCompoundVariant(variantPtr))
-		while (vcfFileReader->getNextVariant(variantPtr))
+
+		while (vcfFileReader->getNextCompoundVariant(variantPtr))
 		{
 			// add all variants unless region is set
 			if (this->m_region_ptr != nullptr)
@@ -39,9 +38,8 @@ namespace gwiz
 					continue;
 				}
 			}
-			// std::cout << "variant: ";
+			// if (variantPtr != nullptr) { std::cout << variantPtr->getPosition() << std::endl; }
 			this->m_variants_ptr_list.push_back(variantPtr);
-			// std::cout << count++ << std::endl;
 		}
 	}
 }

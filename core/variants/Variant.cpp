@@ -141,7 +141,7 @@ namespace gwiz
 	{
 		calculateAlleleCounts();
 		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << "\t" << std::to_string(this->m_unique_id) << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << std::endl;
 	}
 
 }
