@@ -82,9 +82,6 @@ namespace
 		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAAGTAG") != variantPtr->getAlt().end());
 		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAAG") != variantPtr->getAlt().end());
 		ASSERT_EQ(variantPtr->getAlt().size(), 4);
-
-
-		EXPECT_EQ(0, 0);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph)
@@ -107,8 +104,6 @@ namespace
 		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAATATATGT") != variantPtr->getAlt().end());
 		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT") != variantPtr->getAlt().end());
 		ASSERT_EQ(variantPtr->getAlt().size(), 3);
-
-		EXPECT_EQ(0, 0);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph2)
@@ -127,8 +122,6 @@ namespace
 		ASSERT_STREQ(variantPtr->getRef().c_str(),    "GTT");
 		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "GT") != variantPtr->getAlt().end());
 		ASSERT_EQ(variantPtr->getAlt().size(), 1);
-
-		EXPECT_EQ(0, 0);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph3)

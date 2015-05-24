@@ -54,14 +54,18 @@ namespace
 	{
 	public:
 		std::string getGenotypeTest() { return getGenotype(); }
-		void setAlleleCounts(std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > >& alleleCounts)
+		void setAlleleCounts(std::vector< std::string > alleles, std::vector< std::tuple< uint32_t, uint32_t > >& alleleCounts)
 		{
-			this->m_allele_count = alleleCounts;
-		}
-
-		void setTotalAlleleCount(uint32_t totalAlleleCount)
-		{
-			this->m_total_allele_count = totalAlleleCount;
+			this->m_alt.clear();
+			this->m_allele_count.clear();
+			if (alleles.size() != alleleCounts.size()) { throw "alleles must be matched by allele counts"; }
+			for (uint32_t i = 0; i < alleles.size(); ++i)
+			{
+				this->m_total_allele_count += std::get< 0 >(alleleCounts[i]) + std::get< 1 >(alleleCounts[i]);
+				this->m_allele_count[alleles[i]] = alleleCounts[i];
+				if (i == 0)	{ m_ref = alleles[i]; }
+				else { m_alt.emplace_back(alleles[i]); }
+			}
 		}
 	};
 
@@ -237,37 +241,118 @@ namespace
 		ASSERT_STREQ(qual.c_str(),"100");
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeNone)
+	TEST_F(VariantsTest, TestGetGenotypeSimpleNone)
 	{
 		VariantTest variantTest;
-		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
-		variantTest.setAlleleCounts(alleleCount);
-		variantTest.setTotalAlleleCount(0);
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		variantTest.setAlleleCounts(alleles, alleleCounts);
 		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
-		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
 	}
 
-	/*
+	TEST_F(VariantsTest, TestGetGenotypeHomoRefInsufficientCountAlt)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(2,2));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(1,1));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
+	}
+
+	TEST_F(VariantsTest, TestGetGenotypeHomoRefInsufficientPercentAlt)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(50,50));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(29,0));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
+	}
+
 	TEST_F(VariantsTest, TestGetGenotypeHomoRef)
 	{
 		VariantTest variantTest;
-		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
-		alleleCount["A"] = std::make_tuple< uint32_t, uint32_t >(10,10);
-		alleleCount["A"] = std::make_tuple< uint32_t, uint32_t >(10,10);
-		variantTest.setAlleleCounts(alleleCount);
-		variantTest.setTotalAlleleCount(0);
-		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
-		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(10,10));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(0,0));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeNone)
+	TEST_F(VariantsTest, TestGetGenotypeHomoAlt)
 	{
 		VariantTest variantTest;
-		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
-		variantTest.setAlleleCounts(alleleCount);
-		variantTest.setTotalAlleleCount(0);
-		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
-		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(0,0));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(10,10));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
 	}
-	*/
+
+	TEST_F(VariantsTest, TestGetGenotypeHomoAltInsufficientCountRef)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(1,1));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(2,2));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
+	}
+
+	TEST_F(VariantsTest, TestGetGenotypeHomoAltInsufficientPercentRef)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(29,0));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(50,50));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
+	}
+
+	TEST_F(VariantsTest, TestGetGenotypeSimpleHet)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(10,10));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(10,10));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("0/1", variantTest.getGenotypeTest().c_str());
+	}
+
+	TEST_F(VariantsTest, TestGetGenotypeHomoSecondAlt)
+	{
+		VariantTest variantTest;
+		std::vector< std::string > alleles;
+		std::vector< std::tuple< uint32_t, uint32_t > > alleleCounts;
+		alleles.emplace_back("A");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(0,0));
+		alleles.emplace_back("AT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(0,0));
+		alleles.emplace_back("GAT");
+		alleleCounts.emplace_back(std::make_tuple< uint32_t, uint32_t >(50,50));
+		variantTest.setAlleleCounts(alleles, alleleCounts);
+		ASSERT_STREQ("2/2", variantTest.getGenotypeTest().c_str());
+	}
 }

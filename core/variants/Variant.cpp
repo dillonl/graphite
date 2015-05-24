@@ -156,7 +156,8 @@ namespace gwiz
 			uint32_t aCount = std::get< 0 >(ac) + std::get< 1 >(ac);
 			if (aCount > 3 && aCount >= (this->m_total_allele_count * thresholdPercent)) // if the alt count meets our criteria then add it to our potential genotypes
 			{
-				potentialGenotypes.emplace_back(std::make_tuple("0", aCount));
+				uint32_t alleleIndex = i + 1; // we add 1 because 0 is the ref and m_alt is 0 based
+				potentialGenotypes.emplace_back(std::make_tuple(std::to_string(alleleIndex), aCount));
 			}
 		}
 
