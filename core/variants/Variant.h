@@ -171,7 +171,8 @@ namespace gwiz
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 		void printVariant(std::ostream& out) override;
 
-	private:
+	protected:
+		std::string getGenotype();
 		void calculateAlleleCounts();
 		void initializeAlleleCounters();
 

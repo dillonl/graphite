@@ -64,10 +64,6 @@ namespace
 
 	TEST_F(BuildGraphTests, CompoundVariantSimple)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("20:50-80");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantPtr1 = gwiz::Variant::BuildVariant("20\t60\t.\tTAAGT\tT\t.\t.\t.", vcfParser);
 		auto variantPtr2 = gwiz::Variant::BuildVariant("20\t61\t.\tAA\tAGAAG\t.\t.\t.\t.", vcfParser);
@@ -78,7 +74,6 @@ namespace
 		variantsListPtr->addVariant(variantPtr2);
 		variantsListPtr->addVariant(variantPtr3);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "TAAGTTAAC");
@@ -94,10 +89,6 @@ namespace
 
 	TEST_F(BuildGraphTests, BuildGraph)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("20:20301000-20402000");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantPtr1 = gwiz::Variant::BuildVariant("20\t20301046\t.\tTAATATATGTAATATATATTATATATGTAATATAATATATGTAAT\tT\t.\t.\t.", vcfParser);
 		auto variantPtr2 = gwiz::Variant::BuildVariant("20\t20301055\t.\tTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT\tT\t.\t.\t.", vcfParser);
@@ -108,7 +99,6 @@ namespace
 		variantsListPtr->addVariant(variantPtr2);
 		variantsListPtr->addVariant(variantPtr3);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 
@@ -123,10 +113,6 @@ namespace
 
 	TEST_F(BuildGraphTests, BuildGraph2)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("1:1-1000000");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantPtr1 = gwiz::Variant::BuildVariant("1\t105774\t.\tGT\tG\t108.73\ttAC=1;AF=0.500;AN=2;BaseQRankSum=-1.532;ClippingRankSum=0.143;DP=11;FS=0.000;MLEAC=1;MLEAF=0.500;MQ=21.91;MQ0=0;MQRankSum=0.466;QD=9.88;ReadPosRankSum=0.143\tGT:AD:DP:GQ:PL\t0/1:7,5:12:99:167,0,249\t", vcfParser);
 		auto variantPtr2 = gwiz::Variant::BuildVariant("1\t105774\t.\tGTT\tGT\t3.22758\t.\tAB=0.277778;ABP=10.7311;AC=1;AF=0.5;AN=2;AO=5;CIGAR=1M1D1M;DP=18;DPB=16.3333;DPRA=0;EPP=6.91895;EPPR=3.17734;GTI=0;LEN=1;MEANALT=1;MQM=21.8;MQMR=16.5385;NS=1;NUMALT=1;ODDS=0.0976763;PAIRED=1;PAIREDR=1;PAO=0;PQA=0;PQR=0;PRO=0;QA=185;QR=465;RO=13;RPP=6.91895;RPPR=3.17734;RUN=1;SAF=5;SAP=13.8677;SAR=0;SRF=13", vcfParser);
@@ -135,7 +121,6 @@ namespace
 		variantsListPtr->addVariant(variantPtr1);
 		variantsListPtr->addVariant(variantPtr2);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 
@@ -148,10 +133,6 @@ namespace
 
 	TEST_F(BuildGraphTests, BuildGraph3)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("1:1-1000000");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantPtr1 = gwiz::Variant::BuildVariant("20\t69506\t.\tG\tGACAC\t590.52\t.\tAC=2;AF=1.00;AN=2;DP=41;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=3.60\tGT:AD:DP:GQ:PL\t1/1:0,25:25:82:1163,82,0", vcfParser);
 		auto variantPtr2 = gwiz::Variant::BuildVariant("20\t69506\t.\tGACACACACACACACACACACACACACACA\tGACACACACACACACACACACACACACACACACA\t506.892\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=22;CIGAR=1M4I29M;DP=30;DPB=46.5333;DP", vcfParser);
@@ -160,7 +141,6 @@ namespace
 		variantsListPtr->addVariant(variantPtr1);
 		variantsListPtr->addVariant(variantPtr2);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr;
 		gwiz::Variant::SharedPtr variantPtrTest;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
@@ -174,10 +154,6 @@ namespace
 
 	TEST_F(BuildGraphTests, BuildGraph4)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("1:1-1000000");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantPtr1 = gwiz::Variant::BuildVariant("20\t72104\t.\tTA\tT\t1205.73\t.\tAC=2;AF=1.00;AN=2;DP=39;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.92\tGT:AD:DP:GQ:PL  1/1:0,36:36:99:1243,109,0", vcfParser);
 		auto variantPtr2 = gwiz::Variant::BuildVariant("20\t72104\t.\tTAA\tTA\t1062.05\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=36;CIGAR=1M1D1M;DP=39;DPB=59.6667;DPRA=0;EPP=9.04217;EPPR=5.18177;GTI=0;LEN=1;MEANALT=3;MQM=6", vcfParser);
@@ -188,7 +164,6 @@ namespace
 		variantsListPtr->addVariant(variantPtr2);
 		variantsListPtr->addVariant(variantPtr3);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr;
 		gwiz::Variant::SharedPtr variantPtrTest;
 		gwiz::Variant::SharedPtr variantPtrNULL;
@@ -211,10 +186,6 @@ namespace
 
 	TEST_F(BuildGraphTests, BuildGraph5)
 	{
-		auto regionPtr = std::make_shared< gwiz::Region >("1:1-1000000");
-		std::string fastaPath = TEST_FASTA_FILE;
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantLinePtr1 = gwiz::Variant::BuildVariant("20\t86005\t.\tC\tCA\t31.73\t.\tAC=1;AF=0.500;AN=2;BaseQRankSum=-0.361;ClippingRankSum=0.361;DP=41;FS=7.782;MLEAC=1;MLEAF=0.500;MQ=58.77;MQ0=0;MQRankSum=0", vcfParser);
 		auto variantLinePtr2 = gwiz::Variant::BuildVariant("20\t86164\t.\tAG\tA\t2371.73\t.\tAC=2;AF=1.00;AN=2;DP=65;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.22     GT:AD:DP:GQ:PL  1/1:0,65:65:99:2409,196,0", vcfParser);
@@ -231,7 +202,6 @@ namespace
 		variantsListPtr->addVariant(variantLinePtr5);
 		variantsListPtr->addVariant(variantLinePtr6);
 
-		auto testGraph = std::make_shared< TestGraphBGT >(fastaReferencePtr, variantsListPtr);
 		gwiz::Variant::SharedPtr variantPtr1;
 		gwiz::Variant::SharedPtr variantPtr2;
 		gwiz::Variant::SharedPtr variantPtr3;
@@ -325,6 +295,6 @@ namespace
 		ASSERT_EQ(variantPtr4->getAlt().size(), 2);
 		*/
 
-		ASSERT_EQ(variantPtr2, nullptr);
+		// ASSERT_EQ(variantPtr2, nullptr);
 	}
 }

@@ -108,7 +108,6 @@ namespace gwiz
 			if ((ac != this->m_allele_count.end() && std::get< 0 >(ac->second) > 0) ||
 				(ac != this->m_allele_count.end() && std::get< 1 >(ac->second) > 0))
 			{
-				this->m_allele_count_mutex.unlock();
 				return true;
 			}
 		}
@@ -137,11 +136,56 @@ namespace gwiz
 		}
 	}
 
+	std::string Variant::getGenotype()
+	{
+		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
+		float thresholdPercent = 0.3; // if there isn't at least this percent represented in the allele count then we don't consider it
+		std::vector< std::tuple< std::string, uint32_t > > potentialGenotypes;
+
+		// get the reference count
+		auto rc = this->m_allele_count[this->getRef()];
+		uint32_t rCount = std::get< 0 >(rc) + std::get< 1 >(rc);
+		if (rCount > 3 && rCount >= (this->m_total_allele_count * thresholdPercent)) // if the reference count meets our criteria then add it to our potential genotypes
+		{
+			potentialGenotypes.emplace_back(std::make_tuple("0", rCount));
+		}
+
+		for (uint32_t i = 0; i < this->m_alt.size(); ++i)
+		{
+			auto ac = this->m_allele_count[this->m_alt[i]];
+			uint32_t aCount = std::get< 0 >(ac) + std::get< 1 >(ac);
+			if (aCount > 3 && aCount >= (this->m_total_allele_count * thresholdPercent)) // if the alt count meets our criteria then add it to our potential genotypes
+			{
+				potentialGenotypes.emplace_back(std::make_tuple("0", aCount));
+			}
+		}
+
+		// sort the genotypes in decending order. Then we just worry about the first 2 indices (if they exist)
+		std::sort(potentialGenotypes.begin(), potentialGenotypes.end(), [](const std::tuple< std::string, uint32_t >& a, const std::tuple< std::string, uint32_t >& b)
+				  {
+					  return std::get< 1 >(a) > std::get< 1 >(b);
+				  });
+		std::string genotype;
+		// based on the size of the genotypes we generate the genotype
+		switch (potentialGenotypes.size())
+		{
+		case 0: // there isn't a decernible genotype
+			genotype = "./.";
+			break;
+		case 1: // if there is only one then we know this is a homozygous
+			genotype = std::get< 0 >(potentialGenotypes[0]) + "/" + std::get< 0 >(potentialGenotypes[0]);
+			break;
+		default: // at least 2 elements we know (since it's sorted) that the 2 highest must be at index 0 and 1 respectively (heterozygous)
+			genotype = std::get< 0 >(potentialGenotypes[0]) + "/" + std::get< 0 >(potentialGenotypes[1]);
+		}
+		return genotype;
+	}
+
 	void Variant::printVariant(std::ostream& out)
 	{
 		calculateAlleleCounts();
 		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << "\tGT\t" << getGenotype() <<  std::endl;
 	}
 
 }

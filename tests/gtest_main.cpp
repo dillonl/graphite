@@ -12,7 +12,7 @@
 #include "FileTests.hpp"
 */
 #include "BuildGraphTests.hpp"
-// #include "VariantsTest.hpp"
+#include "VariantsTest.hpp"
 
 
 #include "gtest/gtest.h"

@@ -50,6 +50,21 @@ namespace
 		// Objects declared here can be used by all tests in the test case for Foo.
 	};
 
+	class VariantTest : public gwiz::Variant
+	{
+	public:
+		std::string getGenotypeTest() { return getGenotype(); }
+		void setAlleleCounts(std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > >& alleleCounts)
+		{
+			this->m_allele_count = alleleCounts;
+		}
+
+		void setTotalAlleleCount(uint32_t totalAlleleCount)
+		{
+			this->m_total_allele_count = totalAlleleCount;
+		}
+	};
+
     static std::string VCF_LINE_1 = "Y\t2655180\trs11575897\tG\tA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
 	static std::string VCF_LINE_2 = "Y\t2655180\trs11575897\tG\tA,TTA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
 	static std::string VCF_LINE_3 = "20\t249590\tBI_GS_DEL1_B5_P2733_211\tC\t<CN0>\t100\tPASS\tSVTYPE=DEL;CIEND=-7,7;CIPOS=-7,7;END=250420;CS=DEL_union;MC=EM_DL_DEL10608605;AC=1;AF=0.00019968;NS=2504;AN=5008;EAS_AF=0.0;EUR_AF=0.0;AFR_AF=0.0;AMR_AF=0.0;SAS_AF=0.001\tGT\t0|0"; // is not the complete first line
@@ -222,4 +237,37 @@ namespace
 		ASSERT_STREQ(qual.c_str(),"100");
 	}
 
+	TEST_F(VariantsTest, TestGetGenotypeNone)
+	{
+		VariantTest variantTest;
+		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
+		variantTest.setAlleleCounts(alleleCount);
+		variantTest.setTotalAlleleCount(0);
+		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
+		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
+	}
+
+	/*
+	TEST_F(VariantsTest, TestGetGenotypeHomoRef)
+	{
+		VariantTest variantTest;
+		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
+		alleleCount["A"] = std::make_tuple< uint32_t, uint32_t >(10,10);
+		alleleCount["A"] = std::make_tuple< uint32_t, uint32_t >(10,10);
+		variantTest.setAlleleCounts(alleleCount);
+		variantTest.setTotalAlleleCount(0);
+		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
+		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
+	}
+
+	TEST_F(VariantsTest, TestGetGenotypeNone)
+	{
+		VariantTest variantTest;
+		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > alleleCount;
+		variantTest.setAlleleCounts(alleleCount);
+		variantTest.setTotalAlleleCount(0);
+		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
+		ASSERT_STRNE("0/0", variantTest.getGenotypeTest().c_str());
+	}
+	*/
 }
