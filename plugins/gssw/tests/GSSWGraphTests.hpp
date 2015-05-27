@@ -20,14 +20,14 @@
 #include "plugins/gssw/graph/AlignmentReporter.h"
 #include "plugins/gssw/graph/GSSWAdjudicator.h"
 
-#include "core/alignments/BamAlignmentReader.h"
-#include "core/alignments/BamAlignmentReaderManager.h"
-#include "core/alignments/BamAlignmentReaderPreloadManager.h"
-#include "core/variants/VCFFileReader.h"
-#include "core/variants/IVariant.h"
-#include "core/variants/VariantListVCFPreloaded.h"
+#include "core/alignment/BamAlignmentReader.h"
+#include "core/alignment/BamAlignmentReaderManager.h"
+#include "core/alignment/BamAlignmentReaderPreloadManager.h"
+#include "core/variant/VCFFileReader.h"
+#include "core/variant/IVariant.h"
+#include "core/variant/VariantListVCFPreloaded.h"
 #include "core/reference/FastaReference.h"
-#include "core/utils/ThreadPool.hpp"
+#include "core/util/ThreadPool.hpp"
 
 
 namespace

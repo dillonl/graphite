@@ -1,5 +1,5 @@
 #include "Variant.h"
-#include "core/alignments/IAlignment.h"
+#include "core/alignment/IAlignment.h"
 
 namespace gwiz
 {

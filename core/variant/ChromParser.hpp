@@ -1,7 +1,7 @@
 #ifndef GWIZ_CHROMPARSER_H
 #define GWIZ_CHROMPARSER_H
 
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 
 #include <string>
 
@@ -16,9 +16,9 @@ namespace gwiz
 {
 
 	template<typename Iterator>
-	struct PositionParser : boost::spirit::qi::grammar<Iterator, position() >
+	struct ChromParser : boost::spirit::qi::grammar<Iterator, position() >
 	{
-		PositionParser() : PositionParser::base_type(start)
+		ChromParser() : ChromParser::base_type(start)
 			{
 				using namespace boost::spirit;
 

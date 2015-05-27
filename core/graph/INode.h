@@ -3,7 +3,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 #include <string>
 #include <memory>
 #include <vector>

@@ -8,7 +8,7 @@
 #include "vg/graph/ReferenceNode.h"
 #include "vg/graph/VariantGraph.h"
 
-#include "core/utils/ThreadPool.hpp"
+#include "core/util/ThreadPool.hpp"
 
 #include "VariantContig.h"
 

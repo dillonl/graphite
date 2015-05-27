@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 #include "IAlignmentReader.h"
 #include "core/region/Region.h"
 

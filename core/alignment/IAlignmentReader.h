@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 #include "core/region/Region.h"
 
 #include "IAlignment.h"

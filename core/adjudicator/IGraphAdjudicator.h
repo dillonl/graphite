@@ -2,9 +2,9 @@
 #define GWIZ_IGRAPHADJUDICATOR_H
 
 #include <boost/noncopyable.hpp>
-#include "core/variants/IVariantList.h"
+#include "core/variant/IVariantList.h"
 #include "core/graph/IGraph.h"
-#include "core/alignments/IAlignmentReader.h"
+#include "core/alignment/IAlignmentReader.h"
 
 namespace gwiz
 {

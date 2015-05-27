@@ -3,7 +3,7 @@
 
 #include "IVariantNode.h"
 #include "core/graph/INode.h"
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 
 namespace gwiz
 {

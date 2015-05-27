@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "core/variants/VariantListVCFPreloaded.h"
+#include "core/variant/VariantListVCFPreloaded.h"
 #include "core/region/Region.h"
 
 #include "TestConfig.h"

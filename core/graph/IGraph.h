@@ -2,8 +2,8 @@
 #define GWIZ_IGRAPH_H
 
 #include "core/reference/IReference.h"
-#include "core/variants/IVariantList.h"
-#include "core/variants/IVariant.h"
+#include "core/variant/IVariantList.h"
+#include "core/variant/IVariant.h"
 #include "core/graph/INode.h"
 
 #include <boost/noncopyable.hpp>

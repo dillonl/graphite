@@ -1,10 +1,10 @@
-#include "core/variants/VariantList.h"
-#include "core/utils/ThreadPool.hpp"
+#include "core/variant/VariantList.h"
+#include "core/util/ThreadPool.hpp"
 #include "GraphManager.h"
 #include "AlignmentReporter.h"
 #include "core/genotyper/IGenotyper.h"
 
-#include "core/alignments/BamAlignmentReader.h"
+#include "core/alignment/BamAlignmentReader.h"
 
 #include <queue>
 

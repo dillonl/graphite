@@ -1,8 +1,8 @@
 #ifndef GWIZ_GSSW_GSSWGRAPHMANAGER_H
 #define GWIZ_GSSW_GSSWGRAPHMANAGER_H
 
-#include "core/alignments/IAlignmentReaderManager.h"
-#include "core/variants/VariantList.h"
+#include "core/alignment/IAlignmentReaderManager.h"
+#include "core/variant/VariantList.h"
 #include "core/adjudicator/IGraphAdjudicator.h"
 
 #include "GSSWGraph.h"

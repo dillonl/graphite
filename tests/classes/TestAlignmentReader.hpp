@@ -1,7 +1,7 @@
 #ifndef GWIZ_TESTING_TESTALIGNMENTREADER_HPP
 #define GWIZ_TESTING_TESTALIGNMENTREADER_HPP
 
-#include "core/alignments/IAlignmentReader.h"
+#include "core/alignment/IAlignmentReader.h"
 #include "TestAlignment.hpp"
 
 #include <queue>

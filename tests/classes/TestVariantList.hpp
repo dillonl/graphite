@@ -1,7 +1,7 @@
 #ifndef GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
 #define GWIZ_TESTS_CLASSES_TESTVARIANTLIST_HPP
 
-#include "core/variants/VariantList.h"
+#include "core/variant/VariantList.h"
 
 namespace gwiz
 {

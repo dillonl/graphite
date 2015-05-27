@@ -1,7 +1,7 @@
 #ifndef GWIZ_GENOTYPERALLELE_H
 #define GWIZ_GENOTYPERALLELE_H
 
-#include "core/alignments/IAlignment.h"
+#include "core/alignment/IAlignment.h"
 
 #include <memory>
 

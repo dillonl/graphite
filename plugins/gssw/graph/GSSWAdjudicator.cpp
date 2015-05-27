@@ -1,6 +1,6 @@
 #include "GSSWAdjudicator.h"
 #include "GSSWGraph.h"
-#include "core/variants/VariantList.h"
+#include "core/variant/VariantList.h"
 #include "AlignmentReporter.h"
 
 namespace gwiz

@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "core/region/Region.h"
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 
 namespace gwiz
 {

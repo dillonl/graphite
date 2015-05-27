@@ -4,13 +4,13 @@
 
 #include "TestConfig.h"
 
-#include "core/variants/VCFParser.hpp"
+#include "core/variant/VCFParser.hpp"
 
 #include "core/graph/IGraph.h"
-#include "core/variants/Variant.h"
-#include "core/variants/VCFFileReader.h"
+#include "core/variant/Variant.h"
+#include "core/variant/VCFFileReader.h"
 
-#include "core/variants/VCFParser.hpp"
+#include "core/variant/VCFParser.hpp"
 
 namespace
 {

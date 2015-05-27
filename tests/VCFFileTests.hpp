@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "core/variants/VCFFileReader.h"
+#include "core/variant/VCFFileReader.h"
 #include "core/region/Region.h"
 
 #include "TestConfig.h"

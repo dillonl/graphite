@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "core/graph/IGraph.h"
-#include "core/variants/IVariant.h"
+#include "core/variant/IVariant.h"
 #include "core/reference/IReference.h"
 
 namespace

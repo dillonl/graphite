@@ -2,8 +2,8 @@
 #define GWIZ_GSSW_ALIGNMENTREPORT_H
 
 #include "core/reference/IReference.h"
-#include "core/variants/IVariantList.h"
-#include "core/alignments/IAlignment.h"
+#include "core/variant/IVariantList.h"
+#include "core/alignment/IAlignment.h"
 #include "gssw/gssw.h"
 
 #include <boost/noncopyable.hpp>

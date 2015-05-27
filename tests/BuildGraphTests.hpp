@@ -6,9 +6,9 @@
 
 #include "core/graph/IGraph.h"
 #include "core/reference/FastaReference.h"
-#include "core/variants/Variant.h"
-#include "core/variants/VariantList.h"
-#include "core/variants/VCFParser.hpp"
+#include "core/variant/Variant.h"
+#include "core/variant/VariantList.h"
+#include "core/variant/VCFParser.hpp"
 
 namespace
 {

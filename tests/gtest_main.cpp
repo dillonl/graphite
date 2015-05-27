@@ -13,7 +13,7 @@
 */
 #include "BuildGraphTests.hpp"
 #include "VariantsTest.hpp"
-
+#include "SequenceManagerTests.hpp"
 
 #include "gtest/gtest.h"
 

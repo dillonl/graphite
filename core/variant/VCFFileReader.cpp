@@ -1,5 +1,5 @@
-#include "core/utils/file/ASCIIFileReader.h"
-#include "core/utils/file/ASCIIGZFileReader.h"
+#include "core/file/ASCIIFileReader.h"
+#include "core/file/ASCIIGZFileReader.h"
 #include "VCFFileReader.h"
 
 #include <fstream>

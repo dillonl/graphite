@@ -1,8 +1,8 @@
 #ifndef GWIZ_TESTS_BAMALIGNMENTTESTS_HPP
 #define GWIZ_TESTS_BAMALIGNMENTTESTS_HPP
 
-#include "core/alignments/BamAlignmentReader.h"
-#include "core/alignments/BamAlignment.h"
+#include "core/alignment/BamAlignmentReader.h"
+#include "core/alignment/BamAlignment.h"
 #include "TestConfig.h"
 
 TEST(BamAlignmentTests, OpenBamAlignmentInvalidTest)

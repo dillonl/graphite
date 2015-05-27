@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <mutex>
 
-#include "core/utils/Types.h"
-#include "core/variants/Variant.h"
+#include "core/util/Types.h"
+#include "core/variant/Variant.h"
 
 namespace gwiz
 {

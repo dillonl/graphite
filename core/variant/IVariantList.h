@@ -3,8 +3,8 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "core/variants/IVariant.h"
-#include "core/variants/Variant.h"
+#include "core/variant/IVariant.h"
+#include "core/variant/Variant.h"
 
 #include "core/region/Region.h"
 

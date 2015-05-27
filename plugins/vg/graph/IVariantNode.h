@@ -3,8 +3,8 @@
 
 #include "core/graph/INode.h"
 
-#include "core/variants/Variant.h"
-#include "core/utils/Types.h"
+#include "core/variant/Variant.h"
+#include "core/util/Types.h"
 
 namespace gwiz
 {

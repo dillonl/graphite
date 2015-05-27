@@ -11,8 +11,8 @@
 #include "tests/classes/TestReferenceVariantGenerator.hpp"
 #include "plugins/adjudicator/graph/VariantContig.h"
 
-#include "core/variants/VCFFileReader.h"
-#include "core/variants/IVariant.h"
+#include "core/variant/VCFFileReader.h"
+#include "core/variant/IVariant.h"
 #include "core/reference/FastaReference.h"
 
 

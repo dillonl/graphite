@@ -9,11 +9,11 @@
 
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
-#include "core/variants/IVariantList.h"
+#include "core/variant/IVariantList.h"
 #include "core/genotyper/IGenotyperVariant.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
-#include "core/alignments/IAlignmentReader.h"
+#include "core/alignment/IAlignmentReader.h"
 
 namespace gwiz
 {

@@ -1,7 +1,7 @@
 #ifndef GWIZ_INFOFIELDPARSER_H
 #define GWIZ_INFOFIELDPARSER_H
 
-#include "core/utils/Types.h"
+#include "core/util/Types.h"
 
 #include <string>
 

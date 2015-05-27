@@ -1,5 +1,5 @@
 #include "BamAlignmentReaderPreloadManager.h"
-#include "core/utils/ThreadPool.hpp"
+#include "core/util/ThreadPool.hpp"
 
 namespace gwiz
 {
