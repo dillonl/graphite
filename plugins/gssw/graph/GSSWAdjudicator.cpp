@@ -42,7 +42,6 @@ namespace gssw
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				float percentage = (this->m_sw_percent * 0.01);
-				std::cout << percentage << std::endl;
 				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
 				std::unordered_map< uint32_t, int32_t > alignmentIDVariants;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
