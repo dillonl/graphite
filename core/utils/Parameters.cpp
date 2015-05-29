@@ -144,7 +144,7 @@ namespace gwiz
 		std::cout << "\t-v\tPath to input VCF file" << std::endl;
 		std::cout << "\t-f\tPath to input FASTA file" << std::endl;
 		std::cout << "\t-o\tPath to output VCF file [optional - default is stdout]" << std::endl;
-		std::cout << "\t-t\tSmith-Waterman Percent [optional - default is 90]" << std::endl;
+		std::cout << "\t-p\tSmith-Waterman Percent [optional - default is 90]" << std::endl;
 		std::cout << "\t-t\tThread count [optional - default is number of cores x 2]" << std::endl;
 	}
 
