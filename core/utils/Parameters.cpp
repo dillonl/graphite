@@ -47,6 +47,11 @@ namespace gwiz
 	{
 		m_params.clear();
 
+		if (argc == 1) {
+			printUsage();
+			exit(0);
+		}
+
 		int option_index = 0;
 		static struct option long_options[] =
 			{
@@ -121,6 +126,11 @@ namespace gwiz
 				exit(0);
 
 			}
+		}
+		if (this->m_region == "" || this->m_in_vcf_path == "" || this->m_bam_path == "" || this->m_fasta_path == ""){
+			std::cout << "Must specify a region (-r) a vcf (-v) a bam (-b) and a fasta (-f)" << std::endl;
+			printUsage();
+			exit(0);
 		}
 
 	}
