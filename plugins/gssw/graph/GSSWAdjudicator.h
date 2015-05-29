@@ -14,7 +14,7 @@ namespace gssw
 	{
 	public:
 		typedef std::shared_ptr< GSSWAdjudicator > SharedPtr;
-		GSSWAdjudicator();
+		GSSWAdjudicator(uint32_t swPercent);
 		~GSSWAdjudicator();
 
 		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) override;
@@ -32,6 +32,7 @@ namespace gssw
 			return false;
 		}
 		std::mutex m_adjudication_lock;
+		uint32_t m_sw_percent;
 	};
 }
 }

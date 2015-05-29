@@ -7,7 +7,8 @@ namespace gwiz
 {
 namespace gssw
 {
-	GSSWAdjudicator::GSSWAdjudicator()
+	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent) :
+		m_sw_percent(swPercent)
 	{
 		static int id = 0;
 		m_id = ++id;
@@ -40,7 +41,9 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * 0.9));
+				float percentage = (this->m_sw_percent * 0.01);
+				std::cout << percentage << std::endl;
+				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
 				std::unordered_map< uint32_t, int32_t > alignmentIDVariants;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
