@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <tuple>
 
+#include "core/allele/IAllele.h"
 #include "IVariant.h"
 #include "VCFParser.hpp"
 #include "core/reference/Reference.h"
@@ -18,15 +19,6 @@
 
 namespace gwiz
 {
-
-	enum class VARIANT_TYPE
-	{
-		SNP,
-		INS,
-		DEL,
-		DUP,
-		INV
-	};
 
 	class IAlignment;
 
@@ -42,18 +34,24 @@ namespace gwiz
 			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
 			std::string fields;
 			auto variantPtr = std::make_shared< Variant >();
-			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, variantPtr->m_ref, variantPtr->m_alt, variantPtr->m_qual, variantPtr->m_filter, fields))
+			std::string ref;
+			std::vector< std::string > alts;
+
+			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
+
+			auto altsDupsRemoved = removeDuplicateAltAlleles(alts);
+
+			variantPtr->setRefAllele(ref);
+			variantPtr->setAltAlleles(altsDupsRemoved);
+
+			variantPtr->m_all_allele_ptrs.reserve(variantPtr->m_alt_allele_ptrs.size() + 1);
+			variantPtr->m_all_allele_ptrs.emplace_back(variantPtr->m_ref_allele_ptr);
+			variantPtr->m_all_allele_ptrs.insert(variantPtr->m_all_allele_ptrs.end(), variantPtr->m_alt_allele_ptrs.begin(), variantPtr->m_alt_allele_ptrs.end());
+
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
-			variantPtr->m_variant_type = VARIANT_TYPE::SNP;
-			variantPtr->initializeAlleleCounters();
-			// ** code below remove duplicate variants
-			std::sort(variantPtr->m_alt.begin(), variantPtr->m_alt.end());
-			auto it = std::unique(variantPtr->m_alt.begin(), variantPtr->m_alt.end());
-			variantPtr->m_alt.erase(it, variantPtr->m_alt.end());
-			// ** code above remove duplicate variants
 			return variantPtr;
 		}
 
@@ -130,20 +128,6 @@ namespace gwiz
 			return true;
 		}
 
-		inline void setVCFLineFromAlternate(const std::string& alt, const char* vcfLine, size_t length)
-		{
-			this->m_vcf_lines_map[alt] = std::string(vcfLine, length);
-		}
-
-		inline const std::string getVCFLineFromAlternate(const std::string& alt)
-		{
-			if (this->m_vcf_lines_map.find(alt) == this->m_vcf_lines_map.end())
-			{
-				return "";
-			}
-			return this->m_vcf_lines_map[alt];
-		}
-
 		void increaseCount(std::shared_ptr< IAlignment > alignmentPtr);
 
 		void setFilter(std::string filter)
@@ -158,20 +142,65 @@ namespace gwiz
 		bool hasAlts();
 		void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr);
 
-		VARIANT_TYPE getVariantType() const { return m_variant_type; }
 		std::string getChrom() const { return m_chrom; }
 		uint32_t getPosition() const { return m_position; }
 		std::string getQual() const { return m_qual; }
 		std::string getFilter() const { return m_filter; }
 		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
-		std::string const getRef() { return m_ref; }
-		std::vector< std::string > const getAlt() { return m_alt; }
+		/* std::string const getRef() { return m_ref; } */
+		std::string getRef() { return std::string(this->m_ref_allele_ptr->getSequence()); }
+		IAllele::SharedPtr getRefAllelePtr() { return this->m_ref_allele_ptr; }
+		/* std::vector< std::string > const getAlt() { return m_alt; } */
+		std::vector< IAllele::SharedPtr > const getAltAllelePtrs() { return m_alt_allele_ptrs; }
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 		void printVariant(std::ostream& out) override;
 
 	protected:
+		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)
+		{
+			std::vector< std::string > tmpAlts;
+			std::unordered_map< std::string, bool > seqMap;
+			for (auto alt : alts)
+			{
+				if (seqMap.find(alt) == seqMap.end())
+				{
+					tmpAlts.emplace_back(alt);
+					seqMap[alt] = true;
+				}
+			}
+			return tmpAlts;
+		}
+
+		void setRefAllele(const std::string& ref)
+		{
+			this->m_ref_allele_ptr = std::make_shared< IAllele >(SequenceManager::Instance()->getSequence(ref.c_str()));
+		}
+
+		void setAltAlleles(const std::vector< std::string >& alts)
+		{
+			this->m_alt_allele_ptrs.clear();
+			for (const auto& alt : alts)
+			{
+				auto sequencePtr = SequenceManager::Instance()->getSequence(alt.c_str());
+				auto altAllelePtr = std::make_shared< IAllele >(sequencePtr);
+				this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
+			}
+		}
+
+		IAllele::SharedPtr getAllelePtr(const std::string& allele)
+		{
+			for (auto allelePtr : this->m_all_allele_ptrs)
+			{
+				if (memcmp(allelePtr->getSequence(), allele.c_str(), allele.size()))
+				{
+					return allelePtr;
+				}
+			}
+			return nullptr;
+		}
+
 		std::string getGenotype();
 		void calculateAlleleCounts();
 		void initializeAlleleCounters();
@@ -184,7 +213,6 @@ namespace gwiz
 		uint32_t m_total_allele_count; // an efficiency that technically could be calculated from m_allele_count
 		uint32_t m_total_allele_count_low_quality; // all reads that pass through this variant are counted (even if their quality is too low to be counted in m_total_allele_count)
 
-		VARIANT_TYPE m_variant_type;
 		uint32_t m_position;
 		std::string m_chrom;
 		std::string m_id;
@@ -192,9 +220,11 @@ namespace gwiz
 		std::string m_filter;
 		std::string m_ref;
 		std::vector< std::string > m_alt;
+		IAllele::SharedPtr m_ref_allele_ptr;
+		std::vector< IAllele::SharedPtr > m_alt_allele_ptrs;
+		std::vector< IAllele::SharedPtr > m_all_allele_ptrs;
 		std::unordered_map< std::string, std::string > m_info_fields;
 		std::vector< std::shared_ptr< IAlignment > > m_potential_alignments;
-		std::map< std::string, std::string > m_vcf_lines_map;
 		uint32_t m_unique_id;
 	};
 

@@ -13,8 +13,9 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< Sequence > SharedPtr;
-	    Sequence(const char* seq, size_t seqLen) :
-		    m_seq(seq, seqLen)
+
+	    Sequence(const std::string& seq) :
+		    m_seq(seq)
 		{
 		}
 
@@ -22,6 +23,8 @@ namespace gwiz
 
 		const char* getSequence() const { return m_seq.c_str(); }
 		size_t getLength() const { return m_seq.size(); }
+
+		std::string getSequenceString() const { return m_seq; }
 	private:
 		std::string m_seq;
 	};

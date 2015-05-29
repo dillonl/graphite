@@ -5,7 +5,7 @@
 #include "TestConfig.h"
 
 #include "core/graph/IGraph.h"
-#include "core/reference/FastaReference.h"
+// #include "core/reference/FastaReference.h"
 #include "core/variant/Variant.h"
 #include "core/variant/VariantList.h"
 #include "core/variant/VCFParser.hpp"
@@ -76,12 +76,12 @@ namespace
 
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
-		ASSERT_STREQ(variantPtr->getRef().c_str(), "TAAGTTAAC");
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TTAAC") != variantPtr->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAGAAGGTTAAC") != variantPtr->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAAGTAG") != variantPtr->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAAG") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtr->getAlt().size(), 4);
+		ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), "TAAGTTAAC");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TTAAC");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[1]->getSequence(), "TAGAAGGTTAAC");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[2]->getSequence(), "TAAGTAG");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[3]->getSequence(), "TAAG");
+		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 4);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph)
@@ -99,11 +99,12 @@ namespace
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(),    "TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT");
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT") != variantPtr->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAATATATGT") != variantPtr->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtr->getAlt().size(), 3);
+		ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), "TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[1]->getSequence(), "TAATATATGT");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[2]->getSequence(), "TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT");
+
+		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 3);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph2)
@@ -119,9 +120,9 @@ namespace
 		gwiz::Variant::SharedPtr variantPtr;
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(),    "GTT");
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "GT") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtr->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), "GTT");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "GT");
+		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph3)
@@ -139,42 +140,42 @@ namespace
 		variantsListPtr->getNextCompoundVariant(variantPtr);
 		variantsListPtr->getNextCompoundVariant(variantPtrTest);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(),    "GACACACACACACACACACACACACACACA");
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "GACACACACACACACACACACACACACACACACA") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtr->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), "GACACACACACACACACACACACACACACA");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "GACACACACACACACACACACACACACACACACA");
+		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 		ASSERT_EQ(variantPtrTest, nullptr);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph4)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
-		auto variantPtr1 = gwiz::Variant::BuildVariant("20\t72104\t.\tTA\tT\t1205.73\t.\tAC=2;AF=1.00;AN=2;DP=39;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.92\tGT:AD:DP:GQ:PL  1/1:0,36:36:99:1243,109,0", vcfParser);
-		auto variantPtr2 = gwiz::Variant::BuildVariant("20\t72104\t.\tTAA\tTA\t1062.05\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=36;CIGAR=1M1D1M;DP=39;DPB=59.6667;DPRA=0;EPP=9.04217;EPPR=5.18177;GTI=0;LEN=1;MEANALT=3;MQM=6", vcfParser);
-		auto variantPtr3 = gwiz::Variant::BuildVariant("20\t72719\t.\tC\tT\t1779.36\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=56;CIGAR=1X;DP=56;DPB=56;DPRA=0;EPP=3.63072;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=0;NS=1;N", vcfParser);
+		auto variantLinePtr1 = gwiz::Variant::BuildVariant("20\t72104\t.\tTA\tT\t1205.73\t.\tAC=2;AF=1.00;AN=2;DP=39;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.92\tGT:AD:DP:GQ:PL  1/1:0,36:36:99:1243,109,0", vcfParser);
+		auto variantLinePtr2 = gwiz::Variant::BuildVariant("20\t72104\t.\tTAA\tTA\t1062.05\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=36;CIGAR=1M1D1M;DP=39;DPB=59.6667;DPRA=0;EPP=9.04217;EPPR=5.18177;GTI=0;LEN=1;MEANALT=3;MQM=6", vcfParser);
+		auto variantLinePtr3 = gwiz::Variant::BuildVariant("20\t72719\t.\tC\tT\t1779.36\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=56;CIGAR=1X;DP=56;DPB=56;DPRA=0;EPP=3.63072;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=0;NS=1;N", vcfParser);
 
 		auto variantsListPtr = std::make_shared< gwiz::VariantList >();
-		variantsListPtr->addVariant(variantPtr1);
-		variantsListPtr->addVariant(variantPtr2);
-		variantsListPtr->addVariant(variantPtr3);
+		variantsListPtr->addVariant(variantLinePtr1);
+		variantsListPtr->addVariant(variantLinePtr2);
+		variantsListPtr->addVariant(variantLinePtr3);
 
-		gwiz::Variant::SharedPtr variantPtr;
-		gwiz::Variant::SharedPtr variantPtrTest;
-		gwiz::Variant::SharedPtr variantPtrNULL;
-		variantsListPtr->getNextCompoundVariant(variantPtr);
-		variantsListPtr->getNextCompoundVariant(variantPtrTest);
-		variantsListPtr->getNextCompoundVariant(variantPtrNULL);
+		gwiz::Variant::SharedPtr variantPtr1;
+		gwiz::Variant::SharedPtr variantPtr2;
+		gwiz::Variant::SharedPtr variantPtr3;
+		variantsListPtr->getNextCompoundVariant(variantPtr1);
+		variantsListPtr->getNextCompoundVariant(variantPtr2);
+		variantsListPtr->getNextCompoundVariant(variantPtr3);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(),    "TAA");
-		ASSERT_TRUE(std::find(variantPtr->getAlt().begin(), variantPtr->getAlt().end(), "TA") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtr->getAlt().size(), 1);
-		ASSERT_EQ(variantPtr->getPosition(), 72104);
+		ASSERT_EQ(variantPtr1->getPosition(), 72104);
+		ASSERT_STREQ(variantPtr1->getRefAllelePtr()->getSequence(), "TAA");
+		ASSERT_STREQ(variantPtr1->getAltAllelePtrs()[0]->getSequence(),    "TA");
+		ASSERT_EQ(variantPtr1->getAltAllelePtrs().size(), 1);
 
-		ASSERT_STREQ(variantPtrTest->getRef().c_str(),    "C");
-		ASSERT_TRUE(std::find(variantPtrTest->getAlt().begin(), variantPtr->getAlt().end(), "T") != variantPtr->getAlt().end());
-		ASSERT_EQ(variantPtrTest->getAlt().size(), 1);
-		ASSERT_EQ(variantPtrTest->getPosition(), 72719);
+		ASSERT_EQ(variantPtr2->getPosition(), 72719);
+		ASSERT_STREQ(variantPtr2->getRefAllelePtr()->getSequence(), "C");
+		ASSERT_STREQ(variantPtr2->getAltAllelePtrs()[0]->getSequence(),    "T");
+		ASSERT_EQ(variantPtr2->getAltAllelePtrs().size(), 1);
 
-		ASSERT_EQ(variantPtrNULL, nullptr);
+		ASSERT_EQ(variantPtr3, nullptr);
 	}
 
 	TEST_F(BuildGraphTests, BuildGraph5)
@@ -207,24 +208,24 @@ namespace
 		variantsListPtr->getNextCompoundVariant(variantPtr5);
 
 		ASSERT_EQ(variantPtr1->getPosition(), 86005);
-		ASSERT_STREQ(variantPtr1->getRef().c_str(),    "C");
-		ASSERT_TRUE(std::find(variantPtr1->getAlt().begin(), variantPtr1->getAlt().end(), "CA") != variantPtr1->getAlt().end());
-		ASSERT_EQ(variantPtr1->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr1->getRefAllelePtr()->getSequence(), "C");
+		ASSERT_STREQ(variantPtr1->getAltAllelePtrs()[0]->getSequence(),    "CA");
+		ASSERT_EQ(variantPtr1->getAltAllelePtrs().size(), 1);
 
 		ASSERT_EQ(variantPtr2->getPosition(), 86164);
-		ASSERT_STREQ(variantPtr2->getRef().c_str(),    "AGG");
-		ASSERT_TRUE(std::find(variantPtr2->getAlt().begin(), variantPtr2->getAlt().end(), "AG") != variantPtr2->getAlt().end());
-		ASSERT_EQ(variantPtr2->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr2->getRefAllelePtr()->getSequence(), "AGG");
+		ASSERT_STREQ(variantPtr2->getAltAllelePtrs()[0]->getSequence(),    "AG");
+		ASSERT_EQ(variantPtr2->getAltAllelePtrs().size(), 1);
 
 		ASSERT_EQ(variantPtr3->getPosition(), 87263);
-		ASSERT_STREQ(variantPtr3->getRef().c_str(),    "GAAAAAAAAAT");
-		ASSERT_TRUE(std::find(variantPtr3->getAlt().begin(), variantPtr3->getAlt().end(), "GAAAAAAAAT") != variantPtr3->getAlt().end());
-		ASSERT_EQ(variantPtr3->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr3->getRefAllelePtr()->getSequence(), "GAAAAAAAAAT");
+		ASSERT_STREQ(variantPtr3->getAltAllelePtrs()[0]->getSequence(),    "GAAAAAAAAT");
+		ASSERT_EQ(variantPtr3->getAltAllelePtrs().size(), 1);
 
 		ASSERT_EQ(variantPtr4->getPosition(), 87416);
-		ASSERT_STREQ(variantPtr4->getRef().c_str(),    "A");
-		ASSERT_TRUE(std::find(variantPtr4->getAlt().begin(), variantPtr4->getAlt().end(), "C") != variantPtr4->getAlt().end());
-		ASSERT_EQ(variantPtr4->getAlt().size(), 1);
+		ASSERT_STREQ(variantPtr4->getRefAllelePtr()->getSequence(), "A");
+		ASSERT_STREQ(variantPtr4->getAltAllelePtrs()[0]->getSequence(),    "C");
+		ASSERT_EQ(variantPtr4->getAltAllelePtrs().size(), 1);
 
 		ASSERT_EQ(variantPtr5, nullptr);
 	}
@@ -234,60 +235,19 @@ namespace
 		gwiz::VariantParser< const char* > vcfParser;
 		auto variantLinePtr1 = gwiz::Variant::BuildVariant("1\t249240051\t.\tTG\tTAG\t773.046\t.\tAB=0.506944;ABP=3.07062;AC=1;AF=0.5;AN=2;AO=73;CIGAR=1M1I1M;DP=144;DPB=191;DPRA=0;EPP=6.60959;EPPR=3.21711;GTI=0;LEN=1;MEANALT=8;MQM=21.7534", vcfParser);
 		auto variantLinePtr2 = gwiz::Variant::BuildVariant("2\t249240099\t.\tTG\tTAG,TAGG\t151.835\t.\tAB=0.238636,0.227273;ABP=55.2243,59.8634;AC=1,1;AF=0.5,0.5;AN=2;AO=21,20;CIGAR=1M1I1M,1M2I1M;DP=88;DPB=149.5;DPRA=0,0;EPP=3.1137,3.0", vcfParser);
-		/*
-		auto variantLinePtr3 = gwiz::Variant::BuildVariant("1\t249240303\t.\tT\tTA\t1045.73\t.\tAC=1;AF=0.500;AN=2;BaseQRankSum=0.552;ClippingRankSum=-1.541;DP=42;FS=0.000;MLEAC=1;MLEAF=0.500;MQ=34.41;MQ0=0;MQRankSum=-1.465;QD=24.90;Rea", vcfParser);
-		auto variantLinePtr4 = gwiz::Variant::BuildVariant("1\t249240303\t.\tTG\tTAG\t654.301\t.\tAB=0.309028;ABP=94.2423;AC=1;AF=0.5;AN=2;AO=89;CIGAR=1M1I1M;DP=288;DPB=403.5;DPRA=0;EPP=8.49998;EPPR=8.28388;GTI=0;LEN=1;MEANALT=13;MQM=19.4", vcfParser);
-		auto variantLinePtr5 = gwiz::Variant::BuildVariant("1\t249240537\t.\tGGTG\tGG,GGGG\t66.6045\t.\tAB=0.382353,0.264706;ABP=7.09778,19.3602;AC=1,1;AF=0.5,0.5;AN=2;AO=13,9;CIGAR=1M2D1M,2M1X1M;DP=34;DPB=29.75;DPRA=0,0;EPP=11.1951,3.25157;EPP", vcfParser);
-		*/
 
 		auto variantsListPtr = std::make_shared< gwiz::VariantList >();
 		variantsListPtr->addVariant(variantLinePtr1);
 		variantsListPtr->addVariant(variantLinePtr2);
-		/*
-		variantsListPtr->addVariant(variantLinePtr3);
-		variantsListPtr->addVariant(variantLinePtr4);
-		variantsListPtr->addVariant(variantLinePtr5);
-		*/
 
 		gwiz::Variant::SharedPtr variantPtr1;
 		gwiz::Variant::SharedPtr variantPtr2;
-		/*
-		gwiz::Variant::SharedPtr variantPtr3;
-		gwiz::Variant::SharedPtr variantPtr4;
-		gwiz::Variant::SharedPtr variantPtr5;
-		*/
 		variantsListPtr->getNextCompoundVariant(variantPtr1);
 		variantsListPtr->getNextCompoundVariant(variantPtr2);
-		/*
-		variantsListPtr->getNextCompoundVariant(variantPtr3);
-		variantsListPtr->getNextCompoundVariant(variantPtr4);
-		variantsListPtr->getNextCompoundVariant(variantPtr5);
-		*/
 
 		ASSERT_EQ(variantPtr1->getPosition(), 249240051);
-		ASSERT_STREQ(variantPtr1->getRef().c_str(),    "TG");
-		ASSERT_TRUE(std::find(variantPtr1->getAlt().begin(), variantPtr1->getAlt().end(), "TAG") != variantPtr1->getAlt().end());
-		ASSERT_EQ(variantPtr1->getAlt().size(), 1);
-
-		/*
-		ASSERT_EQ(variantPtr2->getPosition(), 249240099);
-		ASSERT_STREQ(variantPtr2->getRef().c_str(),    "TG");
-		ASSERT_TRUE(std::find(variantPtr2->getAlt().begin(), variantPtr2->getAlt().end(), "TAG") != variantPtr2->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr2->getAlt().begin(), variantPtr2->getAlt().end(), "TAGG") != variantPtr2->getAlt().end());
-		ASSERT_EQ(variantPtr2->getAlt().size(), 2);
-
-		ASSERT_EQ(variantPtr3->getPosition(), 249240303);
-		ASSERT_STREQ(variantPtr3->getRef().c_str(),    "TG");
-		ASSERT_TRUE(std::find(variantPtr3->getAlt().begin(), variantPtr3->getAlt().end(), "TAG") != variantPtr3->getAlt().end());
-		ASSERT_EQ(variantPtr3->getAlt().size(), 1);
-
-		ASSERT_EQ(variantPtr4->getPosition(), 249240537);
-		ASSERT_STREQ(variantPtr4->getRef().c_str(),    "GGTG");
-		ASSERT_TRUE(std::find(variantPtr4->getAlt().begin(), variantPtr4->getAlt().end(), "GG") != variantPtr4->getAlt().end());
-		ASSERT_TRUE(std::find(variantPtr4->getAlt().begin(), variantPtr4->getAlt().end(), "GGGG") != variantPtr4->getAlt().end());
-		ASSERT_EQ(variantPtr4->getAlt().size(), 2);
-		*/
-
-		// ASSERT_EQ(variantPtr2, nullptr);
+		ASSERT_STREQ(variantPtr1->getRefAllelePtr()->getSequence(), "TG");
+		ASSERT_STREQ(variantPtr1->getAltAllelePtrs()[0]->getSequence(),    "TAG");
+		ASSERT_EQ(variantPtr1->getAltAllelePtrs().size(), 1);
 	}
 }

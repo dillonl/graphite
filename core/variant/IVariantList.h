@@ -113,8 +113,9 @@ namespace gwiz
 			for (auto variantPtr : variants)
 			{
 				// loop over all the alts in the variants
-				for (auto altString : variantPtr->getAlt())
+				for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
 				{
+					std::string altString = std::string(altAllelePtr->getSequence());
 					// basically we are replacing the variant's reference with the alt within the aggrigated reference (referenceString)
 					// it's complicated to explain in words but if you follow the code it isn't too bad
 					std::string variantString = referenceString;

@@ -14,9 +14,9 @@ namespace gwiz
 	public:
 		static SequenceManager* Instance();
 
-		inline Sequence::SharedPtr getSequence(const char* sequence)
+		inline Sequence::SharedPtr getSequence(const std::string& sequence)
 		{
-			return this->m_sequence_ptr_map.emplace(sequence, std::make_shared< Sequence >(sequence, strlen(sequence))).first->second;
+			return this->m_sequence_ptr_map.emplace(sequence, std::make_shared< Sequence >(sequence)).first->second;
 		}
 
 		// created for testing
@@ -30,7 +30,8 @@ namespace gwiz
 		~SequenceManager() {}
 
 		// contains all the sequences with the string representation as a key
-		std::unordered_map< const char*, Sequence::SharedPtr > m_sequence_ptr_map;
+		/* std::unordered_map< const char*, Sequence::SharedPtr > m_sequence_ptr_map; */
+		std::unordered_map< std::string, Sequence::SharedPtr > m_sequence_ptr_map;
 		static SequenceManager* s_instance;
 	};
 }

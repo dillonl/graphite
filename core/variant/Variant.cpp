@@ -16,16 +16,6 @@ namespace gwiz
 	{
 	}
 
-	void Variant::initializeAlleleCounters()
-	{
-		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		m_allele_count[getRef()] = std::make_tuple(0, 0);
-		for (const auto& alt : getAlt())
-		{
-			m_allele_count[alt] = std::make_tuple(0, 0);
-		}
-	}
-
 	void Variant::incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr)
 	{
 		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
@@ -37,15 +27,15 @@ namespace gwiz
 
 	void Variant::increaseCount(std::shared_ptr< IAlignment > alignmentPtr)
 	{
-		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		std::string allele = alignmentPtr->getVariantAllele(getVariantID());
-		if (!alignmentPtr->isReverseStrand())
+		auto allelePtr = getAllelePtr(allele);
+		if (allelePtr != nullptr && !alignmentPtr->isReverseStrand())
 		{
-			++std::get< 0 >(m_allele_count[allele]);
+			allelePtr->incrementForwardCount();
 		}
-		else
+		else if (allelePtr != nullptr)
 		{
-			++std::get< 1 >(m_allele_count[allele]);
+			allelePtr->incrementReverseCount();
 		}
 		++this->m_total_allele_count;
 	}
@@ -72,46 +62,32 @@ namespace gwiz
 
 	std::string Variant::getAlleleCountString()
 	{
-		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		std::string alleleCountString = "";
-		auto refAlleleTuple = this->m_allele_count[getRef()];
-		alleleCountString += std::to_string(std::get< 0 >(refAlleleTuple)) + ",";
-		alleleCountString += std::to_string(std::get< 1 >(refAlleleTuple));
-		for (auto& alt : getAlt())
+		alleleCountString += std::to_string(this->m_ref_allele_ptr->getForwardCount()) + ",";
+		alleleCountString += std::to_string(this->m_ref_allele_ptr->getReverseCount());
+		for (auto altAllelePtr : getAltAllelePtrs())
 		{
-			auto altAlleleTuple = this->m_allele_count[alt];
 			alleleCountString += ",";
-			alleleCountString += std::to_string(std::get< 0 >(altAlleleTuple)) + ",";
-			alleleCountString += std::to_string(std::get< 1 >(altAlleleTuple));
+			alleleCountString += std::to_string(altAllelePtr->getForwardCount()) + ",";
+			alleleCountString += std::to_string(altAllelePtr->getReverseCount());
 		}
 		return alleleCountString;
 	}
 
 	std::string Variant::alleleString()
 	{
-		std::string alleleString = "";
-		alleleString += getRef() + "\t";
-		for (auto& alt : getAlt())
+		std::stringstream ss;
+		ss << getRefAllelePtr()->getSequence() << "\t";
+		for (auto altAllelePtr : getAltAllelePtrs())
 		{
-			alleleString += alt + ",";
+			ss << "," << altAllelePtr->getSequence();
 		}
-		alleleString.pop_back(); // removes the last space off the end
-		return alleleString;
+		return ss.str();
 	}
 
 	bool Variant::hasAlts()
 	{
-		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		for (auto& alt : getAlt())
-		{
-			auto ac = this->m_allele_count.find(alt);
-			if ((ac != this->m_allele_count.end() && std::get< 0 >(ac->second) > 0) ||
-				(ac != this->m_allele_count.end() && std::get< 1 >(ac->second) > 0))
-			{
-				return true;
-			}
-		}
-		return false;
+		return (this->m_total_allele_count > getRefAllelePtr()->getTotalCount());
 	}
 
 	void Variant::addPotentialAlignment(const IAlignment::SharedPtr alignmentPtr)
@@ -138,6 +114,7 @@ namespace gwiz
 
 	std::string Variant::getGenotype()
 	{
+		/*
 		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
 		float thresholdPercent = 0.3; // if there isn't at least this percent represented in the allele count then we don't consider it
 		std::vector< std::tuple< std::string, uint32_t > > potentialGenotypes;
@@ -180,13 +157,15 @@ namespace gwiz
 			genotype = std::get< 0 >(potentialGenotypes[0]) + "/" + std::get< 0 >(potentialGenotypes[1]);
 		}
 		return genotype;
+		*/
+		return "";
 	}
 
 	void Variant::printVariant(std::ostream& out)
 	{
 		calculateAlleleCounts();
 		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount << "\tGT\t" << getGenotype() <<  std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount <<  std::endl;
 	}
 
 }

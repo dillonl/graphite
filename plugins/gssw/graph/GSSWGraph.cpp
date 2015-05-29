@@ -114,7 +114,7 @@ namespace gssw
 	{
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 	    std::vector< gssw_node* > vertices;
-		for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+		for (uint32_t i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
 		{
 			INode::SharedPtr variantNodePtr = vg::IVariantNode::BuildVariantNodes(variantPtr, i);
 			vertices.push_back(addAlternateNode(variantPtr, variantNodePtr, genotyperVariantPtr, variantReferenceSize));

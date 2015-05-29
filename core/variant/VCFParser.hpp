@@ -7,25 +7,25 @@
 #include <unordered_map>
 #include <utility>
 
+#include "core/sequence/SequenceManager.h"
+
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-
 
 namespace gwiz
 {
 
 	template<typename Iterator>
-	// struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() >
 	struct VariantParser : boost::spirit::qi::grammar<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() >
 	{
 		VariantParser() : VariantParser::base_type(start)
 			{
+				using namespace boost;
 				using namespace boost::spirit;
+				using namespace boost::phoenix;
 
 				std::string dnaMatchString = "actgnACTGN";
 				// auto altMatcher = (+qi::char_(dnaMatchString) % ',') | (+qi::graph % ',');
@@ -82,14 +82,8 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, std::string()> qual;
 		boost::spirit::qi::rule<Iterator, std::string()> filter;
 		boost::spirit::qi::rule<Iterator, std::string() > info;
-			/*
-		boost::spirit::qi::rule<Iterator, std::unordered_map< std::string, std::string >() > info;
-		boost::spirit::qi::rule<Iterator, std::pair< std::string, std::string >() > pair;
-		boost::spirit::qi::rule<Iterator, std::string() > key, value;
-			*/
 
-			// boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::vector<std::string>&, std::vector<std::string>&, std::string&, std::string&, std::unordered_map< std::string, std::string >& >() > start;
-			boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
+		boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
 	};
 
 } // end namespace gwiz

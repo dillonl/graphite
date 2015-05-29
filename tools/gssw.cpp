@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 	auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-	// std::cout << "starting to print vcf" << std::endl;
+	std::cout << "starting to print vcf" << std::endl;
 
 	if (outputVCFPath.size() > 0)
 	{

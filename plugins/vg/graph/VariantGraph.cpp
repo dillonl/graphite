@@ -89,7 +89,7 @@ namespace gwiz
 		std::vector< VariantGraph::VariantVertexDescriptor > VariantGraph::addVariantVertices(std::vector< VariantGraph::VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
 		{
 			std::vector< VariantVertexDescriptor > vertices;
-			for (uint32_t i = 0; i < variantPtr->getAlt().size(); ++i)
+			for (uint32_t i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
 			{
 				INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
 				vertices.push_back(addVariantNode(variantNode));

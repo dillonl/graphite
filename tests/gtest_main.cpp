@@ -3,19 +3,17 @@
 #include "gtest/gtest.h"
 
 /*
+#include "BamAlignmentTests.hpp"
 #include "VCFFileTests.hpp"
 #include "ReferenceTest.hpp"
 #include "RegionTests.hpp"
-#include "BamAlignmentTests.hpp"
 #include "VariantListVCFPreloadedTests.hpp"
 #include "plugins/TestIncludes.h"
 #include "FileTests.hpp"
 */
-#include "BuildGraphTests.hpp"
 #include "VariantsTest.hpp"
 #include "SequenceManagerTests.hpp"
-
-#include "gtest/gtest.h"
+#include "BuildGraphTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)
 {
