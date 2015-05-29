@@ -23,4 +23,4 @@ before_script:
   -  cmake ../
 script:
   -  make
-  -  tests/gwiz_tests
+  #-  tests/gwiz_tests
