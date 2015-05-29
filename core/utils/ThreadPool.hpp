@@ -20,11 +20,7 @@ namespace gwiz
 	public:
 		static ThreadPool* Instance()
 		{
-			static ThreadPool* s_threadpool = NULL; // lazy initialization
-			if (s_threadpool == NULL)
-			{
-				s_threadpool = new ThreadPool();
-			}
+			static ThreadPool* s_threadpool = new ThreadPool(); // lazy initialization
 			return s_threadpool;
 		}
 

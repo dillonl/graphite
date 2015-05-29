@@ -34,16 +34,11 @@ int main(int argc, char** argv)
 	std::thread vcfLoadThread(&gwiz::VariantListVCFPreloaded::loadVariantsFromFile, vcfFileReaderPtr);
 	std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
 	vcfLoadThread.join();
-	std::cout << "Finished loading vcf" << std::endl;
 	loadBamsThread.join();
 
-	std::cout << "Finished loading BAM and VCF" << std::endl;
-
-	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
+	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(gwiz::Parameters::Instance()->getSWPercent());
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 	auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
-
-	// std::cout << "starting to print vcf" << std::endl;
 
 	if (outputVCFPath.size() > 0)
 	{
