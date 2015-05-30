@@ -411,7 +411,9 @@ int8_t* gssw_create_nt_table(void);
 int8_t* gssw_create_num(const char* seq,
                         const int32_t len,
                         const int8_t* nt_table);
-    
+
+void print_graph_to_dot(gssw_graph* graph, const char* fileName);
+
 #ifdef __cplusplus
 }
 #endif	// __cplusplus

@@ -1792,3 +1792,23 @@ int8_t* gssw_create_nt_table(void) {
     memcpy(ret_nt_table, nt_table, 128*sizeof(int8_t));
     return ret_nt_table;
 }
+
+void print_graph_to_dot(gssw_graph* graph, const char* fileName)
+{
+	FILE* dotFile;
+	dotFile = fopen(fileName, "w");
+	fprintf(dotFile, "digraph gwiz {\n");
+	int i;
+	int j;
+	for (i = 0; i < graph->size; ++i)
+	{
+		gssw_node* node = graph->nodes[i];
+		fprintf(dotFile, "%d [ label = \"%s\" ];\n", node->id, node->seq);
+		for (j = 0; j < node->count_next; ++j)
+		{
+			fprintf(dotFile, "%d -> %d;\n", node->id, node->next[j]->id);
+		}
+	}
+	fprintf(dotFile, "}");
+	fclose(dotFile);
+}
