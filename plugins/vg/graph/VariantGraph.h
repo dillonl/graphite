@@ -4,6 +4,7 @@
 #include "ReferenceNode.h"
 #include "core/graph/IGraph.h"
 #include "core/graph/INode.h"
+#include "core/variant/Variant.h"
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -31,7 +32,7 @@ namespace gwiz
 
 		protected:
 			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
-			std::vector< VariantVertexDescriptor > addVariantVertices(std::vector< VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize);
+			std::vector< VariantVertexDescriptor > addVariantVertices(std::vector< VariantVertexDescriptor > altAndRefVertices, IVariant::SharedPtr variantPtr, size_t& variantReferenceSize);
 
 			virtual VariantVertexDescriptor addVariantNode(INode::SharedPtr variantNodePtr)
 			{

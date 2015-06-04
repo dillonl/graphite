@@ -31,7 +31,8 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
 	{
-		auto variantList = std::make_shared< VariantList >();
+		throw "GSSWAdjudicator::adjudicateGraph needs to be fixed";
+		// std::vector< IVariant::SharedPtr > variants;
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
@@ -56,7 +57,7 @@ namespace gssw
 							variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
 						}
 						variantPtr->addPotentialAlignment(alignmentPtr);
-						variantList->addVariant(variantPtr);
+						// variants.emplace_back(variantPtr);
 					}
 				}
 				if (mapped)
@@ -70,7 +71,8 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
-		return variantList;
+		// return std::make_shared< VariantList >(variants);
+		return nullptr;
 	}
 }
 }

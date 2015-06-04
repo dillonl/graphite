@@ -50,7 +50,7 @@ namespace gwiz
 			size_t referenceSize;
 			VariantVertexDescriptor referenceVertex;
 			std::vector< VariantVertexDescriptor > altAndRefVertices;
-			Variant::SharedPtr variantPtr;
+			IVariant::SharedPtr variantPtr;
 			// while (getNextCompoundVariant(variantPtr))
 			while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 			{
@@ -86,7 +86,7 @@ namespace gwiz
 			return referenceVertex;
 		}
 
-		std::vector< VariantGraph::VariantVertexDescriptor > VariantGraph::addVariantVertices(std::vector< VariantGraph::VariantVertexDescriptor > altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize)
+		std::vector< VariantGraph::VariantVertexDescriptor > VariantGraph::addVariantVertices(std::vector< VariantGraph::VariantVertexDescriptor > altAndRefVertices, IVariant::SharedPtr variantPtr, size_t& variantReferenceSize)
 		{
 			std::vector< VariantVertexDescriptor > vertices;
 			for (uint32_t i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
@@ -95,9 +95,10 @@ namespace gwiz
 				vertices.push_back(addVariantNode(variantNode));
 			}
 			size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
-			ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, variantPtr->getRef().size());
+			size_t refSize = variantPtr->getRefAllelePtr()->getSequenceString().size();
+			ReferenceNode::SharedPtr variantReferenceNode = std::make_shared< ReferenceNode >(this->m_reference_ptr, referenceOffset, refSize);
 			vertices.push_back(addReferenceNodeAtVariantPosition(variantReferenceNode));
-			variantReferenceSize = variantPtr->getRef().size();
+			variantReferenceSize = refSize;
 
 			for (auto parentVertexIter = altAndRefVertices.begin(); parentVertexIter != altAndRefVertices.end(); ++parentVertexIter)
 			{

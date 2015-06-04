@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace gwiz
@@ -12,7 +13,6 @@ namespace gwiz
 	Parameters::Parameters() :
 		m_command_options("h:b:f:v:o:r:t:p:"),
 		m_bam_path(""),
-		m_in_vcf_path(""),
 		m_out_vcf_path(""),
 		m_region(""),
 		m_sw_percent(90),
@@ -88,7 +88,7 @@ namespace gwiz
 				}
 				break;
 			case 'v':
-				if (!setPath(this->m_in_vcf_path, optarg))
+				if (!setVCFInputPaths(optarg))
 				{
 					std::cout << "Invalid Input VCF Path: " << optarg << std::endl;
 					exit(0);
@@ -127,7 +127,7 @@ namespace gwiz
 
 			}
 		}
-		if (this->m_region == "" || this->m_in_vcf_path == "" || this->m_bam_path == "" || this->m_fasta_path == ""){
+		if (this->m_region == "" || this->m_in_vcf_paths.size() == 0 || this->m_bam_path == "" || this->m_fasta_path == ""){
 			std::cout << "Must specify a region (-r) a vcf (-v) a bam (-b) and a fasta (-f)" << std::endl;
 			printUsage();
 			exit(0);
@@ -173,6 +173,16 @@ namespace gwiz
 		{
 			return false;
 		}
+	}
+
+	bool Parameters::setVCFInputPaths(const std::string& inPath)
+	{
+		boost::split(this->m_in_vcf_paths, inPath, boost::is_any_of(" "), boost::token_compress_on);
+		for (const auto& path : this->m_in_vcf_paths)
+		{
+			if (!DoesFileExist(inPath)) { return false; }
+		}
+		return true;
 	}
 
 

@@ -11,9 +11,12 @@
 #include "plugins/TestIncludes.h"
 #include "FileTests.hpp"
 */
+
+/*
 #include "VariantsTest.hpp"
 #include "SequenceManagerTests.hpp"
 #include "BuildGraphTests.hpp"
+*/
 
 GTEST_API_ int main(int argc, char** argv)
 {

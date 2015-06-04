@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <thread>
+#include <vector>
 
 namespace gwiz
 {
@@ -21,9 +22,9 @@ namespace gwiz
 
 		std::string getBAMPath() { return m_bam_path; }
 		std::string getFastaPath() { return m_fasta_path; }
-		std::string getInVCFPath() { return m_in_vcf_path; }
 		std::string getOutVCFPath() { return m_out_vcf_path; }
 		std::string getRegion() { return m_region; }
+		std::vector< std::string > getInVCFPaths() { return this->m_in_vcf_paths; }
 		uint32_t getSWPercent() { return m_sw_percent; }
 		uint32_t getThreadCount() { return m_thread_count; }
 
@@ -31,13 +32,14 @@ namespace gwiz
 		Parameters();
 		~Parameters();
 		bool setPath(std::string& outPath, const std::string& inPath);
+		bool setVCFInputPaths(const std::string& inPath);
 
 		std::map<std::string, std::string> m_params;
 		std::string m_command_options;
 
 		std::string m_bam_path;
 		std::string m_fasta_path;
-		std::string m_in_vcf_path;
+		std::vector< std::string > m_in_vcf_paths;
 		std::string m_out_vcf_path;
 		std::string m_region;
 		uint32_t m_sw_percent;

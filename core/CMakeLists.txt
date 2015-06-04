@@ -40,8 +40,9 @@ set(GWIZ_CORE_ALIGNMENT_SOURCES
 
 set(GWIZ_CORE_VARIANT_SOURCES
   variant/Variant.cpp
-  variant/VariantListVCFPreloaded.cpp
-  variant/VCFFileReader.cpp
+  variant/VariantList.cpp
+  variant/VCFList.cpp
+  variant/VCFManager.cpp
   )
 
 add_library(gwiz_core

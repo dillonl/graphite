@@ -15,7 +15,7 @@ namespace gwiz
 		{
 		public:
 			typedef std::shared_ptr< IVariantNode > SharedPtr;
-		    IVariantNode(Variant::SharedPtr variant, uint32_t altIndex) :
+		    IVariantNode(IVariant::SharedPtr variant, uint32_t altIndex) :
 			INode(variant->getAltAllelePtrs()[altIndex]->getSequence(), strlen(variant->getAltAllelePtrs()[altIndex]->getSequence())),
 				m_variant(variant),
 				m_alt_index(altIndex)
@@ -27,13 +27,13 @@ namespace gwiz
 
 			const char* getSequence() override { return m_variant->getAltAllelePtrs()[m_alt_index]->getSequence(); }
 
-			static IVariantNode::SharedPtr BuildVariantNodes(Variant::SharedPtr variant, uint32_t altIndex)
+			static IVariantNode::SharedPtr BuildVariantNodes(IVariant::SharedPtr variant, uint32_t altIndex)
 			{
 				return std::dynamic_pointer_cast< IVariantNode >(std::make_shared< SNPNode >(variant, altIndex));
 			}
 
 		private:
-			Variant::SharedPtr m_variant;
+			IVariant::SharedPtr m_variant;
 			size_t m_alt_index;
 		};
 	}// end namespace vg

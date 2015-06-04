@@ -31,12 +31,6 @@ namespace gwiz
 
 		IReference::SharedPtr m_reference_ptr;
 		IVariantList::SharedPtr m_variant_list_ptr;
-
-		// This is used in conjunction with getCompoundNode.
-		// This stores the next variant so we don't have to
-		// get the variant twice
-		Variant::SharedPtr m_next_variant;
-		VariantParser< const char* > m_vcf_parser;
 	private:
 
 

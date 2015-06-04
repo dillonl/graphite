@@ -77,10 +77,11 @@ namespace gwiz
 	std::string Variant::alleleString()
 	{
 		std::stringstream ss;
-		ss << getRefAllelePtr()->getSequence() << "\t";
-		for (auto altAllelePtr : getAltAllelePtrs())
+		const auto lastIter = this->m_alt_allele_ptrs.end() - 1;
+		for (auto iter = this->m_alt_allele_ptrs.begin(); iter != this->m_alt_allele_ptrs.end(); ++iter)
 		{
-			ss << "," << altAllelePtr->getSequence();
+			ss << (*iter)->getSequence();
+			if (iter != lastIter) { ss << ","; } // don't add a comma on the end of the alt section
 		}
 		return ss.str();
 	}
@@ -165,7 +166,7 @@ namespace gwiz
 	{
 		calculateAlleleCounts();
 		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount <<  std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount <<  std::endl;
 	}
 
 }

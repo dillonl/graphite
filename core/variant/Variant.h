@@ -11,9 +11,9 @@
 #include <unordered_map>
 #include <tuple>
 
-#include "core/allele/IAllele.h"
 #include "IVariant.h"
-#include "VCFParser.hpp"
+#include "core/allele/IAllele.h"
+#include "core/parser/VCFParser.hpp"
 #include "core/reference/Reference.h"
 
 
@@ -143,16 +143,16 @@ namespace gwiz
 		void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr);
 
 		std::string getChrom() const { return m_chrom; }
-		uint32_t getPosition() const { return m_position; }
+		position getPosition() override { return m_position; }
 		std::string getQual() const { return m_qual; }
 		std::string getFilter() const { return m_filter; }
 		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
 		/* std::string const getRef() { return m_ref; } */
 		std::string getRef() { return std::string(this->m_ref_allele_ptr->getSequence()); }
-		IAllele::SharedPtr getRefAllelePtr() { return this->m_ref_allele_ptr; }
+		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		/* std::vector< std::string > const getAlt() { return m_alt; } */
-		std::vector< IAllele::SharedPtr > const getAltAllelePtrs() { return m_alt_allele_ptrs; }
+		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
 		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
 		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 		void printVariant(std::ostream& out) override;

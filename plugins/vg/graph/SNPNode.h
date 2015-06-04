@@ -14,8 +14,8 @@ namespace gwiz
 		public:
 			typedef std::shared_ptr< SNPNode > SharedPtr;
 
-    		SNPNode(Variant::SharedPtr variant, uint32_t altIndex) :
-				IVariantNode(variant, altIndex)
+    		SNPNode(IVariant::SharedPtr variantPtr, uint32_t altIndex) :
+				IVariantNode(variantPtr, altIndex)
 			{
 			}
 			~SNPNode() {}

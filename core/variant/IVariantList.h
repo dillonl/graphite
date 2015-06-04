@@ -4,12 +4,11 @@
 #include <boost/noncopyable.hpp>
 
 #include "core/variant/IVariant.h"
-#include "core/variant/Variant.h"
-
 #include "core/region/Region.h"
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 namespace gwiz
 {
@@ -22,6 +21,24 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< IVariantList > SharedPtr;
+		IVariantList(){}
+		virtual ~IVariantList() {}
+
+		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
+
+		//things to be removed possibly
+		/* virtual size_t getCount() = 0; */
+		/* virtual void sort() = 0; */
+		/* virtual void addVariants(IVariantList::SharedPtr variantListPtr) = 0; */
+
+		virtual bool hasVariants() = 0;
+		virtual void printToVCF(std::ostream& out) = 0;
+	};
+/*
+	class IVariantList : private boost::noncopyable
+	{
+	public:
+	typedef std::shared_ptr< IVariantList > SharedPtr;
 	    IVariantList() : m_next_variant_init(false) {}
 		virtual ~IVariantList() {}
 
@@ -34,7 +51,7 @@ namespace gwiz
 		virtual size_t getCount() = 0;
 
 		virtual void printToVCF(std::ostream& out) = 0;
-	/* protected: */
+		//protected:
 
 		inline bool getNextCompoundVariant(Variant::SharedPtr& variant)
 		{
@@ -65,7 +82,6 @@ namespace gwiz
 			{
 				if (variantEndPosition < nextVariant->getPosition() || strcmp(variantChrom.c_str(), nextVariant->getChrom().c_str()) != 0)
 				{
-					/* variant = nullptr; */
 					break;
 				}
 				// this is a minor efficiency, even though this is a bit ugly
@@ -122,22 +138,14 @@ namespace gwiz
 					variantString.erase(variantPtr->getPosition() - startPosition, variantPtr->getRef().size());
 					variantString.insert(variantPtr->getPosition() - startPosition, altString);
 					line += variantString + ",";
-					/* altMap[variantString] = variantPtr->getVCFLineFromAlternate(altString); */
 				}
 			}
-			/* line.replace(line.size() - 1, 1, "\t\n"); // replace the past comma with a tab */
 			line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
 			std::string quality = "0";
 			std::string filter = "PASS";
 			std::string info = "C=TRUE";
 			line += quality + "\t" + filter + "\t" + info + "\t.\n";
 			auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
-			/*
-			for (auto const& altTuple : altMap) // set the vcf_lines back to the original vcf line
-			{
-				variant->setVCFLineFromAlternate(altTuple.first, altTuple.second.c_str(), altTuple.second.size());
-			}
-			*/
 			return variant;
 		}
 
@@ -150,6 +158,7 @@ namespace gwiz
 		VariantParser< const char* > m_vcf_parser;
 
 	};
+	*/
 } // end namespace gwiz
 
 #endif //GWIZ_IVARIANTLIST_H

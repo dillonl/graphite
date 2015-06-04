@@ -32,15 +32,15 @@ namespace gssw
 
 		virtual void constructGraph() override;
 		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
-		Variant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
+		IVariant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
 		int32_t getMatchValue() { return m_match; }
 	protected:
-		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, Variant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
+		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
 
 		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
-		gssw_node* addAlternateNode(Variant::SharedPtr variantPtr, INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
+		gssw_node* addAlternateNode(IVariant::SharedPtr variantPtr, INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		int32_t m_match;
@@ -56,10 +56,11 @@ namespace gssw
 		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
         std::list< IGenotyperVariant > m_genotype_variants;
-		std::map< uint32_t, Variant::SharedPtr > m_variants_map;
+		std::map< uint32_t, IVariant::SharedPtr > m_variants_map;
 
 	private:
 		void graphConstructed();
+		IVariantList::SharedPtr m_variant_list_ptr;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,

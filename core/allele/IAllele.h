@@ -26,6 +26,7 @@ namespace gwiz
 
 		Sequence::SharedPtr getSequencePtr() { return this->m_sequence_ptr; }
 		const char* getSequence() { return this->m_sequence_ptr->getSequence(); }
+		std::string getSequenceString() { return this->m_sequence_ptr->getSequenceString(); }
 
 		inline uint32_t getPaddingPrefix() { return this->m_padding_prefix; }
 		inline uint32_t getPaddingSuffix() { return this->m_padding_suffix; }

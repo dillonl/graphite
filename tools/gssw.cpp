@@ -1,9 +1,7 @@
 #include "core/alignment/BamAlignmentReader.h"
 #include "core/alignment/BamAlignmentReaderManager.h"
 #include "core/alignment/BamAlignmentReaderPreloadManager.h"
-#include "core/variant/VCFFileReader.h"
-#include "core/variant/IVariant.h"
-#include "core/variant/VariantListVCFPreloaded.h"
+#include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
 #include "core/util/Parameters.h"
 #include "gssw/graph/GraphManager.h"
@@ -15,41 +13,42 @@
 int main(int argc, char** argv)
 {
 	gwiz::Parameters::Instance()->setParams(argc, argv);
-	std::string fastaPath = gwiz::Parameters::Instance()->getFastaPath();
-	std::string vcfPath = gwiz::Parameters::Instance()->getInVCFPath();
-	std::string bamPath = gwiz::Parameters::Instance()->getBAMPath();
-	std::string outputVCFPath = gwiz::Parameters::Instance()->getOutVCFPath();
-	std::string region = gwiz::Parameters::Instance()->getRegion();
+	auto fastaPath = gwiz::Parameters::Instance()->getFastaPath();
+	auto vcfPaths = gwiz::Parameters::Instance()->getInVCFPaths();
+	auto bamPath = gwiz::Parameters::Instance()->getBAMPath();
+	auto outputVCFPath = gwiz::Parameters::Instance()->getOutVCFPath();
+	auto region = gwiz::Parameters::Instance()->getRegion();
 	if (gwiz::Parameters::Instance()->getThreadCount() > 0)
 	{
 		gwiz::ThreadPool::Instance()->setThreadCount(gwiz::Parameters::Instance()->getThreadCount());
 	}
 
-	gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >(region);
+	auto regionPtr = std::make_shared< gwiz::Region >(region);
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
 
-	auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
 	auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 
-	std::thread vcfLoadThread(&gwiz::VariantListVCFPreloaded::loadVariantsFromFile, vcfFileReaderPtr);
 	std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
-	vcfLoadThread.join();
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(vcfPaths, regionPtr);
+	variantManagerPtr->asyncLoadVCFs();
 	loadBamsThread.join();
+	variantManagerPtr->waitForVCFsToLoadAndProcess();
 
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(gwiz::Parameters::Instance()->getSWPercent());
-	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
-	auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
+	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
+	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	if (outputVCFPath.size() > 0)
 	{
 		std::ofstream outVCF;
 		outVCF.open(outputVCFPath, std::ios::out | std::ios::trunc);
-		variantList->printToVCF(outVCF);
+		variantListPtr->printToVCF(outVCF);
 		outVCF.close();
 	}
 	else
 	{
-		variantList->printToVCF(std::cout);
+		variantListPtr->printToVCF(std::cout);
 	}
 	return 0;
 }
