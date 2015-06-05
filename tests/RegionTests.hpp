@@ -52,7 +52,7 @@ TEST(RegionTest, TestRegionRegionIDOnly)
 	gwiz::position startPositionNotEqual = 1;
 	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
 	EXPECT_EQ(region.getStartPosition(), 0);
-	EXPECT_EQ(region.getEndPosition(), 0);
+	EXPECT_EQ(region.getEndPosition(), gwiz::MAX_POSITION);
 }
 
 // Tests factorial of negative numbers.

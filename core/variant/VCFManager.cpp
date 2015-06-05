@@ -10,9 +10,13 @@ namespace gwiz
 {
 	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr) :
 		m_loaded_vcfs(false),
-		m_vcf_paths(vcfFilePaths),
 		m_region_ptr(regionPtr)
 	{
+		for (const auto& vcfPath : vcfFilePaths)
+		{
+			auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
+		}
 	}
 
 	VCFManager::~VCFManager()
@@ -32,10 +36,9 @@ namespace gwiz
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::vector< std::thread > vcfLoadThreads;
 		std::vector< std::shared_ptr< std::future< std::vector< IVariant::SharedPtr > > > > vcfFutureVariantListPtrs;
-		for (const auto& vcfFilePath : this->m_vcf_paths)
+		for (const auto& vcfFileReaderPtr : this->m_vcf_file_reader_ptrs)
 		{
-			auto vcfListPtr = std::make_shared< VCFList >(vcfFilePath, this->m_region_ptr);
-			auto funct = std::bind(&VCFList::load, vcfListPtr);
+			auto funct = std::bind(&VCFFileReader::getVariantsInRegion, vcfFileReaderPtr, this->m_region_ptr);
 			auto functFuture = ThreadPool::Instance()->enqueue(funct);
 			vcfFutureVariantListPtrs.emplace_back(functFuture);
 		}
@@ -67,5 +70,14 @@ namespace gwiz
 	IVariantList::SharedPtr VCFManager::getCompleteVariantList()
 	{
 		return this->m_variant_list_ptr;
+	}
+
+	void VCFManager::printToVCF(std::ostream& out)
+	{
+		this->m_variant_list_ptr->printToVCF(out);
+	}
+
+	void VCFManager::releaseVCFResources()
+	{
 	}
 }

@@ -2,8 +2,8 @@
 #define GWIZ_VCFMANAGER_H
 
 #include "core/region/Region.h"
-#include "VCFList.h"
 #include "VariantList.h"
+#include "VCFFileReader.h"
 #include "IVariantManager.h"
 #include "IVariant.h"
 
@@ -28,11 +28,13 @@ namespace gwiz
 		void asyncLoadVCFs();
 		void waitForVCFsToLoadAndProcess();
 		IVariantList::SharedPtr getCompleteVariantList() override;
+		void releaseVCFResources();
+		void printToVCF(std::ostream& out);
 	private:
 		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them
 
 		VariantList::SharedPtr m_variant_list_ptr;
-		std::vector< std::string > m_vcf_paths;
+		std::vector< VCFFileReader::SharedPtr > m_vcf_file_reader_ptrs;
 		Region::SharedPtr m_region_ptr;
 		std::atomic< bool > m_loaded_vcfs;
 		std::mutex m_loaded_mutex;

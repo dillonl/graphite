@@ -25,12 +25,8 @@ namespace gwiz
 		virtual ~IVariantList() {}
 
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
-
-		//things to be removed possibly
-		/* virtual size_t getCount() = 0; */
-		/* virtual void sort() = 0; */
-		/* virtual void addVariants(IVariantList::SharedPtr variantListPtr) = 0; */
-
+		virtual size_t getCount() = 0;
+		virtual void sort() = 0;
 		virtual bool hasVariants() = 0;
 		virtual void printToVCF(std::ostream& out) = 0;
 	};

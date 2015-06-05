@@ -38,7 +38,7 @@ namespace gwiz
 		std::sort(this->m_variant_ptrs.begin(), this->m_variant_ptrs.end(),
 				  [] (const IVariant::SharedPtr a, const IVariant::SharedPtr b)
 				  {
-					  return a->getPosition() > b->getPosition();
+					  return a->getPosition() < b->getPosition();
 				  }
 			);
 	}
@@ -64,8 +64,23 @@ namespace gwiz
 		throw "VariantList::addVariants not implemented";
 	}
 
+	void VariantList::printHeader(std::ostream& out)
+	{
+		out << "##fileformat=VCFv4.2" << std::endl;
+		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">" << std::endl;
+		out << "##INFO=<ID=TC,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
+		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth including non-counted low quality reads\">" << std::endl;
+		out << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << std::endl;
+		out << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE" << std::endl;
+	}
+
 	void VariantList::printToVCF(std::ostream& out)
 	{
+		printHeader(out);
+		for(const auto variantPtr : this->m_variant_ptrs)
+		{
+			variantPtr->printVariant(out);
+		}
 	}
 
 	bool VariantList::getNextCompoundVariant(IVariant::SharedPtr& variant)

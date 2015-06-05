@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "core/util/Types.h"
-#include "RegionParser.hpp"
+#include "core/parser/RegionParser.hpp"
 
 namespace gwiz
 {
@@ -20,14 +20,12 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< Region > SharedPtr;
 		Region(const std::string& regionString);
-		Region() = delete; // force region_string usage
 		~Region();
 
 		std::string getRegionString() const { return m_region_string; }
 		std::string getReferenceID() const { return this->m_reference_id; }
 		position getStartPosition() const { return this->m_start_position; }
 		position getEndPosition() const { return this->m_end_position; }
-
 		void setStartPosition(position startPosition) { this->m_start_position = startPosition; }
 		void setEndPosition(position endPosition) { this->m_end_position = endPosition; }
 

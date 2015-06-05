@@ -9,7 +9,7 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
 endif()
 
 set(GWIZ_UTIL_SOURCES
-  util/Parameters.cpp
+  util/Params.cpp
   )
 
 set(GWIZ_SEQUENCE_SOURCES
@@ -41,8 +41,8 @@ set(GWIZ_CORE_ALIGNMENT_SOURCES
 set(GWIZ_CORE_VARIANT_SOURCES
   variant/Variant.cpp
   variant/VariantList.cpp
-  variant/VCFList.cpp
   variant/VCFManager.cpp
+  variant/VCFFileReader.cpp
   )
 
 add_library(gwiz_core

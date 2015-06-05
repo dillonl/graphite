@@ -17,10 +17,11 @@ namespace gwiz
 		~VariantList();
 
 		bool getNextVariant(IVariant::SharedPtr& variantPtr) override;
-		size_t getCount();
-		void sort();
+		size_t getCount() override;
+		void sort() override;
 		void printToVCF(std::ostream& out) override;
 		void normalizeOverlappingVariants();
+		void printHeader(std::ostream& out);
 
 		//things to remove
 		void addVariants(IVariantList::SharedPtr variantListPtr);

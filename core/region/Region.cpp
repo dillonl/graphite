@@ -17,6 +17,10 @@ namespace gwiz
 			throw std::invalid_argument("Region format is invalid");
 		}
 		boost::spirit::qi::parse(regionString.c_str(), regionString.c_str() + regionString.size(), m_region_parser, this->m_reference_id, this->m_start_position, this->m_end_position);
+		if (this->m_start_position == 0 && this->m_end_position == 0)
+		{
+			this->m_end_position = MAX_POSITION;
+		}
 	}
 
 	Region::~Region()
