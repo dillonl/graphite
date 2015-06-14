@@ -12,10 +12,10 @@
 */
 
 /*
-#include "VariantsTest.hpp"
 #include "SequenceManagerTests.hpp"
 #include "BuildGraphTests.hpp"
 */
+#include "VariantsTest.hpp"
 #include "RegionTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)

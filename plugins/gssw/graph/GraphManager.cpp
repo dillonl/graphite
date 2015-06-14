@@ -4,7 +4,7 @@
 #include "core/genotyper/IGenotyper.h"
 #include "core/variant/VariantList.h"
 
-#include "core/alignment/BamAlignmentReader.h"
+#include "core/alignment/BamAlignmentManager.h"
 
 #include <queue>
 
@@ -16,10 +16,10 @@ namespace gwiz
 namespace gssw
 {
 
-	GraphManager::GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentReaderManager::SharedPtr alignmentReaderManager, IGraphAdjudicator::SharedPtr graphAdjudicatorPtr) :
+	GraphManager::GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IGraphAdjudicator::SharedPtr graphAdjudicatorPtr) :
 		m_reference_ptr(referencePtr),
 		m_variant_manager_ptr(variantManagerPtr),
-		m_alignment_reader_manager(alignmentReaderManager),
+		m_alignment_manager_ptr(alignmentManagerPtr),
 		m_graph_adjudicator_ptr(graphAdjudicatorPtr)
 	{
 	}
@@ -36,15 +36,16 @@ namespace gssw
 			auto endGraphPosition = (currentPosition + graphSize > endPosition) ? endPosition : (currentPosition + graphSize);
 			auto graphRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition) + "-" + std::to_string(endGraphPosition)));
 			auto variantsListPtr = this->m_variant_manager_ptr->getVariantsInRegion(graphRegion);
-			if (variantsListPtr->hasVariants()) // if we have variants, then process them
+			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
-				auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
+				// auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 				// create region for alignmentReader
-				alignmentReaderPtr->init();
-				alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
-				if (alignmentReaderPtr->getReadCount() == 0) { continue; } // if there are no reads then continue
-				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentReaderPtr, currentPosition, graphSize);
+				// alignmentReaderPtr->init();
+				// alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
+				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
+				if (alignmentListPtr->getCount() == 0) { continue; } // if there are no reads then continue
+				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
 				ThreadPool::Instance()->enqueue(funct);
 			}
 			currentPosition += graphSize - overlap;
@@ -52,11 +53,11 @@ namespace gssw
 		ThreadPool::Instance()->joinAll();
 	}
 
-	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentReader::SharedPtr alignmentReaderPtr, position startPosition, size_t graphSize)
+	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize)
 	{
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
-		this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentReaderPtr);
+		this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentListPtr);
 	}
 
 }

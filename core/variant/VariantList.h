@@ -22,10 +22,6 @@ namespace gwiz
 		void printToVCF(std::ostream& out) override;
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out);
-
-		//things to remove
-		void addVariants(IVariantList::SharedPtr variantListPtr);
-		bool hasVariants() override;
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
 
 	protected:

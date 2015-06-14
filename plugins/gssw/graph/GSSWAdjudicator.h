@@ -2,6 +2,7 @@
 #define GWIZ_GSSW_GSSWADJUDICATOR_H
 
 #include "core/adjudicator/IGraphAdjudicator.h"
+#include "core/alignment/IAlignmentList.h"
 #include "GSSWGraph.h"
 
 #include <mutex>
@@ -17,7 +18,7 @@ namespace gssw
 		GSSWAdjudicator(uint32_t swPercent);
 		~GSSWAdjudicator();
 
-		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) override;
+		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr) override;
 		int m_id;
 	private:
 		void printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment);

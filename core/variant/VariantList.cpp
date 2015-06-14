@@ -54,16 +54,6 @@ namespace gwiz
 		this->m_variant_ptrs = variantPtrs;
 	}
 
-	bool VariantList::hasVariants()
-	{
-		return getCount() > 0;
-	}
-
-	void VariantList::addVariants(IVariantList::SharedPtr variantListPtr)
-	{
-		throw "VariantList::addVariants not implemented";
-	}
-
 	void VariantList::printHeader(std::ostream& out)
 	{
 		out << "##fileformat=VCFv4.2" << std::endl;

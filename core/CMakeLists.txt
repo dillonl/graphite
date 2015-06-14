@@ -31,11 +31,13 @@ set(GWIZ_CORE_REGION_SOURCES
   )
 
 set(GWIZ_CORE_ALIGNMENT_SOURCES
-  alignment/BamAlignment.cpp
-  alignment/BamAlignmentReader.cpp
-  alignment/BamAlignmentReaderManager.cpp
-  alignment/BamAlignmentReaderPreload.cpp
-  alignment/BamAlignmentReaderPreloadManager.cpp
+  alignment/AlignmentList.cpp
+  alignment/BamAlignmentManager.cpp
+#  alignment/BamAlignment.cpp
+#  alignment/BamAlignmentReader.cpp
+#  alignment/BamAlignmentReaderManager.cpp
+#  alignment/BamAlignmentReaderPreload.cpp
+#  alignment/BamAlignmentReaderPreloadManager.cpp
   )
 
 set(GWIZ_CORE_VARIANT_SOURCES

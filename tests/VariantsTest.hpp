@@ -1,12 +1,10 @@
-#include "gtest/gtest.h"
-
 #include <vector>
 
 #include "TestConfig.h"
 
 #include "core/sequence/SequenceManager.h"
 #include "core/allele/IAllele.h"
-#include "core/variant/VCFParser.hpp"
+#include "core/parser/VCFParser.hpp"
 #include "core/variant/Variant.h"
 #include "core/variant/VCFFileReader.h"
 #include "core/graph/IGraph.h"
@@ -14,41 +12,6 @@
 
 namespace
 {
-
-// The fixture for testing class Foo.
-	class VariantsTest : public ::testing::Test
-	{
-	protected:
-		// You can remove any or all of the following functions if its body
-		// is empty.
-
-		VariantsTest()
-		{
-				// You can do set-up work for each test here.
-		}
-
-		virtual ~VariantsTest()
-		{
-			// You can do clean-up work that doesn't throw exceptions here.
-	    }
-
-		// If the constructor and destructor are not enough for setting up
-		// and cleaning up each test, you can define the following methods:
-
-		virtual void SetUp()
-		{
-			// Code here will be called immediately after the constructor (right
-			// before each test).
-		}
-
-		virtual void TearDown()
-		{
-			// Code here will be called immediately after each test (right
-			// before the destructor).
-		}
-
-		// Objects declared here can be used by all tests in the test case for Foo.
-	};
 
 	class VariantTest : public gwiz::Variant
 	{
@@ -79,7 +42,7 @@ namespace
 	static std::string VCF_LINE_3 = "20\t249590\tBI_GS_DEL1_B5_P2733_211\tC\t<CN0>\t100\tPASS\tSVTYPE=DEL;CIEND=-7,7;CIPOS=-7,7;END=250420;CS=DEL_union;MC=EM_DL_DEL10608605;AC=1;AF=0.00019968;NS=2504;AN=5008;EAS_AF=0.0;EUR_AF=0.0;AFR_AF=0.0;AMR_AF=0.0;SAS_AF=0.001\tGT\t0|0"; // is not the complete first line
 	static std::string VCF_LINE_4 = "20\t254691\t.\tG\tA\t100\tPASS\tAC=4;AF=0.000798722;AN=5008;NS=2504;DP=14874;EAS_AF=0;AMR_AF=0;AFR_AF=0.003;EUR_AF=0;SAS_AF=0;AA=G|||\tGT\t0|0\t0|0\t0|0\t0|0\t0|0";
 
-	TEST_F(VariantsTest, ParseVariantChromTest)
+	TEST(VariantsTest, ParseVariantChromTest)
 	{
 		std::string chromVCF = "Y"; // this matches the first variant line of the test_vcf_file
 		std::string notChromVCF = "0";
@@ -94,7 +57,7 @@ namespace
 	}
 
 
-	TEST_F(VariantsTest, ParseVariantPositionTest)
+	TEST(VariantsTest, ParseVariantPositionTest)
 	{
 		uint32_t positionVCF = 2655180; // this matches the first variant line of the test_vcf_file
 		uint32_t notPositionVCF = 0;
@@ -110,7 +73,7 @@ namespace
 		EXPECT_NE(positionVCF, notPositionVCF);
 	}
 
-	TEST_F(VariantsTest, ParseVariantIDTest)
+	TEST(VariantsTest, ParseVariantIDTest)
 	{
 		std::string idVCF = "rs11575897"; // this matches the first variant line of the test_vcf_file
 		std::string notIDVCF = "0";
@@ -126,7 +89,7 @@ namespace
 	}
 
 
-	TEST_F(VariantsTest, ParseVariantRefTest)
+	TEST(VariantsTest, ParseVariantRefTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
@@ -137,7 +100,7 @@ namespace
 		ASSERT_STRNE(refAllele->getSequence(),"A");
 	}
 
-	TEST_F(VariantsTest, ParseVariantAltTest)
+	TEST(VariantsTest, ParseVariantAltTest)
 	{
 		const char* altVCF = "A"; // this matches the first variant line of the test_vcf_file
 
@@ -150,7 +113,7 @@ namespace
 		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF);
 	}
 
-	TEST_F(VariantsTest, ParseVariantMultipleAltTest)
+	TEST(VariantsTest, ParseVariantMultipleAltTest)
 	{
 		std::vector<std::string> altVCF = {"A","TTA"};
 
@@ -163,7 +126,7 @@ namespace
 		ASSERT_STREQ(altAllelePtrs[1]->getSequence(), altVCF[1].c_str());
 	}
 
-	TEST_F(VariantsTest, ParseVariantMultipleAltDupsTest)
+	TEST(VariantsTest, ParseVariantMultipleAltDupsTest)
 	{
 		std::vector<std::string> altVCF = {"A","TTA", "TTA"};
 
@@ -177,7 +140,7 @@ namespace
 		ASSERT_EQ(altAllelePtrs.size(), 2);
 	}
 
-	TEST_F(VariantsTest, ParseVariantQualTest)
+	TEST(VariantsTest, ParseVariantQualTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
@@ -187,7 +150,7 @@ namespace
 		ASSERT_STREQ(qual.c_str(),"34439.5");;
 	}
 
-	TEST_F(VariantsTest, ParseVariantFilterTest)
+	TEST(VariantsTest, ParseVariantFilterTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
@@ -197,7 +160,7 @@ namespace
 		ASSERT_STREQ(filter.c_str(),"PASS");
 	}
 
-	TEST_F(VariantsTest, ParseVariantInfoTest)
+	TEST(VariantsTest, ParseVariantInfoTest)
 	{
 		std::map< std::string, std::string > infoMap;
 		infoMap["AA"] = "G";
@@ -224,7 +187,7 @@ namespace
 		ASSERT_EQ(infoFields.size(), 11);
 	}
 
-	TEST_F(VariantsTest, ParseVariantSymbolidTest)
+	TEST(VariantsTest, ParseVariantSymbolidTest)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
@@ -234,7 +197,7 @@ namespace
 		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "<CN0>");
 	}
 
-	TEST_F(VariantsTest, ParseVariantQual2Test)
+	TEST(VariantsTest, ParseVariantQual2Test)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;
@@ -245,7 +208,7 @@ namespace
 	}
 
 	/*
-	TEST_F(VariantsTest, TestGetGenotypeSimpleNone)
+	TEST(VariantsTest, TestGetGenotypeSimpleNone)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -254,7 +217,7 @@ namespace
 		ASSERT_STREQ("./.", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoRefInsufficientCountAlt)
+	TEST(VariantsTest, TestGetGenotypeHomoRefInsufficientCountAlt)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -267,7 +230,7 @@ namespace
 		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoRefInsufficientPercentAlt)
+	TEST(VariantsTest, TestGetGenotypeHomoRefInsufficientPercentAlt)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -280,7 +243,7 @@ namespace
 		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoRef)
+	TEST(VariantsTest, TestGetGenotypeHomoRef)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -293,7 +256,7 @@ namespace
 		ASSERT_STREQ("0/0", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoAlt)
+	TEST(VariantsTest, TestGetGenotypeHomoAlt)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -306,7 +269,7 @@ namespace
 		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoAltInsufficientCountRef)
+	TEST(VariantsTest, TestGetGenotypeHomoAltInsufficientCountRef)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -319,7 +282,7 @@ namespace
 		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoAltInsufficientPercentRef)
+	TEST(VariantsTest, TestGetGenotypeHomoAltInsufficientPercentRef)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -332,7 +295,7 @@ namespace
 		ASSERT_STREQ("1/1", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeSimpleHet)
+	TEST(VariantsTest, TestGetGenotypeSimpleHet)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;
@@ -345,7 +308,7 @@ namespace
 		ASSERT_STREQ("0/1", variantTest.getGenotypeTest().c_str());
 	}
 
-	TEST_F(VariantsTest, TestGetGenotypeHomoSecondAlt)
+	TEST(VariantsTest, TestGetGenotypeHomoSecondAlt)
 	{
 		VariantTest variantTest;
 		std::vector< std::string > alleles;

@@ -4,7 +4,7 @@
 #include <boost/noncopyable.hpp>
 #include "core/variant/IVariantList.h"
 #include "core/graph/IGraph.h"
-#include "core/alignment/IAlignmentReader.h"
+#include "core/alignment/IAlignmentList.h"
 
 namespace gwiz
 {
@@ -17,7 +17,7 @@ namespace gssw
 		IGraphAdjudicator() {}
 		virtual ~IGraphAdjudicator() {}
 
-		virtual IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsPtr) = 0;
+		virtual IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr) = 0;
 	};
 }
 }

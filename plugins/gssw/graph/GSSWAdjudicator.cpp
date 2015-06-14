@@ -29,7 +29,7 @@ namespace gssw
 		}
 	}
 
-	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentReader::SharedPtr alignmentsReaderPtr)
+	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr)
 	{
 		throw "GSSWAdjudicator::adjudicateGraph needs to be fixed";
 		// std::vector< IVariant::SharedPtr > variants;
@@ -37,7 +37,7 @@ namespace gssw
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
 			IAlignment::SharedPtr alignmentPtr;
-			while (alignmentsReaderPtr->getNextAlignment(alignmentPtr))
+			while (alignmentListPtr->getNextAlignment(alignmentPtr))
 			{
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;

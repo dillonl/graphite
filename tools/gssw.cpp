@@ -1,6 +1,4 @@
-#include "core/alignment/BamAlignmentReader.h"
-#include "core/alignment/BamAlignmentReaderManager.h"
-#include "core/alignment/BamAlignmentReaderPreloadManager.h"
+#include "core/alignment/BamAlignmentManager.h"
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
 #include "core/util/Params.h"
@@ -28,19 +26,22 @@ int main(int argc, char** argv)
 	gwiz::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-	auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
+	// auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 
-	std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
+	// std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
+	auto bamAlignmentManager = std::make_shared< gwiz::BamAlignmentManager >(bamPath, regionPtr);
 	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(vcfPaths, regionPtr);
 	variantManagerPtr->asyncLoadVCFs();
-	loadBamsThread.join();
+	bamAlignmentManager->asyncLoadAlignments();
+	// loadBamsThread.join();
+	bamAlignmentManager->waitForAlignmentsToLoad();
 	variantManagerPtr->waitForVCFsToLoadAndProcess();
 	variantManagerPtr->releaseVCFResources(); // releases the vcf file memory
 
 	std::cout << "loaded" << std::endl;
 
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent);
-	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
+	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
