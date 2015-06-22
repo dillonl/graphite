@@ -25,4 +25,8 @@ namespace gwiz
 	void BamAlignmentManager::waitForAlignmentsToLoad()
 	{
 	}
+
+	void BamAlignmentManager::releaseResources()
+	{
+	}
 }

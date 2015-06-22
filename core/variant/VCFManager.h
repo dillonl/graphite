@@ -28,7 +28,7 @@ namespace gwiz
 		void asyncLoadVCFs();
 		void waitForVCFsToLoadAndProcess();
 		IVariantList::SharedPtr getCompleteVariantList() override;
-		void releaseVCFResources();
+		void releaseResources() override;
 		void printToVCF(std::ostream& out);
 	private:
 		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them

@@ -77,7 +77,7 @@ namespace gwiz
 		this->m_variant_list_ptr->printToVCF(out);
 	}
 
-	void VCFManager::releaseVCFResources()
+	void VCFManager::releaseResources()
 	{
 	}
 }

@@ -19,6 +19,7 @@ namespace gwiz
 
 		virtual IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr) = 0;
 		virtual IVariantList::SharedPtr getCompleteVariantList() = 0;
+		virtual void releaseResources() = 0;
 	};
 }
 

@@ -33,7 +33,7 @@ set(GWIZ_CORE_REGION_SOURCES
 set(GWIZ_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
-#  alignment/BamAlignment.cpp
+  alignment/BamAlignment.cpp
 #  alignment/BamAlignmentReader.cpp
 #  alignment/BamAlignmentReaderManager.cpp
 #  alignment/BamAlignmentReaderPreload.cpp

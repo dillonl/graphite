@@ -8,13 +8,10 @@
 #include "ReferenceTest.hpp"
 #include "VariantListVCFPreloadedTests.hpp"
 #include "plugins/TestIncludes.h"
-#include "FileTests.hpp"
-*/
-
-/*
-#include "SequenceManagerTests.hpp"
 #include "BuildGraphTests.hpp"
 */
+#include "FileTests.hpp"
+#include "SequenceManagerTests.hpp"
 #include "VariantsTest.hpp"
 #include "RegionTests.hpp"
 

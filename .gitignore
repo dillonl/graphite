@@ -5,7 +5,7 @@ bin/
 lib/*
 
 #data folder
-data/
+/data/
 
 #Gtags folders
 GPATH

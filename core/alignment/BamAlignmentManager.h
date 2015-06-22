@@ -16,6 +16,7 @@ namespace gwiz
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr);
 		void asyncLoadAlignments();
 		void waitForAlignmentsToLoad();
+		void releaseResources() override;
 	private:
 		std::string m_bam_path;
 		Region::SharedPtr m_region_ptr;

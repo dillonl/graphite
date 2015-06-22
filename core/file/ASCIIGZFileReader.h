@@ -26,22 +26,11 @@ namespace gwiz
 
 		inline bool getNextLine(std::string& line) override
 		{
+			if (!this->m_opened) { return false; }
 			auto value = (bool)std::getline(*this->m_in_stream_ptr, line);
-			line += "\n";
+			/* line += "\n"; */
 			return value;
 		}
-
-		/*
-		inline const char* getNextLine() override
-		{
-			std::cout << "hello" << std::endl;
-			for(std::string str; std::getline(*this->m_iostream_ptr, str); )
-			{
-				std::cout << "Processed line " << str << '\n';
-			}
-			return nullptr;
-		}
-		*/
 
 	private:
 		std::shared_ptr< std::iostream > m_iostream_ptr;

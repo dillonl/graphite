@@ -9,7 +9,7 @@ namespace gwiz
 	ASCIIGZFileReader::ASCIIGZFileReader(const std::string& path) :
 		IFile(path)
 	{
-		Open();
+		// Open();
 	}
 
 	ASCIIGZFileReader::~ASCIIGZFileReader()
@@ -19,6 +19,10 @@ namespace gwiz
 	void ASCIIGZFileReader::Open()
 	{
 		if (m_opened) { return; }
+		if (!this->fileExists(this->m_file_path))
+		{
+            throw std::ios_base::failure("File not found: " + this->m_file_path);
+		}
 		m_opened = true;
 		m_ifstream_ptr = std::make_shared< std::ifstream >(this->m_file_path, std::ios_base::in | std::ios_base::binary);
 		m_in_stream_ptr = std::make_shared< boost::iostreams::filtering_istream >();

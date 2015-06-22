@@ -13,7 +13,7 @@
 #include "core/genotyper/IGenotyperVariant.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
-#include "core/alignment/IAlignmentReader.h"
+/* #include "core/alignment/IAlignmentReader.h" */
 
 namespace gwiz
 {

@@ -26,24 +26,27 @@ int main(int argc, char** argv)
 	gwiz::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-	// auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 
-	// std::thread loadBamsThread(&gwiz::BamAlignmentReaderPreloadManager::processBam, bamAlignmentReaderPreloadManager);
+	// load bam alignments
 	auto bamAlignmentManager = std::make_shared< gwiz::BamAlignmentManager >(bamPath, regionPtr);
+	bamAlignmentManager->asyncLoadAlignments(); // begin the process of loading the alignments asynchronously
+
+	// load variants from vcf
 	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(vcfPaths, regionPtr);
-	variantManagerPtr->asyncLoadVCFs();
-	bamAlignmentManager->asyncLoadAlignments();
-	// loadBamsThread.join();
-	bamAlignmentManager->waitForAlignmentsToLoad();
-	variantManagerPtr->waitForVCFsToLoadAndProcess();
-	variantManagerPtr->releaseVCFResources(); // releases the vcf file memory
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
-	std::cout << "loaded" << std::endl;
+	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
+	// create an adjudicator for the graph
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent);
+	// the gsswGraphManager adjudicates on the variantManager's variants
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
+	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	if (outputVCFPath.size() > 0)
 	{

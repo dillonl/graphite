@@ -61,7 +61,6 @@ namespace
 	{
 		uint32_t positionVCF = 2655180; // this matches the first variant line of the test_vcf_file
 		uint32_t notPositionVCF = 0;
-        std::string test_path = TEST_1KG_CHRY_VCF_FILE;
 
 		gwiz::VariantParser< const char* > vcfParser;
 		gwiz::Variant::SharedPtr variantPtr;

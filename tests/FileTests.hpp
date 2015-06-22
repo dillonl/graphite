@@ -1,152 +1,123 @@
 #ifndef GWIZ_TESTS_FILETESTS_HPP
 #define GWIZ_TESTS_FILETESTS_HPP
 
-#include "core/util/file/ASCIIFileReader.h"
-#include "core/util/file/ASCIIGZFileReader.h"
+#include "core/file/ASCIIFileReader.h"
+#include "core/file/ASCIIGZFileReader.h"
 #include "TestConfig.h"
+
+namespace fileTests
+{
+	void testOpenValidFileTest(gwiz::IFile::SharedPtr asciiFilePtr)
+	{
+		ASSERT_NO_THROW(asciiFilePtr->Open());
+	}
+
+	void testOpenInvalidFileTest(gwiz::IFile::SharedPtr asciiFilePtr)
+	{
+		ASSERT_THROW(asciiFilePtr->Open(), std::ios_base::failure);
+	}
+
+	void testReadNextLineUnopenedFile(gwiz::IFile::SharedPtr asciiFilePtr)
+	{
+		std::string line;
+		ASSERT_FALSE(asciiFilePtr->getNextLine(line));
+	}
+
+	void testReadNextLine(gwiz::IFile::SharedPtr asciiFilePtr)
+	{
+		asciiFilePtr->Open();
+
+		uint32_t count = 0;
+		std::string line;
+		while (asciiFilePtr->getNextLine(line))
+		{
+			++count;
+			std::string countString = std::to_string(count);
+			ASSERT_STREQ(line.c_str(), countString.c_str());
+		}
+		ASSERT_EQ(count, 100); // 100 is the last line of the text file
+	}
+
+	void testReadNextLineEOFReturnFalse(gwiz::IFile::SharedPtr asciiFilePtr)
+	{
+		asciiFilePtr->Open();
+		std::string line;
+		for (uint32_t i = 1; i <= 100; ++i)
+		{
+			asciiFilePtr->getNextLine(line);
+		}
+		EXPECT_FALSE(asciiFilePtr->getNextLine(line));
+	}
+}
 
 TEST(ASCIIGZFileReaderTests, OpenValidFileTest)
 {
-	bool success = true;
-	try
-	{
-		std::string path = TEST_LINE_NUMBERS_GZ_FILE;
-		auto asciiGZReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
-		asciiGZReaderPtr->Open();
-	}
-	catch (std::ios_base::failure& exc)
-	{
-		success = false;
-	}
-	EXPECT_TRUE(success);
-}
-
-TEST(ASCIIGZFileReaderTests, getNextLineFileTest)
-{
-	bool success = false;
 	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
-	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
-	asciiReaderPtr->Open();
-	const char* line;
-	uint32_t count = 1;
-	asciiReaderPtr->getNextLine();
-
-	/*
-	while ((line = asciiReaderPtr->getNextLine()) != nullptr)
-	{
-		std::string countString = std::to_string(count);
-		ASSERT_STREQ(line, countString.c_str());
-		++count;
-		success = true;
-	}
-	EXPECT_TRUE(success);
-	*/
+	auto gzAsciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	fileTests::testOpenValidFileTest(gzAsciiReaderPtr);
 }
 
-/*
 TEST(ASCIIFileReaderTests, OpenValidFileTest)
 {
-	bool success = true;
-	try
-	{
-		std::string path = TEST_LINE_NUMBERS_FILE;
-		auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-		asciiReaderPtr->Open();
-	}
-	catch (std::ios_base::failure& exc)
-	{
-		success = false;
-	}
-	EXPECT_TRUE(success);
+	std::string path = TEST_LINE_NUMBERS_FILE;
+	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
+	fileTests::testOpenValidFileTest(asciiReaderPtr);
+}
+
+TEST(ASCIIGZFileReaderTests, OpenInvalidFileTest)
+{
+	std::string path = TEST_INVALID_FILE;
+	auto gzAsciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	fileTests::testOpenInvalidFileTest(gzAsciiReaderPtr);
 }
 
 TEST(ASCIIFileReaderTests, OpenInvalidFileTest)
 {
-	bool success = true;
-	try
-	{
-		std::string path = TEST_INVALID_FILE;
-		auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-		asciiReaderPtr->Open();
-	}
-	catch (std::ios_base::failure& exc)
-	{
-		success = false;
-	}
-	EXPECT_FALSE(success);
-}
-
-TEST(ASCIIFileReaderTests, getNextLineFileTest)
-{
-	bool success = true;
-	std::string path = TEST_LINE_NUMBERS_FILE;
+	std::string path = TEST_INVALID_FILE;
 	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-	asciiReaderPtr->Open();
-	const char* line;
-	uint32_t count = 1;
-	while ((line = asciiReaderPtr->getNextLine()) != NULL)
-	{
-		ASSERT_EQ(atoi(line), count);
-		++count;
-	}
-	EXPECT_TRUE(success);
+	fileTests::testOpenInvalidFileTest(asciiReaderPtr);
 }
 
-TEST(ASCIIFileReaderTests, getNextLineEndIsNULLFileTest)
+TEST(ASCIIGZFileReaderTests, ReadNextLineGZTest)
+{
+	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
+	auto gzAsciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	fileTests::testReadNextLine(gzAsciiReaderPtr);
+}
+
+TEST(ASCIIFileReaderTests, ReadNextLineTest)
 {
 	std::string path = TEST_LINE_NUMBERS_FILE;
 	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-	asciiReaderPtr->Open();
-	for (uint32_t i = 1; i <= 100; ++i)
-	{
-		asciiReaderPtr->getNextLine();
-	}
-	const char* line = asciiReaderPtr->getNextLine();
-	bool success = line == NULL;
-	EXPECT_TRUE(success);
+	fileTests::testReadNextLine(asciiReaderPtr);
 }
 
-TEST(ASCIIFileReaderTests, getNextLineUnopenedFileTest)
+TEST(ASCIIGZFileReaderTests, ReadNextLineGZEOFReturnFalseTest)
 {
-	std::string path =  TEST_LINE_NUMBERS_FILE;
+	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
+	auto gzAsciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	fileTests::testReadNextLineEOFReturnFalse(gzAsciiReaderPtr);
+}
+
+TEST(ASCIIFileReaderTests, ReadNextLineEOFReturnFalseTest)
+{
+	std::string path = TEST_LINE_NUMBERS_FILE;
 	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-	bool success = (asciiReaderPtr->getNextLine() == NULL);
-	EXPECT_TRUE(success);
+	fileTests::testReadNextLineEOFReturnFalse(asciiReaderPtr);
 }
 
-/*
-
-TEST(ASCIIFileReaderTests, CountLinesFileTest)
+TEST(ASCIIGZFileReaderTests, ReadNextLineGZUnopened)
 {
-	bool success = true;
-	try
-	{
-		std::string path = "/home/dlee/data/var.vcf";
-		auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-		uintmax_t lineCount = asciiReaderPtr->CountLines(path);
-		std::cout << "--lines: " << lineCount << std::endl;
-	}
-	catch (std::ios_base::failure& exc)
-	{
-		success = false;
-	}
-	EXPECT_TRUE(success);
+	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
+	auto gzAsciiReaderPtr = std::make_shared<gwiz::ASCIIGZFileReader>(path);
+	fileTests::testReadNextLineUnopenedFile(gzAsciiReaderPtr);
 }
 
-TEST(ASCIIFileReaderTests, CountLines2FileTest)
+TEST(ASCIIFileReaderTests, ReadNextLineUnopened)
 {
-	bool success = true;
-	try
-	{
-		std::string path = "/home/dlee/data/var.vcf";
-		auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
-		uintmax_t lineCount = asciiReaderPtr->CountLines2(path);
-	}
-	catch (std::ios_base::failure& exc)
-	{
-		success = false;
-	}
-	EXPECT_TRUE(success);
+	std::string path = TEST_LINE_NUMBERS_FILE;
+	auto asciiReaderPtr = std::make_shared<gwiz::ASCIIFileReader>(path);
+	fileTests::testReadNextLineUnopenedFile(asciiReaderPtr);
 }
-*/
+
 #endif //GWIZ_TESTS_FILETESTS_HPP
