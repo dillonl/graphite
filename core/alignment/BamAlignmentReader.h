@@ -20,7 +20,7 @@ namespace gwiz
         BamAlignmentReader(const std::string& filePath);
 		~BamAlignmentReader();
 
-        IAlignmentList::SharedPtr loadAlignmentsInRegion(Region::SharedPtr regionPtr) override;
+        std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 
 	private:
 		std::string m_file_path;

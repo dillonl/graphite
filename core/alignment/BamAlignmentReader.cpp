@@ -13,7 +13,7 @@ namespace gwiz
 	{
 	}
 
-	IAlignmentList::SharedPtr BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr)
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr)
 	{
 		if (!this->m_bam_reader.Open(this->m_file_path))
 		{
@@ -33,6 +33,6 @@ namespace gwiz
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
 			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}
-		return std::make_shared< AlignmentList >(alignmentPtrs);
+		return alignmentPtrs;
 	}
 }

@@ -14,7 +14,7 @@ namespace gwiz
 		IAlignmentReader() {}
 		virtual ~IAlignmentReader() {}
 
-		virtual IAlignmentList::SharedPtr loadAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
+		virtual std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
 	};
 }
 
