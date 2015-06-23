@@ -12,32 +12,50 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
 	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
 	std::string regionString = "20";
 	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto alignmentsList = std::make_shared< gwiz::AlignmentList >(bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr));
-	uint32_t count = 0;
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 
-	gwiz::IAlignment::SharedPtr alignmentPtr;
-	while (alignmentsList->getNextAlignment(alignmentPtr))
-	{
-		++count;
-	}
-	// std::cout << "chrom20 count: " << count << std::endl;
+	ASSERT_EQ(alignmentsList.size(), 5940);
 }
 
-TEST(BamAlignmentReaderTests, TestLoadAlignmentRegionWithPositions)
+TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 {
 	std::string path = TEST_BAM_FILE;
 	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
 	std::string regionString = "20:1-100";
 	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto alignmentsList = std::make_shared< gwiz::AlignmentList >(bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr));
-	uint32_t count = 0;
-
-	gwiz::IAlignment::SharedPtr alignmentPtr;
-	while (alignmentsList->getNextAlignment(alignmentPtr))
-	{
-		++count;
-	}
-	// std::cout << "chrom20 count: " << count << std::endl;
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 0);
 }
+
+TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "20:1-10000000";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 1988);
+}
+
+TEST(BamAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "1:10000000-20000000";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 1979);
+}
+
+TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "1:100000000-600000000";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 7499);
+}
+
 
 #endif //GWIZ_BAMALIGNMENTREADERTESTS_HPP

@@ -20,6 +20,8 @@ namespace gwiz
 
 	void BamAlignmentManager::asyncLoadAlignments()
 	{
+		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
+		if (this->m_loaded) { return; }
 	}
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()

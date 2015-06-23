@@ -28,8 +28,10 @@ namespace gwiz
 		auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		size_t counter = 0;
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+		uint32_t count = 0;
 		while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
 		{
+			if (bamAlignmentPtr->RefID != refID) { break; }
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr));
 			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}
