@@ -90,9 +90,9 @@ namespace gwiz
 			if (memcmp(regionReferenceIDWithTab.c_str(), line.c_str(), regionReferenceIDWithTab.size()) == 0) // if we are in the correct reference (chrom)
 			{
 				position linePosition = getPositionFromLine(line.c_str());
-				if ((regionPtr->getStartPosition() <= linePosition || linePosition <= regionPtr->getEndPosition()))
+				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line.c_str(), this->m_vcf_parser));
+					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_vcf_parser));
 				}
 				if (regionPtr->getEndPosition() < linePosition) { break; } // if we have passed the end position of the region then stop looking for variants
 			}

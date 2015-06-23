@@ -20,6 +20,7 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< VCFManager > SharedPtr;
 
+		VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr);
 		VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr);
 		~VCFManager();
 

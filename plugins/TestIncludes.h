@@ -8,8 +8,8 @@
 /*
 #include "adjudicator/tests/TestIncludes.h"
 #include "vg/tests/TestIncludes.h"
-*/
 #include "gssw/tests/TestIncludes.h"
+*/
 
 
 #endif // GWIZ_PLUGIN_TESTS_H

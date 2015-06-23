@@ -8,6 +8,14 @@
 
 namespace gwiz
 {
+	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr) :
+		m_loaded_vcfs(false),
+		m_region_ptr(regionPtr)
+	{
+		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
+	}
+
 	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr)
@@ -50,6 +58,7 @@ namespace gwiz
 			auto vcfVariantPtrs = vcfFuture->get();
 			variantPtrs.insert(variantPtrs.end(), vcfVariantPtrs.begin(), vcfVariantPtrs.end());
 		}
+
 		vcfFutureVariantListPtrs.clear();
 		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs);
 		this->m_variant_list_ptr->sort();

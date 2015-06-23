@@ -3,110 +3,422 @@
 
 #include <stdexcept>
 
-#include "core/variant/VCFFileReader.h"
+#include "core/variant/IVariant.h"
+#include "core/variant/VCFManager.h"
 #include "core/region/Region.h"
 
 #include "TestConfig.h"
 
-TEST(VCFFileReaderTests, TestVCFFileReaderGetRegion)
+TEST(VCFFileReaderTests, ReadAllChrom20)
 {
-	std::string chrom = "Y";
-	gwiz::position startPosition = 2851690;
-	gwiz::position endPosition = 2900741;
-    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
-	gwiz::Variant::SharedPtr variantPtr;
-	gwiz::Variant::SharedPtr prevVariantPtr;
-	vcfFileReader->getNextVariant(variantPtr);
-	ASSERT_EQ(variantPtr->getPosition(), startPosition);
-	while (vcfFileReader->getNextVariant(variantPtr))
+	std::string chrom = "20";
+    std::string regionString = chrom;
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	uint32_t totalCount = 181;
+	std::string path = TEST_VCF_FILE;
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 0;
+	while (variantListPtr->getNextVariant(variantPtr))
 	{
-		ASSERT_STREQ(chrom.c_str(), variantPtr->getChrom().c_str());
-		ASSERT_LE(startPosition, variantPtr->getPosition());
-		ASSERT_GE(endPosition, variantPtr->getPosition());
-		prevVariantPtr = variantPtr; // so we can check the last position
+		ASSERT_STREQ(variantPtr->getChrom().c_str(), chrom.c_str());
+		++count;
 	}
-	ASSERT_EQ(prevVariantPtr->getPosition(), endPosition);
+	ASSERT_EQ(count, totalCount); // 181 is the number of variants in chrom 20 for the TEST_VCF_FILE
 }
 
-TEST(VCFFileReaderTests, TestVCFFileReaderGetRegionBeforeStart)
+TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingAndEnd)
 {
-	std::string chrom = "Y";
-	gwiz::position startPosition = 2655179;
-	gwiz::position endPosition = 2656000;
-	gwiz::position firstPosition = 2655180;
+	std::string chrom = "1";
+	gwiz::position startPosition = 1;
+	gwiz::position endPosition = 4000000;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 3728155;
+	uint32_t totalCount = 12;
+	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
-	gwiz::Variant::SharedPtr variantPtr;
-	vcfFileReader->getNextVariant(variantPtr);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 1;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
-}
-
-TEST(VCFFileReaderTests, TestVCFFileReaderGetRegionEnd)
-{
-	std::string chrom = "Y";
-	gwiz::position startRegionPosition = 28760931;
-	gwiz::position endRegionPosition = 38770931;
-	gwiz::position endPosition = 28770931;
-    std::string regionString = chrom + ":" + std::to_string(startRegionPosition) + "-" + std::to_string(endRegionPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
-	gwiz::Variant::SharedPtr variantPtr;
-	gwiz::Variant::SharedPtr prevVariantPtr;
-	while (vcfFileReader->getNextVariant(variantPtr))
+	while (variantListPtr->getNextVariant(variantPtr))
 	{
-		prevVariantPtr = variantPtr;
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+		++count;
 	}
-	ASSERT_EQ(prevVariantPtr->getPosition(), endPosition);
+	ASSERT_EQ(tmpPosition, lastPosition);
+	ASSERT_EQ(count, totalCount);
 }
 
-TEST(VCFFileReaderTests, TestVCFFileReaderGetAfterLastVariantIsNULL)
+TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingNonExactEnd)
 {
-	std::string chrom = "Y";
-	gwiz::position startRegionPosition = 28760931;
-	gwiz::position endRegionPosition = 38770931;
-	gwiz::position endPosition = 28770931;
-    std::string regionString = chrom + ":" + std::to_string(startRegionPosition) + "-" + std::to_string(endRegionPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path, region);
-	gwiz::Variant::SharedPtr variantPtr;
-	while (vcfFileReader->getNextVariant(variantPtr))
+	std::string chrom = "1";
+	gwiz::position startPosition = 909434;
+	gwiz::position endPosition = 4000000;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 3728155;
+	uint32_t totalCount = 12;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 1;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
 	{
-		ASSERT_TRUE(variantPtr != NULL);
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+		++count;
 	}
-	ASSERT_TRUE(variantPtr == NULL);
+	ASSERT_EQ(tmpPosition, lastPosition);
+	ASSERT_EQ(count, totalCount);
 }
 
-TEST(VCFFileReaderTests, TestVCFFileReaderWithoutRegion)
+TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingExactEnd)
 {
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-	auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(path);
-	gwiz::Variant::SharedPtr variantPtr;
-	while (vcfFileReader->getNextVariant(variantPtr))
+	std::string chrom = "1";
+	gwiz::position startPosition = 1;
+	gwiz::position endPosition = 3728155;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 3728155;
+	uint32_t totalCount = 12;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 1;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
 	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+		++count;
 	}
-	ASSERT_TRUE(true); // if we get here then we have completed the test
+	ASSERT_EQ(tmpPosition, lastPosition);
+	ASSERT_EQ(count, totalCount);
 }
 
-/*
- * Makes sure that a region without any variants throws an exception
- */
-TEST(VCFFileReaderTests, TestVCFFileReaderGetNoRegion)
+TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingExactEnd)
 {
-	std::string chrom = "Y";
-	gwiz::position startRegionPosition = 0;
-	gwiz::position endRegionPosition = 200;
-    std::string regionString = chrom + ":" + std::to_string(startRegionPosition) + "-" + std::to_string(endRegionPosition);
-	gwiz::Region::SharedPtr region = std::make_shared< gwiz::Region >(regionString);
-	std::string path = TEST_1KG_CHRY_VCF_FILE;
-    ASSERT_ANY_THROW(std::make_shared<gwiz::VCFFileReader>(path, region));
+	std::string chrom = "1";
+	gwiz::position startPosition = 909434;
+	gwiz::position endPosition = 3728155;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 3728155;
+	uint32_t totalCount = 12;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 1;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+		++count;
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+	ASSERT_EQ(count, totalCount);
 }
 
+TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition = 246020849;
+	gwiz::position endPosition = 248828840;
+	gwiz::position lastPosition = 248828840;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginningExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition = 246020749;
+	gwiz::position endPosition = 248828840;
+	gwiz::position lastPosition = 248828840;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingNonExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition = 246020749;
+	gwiz::position endPosition = 300000000;
+	gwiz::position lastPosition = 248828840;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginingNonExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition = 238828840;
+	gwiz::position endPosition = 348828840;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 248828840;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition =  36314453;
+	gwiz::position endPosition = 38686990;
+	gwiz::position firstPosition =  36314453;
+	gwiz::position lastPosition = 38686990;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition =  36314450;
+	gwiz::position endPosition = 38686990;
+	gwiz::position firstPosition =  36314453;
+	gwiz::position lastPosition = 38686990;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingNonExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition =  36314453;
+	gwiz::position endPosition = 38686991;
+	gwiz::position firstPosition =  36314453;
+	gwiz::position lastPosition = 38686990;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingNonExactEnd)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition =  36314452;
+	gwiz::position endPosition = 38686991;
+	gwiz::position firstPosition =  36314453;
+	gwiz::position lastPosition = 38686990;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	gwiz::position tmpPosition;
+	variantListPtr->getNextVariant(variantPtr);
+	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
+	}
+	ASSERT_EQ(tmpPosition, lastPosition);
+}
+
+TEST(VCFFileReaderTests, ReadRegionNonExistantChrom)
+{
+	std::string chrom = "J";
+	uint32_t totalCount = 0;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom;
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 0;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		++count;
+	}
+	ASSERT_EQ(count, totalCount);
+}
+
+TEST(VCFFileReaderTests, ReadRegionWithNoVariants)
+{
+	std::string chrom = "1";
+	gwiz::position startPosition = 1;
+	gwiz::position endPosition = 100;
+	gwiz::position firstPosition = 909434;
+	gwiz::position lastPosition = 3728155;
+	uint32_t totalCount = 0;
+	std::string path = TEST_VCF_FILE;
+    std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::IVariant::SharedPtr variantPtr;
+	uint32_t count = 0;
+	gwiz::position tmpPosition;
+	while (variantListPtr->getNextVariant(variantPtr))
+	{
+		++count;
+	}
+	ASSERT_EQ(count, totalCount);
+}
+
+TEST(VCFFileReaderTests, ReadAllRegionsCheckCount)
+{
+	uint32_t totalCount = 8127;
+	uint32_t count = 0;
+	for (uint32_t i = 1; i <= 22; ++i)
+	{
+		std::string chrom = std::to_string(i);
+		std::string path = TEST_VCF_FILE;
+		std::string regionString = chrom;
+		auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+		auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+		gwiz::IVariant::SharedPtr variantPtr;
+		gwiz::position tmpPosition;
+		while (variantListPtr->getNextVariant(variantPtr))
+		{
+			ASSERT_STREQ(chrom.c_str(), variantPtr->getChrom().c_str());
+			++count;
+		}
+	}
+	ASSERT_EQ(count, totalCount);
+}
 
 #endif // GWIZ_VCF_FILE_TESTS_HPP

@@ -18,7 +18,8 @@ namespace gwiz
 	{
 		if (this->m_current_index < this->m_variant_ptrs.size())
 		{
-			variantPtr = this->m_variant_ptrs[this->m_current_index++];
+			variantPtr = this->m_variant_ptrs[this->m_current_index];
+			++this->m_current_index;
 			return true;
 		}
 		else
@@ -52,6 +53,7 @@ namespace gwiz
 			variantPtrs.emplace_back(variantPtr);
 		}
 		this->m_variant_ptrs = variantPtrs;
+		this->m_current_index = 0;
 	}
 
 	void VariantList::printHeader(std::ostream& out)

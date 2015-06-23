@@ -29,15 +29,13 @@ namespace gwiz
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const char* const vcf_line, VariantParser< const char* >& parser)
+		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser)
 		{
-			const char* end_line = static_cast< const char* >(memchr(vcf_line, '\n', std::numeric_limits< position >::max()));
 			std::string fields;
 			auto variantPtr = std::make_shared< Variant >();
 			std::string ref;
 			std::vector< std::string > alts;
-
-			if (!boost::spirit::qi::parse(vcf_line, end_line, parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
+			if (!boost::spirit::qi::parse(vcfLine.c_str(), (vcfLine.c_str() + vcfLine.size()), parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}

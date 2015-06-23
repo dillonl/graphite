@@ -15,7 +15,7 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< IAlignmentManager > SharedPtr;
 		IAlignmentManager() {}
-		~IAlignmentManager() {}
+		virtual ~IAlignmentManager() {}
 
         virtual IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
 		virtual void releaseResources() = 0;

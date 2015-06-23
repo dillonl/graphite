@@ -3,6 +3,8 @@
 
 #define TEST_LINE_NUMBERS_FILE "@CMAKE_SOURCE_DIR@/tests/data/test_line_numbers.txt";
 #define TEST_LINE_NUMBERS_GZ_FILE "@CMAKE_SOURCE_DIR@/tests/data/test_line_numbers.txt.gz";
+#define TEST_VCF_FILE "@CMAKE_SOURCE_DIR@/tests/data/test.vcf"
+#define TEST_BAM_FILE "@CMAKE_SOURCE_DIR@/tests/data/test.bam"
 #define TEST_INVALID_FILE "invalid.txt";
 
 
