@@ -5,6 +5,10 @@
 #include "core/region/Region.h"
 
 #include <mutex>
+#include <thread>
+#include <atomic>
+#include <memory>
+#include <future>
 
 namespace gwiz
 {
@@ -17,6 +21,7 @@ namespace gwiz
 
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 		void asyncLoadAlignments();
+		void loadBam();
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 	private:
@@ -25,6 +30,8 @@ namespace gwiz
 		bool m_loaded;
 		std::string m_bam_path;
 		Region::SharedPtr m_region_ptr;
+		std::shared_ptr< std::thread > m_loading_thread_ptr;
+        std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
 	};
 }
 

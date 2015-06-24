@@ -17,6 +17,7 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegion)
 	std::string region2String = "20:10000000-30000000";
 	auto region2Ptr = std::make_shared< gwiz::Region >(region2String);
 	auto alignmentsListPtr = bamAlignmentManagerPtr->getAlignmentsInRegion(region2Ptr);
+
 }
 
 #endif //GWIZ_BAMALIGNMENTMANAGERTESTS_HPP

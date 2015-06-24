@@ -52,10 +52,10 @@ namespace gwiz
 		}
 
 		std::vector< IVariant::SharedPtr > variantPtrs;
-		for (auto& vcfFuture : vcfFutureVariantListPtrs)
+		for (auto& vcfFuturePtr : vcfFutureVariantListPtrs)
 		{
-			vcfFuture->wait();
-			auto vcfVariantPtrs = vcfFuture->get();
+			vcfFuturePtr->wait();
+			auto vcfVariantPtrs = vcfFuturePtr->get();
 			variantPtrs.insert(variantPtrs.end(), vcfVariantPtrs.begin(), vcfVariantPtrs.end());
 		}
 
