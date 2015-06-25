@@ -1,5 +1,6 @@
 #include "BamAlignmentManager.h"
 #include "BamAlignmentReader.h"
+#include "AlignmentList.h"
 #include "core/util/ThreadPool.hpp"
 
 #include <functional>
@@ -18,8 +19,19 @@ namespace gwiz
 
 	IAlignmentList::SharedPtr BamAlignmentManager::getAlignmentsInRegion(Region::SharedPtr regionPtr)
 	{
-		// check if outside of the m_region_ptr and if so then throw an error
-		return nullptr;
+		position startPosition = regionPtr->getStartPosition();
+		position endPosition = regionPtr->getEndPosition();
+
+		auto lowerBound = std::lower_bound(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(), nullptr, [startPosition](const IAlignment::SharedPtr& alignmentPtr, const IAlignment::SharedPtr& ignore) {
+				return startPosition > alignmentPtr->getPosition();
+			});
+		auto upperBound = std::upper_bound(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(), nullptr, [endPosition](const IAlignment::SharedPtr& ignore, const IAlignment::SharedPtr& alignmentPtr) {
+				return alignmentPtr->getPosition() > endPosition;
+			});
+
+		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+		alignmentPtrs.insert(alignmentPtrs.begin(), lowerBound, upperBound);
+		return std::make_shared< AlignmentList >(alignmentPtrs);
 	}
 
 	position BamAlignmentManager::getLastPositionInBam()
