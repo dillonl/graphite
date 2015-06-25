@@ -22,6 +22,20 @@ namespace gwiz
 		return nullptr;
 	}
 
+	position BamAlignmentManager::getLastPositionInBam()
+	{
+		BamTools::BamReader bamReader;
+		if (!bamReader.Open(this->m_bam_path))
+		{
+			throw "Unable to open bam file";
+		}
+
+		bamReader.LocateIndex();
+		int refID = bamReader.GetReferenceID(this->m_region_ptr->getReferenceID());
+		auto referenceData = bamReader.GetReferenceData();
+		return referenceData[refID].RefLength;
+	}
+
 	void BamAlignmentManager::asyncLoadAlignments()
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
@@ -32,12 +46,15 @@ namespace gwiz
 	void BamAlignmentManager::loadBam()
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
+		std::unordered_map< std::string, bool > alignmentMap;
 		std::vector< std::thread > bamLoadThreads;
 		uint32_t positionIncrement = 100000;
 		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureAlignmentListPtrs;
 		position startPosition = this->m_region_ptr->getStartPosition();
 		position endPosition = startPosition + positionIncrement;
-		while (endPosition < this->m_region_ptr->getEndPosition())
+		position bamLastPosition = getLastPositionInBam();
+		std::cout << "bamlastpos: " << bamLastPosition << std::endl;
+		while (endPosition < bamLastPosition)// this->m_region_ptr->getEndPosition())
 		{
             std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 			auto regionPtr = std::make_shared< Region >(regionString);
@@ -47,17 +64,19 @@ namespace gwiz
 			futureAlignmentListPtrs.emplace_back(functFuture);
 			startPosition = endPosition + 1;
 			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
-			std::cout << endPosition << std::endl;
 		}
 		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
 		{
 			alignmentFuturePtr->wait();
 			auto loadedAlignmentPtrs = alignmentFuturePtr->get();
-			this->m_alignment_ptrs.insert(this->m_alignment_ptrs.end(), loadedAlignmentPtrs.begin(), loadedAlignmentPtrs.end());
+			for (auto& alignment : loadedAlignmentPtrs)
+			{
+				if (alignmentMap.find(alignment->getID()) != alignmentMap.end()) { continue; } // make sure we don't add overlapping regions
+				alignmentMap[alignment->getID()] = true;
+				this->m_alignment_ptrs.emplace_back(alignment);
+			}
 		}
-		futureAlignmentListPtrs.clear();
 		this->m_loaded = true;
-		std::cout << "size: " << this->m_alignment_ptrs.size() << std::endl;
 	}
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()

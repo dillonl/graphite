@@ -25,6 +25,7 @@ namespace gwiz
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 	private:
+		position getLastPositionInBam();
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;
