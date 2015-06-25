@@ -9,7 +9,8 @@ namespace gwiz
 {
 	BamAlignmentManager::BamAlignmentManager(const std::string& bamPath, Region::SharedPtr regionPtr) :
 		m_bam_path(bamPath),
-		m_region_ptr(regionPtr)
+		m_region_ptr(regionPtr),
+		m_loaded(false)
 	{
 	}
 
@@ -23,7 +24,7 @@ namespace gwiz
 		position endPosition = regionPtr->getEndPosition();
 
 		auto lowerBound = std::lower_bound(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(), nullptr, [startPosition](const IAlignment::SharedPtr& alignmentPtr, const IAlignment::SharedPtr& ignore) {
-				return startPosition > alignmentPtr->getPosition();
+				return startPosition > alignmentPtr->getPosition() + alignmentPtr->getLength();
 			});
 		auto upperBound = std::upper_bound(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(), nullptr, [endPosition](const IAlignment::SharedPtr& ignore, const IAlignment::SharedPtr& alignmentPtr) {
 				return alignmentPtr->getPosition() > endPosition;
@@ -64,7 +65,10 @@ namespace gwiz
 		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureAlignmentListPtrs;
 		position startPosition = this->m_region_ptr->getStartPosition();
 		position endPosition = startPosition + positionIncrement;
-		position bamLastPosition = getLastPositionInBam();
+		// the last position is needs to be calculated by the reader if we are loading the entire chromosome.
+		// Otherwise use the specified end position.
+		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? getLastPositionInBam() : this->m_region_ptr->getEndPosition();
+
 		while (endPosition < bamLastPosition)// this->m_region_ptr->getEndPosition())
 		{
             std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
@@ -76,6 +80,7 @@ namespace gwiz
 			startPosition = endPosition + 1;
 			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
 		}
+		uint32_t count = 0;
 		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
 		{
 			alignmentFuturePtr->wait();

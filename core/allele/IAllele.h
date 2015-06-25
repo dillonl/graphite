@@ -30,6 +30,8 @@ namespace gwiz
 
 		inline uint32_t getPaddingPrefix() { return this->m_padding_prefix; }
 		inline uint32_t getPaddingSuffix() { return this->m_padding_suffix; }
+		inline void setPaddingPrefix(uint32_t padding) { this->m_padding_prefix = padding; }
+		inline void setPaddingSuffix(uint32_t padding) { this->m_padding_suffix = padding; }
 
 		inline uint32_t getForwardCount() { return this->m_forward_count.load(); }
 		inline uint32_t getReverseCount() { return this->m_reverse_count.load(); }

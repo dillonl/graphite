@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "gtest/gtest.h"
 
 #include "FileTests.hpp"
@@ -9,6 +7,7 @@
 #include "RegionTests.hpp"
 #include "BamAlignmentReaderTests.hpp"
 #include "BamAlignmentManagerTests.hpp"
+#include "GSSWTests.hpp"
 #include "plugins/TestIncludes.h"
 
 GTEST_API_ int main(int argc, char** argv)

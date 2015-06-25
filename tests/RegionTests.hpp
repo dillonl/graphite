@@ -5,7 +5,6 @@
 
 #include "core/region/Region.h"
 
-// Tests factorial of negative numbers.
 TEST(RegionTest, ConstructorWithGetRegionString)
 {
 	std::string regionString = "20:10-100";
@@ -15,7 +14,7 @@ TEST(RegionTest, ConstructorWithGetRegionString)
 	EXPECT_STRNE(regionNotEqual.c_str(), region.getRegionString().c_str());
 }
 
-// Tests factorial of negative numbers.
+
 TEST(RegionTest, GetReferenceID)
 {
 	std::string reference = "20";
@@ -27,7 +26,6 @@ TEST(RegionTest, GetReferenceID)
 	EXPECT_STRNE(referenceNotEqual.c_str(), region.getReferenceID().c_str());
 }
 
-// Tests factorial of negative numbers.
 TEST(RegionTest, GetStartPosition)
 {
 	gwiz::position startPosition = 2000;
@@ -41,7 +39,6 @@ TEST(RegionTest, GetStartPosition)
 
 }
 
-// Tests factorial of negative numbers.
 TEST(RegionTest, TestRegionRegionIDOnly)
 {
 	bool success = false;
@@ -55,11 +52,18 @@ TEST(RegionTest, TestRegionRegionIDOnly)
 	EXPECT_EQ(region.getEndPosition(), gwiz::MAX_POSITION);
 }
 
-// Tests factorial of negative numbers.
 TEST(RegionTest, TestRegionInvalidArgument)
 {
 	bool success = false;
 	std::string invalidString = "";
+	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
+}
+
+// Tests invalid position
+TEST(RegionTest, TestRegionInvalidStartAndEndPositions)
+{
+	bool success = false;
+	std::string invalidString = "10:10000-1";
 	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
 }
 

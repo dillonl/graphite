@@ -147,6 +147,7 @@ namespace gwiz
 		std::string id = ".";
 		std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
 		std::map< std::string, std::string > altMap; // maps new alt with the original vcf line
+		std::vector< std::tuple< uint32_t, uint32_t > > altAllelePadding;
 		// loop over all the variants
 		for (auto variantPtr : variants)
 		{
@@ -160,6 +161,9 @@ namespace gwiz
 				variantString.erase(variantPtr->getPosition() - startPosition, variantPtr->getRefAllelePtr()->getSequenceString().size());
 				variantString.insert(variantPtr->getPosition() - startPosition, altString);
 				line += variantString + ",";
+				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
+				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
+				altAllelePadding.emplace_back(std::make_tuple(paddingPrefix, paddingSuffix));
 			}
 		}
 		line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
@@ -168,6 +172,7 @@ namespace gwiz
 		std::string info = "C=TRUE";
 		line += quality + "\t" + filter + "\t" + info + "\t.\n";
 		auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+		variant->setAltAllelePadding(altAllelePadding);
 		return variant;
 	}
 

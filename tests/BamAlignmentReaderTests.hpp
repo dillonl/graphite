@@ -57,5 +57,19 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
 	ASSERT_EQ(alignmentsList.size(), 7499);
 }
 
+TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "1:100000000-600000000";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	for (auto alignmentPtr : alignmentsList)
+	{
+		ASSERT_LE(regionPtr->getStartPosition(), alignmentPtr->getPosition() - alignmentPtr->getLength());
+		ASSERT_GE(regionPtr->getEndPosition(), alignmentPtr->getPosition());
+	}
+}
+
 
 #endif //GWIZ_BAMALIGNMENTREADERTESTS_HPP

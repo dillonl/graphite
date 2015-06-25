@@ -126,6 +126,8 @@ namespace gwiz
 			return true;
 		}
 
+		void setAltAllelePadding(const std::vector< std::tuple< uint32_t, uint32_t > >& altAllelePadding);
+
 		void increaseCount(std::shared_ptr< IAlignment > alignmentPtr);
 
 		void setFilter(std::string filter)

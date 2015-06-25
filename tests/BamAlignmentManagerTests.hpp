@@ -49,4 +49,105 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegion)
 	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
 }
 
+TEST(BamAlignmentManagerTests, TestLoadAlignmentSmallRegion)
+{
+	std::string path = TEST_BAM_FILE;
+	std::string regionString = "20";
+	auto regionPtr1 = std::make_shared< gwiz::Region >(regionString);
+
+	std::string region2String = "20:10000000-10003000";
+	auto regionPtr2 = std::make_shared< gwiz::Region >(region2String);
+	std::vector< gwiz::IAlignment::SharedPtr > alignmentPtrs;
+	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
+	auto alignmentListReaderPtr = std::make_shared< gwiz::AlignmentList >(alignmentPtrs);
+
+	gwiz::IAlignmentList::SharedPtr alignmentListManagerPtr;
+	getAlignmentPtrsFromManager(path, alignmentListManagerPtr, regionPtr1, regionPtr2);
+
+	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
+}
+
+TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionEmpty)
+{
+	std::string path = TEST_BAM_FILE;
+	std::string regionString = "20";
+	auto regionPtr1 = std::make_shared< gwiz::Region >(regionString);
+
+	std::string region2String = "20:1-10000";
+	auto regionPtr2 = std::make_shared< gwiz::Region >(region2String);
+	std::vector< gwiz::IAlignment::SharedPtr > alignmentPtrs;
+	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
+	auto alignmentListReaderPtr = std::make_shared< gwiz::AlignmentList >(alignmentPtrs);
+
+	gwiz::IAlignmentList::SharedPtr alignmentListManagerPtr;
+	getAlignmentPtrsFromManager(path, alignmentListManagerPtr, regionPtr1, regionPtr2);
+
+	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
+	ASSERT_EQ(alignmentListManagerPtr->getCount(), 0);
+}
+
+TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionTwoSpecific)
+{
+	std::string path = TEST_BAM_FILE;
+	std::string regionString = "20:10000000-50000000";
+	auto regionPtr1 = std::make_shared< gwiz::Region >(regionString);
+
+	std::string region2String = "20:30000000-40000000";
+	auto regionPtr2 = std::make_shared< gwiz::Region >(region2String);
+	std::vector< gwiz::IAlignment::SharedPtr > alignmentPtrs;
+	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
+	auto alignmentListReaderPtr = std::make_shared< gwiz::AlignmentList >(alignmentPtrs);
+
+	gwiz::IAlignmentList::SharedPtr alignmentListManagerPtr;
+	getAlignmentPtrsFromManager(path, alignmentListManagerPtr, regionPtr1, regionPtr2);
+
+	/*
+	gwiz::IAlignment::SharedPtr alignmentPtr1;
+	gwiz::IAlignment::SharedPtr alignmentPtr2;
+	while (alignmentListReaderPtr->getNextAlignment(alignmentPtr1) && alignmentListManagerPtr->getNextAlignment(alignmentPtr2))
+	{
+		std::cout << alignmentPtr1->getPosition() << " " << alignmentPtr2->getPosition() << std::endl;
+		std::cout << alignmentPtr1->getID().c_str() << " " << alignmentPtr2->getID().c_str() << std::endl;
+	}
+	*/
+
+	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
+}
+
+TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionOverlapByOne)
+{
+	std::string path = TEST_BAM_FILE;
+	std::string regionString = "20:26000000-27000000";
+	auto regionPtr1 = std::make_shared< gwiz::Region >(regionString);
+
+	std::string region2String = "20:26151952-26151953";
+	auto regionPtr2 = std::make_shared< gwiz::Region >(region2String);
+	std::vector< gwiz::IAlignment::SharedPtr > alignmentPtrs;
+	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
+	auto alignmentListReaderPtr = std::make_shared< gwiz::AlignmentList >(alignmentPtrs);
+
+	gwiz::IAlignmentList::SharedPtr alignmentListManagerPtr;
+	getAlignmentPtrsFromManager(path, alignmentListManagerPtr, regionPtr1, regionPtr2);
+
+	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
+}
+
+TEST(BamAlignmentManagerTests, TestLoadAlignmentAllChrom20)
+{
+	std::string path = TEST_BAM_FILE;
+	std::string regionString = "20";
+	auto regionPtr1 = std::make_shared< gwiz::Region >(regionString);
+
+	std::string region2String = "20";
+	auto regionPtr2 = std::make_shared< gwiz::Region >(region2String);
+	std::vector< gwiz::IAlignment::SharedPtr > alignmentPtrs;
+	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
+	auto alignmentListReaderPtr = std::make_shared< gwiz::AlignmentList >(alignmentPtrs);
+
+	gwiz::IAlignmentList::SharedPtr alignmentListManagerPtr;
+	getAlignmentPtrsFromManager(path, alignmentListManagerPtr, regionPtr1, regionPtr2);
+
+	compareAlignmentLists(alignmentListReaderPtr, alignmentListManagerPtr);
+}
+
 #endif //GWIZ_BAMALIGNMENTMANAGERTESTS_HPP
