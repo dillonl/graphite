@@ -65,7 +65,6 @@ namespace gwiz
 		position startPosition = this->m_region_ptr->getStartPosition();
 		position endPosition = startPosition + positionIncrement;
 		position bamLastPosition = getLastPositionInBam();
-		std::cout << "bamlastpos: " << bamLastPosition << std::endl;
 		while (endPosition < bamLastPosition)// this->m_region_ptr->getEndPosition())
 		{
             std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
