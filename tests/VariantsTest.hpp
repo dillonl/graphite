@@ -206,6 +206,7 @@ namespace
 		ASSERT_STREQ(qual.c_str(),"100");
 	}
 
+
 	/*
 	TEST(VariantsTest, TestGetGenotypeSimpleNone)
 	{

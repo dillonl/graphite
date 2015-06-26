@@ -28,7 +28,6 @@ namespace gwiz
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);
 		IVariant::SharedPtr buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< IVariant::SharedPtr >& variants);
 
-	private:
 		size_t m_current_index;
 		std::vector< IVariant::SharedPtr > m_variant_ptrs;
 		bool m_next_variant_init;

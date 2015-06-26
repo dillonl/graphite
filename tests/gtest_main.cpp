@@ -4,6 +4,7 @@
 #include "VCFFileTests.hpp"
 #include "SequenceManagerTests.hpp"
 #include "VariantsTest.hpp"
+#include "CompoundVariantTests.hpp"
 #include "RegionTests.hpp"
 #include "BamAlignmentReaderTests.hpp"
 #include "BamAlignmentManagerTests.hpp"
