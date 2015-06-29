@@ -172,6 +172,8 @@ namespace gwiz
 		std::string info = "C=TRUE";
 		line += quality + "\t" + filter + "\t" + info + "\t.\n";
 		auto variant = Variant::BuildVariant(line.c_str(), this->m_vcf_parser);
+
+		//AT SOME POINT WE NEED TO FIGURE OUT A WAY TO GET BACK TO THE VCF REPRESENTATIONS
 		variant->setAltAllelePadding(altAllelePadding);
 		return variant;
 	}
