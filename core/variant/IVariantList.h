@@ -3,8 +3,8 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "core/variant/IVariant.h"
 #include "core/region/Region.h"
+#include "IVariant.h"
 
 #include <vector>
 #include <algorithm>
@@ -12,6 +12,7 @@
 
 namespace gwiz
 {
+	/* class IVariant; */
 	/*
 	 * An iterface for variant readers. Provides a very sparse
 	 * framework for a variant reader. This will allow flexibility

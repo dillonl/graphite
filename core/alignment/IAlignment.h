@@ -6,9 +6,11 @@
 #include <memory>
 #include <unordered_map>
 #include <mutex>
+#include <vector>
+#include <string>
 
 #include "core/util/Types.h"
-#include "core/variant/Variant.h"
+// #include "core/variant/Variant.h"
 
 namespace gwiz
 {

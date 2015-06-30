@@ -14,6 +14,7 @@
 
 namespace
 {
+	/*
 	void testCompoundVariants(std::vector< std::string > variantLines, std::vector< std::string > refSequence, std::vector< std::vector< std::string > > altSequences, std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding)
 	{
 		gwiz::VariantParser< const char* > vcfParser;
@@ -95,6 +96,7 @@ namespace
 		std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding = { { std::make_tuple< uint32_t, uint32_t >(0,0) }, { std::make_tuple< uint32_t, uint32_t >(0,1) }, { std::make_tuple< uint32_t, uint32_t >(0,9) }, { std::make_tuple< uint32_t, uint32_t >(0,0) } };
 		testCompoundVariants(variantLines, refSequence, altSequences, altSequencePadding);
 	}
+	*/
 }
 
 #endif //GWIZ_COMPOUNDVARIANTTESTS_HPP

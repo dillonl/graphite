@@ -12,7 +12,7 @@
 #include <tuple>
 
 #include "IVariant.h"
-#include "core/allele/IAllele.h"
+#include "core/allele/Allele.h"
 #include "core/parser/VCFParser.hpp"
 #include "core/reference/Reference.h"
 
@@ -175,7 +175,7 @@ namespace gwiz
 
 		void setRefAllele(const std::string& ref)
 		{
-			this->m_ref_allele_ptr = std::make_shared< IAllele >(SequenceManager::Instance()->getSequence(ref.c_str()));
+			this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref.c_str()));
 		}
 
 		void setAltAlleles(const std::vector< std::string >& alts)
@@ -184,7 +184,7 @@ namespace gwiz
 			for (const auto& alt : alts)
 			{
 				auto sequencePtr = SequenceManager::Instance()->getSequence(alt.c_str());
-				auto altAllelePtr = std::make_shared< IAllele >(sequencePtr);
+				auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
 				this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
 			}
 		}

@@ -27,12 +27,14 @@ namespace gwiz
 
 	void Variant::setAltAllelePadding(const std::vector< std::tuple< uint32_t, uint32_t > >& altAllelePadding)
 	{
+		/*
 		for (size_t i = 0; i < this->m_alt_allele_ptrs.size(); ++i)
 		{
 			auto altAllelePtr = this->m_alt_allele_ptrs[i];
 			altAllelePtr->setPaddingPrefix(std::get< 0 >(altAllelePadding[i]));
 			altAllelePtr->setPaddingSuffix(std::get< 1 >(altAllelePadding[i]));
 		}
+		*/
 	}
 
 	void Variant::increaseCount(std::shared_ptr< IAlignment > alignmentPtr)

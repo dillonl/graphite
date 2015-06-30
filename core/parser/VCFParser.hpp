@@ -64,9 +64,9 @@ namespace gwiz
 						start
 						, std::cout
 						<< boost::phoenix::val("Error! Column ")
-						<< _4                               // what failed?
+						// << _4                               // what failed?
 						<< boost::phoenix::val(" is incorrectly formatted: \"")
-						<< _1 // prints the error line
+						// << _1 // prints the error line
 						<< std::endl
 						);
 

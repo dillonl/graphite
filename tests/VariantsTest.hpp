@@ -3,7 +3,7 @@
 #include "TestConfig.h"
 
 #include "core/sequence/SequenceManager.h"
-#include "core/allele/IAllele.h"
+#include "core/allele/Allele.h"
 #include "core/parser/VCFParser.hpp"
 #include "core/variant/Variant.h"
 #include "core/variant/VCFFileReader.h"
@@ -25,7 +25,7 @@ namespace
 			for (uint32_t i = 0; i < alleles.size(); ++i)
 			{
 				auto sequencePtr = gwiz::SequenceManager::Instance()->getSequence(alleles[i].c_str());
-				auto allelePtr = std::make_shared< gwiz::IAllele >(sequencePtr);
+				auto allelePtr = std::make_shared< gwiz::Allele >(sequencePtr);
 				this->m_total_allele_count += std::get< 0 >(alleleCounts[i]) + std::get< 1 >(alleleCounts[i]);
 				this->m_allele_count[alleles[i]] = alleleCounts[i];
 				if (i == 0)	{ m_ref_allele_ptr = allelePtr; }

@@ -2,6 +2,7 @@
 #include "core/file/ASCIIGZFileReader.h"
 #include "VariantList.h"
 #include "VCFFileReader.h"
+#include "VCFVariant.h"
 
 #include <fstream>
 #include <iostream>
@@ -17,8 +18,12 @@
 
 namespace gwiz
 {
+
 	VCFFileReader::VCFFileReader(const std::string& path)
 	{
+		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
+		m_id = s_vcf_id;
+		++s_vcf_id;
 		setFileReader(path);
 		Open();
 	}
@@ -92,7 +97,7 @@ namespace gwiz
 				position linePosition = getPositionFromLine(line.c_str());
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_vcf_parser));
+					variantPtrs.emplace_back(VCFVariant::BuildVariant(line, this->m_this_wk_ptr.lock(), this->m_vcf_parser));
 				}
 				if (regionPtr->getEndPosition() < linePosition) { break; } // if we have passed the end position of the region then stop looking for variants
 			}

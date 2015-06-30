@@ -11,6 +11,7 @@
 
 namespace gwiz
 {
+	class IAllele;
 	class IAlignment;
     class IVariant : private boost::noncopyable
     {

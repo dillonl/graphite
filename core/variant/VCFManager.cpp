@@ -12,7 +12,7 @@ namespace gwiz
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr)
 	{
-		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 	}
 
@@ -22,7 +22,7 @@ namespace gwiz
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
-			auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath);
 			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 		}
 	}
