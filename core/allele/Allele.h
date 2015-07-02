@@ -17,16 +17,18 @@ namespace gwiz
 		{
 		}
 
-		Allele() = delete;
 		~Allele() {}
 
 		std::shared_ptr< Sequence > getSequencePtr() override { return this->m_sequence_ptr; }
 		const char* getSequence() override { return this->m_sequence_ptr->getSequence(); }
 		std::string getSequenceString() override { return this->m_sequence_ptr->getSequenceString(); }
+		void setMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) { this->m_allele_meta_data_ptr = alleleMetaDataPtr; }
+		AlleleMetaData::SharedPtr getMetaData() { return this->m_allele_meta_data_ptr; }
 
 	protected:
+		Allele() {}
 		std::shared_ptr< Sequence > m_sequence_ptr;
-
+		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
 	};
 }
 

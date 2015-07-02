@@ -148,6 +148,7 @@ namespace gwiz
 		std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
 		std::map< std::string, std::string > altMap; // maps new alt with the original vcf line
 		std::vector< std::tuple< uint32_t, uint32_t > > altAllelePadding;
+		auto compoundVariantPtr = std::make_shared< Variant::SharedPtr >();
 		// loop over all the variants
 		for (auto variantPtr : variants)
 		{
