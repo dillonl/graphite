@@ -149,6 +149,7 @@ namespace gwiz
 		std::map< std::string, std::string > altMap; // maps new alt with the original vcf line
 		std::vector< std::tuple< uint32_t, uint32_t > > altAllelePadding;
 		auto compoundVariantPtr = std::make_shared< Variant::SharedPtr >();
+		std::unordered_map< Sequence::SharedPtr, IAllele::SharedPtr > sequenceAlleleMap;
 		// loop over all the variants
 		for (auto variantPtr : variants)
 		{
@@ -164,6 +165,19 @@ namespace gwiz
 				line += variantString + ",";
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
 				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
+				/*
+				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequencePtr());
+				auto alleleMetaDataPtr = std::make_shared< AlleleMetaData >(nullptr, paddingPrefix, paddingSuffix);
+				auto alleleCopy = altAllelePtr->copyAllele();
+				if (seqAlleleIter != sequenceAlleleMap.end()) // if this is not the first time we have seen this allele sequence
+				{
+					sequenceAlleleMap.at(altAllelePtr->getSequencePtr())->addAlleleMetaData(alleleMetaDataPtr);
+				}
+				else // if this is the first time we have seen this allele sequence
+				{
+					sequenceAlleleMap.at(altAllelePtr->getSequencePtr()) = alleleCopy;
+				}
+				*/
 				altAllelePadding.emplace_back(std::make_tuple(paddingPrefix, paddingSuffix));
 			}
 		}

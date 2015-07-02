@@ -19,6 +19,7 @@ namespace gwiz
 
 		virtual ~IAllele() {}
 
+		virtual IAllele::SharedPtr copyAllele() = 0;
 		virtual std::shared_ptr< Sequence > getSequencePtr() = 0;
 		virtual const char* getSequence() = 0;
 		virtual std::string getSequenceString() = 0;

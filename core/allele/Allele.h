@@ -19,6 +19,13 @@ namespace gwiz
 
 		~Allele() {}
 
+		IAllele::SharedPtr copyAllele() override
+		{
+			auto allelePtr = std::make_shared< Allele >(this->m_sequence_ptr);
+			allelePtr->m_allele_meta_data_ptr = this->m_allele_meta_data_ptr;
+			return allelePtr;
+		}
+
 		std::shared_ptr< Sequence > getSequencePtr() override { return this->m_sequence_ptr; }
 		const char* getSequence() override { return this->m_sequence_ptr->getSequence(); }
 		std::string getSequenceString() override { return this->m_sequence_ptr->getSequenceString(); }

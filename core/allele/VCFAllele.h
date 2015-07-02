@@ -5,12 +5,20 @@
 
 namespace gwiz
 {
+	class VCFFileReader;
 	class VCFAllele : public Allele
 	{
 	public:
-		VCFAllele() {}
-		~Allele() {}
+	    VCFAllele(Sequence::SharedPtr sequence, VCFFileReader::SharedPtr vcfFileReaderPtr) : m_sequence_ptr(sequence), m_vcf_file_reader_ptr(vcfFileReaderPtr) {}
+		~VCFAllele() {}
 
+		virtual IAllele::SharedPtr copyAllele() override
+		{
+			auto allelePtr = std::make_shared< VCFAllele >(this->m_sequence_ptr);
+			allelePtr->m_allele_meta_data_ptr = this->m_allele_meta_data_ptr;
+			allelePtr->m_vcf_file_reader_ptr = this->m_vcf_file_reader_ptr;
+			return allelePtr;
+		}
 		/*
 		  We use a createAllelePtr static method so we can create a weak pointer
 		  to the allelemetadata object. That way the allelemetadata has a way
@@ -24,6 +32,7 @@ namespace gwiz
 			return allelePtr;
 		}
 
+		VCFFileReader::SharedPtr getVCFFileReader() { return this->m_vcf_file_reader_ptr; }
 		std::vector< std::shared_ptr< AlleleMetaData > > getAlleleMetaDataPtrs() override { return m_allele_meta_data_ptrs; }
 
 		void addAlleleMetaData(std::shared_ptr< VCFFileReader > vcfReaderPtr, uint16_t paddingPrefix, uint16_t paddingSuffix) override
@@ -33,6 +42,7 @@ namespace gwiz
 
 	protected:
 		std::vector< AlleleMetaData::SharedPtr > m_allele_meta_data_ptrs;
+		VCFFileReader::SharedPtr m_vcf_file_reader_ptr;
 
 	};
 }
