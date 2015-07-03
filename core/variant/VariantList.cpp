@@ -1,5 +1,6 @@
 #include "VariantList.h"
 #include "Variant.h"
+#include "core/allele/EquivalentAllele.h"
 
 namespace gwiz
 {
@@ -162,22 +163,28 @@ namespace gwiz
 				std::string variantString = referenceString;
 				variantString.erase(variantPtr->getPosition() - startPosition, variantPtr->getRefAllelePtr()->getSequenceString().size());
 				variantString.insert(variantPtr->getPosition() - startPosition, altString);
-				line += variantString + ",";
+				altAllelePtr->setSequence(SequenceManager::Instance()->getSequence(variantString));
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
 				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
-				/*
+
 				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequencePtr());
-				auto alleleMetaDataPtr = std::make_shared< AlleleMetaData >(nullptr, paddingPrefix, paddingSuffix);
-				auto alleleCopy = altAllelePtr->copyAllele();
+				altAllelePtr->setAlleleMetaData(std::make_shared< AlleleMetaData >(paddingPrefix, paddingSuffix));
 				if (seqAlleleIter != sequenceAlleleMap.end()) // if this is not the first time we have seen this allele sequence
 				{
-					sequenceAlleleMap.at(altAllelePtr->getSequencePtr())->addAlleleMetaData(alleleMetaDataPtr);
+					auto equivalentAllelePtr = std::dynamic_pointer_cast< EquivalentAllele >(seqAlleleIter->second);
+					if (!equivalentAllelePtr) // if the seqAllele is not an equivalentallele then create a new one, add the allele in the map and then add the equivalentallele it to the map
+					{
+						equivalentAllelePtr = std::make_shared< EquivalentAllele >(altAllelePtr->getSequencePtr());
+						equivalentAllelePtr->addAllele(seqAlleleIter->second);
+						sequenceAlleleMap[altAllelePtr->getSequencePtr()] = equivalentAllelePtr;
+					}
+					equivalentAllelePtr->addAllele(altAllelePtr);
 				}
 				else // if this is the first time we have seen this allele sequence
 				{
-					sequenceAlleleMap.at(altAllelePtr->getSequencePtr()) = alleleCopy;
+					sequenceAlleleMap[altAllelePtr->getSequencePtr()] = altAllelePtr;
 				}
-				*/
+
 				altAllelePadding.emplace_back(std::make_tuple(paddingPrefix, paddingSuffix));
 			}
 		}

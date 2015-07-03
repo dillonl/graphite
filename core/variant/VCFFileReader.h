@@ -23,29 +23,23 @@
 
 namespace gwiz
 {
-	class VCFFileReader : private boost::noncopyable, public SharedCreator< VCFFileReader >
+	class VCFFileReader : private boost::noncopyable
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;
 		typedef std::weak_ptr<VCFFileReader> WeakPtr;
+		~VCFFileReader();
 
 		inline static VCFFileReader::SharedPtr CreateVCFFileReader(const std::string& path)
 		{
-			/*
-			_private_const p;
-			_private_destr d;
-			auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(p, path, d);
-			vcfFileReaderPtr->m_this_wk_ptr = vcfFileReaderPtr;
+			auto vcfFileReaderPtr = std::shared_ptr< VCFFileReader >(new VCFFileReader(path));
 			return vcfFileReaderPtr;
-			*/
-			return nullptr;
 		}
 
 		uint32_t getID() { return this->m_id; }
 		std::vector< IVariant::SharedPtr > getVariantsInRegion(Region::SharedPtr regionPtr);
 	protected:
 		VCFFileReader(const std::string& path);
-		~VCFFileReader();
 	private:
 
 		void Open();

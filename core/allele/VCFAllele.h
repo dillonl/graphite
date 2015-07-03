@@ -35,9 +35,14 @@ namespace gwiz
 		VCFFileReader::SharedPtr getVCFFileReader() { return this->m_vcf_file_reader_ptr; }
 		std::vector< std::shared_ptr< AlleleMetaData > > getAlleleMetaDataPtrs() override { return m_allele_meta_data_ptrs; }
 
-		void addAlleleMetaData(std::shared_ptr< VCFFileReader > vcfReaderPtr, uint16_t paddingPrefix, uint16_t paddingSuffix) override
+		AlleleMetaData::SharedPtr generateAlleleMetaData(uint16_t paddingPrefix, uint16_t paddingSuffix) override
 		{
-			this->m_allele_meta_data_ptrs.emplace_back(std::make_shared< AlleleMetaData >(vcfReaderPtr, paddingPrefix, paddingSuffix));
+			return std::make_shared< AlleleMetaData >(this->m_vcf_file_reader_ptr, paddingPrefix, paddingSuffix);
+		}
+
+		void addAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) override
+		{
+			this->m_allele_meta_data_ptrs.emplace_back(alleleMetaDataPtr);
 		}
 
 	protected:

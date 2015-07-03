@@ -12,29 +12,24 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< Allele > SharedPtr;
-	    Allele(std::shared_ptr< Sequence > sequencePtr) :
+	    Allele(Sequence::SharedPtr sequencePtr) :
 		    m_sequence_ptr(sequencePtr)
 		{
 		}
 
+		Allele() = delete;
 		~Allele() {}
 
-		IAllele::SharedPtr copyAllele() override
-		{
-			auto allelePtr = std::make_shared< Allele >(this->m_sequence_ptr);
-			allelePtr->m_allele_meta_data_ptr = this->m_allele_meta_data_ptr;
-			return allelePtr;
-		}
 
 		std::shared_ptr< Sequence > getSequencePtr() override { return this->m_sequence_ptr; }
 		const char* getSequence() override { return this->m_sequence_ptr->getSequence(); }
+		void setSequence(std::shared_ptr< Sequence > sequencePtr) override { this->m_sequence_ptr = sequencePtr; }
 		std::string getSequenceString() override { return this->m_sequence_ptr->getSequenceString(); }
-		void setMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) { this->m_allele_meta_data_ptr = alleleMetaDataPtr; }
-		AlleleMetaData::SharedPtr getMetaData() { return this->m_allele_meta_data_ptr; }
+		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr)  override { this->m_allele_meta_data_ptr = alleleMetaDataPtr; }
+		virtual AlleleMetaData::SharedPtr getAlleleMetaData() override { return this->m_allele_meta_data_ptr; }
 
 	protected:
-		Allele() {}
-		std::shared_ptr< Sequence > m_sequence_ptr;
+		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
 	};
 }

@@ -18,11 +18,12 @@ namespace gwiz
 	    IAllele() { }
 
 		virtual ~IAllele() {}
-
-		virtual IAllele::SharedPtr copyAllele() = 0;
 		virtual std::shared_ptr< Sequence > getSequencePtr() = 0;
 		virtual const char* getSequence() = 0;
 		virtual std::string getSequenceString() = 0;
+		virtual void setSequence(std::shared_ptr< Sequence > sequencePtr) = 0;
+		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
+		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
 
 		inline uint32_t getForwardCount() { return this->m_forward_count.load(); }
 		inline uint32_t getReverseCount() { return this->m_reverse_count.load(); }
