@@ -143,17 +143,16 @@ namespace gwiz
 	IVariant::SharedPtr VariantList::buildCompoundVariant(const position startPosition, const std::string& referenceString, const std::vector< IVariant::SharedPtr >& variants)
 	{
 		position referenceEndPosition = referenceString.size() + startPosition;
-		std::string chrom = variants[0]->getChrom();
-		position pos = variants[0]->getPosition();
-		std::string id = ".";
-		std::string line = chrom + "\t" + std::to_string(pos) + "\t" + id + "\t" + referenceString + "\t";
-		std::map< std::string, std::string > altMap; // maps new alt with the original vcf line
-		std::vector< std::tuple< uint32_t, uint32_t > > altAllelePadding;
 		auto compoundVariantPtr = std::make_shared< Variant::SharedPtr >();
 		std::unordered_map< Sequence::SharedPtr, IAllele::SharedPtr > sequenceAlleleMap;
+		auto equivalentRefAllelePtr = std::make_shared< EquivalentAllele >(SequenceManager::Instance()->getSequence(referenceString));
 		// loop over all the variants
 		for (auto variantPtr : variants)
 		{
+			uint16_t refPaddingPrefix = variantPtr->getPosition() - startPosition;
+			uint16_t refPaddingSuffix = referenceString.size() - (refPaddingPrefix + variantPtr->getRefAllelePtr()->getSequencePtr()->getLength());
+			variantPtr->getRefAllelePtr()->setAlleleMetaData(std::make_shared< AlleleMetaData >(refPaddingPrefix, refPaddingSuffix));
+			equivalentRefAllelePtr->addAllele(variantPtr->getRefAllelePtr());
 			// loop over all the alts in the variants
 			for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
 			{
@@ -167,8 +166,8 @@ namespace gwiz
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
 				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
 
-				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequencePtr());
 				altAllelePtr->setAlleleMetaData(std::make_shared< AlleleMetaData >(paddingPrefix, paddingSuffix));
+				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequencePtr());
 				if (seqAlleleIter != sequenceAlleleMap.end()) // if this is not the first time we have seen this allele sequence
 				{
 					auto equivalentAllelePtr = std::dynamic_pointer_cast< EquivalentAllele >(seqAlleleIter->second);
@@ -185,9 +184,16 @@ namespace gwiz
 					sequenceAlleleMap[altAllelePtr->getSequencePtr()] = altAllelePtr;
 				}
 
-				altAllelePadding.emplace_back(std::make_tuple(paddingPrefix, paddingSuffix));
 			}
 		}
+		std::vector< IAllele::SharedPtr > altAllelePtrs;
+		altAllelePtrs.reserve(sequenceAlleleMap.size());
+		for (auto altMapIter : sequenceAlleleMap) { altAllelePtrs.emplace_back(altMapIter.second); }
+		auto variantPtr = std::make_shared< Variant >(startPosition, variants[0]->getChrom(), ".", "0", "PASS", equivalentRefAllelePtr, altAllelePtrs);
+
+		return variantPtr;
+
+/*
 		line.replace(line.size() - 1, 1, "\t"); // replace the past comma with a tab
 		std::string quality = "0";
 		std::string filter = "PASS";
@@ -197,7 +203,7 @@ namespace gwiz
 
 		//AT SOME POINT WE NEED TO FIGURE OUT A WAY TO GET BACK TO THE VCF REPRESENTATIONS
 		variant->setAltAllelePadding(altAllelePadding);
-		return variant;
+*/
 	}
 
 	VariantList::SharedPtr VariantList::getVariantsInRegion(Region::SharedPtr regionPtr)

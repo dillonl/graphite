@@ -21,13 +21,16 @@ namespace gwiz
 {
 
 	class IAlignment;
-
 	class Variant : public IVariant
 	{
 	public:
 		typedef std::shared_ptr< Variant > SharedPtr;
+		Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs);
+
 		Variant();
 		~Variant();
+
+		/* Variant::SharedPtr copyVariant(IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs); */
 
 		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser)
 		{
@@ -40,10 +43,10 @@ namespace gwiz
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
 
-			auto altsDupsRemoved = removeDuplicateAltAlleles(alts);
+			/* auto altsDupsRemoved = removeDuplicateAltAlleles(alts); */
 
 			variantPtr->setRefAllele(ref);
-			variantPtr->setAltAlleles(altsDupsRemoved);
+			variantPtr->setAltAlleles(alts);
 
 			variantPtr->m_all_allele_ptrs.reserve(variantPtr->m_alt_allele_ptrs.size() + 1);
 			variantPtr->m_all_allele_ptrs.emplace_back(variantPtr->m_ref_allele_ptr);
@@ -158,6 +161,8 @@ namespace gwiz
 		void printVariant(std::ostream& out) override;
 
 	protected:
+		void init();
+
 		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)
 		{
 			std::vector< std::string > tmpAlts;

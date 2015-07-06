@@ -3,18 +3,52 @@
 
 namespace gwiz
 {
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_total_allele_count_low_quality(0), m_total_allele_count(0)
+	{
+		init();
+		this->m_ref_allele_ptr = refAllelePtr;
+		this->m_alt_allele_ptrs = altAllelePtrs;
+
+		this->m_all_allele_ptrs.reserve(this->m_alt_allele_ptrs.size() + 1);
+		this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
+		this->m_all_allele_ptrs.insert(this->m_all_allele_ptrs.end(), this->m_alt_allele_ptrs.begin(), this->m_alt_allele_ptrs.end());
+	}
+
 	Variant::Variant() :
 		m_total_allele_count_low_quality(0),
 		m_total_allele_count(0)
+	{
+		init();
+	}
+
+	Variant::~Variant()
+	{
+	}
+
+	void Variant::init()
 	{
 		static uint32_t uniqueID;
 		m_unique_id = uniqueID;
 		++uniqueID;
 	}
 
-	Variant::~Variant()
+	/*
+	Variant::SharedPtr Variant::copyVariant(IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs)
 	{
+		auto variantPtr = std::make_shared< Variant >();
+		variantPtr->m_position = this->m_position;
+		variantPtr->m_chrom = this->m_chrom;
+		variantPtr->m_id = this->m_id;
+		variantPtr->m_qual = this->m_qual;
+		variantPtr->m_filter = this->m_filter;
+		variantPtr->m_ref_allele_ptr = refAllelePtr;
+		variantPtr->m_alt_allele_ptrs = altAllelePtrs;
+		variantPtr->m_all_allele_ptrs.reserve(altAllelePtrs.size() + 1);
+		variantPtr->m_all_allele_ptrs[0] = refAllelePtr;
+		// variantPtr->m_all_allele_ptrs.push_back(altAllelePtrs);
+		return variantPtr;
 	}
+	*/
 
 	void Variant::incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr)
 	{
