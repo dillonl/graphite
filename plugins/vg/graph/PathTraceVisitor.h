@@ -26,17 +26,21 @@ namespace vg
 		template< typename V, typename Graph >
 			void discover_vertex(V u, Graph& g)
 		{
+			std::cout << "discover" << std::endl;
 			this->m_current_path.emplace_back(u);
 		}
 
 		template< typename V, typename Graph >
 			void finish_vertex(V u, Graph& g)
 		{
+			std::cout << "finish1" << std::endl;
 			// if we are at the end of a path
 			if (boost::out_degree(u, g) == 0)
 			{
+				std::cout << "finish2: " << this->m_current_path.size() << std::endl;
 				this->m_paths.emplace_back(this->m_current_path);
 			}
+			std::cout << "finish3" << std::endl;
 			this->m_current_path.pop_back();
 		}
 

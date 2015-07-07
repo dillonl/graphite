@@ -25,22 +25,19 @@ namespace gwiz
 			boost::depth_first_search((*this->m_graph_ptr), boost::visitor(pathTraceVisitor));
 			auto tracePaths = pathTraceVisitor.getPaths();
 			Graph graph = *this->m_graph_ptr;
-			/*
-			for (std::vector< std::vector< VariantVertexDescriptor > > descriptorPath : tracePaths)
+			std::cout << "paths count: " << tracePaths.size() << std::endl;
+			for (std::vector< VariantVertexDescriptor > descriptorPath : tracePaths)
 			{
 				std::vector< INode::SharedPtr > pathNodes;
 				std::string path;
-				for (std::vector< VariantVertexDescriptor > nodeDescriptorVec : tracePaths)
+				for (VariantVertexDescriptor nodeDescriptor : descriptorPath)
 				{
-					for (VariantVertexDescriptor nodeDescriptor : nodeDescriptorVec)
-					{
-						INode::SharedPtr node = graph[nodeDescriptor];
-						path += std::string(node->getSequence(), node->getLength());
-						pathNodes.emplace_back(node);
-					}
+					INode::SharedPtr node = graph[nodeDescriptor];
+					path += std::string(node->getSequence(), node->getLength());
+					pathNodes.emplace_back(node);
 				}
+				paths.emplace_back(path);
 			}
-			*/
 		}
 
 		VariantGraph::VariantVertexDescriptor VariantGraph::getVertexAtPosition(position referencePosition)
@@ -76,7 +73,6 @@ namespace gwiz
 			VariantVertexDescriptor referenceVertex;
 			std::vector< VariantVertexDescriptor > altAndRefVertices;
 			IVariant::SharedPtr variantPtr;
-			// while (getNextCompoundVariant(variantPtr))
 			while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 			{
 				referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);

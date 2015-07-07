@@ -36,5 +36,9 @@ int main(int argc, char** argv)
 	std::vector< std::vector< gwiz::INode::SharedPtr > > nodes;
 	variantGraphPtr->getAllPaths(paths, nodes);
 
+	for (auto path : paths)
+	{
+		std::cout << path << std::endl;
+	}
 	return 0;
 }
