@@ -24,13 +24,23 @@ namespace gwiz
 			PathTraceVisitor pathTraceVisitor;
 			boost::depth_first_search((*this->m_graph_ptr), boost::visitor(pathTraceVisitor));
 			auto tracePaths = pathTraceVisitor.getPaths();
-			for (auto descriptorPath : tracePaths)
+			Graph graph = *this->m_graph_ptr;
+			/*
+			for (std::vector< std::vector< VariantVertexDescriptor > > descriptorPath : tracePaths)
 			{
-				for (auto nodeDescriptor : tracePaths)
+				std::vector< INode::SharedPtr > pathNodes;
+				std::string path;
+				for (std::vector< VariantVertexDescriptor > nodeDescriptorVec : tracePaths)
 				{
-					// INode::SharedPtr node = (m_graph_ptr)[nodeDescriptor];
+					for (VariantVertexDescriptor nodeDescriptor : nodeDescriptorVec)
+					{
+						INode::SharedPtr node = graph[nodeDescriptor];
+						path += std::string(node->getSequence(), node->getLength());
+						pathNodes.emplace_back(node);
+					}
 				}
 			}
+			*/
 		}
 
 		VariantGraph::VariantVertexDescriptor VariantGraph::getVertexAtPosition(position referencePosition)

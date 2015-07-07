@@ -32,5 +32,9 @@ int main(int argc, char** argv)
 	std::cout << "starting graph construction" << std::endl;
 	variantGraphPtr->constructGraph();
 
+	std::vector< std::string > paths;
+	std::vector< std::vector< gwiz::INode::SharedPtr > > nodes;
+	variantGraphPtr->getAllPaths(paths, nodes);
+
 	return 0;
 }
