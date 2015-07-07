@@ -8,7 +8,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
 
 # set header and source files
 set(GWIZ_TOOLS_SOURCES
-  gssw.cpp
+	gssw.cpp
+)
+
+# set header and source files
+set(PATHTRACE_TOOLS_SOURCES
+	pathtrace.cpp
 )
 
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
@@ -26,9 +31,22 @@ set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 add_executable(gssw
   ${GWIZ_TOOLS_SOURCES}
 )
+add_executable(pathtrace
+  ${PATHTRACE_TOOLS_SOURCES}
+)
 
 # link libraries to executables
 target_link_libraries(gssw
+  BamTools
+  BamTools-utils
+  ${CORE_LIB}
+  fastahack_lib
+  ${SCI_BOOST_LIBRARY}
+  ${PLUGIN_LIBS}
+  ${GSSW_LIB}
+)
+
+target_link_libraries(pathtrace
   BamTools
   BamTools-utils
   ${CORE_LIB}

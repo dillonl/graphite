@@ -29,6 +29,7 @@ namespace gwiz
 			virtual void constructGraph() override;
 
 			VariantVertexDescriptor getVertexAtPosition(position referencePosition);
+			void getAllPaths(std::vector< std::string >& paths, std::vector< std::vector< INode::SharedPtr > >& nodes);
 
 		protected:
 			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
@@ -61,8 +62,6 @@ namespace gwiz
 			std::mutex m_graph_mutex;
 
 		private:
-
-
 
 			struct OurVertexPropertyWriter {
 			OurVertexPropertyWriter(Graph& g_) : g(g_) {}

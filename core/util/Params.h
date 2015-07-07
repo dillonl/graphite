@@ -10,9 +10,11 @@ namespace gwiz
 	class Params : private boost::noncopyable
 	{
 	public:
-		Params(int argc, char** argv);
+		Params();
 		~Params();
 
+		void parseGSSW(int argc, char** argv);
+		void parsePathTrace(int argc, char** argv);
 		bool showHelp();
 		void printHelp();
 		bool validateRequired();

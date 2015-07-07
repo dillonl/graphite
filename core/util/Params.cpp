@@ -4,7 +4,16 @@
 
 namespace gwiz
 {
-	Params::Params(int argc, char** argv)
+	Params::Params()
+	{
+
+	}
+
+	Params::~Params()
+	{
+	}
+
+	void Params::parseGSSW(int argc, char** argv)
 	{
 		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
 		m_options_description_ptr->add_options()
@@ -12,7 +21,7 @@ namespace gwiz
 			(",b", boost::program_options::value< std::string >()->required(), "Path to input BAM file")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file")
-			(",o", boost::program_options::value< std::string >()->required(), "Path to output VCF file [optional - default is stdout]")
+			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output VCF file [optional - default is stdout]")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
 			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")
 			(",t", boost::program_options::value< uint32_t >()->default_value(std::thread::hardware_concurrency() * 2), "Thread count [optional - default is number of cores x 2]");
@@ -20,8 +29,17 @@ namespace gwiz
 		boost::program_options::store(parseCommandLine, m_variables_map);
 	}
 
-	Params::~Params()
+	void Params::parsePathTrace(int argc, char** argv)
 	{
+		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
+		m_options_description_ptr->add_options()
+			("help,h","Print help message")
+			(",r", boost::program_options::value< std::string >()->required(), "Region information")
+			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file")
+			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output VCF file [optional - default is stdout]")
+			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file");
+		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
+		boost::program_options::store(parseCommandLine, m_variables_map);
 	}
 
 	bool Params::showHelp()

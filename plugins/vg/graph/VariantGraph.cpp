@@ -2,6 +2,7 @@
 
 #include "VariantGraph.h"
 #include "SNPNode.h"
+#include "PathTraceVisitor.h"
 
 namespace gwiz
 {
@@ -16,6 +17,20 @@ namespace gwiz
 
 		VariantGraph::~VariantGraph()
 		{
+		}
+
+		void VariantGraph::getAllPaths(std::vector< std::string >& paths, std::vector< std::vector< INode::SharedPtr > >& nodes)
+		{
+			PathTraceVisitor pathTraceVisitor;
+			boost::depth_first_search((*this->m_graph_ptr), boost::visitor(pathTraceVisitor));
+			auto tracePaths = pathTraceVisitor.getPaths();
+			for (auto descriptorPath : tracePaths)
+			{
+				for (auto nodeDescriptor : tracePaths)
+				{
+					// INode::SharedPtr node = (m_graph_ptr)[nodeDescriptor];
+				}
+			}
 		}
 
 		VariantGraph::VariantVertexDescriptor VariantGraph::getVertexAtPosition(position referencePosition)

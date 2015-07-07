@@ -10,7 +10,8 @@
 
 int main(int argc, char** argv)
 {
-	gwiz::Params params(argc, argv);
+	gwiz::Params params;
+	params.parseGSSW(argc, argv);
 	if (params.showHelp() || !params.validateRequired())
 	{
 		params.printHelp();
