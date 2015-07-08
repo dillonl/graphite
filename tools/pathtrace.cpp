@@ -35,10 +35,10 @@ int main(int argc, char** argv)
 	std::vector< std::string > paths;
 	std::vector< std::vector< gwiz::INode::SharedPtr > > nodes;
 	variantGraphPtr->getAllPaths(paths, nodes);
-
-	for (auto path : paths)
+	for (auto nodeList : nodes)
 	{
-		std::cout << path << std::endl;
+		gwiz::vg::VariantGraph::printNodes(nodeList);
+		std::cout << std::endl;
 	}
 	return 0;
 }

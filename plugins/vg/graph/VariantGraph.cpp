@@ -1,8 +1,12 @@
 #include <boost/graph/graphviz.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include "VariantGraph.h"
 #include "SNPNode.h"
 #include "PathTraceVisitor.h"
+
+#include <deque>
+#include <set>
 
 namespace gwiz
 {
@@ -21,22 +25,35 @@ namespace gwiz
 
 		void VariantGraph::getAllPaths(std::vector< std::string >& paths, std::vector< std::vector< INode::SharedPtr > >& nodes)
 		{
-			PathTraceVisitor pathTraceVisitor;
-			boost::depth_first_search((*this->m_graph_ptr), boost::visitor(pathTraceVisitor));
-			auto tracePaths = pathTraceVisitor.getPaths();
 			Graph graph = *this->m_graph_ptr;
-			std::cout << "paths count: " << tracePaths.size() << std::endl;
-			for (std::vector< VariantVertexDescriptor > descriptorPath : tracePaths)
+			std::deque< VariantVertexDescriptor > vertices;
+			vertices.emplace_front(boost::vertex(0,graph));
+			std::vector< INode::SharedPtr > nodeTracker;
+			std::unordered_map< VariantVertexDescriptor, std::vector< INode::SharedPtr > > vertexMap;
+			while (!vertices.empty())
 			{
-				std::vector< INode::SharedPtr > pathNodes;
-				std::string path;
-				for (VariantVertexDescriptor nodeDescriptor : descriptorPath)
+				auto currentVertexDescriptor = vertices.front();
+				vertices.pop_front();
+				auto nodePtr = graph[currentVertexDescriptor];
+
+				if (vertexMap.find(currentVertexDescriptor) != vertexMap.end())
 				{
-					INode::SharedPtr node = graph[nodeDescriptor];
-					path += std::string(node->getSequence(), node->getLength());
-					pathNodes.emplace_back(node);
+					nodeTracker = vertexMap[currentVertexDescriptor];
 				}
-				paths.emplace_back(path);
+				nodeTracker.emplace_back(nodePtr);
+				Graph::out_edge_iterator e, end;
+				boost::tie(e, end) = boost::out_edges(currentVertexDescriptor, graph);
+				bool pathEnd = (e == end);
+				for (; e != end; ++e)
+				{
+					auto vertexDescriptor = target(*e, graph);
+					vertices.emplace_front(vertexDescriptor);
+					vertexMap[vertexDescriptor] = nodeTracker;
+				}
+				if (pathEnd)
+				{
+					nodes.emplace_back(nodeTracker);
+				}
 			}
 		}
 

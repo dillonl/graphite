@@ -30,6 +30,13 @@ namespace gwiz
 
 			VariantVertexDescriptor getVertexAtPosition(position referencePosition);
 			void getAllPaths(std::vector< std::string >& paths, std::vector< std::vector< INode::SharedPtr > >& nodes);
+			static void printNodes(const std::vector< INode::SharedPtr >& nodePaths)
+			{
+				for (auto node : nodePaths)
+				{
+					std::cout << std::string(node->getSequence(), node->getLength()) << "|";
+				}
+			}
 
 		protected:
 			VariantVertexDescriptor addReference(std::vector< VariantVertexDescriptor >& altAndRefVertices, ReferenceNode::SharedPtr referenceNode);
