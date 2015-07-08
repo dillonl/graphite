@@ -36,8 +36,8 @@ namespace gwiz
 			("help,h","Print help message")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file")
-			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output VCF file [optional - default is stdout]")
-			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file");
+			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
+		    (",p", boost::program_options::value< std::string >()->default_value(""), "Prefix to output files [optional - default is stdout]");
 		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
 		boost::program_options::store(parseCommandLine, m_variables_map);
 	}
@@ -84,6 +84,11 @@ namespace gwiz
 	std::string Params::getOutVCFPath()
 	{
 		return m_variables_map["-o"].as< std::string >();
+	}
+
+	std::string Params::getFilePrefix()
+	{
+		return m_variables_map["-p"].as< std::string >();
 	}
 
 	Region::SharedPtr Params::getRegion()

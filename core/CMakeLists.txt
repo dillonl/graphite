@@ -24,6 +24,7 @@ set(GWIZ_FILE_SOURCES
 set(GWIZ_CORE_REFERENCE_SOURCES
   reference/Reference.cpp
   reference/FastaReference.cpp
+  reference/FastaWriter.cpp
   )
 
 set(GWIZ_CORE_REGION_SOURCES

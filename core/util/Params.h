@@ -23,6 +23,7 @@ namespace gwiz
 		std::vector< std::string > getInVCFPaths();
 		std::string getBAMPath();
 		std::string getOutVCFPath();
+		std::string getFilePrefix();
 		Region::SharedPtr getRegion();
 		uint32_t getPercent();
 		uint32_t getThreadCount();
