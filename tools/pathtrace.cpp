@@ -3,6 +3,7 @@
 #include "core/reference/FastaReference.h"
 #include "core/reference/FastaWriter.h"
 #include "plugins/vg/graph/VariantGraph.h"
+#include "plugins/vg/graph/SNPNode.h"
 
 void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes);
 void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out);
@@ -47,11 +48,28 @@ int main(int argc, char** argv)
 void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out)
 {
 	std::string pathString;
+	std::string header;
 	for (auto node : nodes)
 	{
+		auto referenceNodePtr = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >(node);
+		auto variantNodePtr = std::dynamic_pointer_cast< gwiz::vg::SNPNode >(node);
+		header += "{" + std::to_string(node->getPosition());
+		if (referenceNodePtr != nullptr)
+		{
+			header += " r}: ";
+		}
+		else if (variantNodePtr != nullptr)
+		{
+			header += " s}: ";
+		}
+		else
+		{
+			throw "There was an error with generating the header";
+		}
+		header += std::string(node->getSequence(), node->getLength()) + "|";
 		pathString += std::string(node->getSequence(), node->getLength());
 	}
-	std::string header = "test";
+	header = header.substr(0, header.size() - 1);
 	gwiz::FastaWriter fastaWriter(header, pathString);
 	fastaWriter.write(out);
 }
@@ -63,7 +81,7 @@ void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< 
 	{
 		if (filePrefix.size() > 0)
 		{
-			std::string fileName = filePrefix + "_" + std::to_string(count++);
+			std::string fileName = filePrefix + "_" + std::to_string(count++) + ".fa";
 			ofstream out;
 			out.open(fileName, std::ios::out | std::ios::trunc);
 			printNodes(nodeList, out);
@@ -72,6 +90,7 @@ void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< 
 		else
 		{
 			printNodes(nodeList, std::cout);
+			std::cout << std::endl;
 		}
 	}
 }
