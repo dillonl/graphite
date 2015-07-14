@@ -13,7 +13,8 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< Allele > SharedPtr;
 	    Allele(Sequence::SharedPtr sequencePtr) :
-		    m_sequence_ptr(sequencePtr)
+		    m_sequence_ptr(sequencePtr),
+			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
 		{
 		}
 

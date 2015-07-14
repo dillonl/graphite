@@ -145,6 +145,7 @@ namespace gwiz
 		position referenceEndPosition = referenceString.size() + startPosition;
 		auto compoundVariantPtr = std::make_shared< Variant::SharedPtr >();
 		std::unordered_map< Sequence::SharedPtr, IAllele::SharedPtr > sequenceAlleleMap;
+		std::vector< Sequence::SharedPtr > sequenceKeyOrder;
 
 		// since this is a "compound variant" we know that there is going to be more than one reference allele.
 		// They may be the same sequence but they will come from different variants and therefore we want to
@@ -196,13 +197,16 @@ namespace gwiz
 				{
 					sequenceAlleleMap[altAllelePtr->getSequencePtr()] = altAllelePtr;
 				}
-
+				sequenceKeyOrder.emplace_back(altAllelePtr->getSequencePtr());
 			}
 		}
 		// create the varaintPtr and add all the variant information
 		std::vector< IAllele::SharedPtr > altAllelePtrs;
 		altAllelePtrs.reserve(sequenceAlleleMap.size());
-		for (auto altMapIter : sequenceAlleleMap) { altAllelePtrs.emplace_back(altMapIter.second); }
+		for (auto sequencePtr : sequenceKeyOrder) // add the alleles back in the order they were seen
+		{
+			altAllelePtrs.emplace_back(sequenceAlleleMap[sequencePtr]);
+		}
 		auto variantPtr = std::make_shared< Variant >(startPosition, variants[0]->getChrom(), ".", "0", "PASS", equivalentRefAllelePtr, altAllelePtrs);
 
 		return variantPtr;

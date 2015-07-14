@@ -6,7 +6,8 @@
 #include "TestConfig.h"
 
 #include "core/sequence/SequenceManager.h"
-#include "core/allele/IAllele.h"
+#include "core/allele/Allele.h"
+#include "core/allele/EquivalentAllele.h"
 #include "core/parser/VCFParser.hpp"
 #include "core/variant/Variant.h"
 #include "core/variant/VCFFileReader.h"
@@ -14,44 +15,77 @@
 
 namespace
 {
-	/*
-	void testCompoundVariants(std::vector< std::string > variantLines, std::vector< std::string > refSequence, std::vector< std::vector< std::string > > altSequences, std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding)
+	using namespace gwiz;
+
+	void testCompoundVariants(std::vector< std::string > variantLines, std::vector< IAllele::SharedPtr > refAllelePtr, std::vector< std::vector< IAllele::SharedPtr > > altAlleles)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		std::vector< gwiz::IVariant::SharedPtr > variantPtrs;
+		VariantParser< const char* > vcfParser;
+		std::vector< IVariant::SharedPtr > variantPtrs;
 		for (auto& variantLine : variantLines)
 		{
-			variantPtrs.emplace_back(gwiz::Variant::BuildVariant(variantLine, vcfParser));
+			variantPtrs.emplace_back(Variant::BuildVariant(variantLine, vcfParser));
 		}
-		auto variantsListPtr = std::make_shared< gwiz::VariantList >(variantPtrs);
+		auto variantsListPtr = std::make_shared< VariantList >(variantPtrs);
 		variantsListPtr->sort();
 		variantsListPtr->normalizeOverlappingVariants();
 
 		uint32_t variantCounter = 0;
-		gwiz::IVariant::SharedPtr variantPtr;
+		IVariant::SharedPtr variantPtr;
 		while (variantsListPtr->getNextVariant(variantPtr))
 		{
-			ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), refSequence[variantCounter].c_str());
-			for (size_t i = 0; i < altSequences[variantCounter].size(); ++i)
+			auto refMetaDataPtr = variantPtr->getRefAllelePtr()->getAlleleMetaData();
+			auto testRefMetaDataPtr = refAllelePtr[variantCounter]->getAlleleMetaData();
+			ASSERT_STREQ(variantPtr->getRefAllelePtr()->getSequence(), refAllelePtr[variantCounter]->getSequence());
+			ASSERT_EQ(refMetaDataPtr->getPaddingPrefix(), testRefMetaDataPtr->getPaddingPrefix());
+			ASSERT_EQ(refMetaDataPtr->getPaddingSuffix(), testRefMetaDataPtr->getPaddingSuffix());
+			for (size_t i = 0; i < altAlleles[variantCounter].size(); ++i)
 			{
-				ASSERT_STREQ(variantPtr->getAltAllelePtrs()[i]->getSequence(), altSequences[variantCounter][i].c_str());
-				ASSERT_EQ(variantPtr->getAltAllelePtrs()[i]->getPaddingPrefix(), std::get< 0 >(altSequencePadding[variantCounter][i]));
-				ASSERT_EQ(variantPtr->getAltAllelePtrs()[i]->getPaddingSuffix(), std::get< 1 >(altSequencePadding[variantCounter][i]));
+				auto altAllelePtr = altAlleles[variantCounter][i];
+				auto altMetaDataPtr = altAllelePtr->getAlleleMetaData();
+				ASSERT_STREQ(variantPtr->getAltAllelePtrs()[i]->getSequence(), altAllelePtr->getSequence());
+				ASSERT_EQ(altMetaDataPtr->getPaddingPrefix(), altMetaDataPtr->getPaddingPrefix());
+				ASSERT_EQ(altMetaDataPtr->getPaddingSuffix(), altMetaDataPtr->getPaddingSuffix());
 			}
-			ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), altSequences[variantCounter].size());
+			ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), altAlleles[variantCounter].size());
 			++variantCounter;
 		}
+	}
+
+	IAllele::SharedPtr makeAllele(const std::string& seq, std::vector< std::tuple< uint16_t, uint16_t > > padding)
+	{
+		auto sequencePtr = SequenceManager::Instance()->getSequence(seq);
+		IAllele::SharedPtr allelePtr;
+		if (padding.size() > 1)
+		{
+			allelePtr = std::make_shared< EquivalentAllele >(sequencePtr);
+			for (auto& pad : padding)
+			{
+				auto metaDataPtr = std::make_shared< AlleleMetaData >(std::get< 0 >(pad), std::get< 1 >(pad));
+			}
+		}
+		else
+		{
+			allelePtr = std::make_shared< Allele >(sequencePtr);
+			auto metaDataPtr = std::make_shared< AlleleMetaData >(std::get< 0 >(padding[0]), std::get< 1 >(padding[0]));
+		}
+		return allelePtr;
 	}
 
 	TEST(CompoundVariantTests, CompoundVariantSimple)
 	{
 		std::vector< std::string > variantLines = { "20\t60\t.\tTAAGT\tT\t.\t.\t.", "20\t61\t.\tAA\tAGAAG\t.\t.\t.\t.", "20\t63\t.\tGTTAAC\tGTAG,G\t.\t.\t." };
-		std::vector< std::string > refSequence = { "TAAGTTAAC" };
-		std::vector< std::vector< std::string > > altSequences = { { "TTAAC", "TAGAAGGTTAAC", "TAAGTAG", "TAAG" } };
-		std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding = { { std::make_tuple< uint32_t, uint32_t >(0,4), std::make_tuple< uint32_t, uint32_t >(1,6), std::make_tuple< uint32_t, uint32_t >(3,0), std::make_tuple< uint32_t, uint32_t >(3,0) } };
-		testCompoundVariants(variantLines, refSequence, altSequences, altSequencePadding);
+		std::vector< IAllele::SharedPtr > refAllelePtrList = { makeAllele("TAAGTTAAC", {std::make_tuple< uint16_t, uint16_t >(0,0)}) };
+		std::vector< std::vector< IAllele::SharedPtr > > altAllelePtrsList = {};
+		std::vector< IAllele::SharedPtr > altAllelePtrs;
+		altAllelePtrs.emplace_back(makeAllele("TTAAC", {std::make_tuple< uint16_t, uint16_t >(0,4)}));
+		altAllelePtrs.emplace_back(makeAllele("TAGAAGGTTAAC", {std::make_tuple< uint16_t, uint16_t >(1,6)}));
+		altAllelePtrs.emplace_back(makeAllele("TAAGTAG", {std::make_tuple< uint16_t, uint16_t >(3,0)}));
+		altAllelePtrs.emplace_back(makeAllele("TAAG", {std::make_tuple< uint16_t, uint16_t >(3,0)}));
+		altAllelePtrsList.emplace_back(altAllelePtrs);
+		testCompoundVariants(variantLines, refAllelePtrList, altAllelePtrsList);
 	}
 
+/*
 	TEST(CompoundVariantTests, BuildCompoundVariant)
 	{
 		std::vector< std::string > variantLines = { "20\t20301046\t.\tTAATATATGTAATATATATTATATATGTAATATAATATATGTAAT\tT\t.\t.\t.", "20\t20301055\t.\tTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT\tT\t.\t.\t.", "20\t20301104\t.\tGT\tG\t.\t.\t." };
