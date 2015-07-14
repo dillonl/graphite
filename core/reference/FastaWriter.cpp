@@ -26,9 +26,10 @@ namespace gwiz
 		uint32_t currentCharIndex = 0;
 		while (currentCharIndex < this->m_sequence.size())
 		{
+			lineLength = ((currentCharIndex + lineLength) > this->m_sequence.size()) ? lineLength - (this->m_sequence.size() - currentCharIndex) : lineLength;
 			out.write((this->m_sequence.c_str() + currentCharIndex), lineLength);
+			out << std::endl;
 			currentCharIndex += lineLength;
-			lineLength = std::min< uint32_t >(lineLength, std::max< uint32_t >((uint32_t)(this->m_sequence.size() - currentCharIndex), 0));
 		}
 	}
 }

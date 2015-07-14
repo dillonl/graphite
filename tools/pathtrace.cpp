@@ -4,7 +4,8 @@
 #include "core/reference/FastaWriter.h"
 #include "plugins/vg/graph/VariantGraph.h"
 
-void printNodesToFasta(std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes, std::ostream out);
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes);
+void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out);
 
 int main(int argc, char** argv)
 {
@@ -17,7 +18,6 @@ int main(int argc, char** argv)
 	}
 	auto fastaPath = params.getFastaPath();
 	auto vcfPaths = params.getInVCFPaths();
-	auto outputVCFPath = params.getOutVCFPath();
 	auto regionPtr = params.getRegion();
 	auto filePrefix = params.getFilePrefix();
 
@@ -39,35 +39,39 @@ int main(int argc, char** argv)
 	std::vector< std::string > paths;
 	std::vector< std::vector< gwiz::INode::SharedPtr > > nodes;
 	variantGraphPtr->getAllPaths(paths, nodes);
+	printNodesToFasta(filePrefix, nodes);
 
 	return 0;
 }
 
-void printNodesToFasta(std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes, std::ostream out)
+void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out)
 {
-	/*
-	  size_t count = 1;
-	  for (auto nodeList : nodes)
-	  {
-	  std::ostream out;
-	  if (filePrefix.size() > 0)
-	  {
-	  ofstream outfileStream;
-	  out = outFileStream;
-	  out.open(fileName = "" + std::to_string(count++), std::ios::out | std::ios::trunc);
-	  }
-	  else
-	  {
-	  out = std::cout;
-	  }
-	  std::string pathString;
-	  for (auto node : nodePaths)
-	  {
-	  pathString += std::string(node->getSequence(), node->getLength());
-	  }
-	  std::string header = "test";
-	  gwiz::FastaWriter fastaWriter(header, pathString);
-	  fastaWriter.write(out);
-	  }
-	*/
+	std::string pathString;
+	for (auto node : nodes)
+	{
+		pathString += std::string(node->getSequence(), node->getLength());
+	}
+	std::string header = "test";
+	gwiz::FastaWriter fastaWriter(header, pathString);
+	fastaWriter.write(out);
+}
+
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes)
+{
+	size_t count = 1;
+	for (auto nodeList : nodes)
+	{
+		if (filePrefix.size() > 0)
+		{
+			std::string fileName = filePrefix + "_" + std::to_string(count++);
+			ofstream out;
+			out.open(fileName, std::ios::out | std::ios::trunc);
+			printNodes(nodeList, out);
+			out.close();
+		}
+		else
+		{
+			printNodes(nodeList, std::cout);
+		}
+	}
 }
