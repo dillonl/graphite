@@ -131,7 +131,6 @@ namespace gwiz
 			}
 			variantChrom = nextVariant->getChrom();
 		}
-
 		if (!variants.empty())
 		{
 			variant = buildCompoundVariant(startPosition, referenceString, variants);
@@ -174,6 +173,7 @@ namespace gwiz
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
 				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
 				altAllelePtr->setAlleleMetaData(std::make_shared< AlleleMetaData >(paddingPrefix, paddingSuffix));
+				// std::cout << "building aa: " << altAllelePtr->getSequence() << "(" << altAllelePtr->getAlleleMetaData()->getPaddingPrefix() << "," << altAllelePtr->getAlleleMetaData()->getPaddingSuffix() << ")" << std::endl;
 
 				// if this sequence is not in the map then add it. If it is in the map then
 				// switch it with an equivalentAllele. The equivalentAllele keeps track of
@@ -196,8 +196,8 @@ namespace gwiz
 				else // if this is the first time we have seen this allele sequence
 				{
 					sequenceAlleleMap[altAllelePtr->getSequencePtr()] = altAllelePtr;
+					sequenceKeyOrder.emplace_back(altAllelePtr->getSequencePtr()); // add the allelesequence to the keysequencetracker
 				}
-				sequenceKeyOrder.emplace_back(altAllelePtr->getSequencePtr());
 			}
 		}
 		// create the varaintPtr and add all the variant information

@@ -19,21 +19,29 @@ namespace
 
 	void compareAlleles(IAllele::SharedPtr allele1, IAllele::SharedPtr allele2)
 	{
+		// std::cout << "----" << std::endl;
 		auto eAllele1 = std::dynamic_pointer_cast< EquivalentAllele >(allele1);
 		auto eAllele2 = std::dynamic_pointer_cast< EquivalentAllele >(allele2);
 		if (eAllele1 != nullptr && eAllele2 != nullptr)
 		{
+			// std::cout << "ea1(r): " << eAllele1->getSequence() << " ea2(r): " << eAllele2->getSequence() << std::endl;
 			ASSERT_STREQ(eAllele1->getSequence(), eAllele2->getSequence());
 			for (uint32_t i = 0; i < eAllele1->getAllAlleles().size(); ++i)
 			{
-				auto altAllele1 = eAllele1->getAllAlleles()[i];
-				auto altAllele2 = eAllele2->getAllAlleles()[i];
-				auto alt1MetaDataPtr = altAllele1->getAlleleMetaData();
-				auto alt2MetaDataPtr = altAllele2->getAlleleMetaData();
-				ASSERT_STREQ(altAllele1->getSequence(), altAllele2->getSequence());
-				ASSERT_EQ(alt1MetaDataPtr->getPaddingPrefix(), alt2MetaDataPtr->getPaddingPrefix());
-				ASSERT_EQ(alt1MetaDataPtr->getPaddingSuffix(), alt2MetaDataPtr->getPaddingSuffix());
+				auto eqAllele1 = eAllele1->getAllAlleles()[i];
+				auto eqAllele2 = eAllele2->getAllAlleles()[i];
+				auto eq1MetaDataPtr = eqAllele1->getAlleleMetaData();
+				auto eq2MetaDataPtr = eqAllele2->getAlleleMetaData();
+				/*
+				std::cout << "aa1(a): " << eqAllele1->getSequence() << "(" << eq1MetaDataPtr->getPaddingPrefix() << ")" << " aa2(a): " << eqAllele2->getSequence() << "(" << eq2MetaDataPtr->getPaddingPrefix() << ")" << std::endl;
+				std::cout << "t: " << eq1MetaDataPtr->getPaddingPrefix() << " " <<  eq2MetaDataPtr->getPaddingPrefix() << std::endl;;
+				std::cout << "t: " << eq1MetaDataPtr->getPaddingSuffix() << " " <<  eq2MetaDataPtr->getPaddingSuffix() << std::endl;;
+				*/
+				ASSERT_STREQ(eqAllele1->getSequence(), eqAllele2->getSequence());
+				ASSERT_EQ(eq1MetaDataPtr->getPaddingPrefix(), eq2MetaDataPtr->getPaddingPrefix());
+				ASSERT_EQ(eq1MetaDataPtr->getPaddingSuffix(), eq2MetaDataPtr->getPaddingSuffix());
 			}
+			ASSERT_EQ(eAllele1->getAllAlleles().size(), eAllele2->getAllAlleles().size());
 		}
 		else
 		{
@@ -43,6 +51,7 @@ namespace
 			ASSERT_EQ(allele1MetaDataPtr->getPaddingPrefix(), allele2MetaDataPtr->getPaddingPrefix());
 			ASSERT_EQ(allele1MetaDataPtr->getPaddingSuffix(), allele2MetaDataPtr->getPaddingSuffix());
 		}
+		// std::cout << "----" << std::endl;
 	}
 
 	void testCompoundVariants(std::vector< std::string > variantLines, std::vector< IAllele::SharedPtr > refAllelePtr, std::vector< std::vector< IAllele::SharedPtr > > altAlleles)
@@ -63,7 +72,9 @@ namespace
 		{
 			compareAlleles(variantPtr->getRefAllelePtr(), refAllelePtr[variantCounter]);
 			for (size_t i = 0; i < altAlleles[variantCounter].size(); ++i)
+			for (size_t i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
 			{
+				// std::cout << variantPtr->getPosition() << std::endl;
 				compareAlleles(variantPtr->getAltAllelePtrs()[i], altAlleles[variantCounter][i]);
 			}
 			ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), altAlleles[variantCounter].size());
@@ -85,68 +96,126 @@ namespace
 		testCompoundVariants(variantLines, refAllelePtrList, altAllelePtrsList);
 	}
 
-
-	/*
-	  TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT
-	  TAATATATGTAATATATATTATATATGTAATATAATATATGTAAT
-	  *********TAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT
-	  **********************************************************GT**************************************************
-
-	  TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT
-	  *********TAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT
-	  *********TAATATATGT****************************************************************************************************
-
-	*/
-
 	TEST(CompoundVariantTests, BuildCompoundVariant)
 	{
 		std::vector< std::string > variantLines = { "20\t20301046\t.\tTAATATATGTAATATATATTATATATGTAATATAATATATGTAAT\tT\t.\t.\t.", "20\t20301055\t.\tTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT\tT\t.\t.\t.", "20\t20301104\t.\tGT\tG\t.\t.\t." };
 		std::vector< IAllele::SharedPtr > refAllelePtrs = {
-			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(0, 65)),
-			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(9, 0)),
-			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(57, 50))
+			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAAT", std::make_shared< AlleleMetaData >(0, 65)),
+			std::make_shared< Allele >("TAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(9, 0)),
+			std::make_shared< Allele >("GT", std::make_shared< AlleleMetaData >(58, 50))
 		};
 
 		auto refPtr = std::make_shared< EquivalentAllele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", refAllelePtrs);
 		std::vector< IAllele::SharedPtr > refAllelePtrList = { refPtr };
+
 		std::vector< std::vector< IAllele::SharedPtr > > altAllelePtrsList = {};
 		std::vector< IAllele::SharedPtr > altAllelePtrs = {
-			std::make_shared< Allele >("TATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(0, 108)),
-			std::make_shared< Allele >("TAATATATGT", std::make_shared< AlleleMetaData >(9, 90)),
-			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(3, 0))
+			std::make_shared< Allele >("TATATATTATATATGTAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(0, 65)),
+			std::make_shared< Allele >("TAATATATGT", std::make_shared< AlleleMetaData >(9, 0)),
+			std::make_shared< Allele >("TAATATATGTAATATATATTATATATGTAATATAATATATGTAATATATATTATATATGAATATATAATATATGTAATATATAATATATGTAATATATATTATATATGT", std::make_shared< AlleleMetaData >(58, 50))
 			};
 		altAllelePtrsList.emplace_back(altAllelePtrs);
 		testCompoundVariants(variantLines, refAllelePtrList, altAllelePtrsList);
 	}
-/*
 
 	TEST(CompoundVariantTests, BuildSemanticCompoundVariant)
 	{
-		std::vector< std::string > variantLines = { "1\t105774\t.\tGT\tG\t108.73\ttAC=1;AF=0.500;AN=2;BaseQRankSum=-1.532;ClippingRankSum=0.143;DP=11;FS=0.000;MLEAC=1;MLEAF=0.500;MQ=21.91;MQ0=0;MQRankSum=0.466;QD=9.88;ReadPosRankSum=0.143\tGT:AD:DP:GQ:PL\t0/1:7,5:12:99:167,0,249\t", "1\t105774\t.\tGTT\tGT\t3.22758\t.\tAB=0.277778;ABP=10.7311;AC=1;AF=0.5;AN=2;AO=5;CIGAR=1M1D1M;DP=18;DPB=16.3333;DPRA=0;EPP=6.91895;EPPR=3.17734;GTI=0;LEN=1;MEANALT=1;MQM=21.8;MQMR=16.5385;NS=1;NUMALT=1;ODDS=0.0976763;PAIRED=1;PAIREDR=1;PAO=0;PQA=0;PQR=0;PRO=0;QA=185;QR=465;RO=13;RPP=6.91895;RPPR=3.17734;RUN=1;SAF=5;SAP=13.8677;SAR=0;SRF=13" };
-		std::vector< std::string > refSequence = { "GTT" };
-		std::vector< std::vector< std::string > > altSequences ={ { "GT" } };
-		std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding = { { std::make_tuple< uint32_t, uint32_t >(0,1) } };
-		testCompoundVariants(variantLines, refSequence, altSequences, altSequencePadding);
+		std::vector< std::string > variantLines = {
+			"1\t105774\t.\tGT\tG\t.\t.\t.",
+			"1\t105774\t.\tGTT\tGT\t.\t.\t." };
+
+		std::vector< IAllele::SharedPtr > refAllelePtrs = {
+			std::make_shared< Allele >("GT", std::make_shared< AlleleMetaData >(0, 1)),
+			std::make_shared< Allele >("GTT", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		auto refPtr = std::make_shared< EquivalentAllele >("GTT", refAllelePtrs);
+		std::vector< IAllele::SharedPtr > refAllelePtrsList = { refPtr };
+
+		std::vector< IAllele::SharedPtr > altAlleleEqPtrs = {
+			std::make_shared< Allele >("GT", std::make_shared< AlleleMetaData >(0, 1)),
+			std::make_shared< Allele >("GT", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		std::vector< std::vector< IAllele::SharedPtr > > altAllelePtrsList = {};
+		auto altPtr = std::make_shared< EquivalentAllele >("GT", altAlleleEqPtrs);
+
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altPtr };
+		altAllelePtrsList.emplace_back(altAllelePtrs);
+
+		testCompoundVariants(variantLines, refAllelePtrsList, altAllelePtrsList);
 	}
+
+	/*
+	  GACACACACACACACACACACACACACACA
+	  GACACACACACACACACACACACACACACACACA
+	  G*****************************
+
+	  GACACACACACACACACACACACACACACACACA
+	  GACAC
+	 */
 
 	TEST(CompoundVariantTests, BuildCompoundVariant3)
 	{
-		std::vector< std::string > variantLines = { "20\t69506\t.\tG\tGACAC\t590.52\t.\tAC=2;AF=1.00;AN=2;DP=41;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=3.60\tGT:AD:DP:GQ:PL\t1/1:0,25:25:82:1163,82,0", "20\t69506\t.\tGACACACACACACACACACACACACACACA\tGACACACACACACACACACACACACACACACACA\t506.892\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=22;CIGAR=1M4I29M;DP=30;DPB=46.5333;DP" };
-		std::vector< std::string > refSequence = { "GACACACACACACACACACACACACACACA" };
-		std::vector< std::vector< std::string > > altSequences ={ { "GACACACACACACACACACACACACACACACACA" } };
-		std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding = { { std::make_tuple< uint32_t, uint32_t >(0,29) } };
-		testCompoundVariants(variantLines, refSequence, altSequences, altSequencePadding);
-	}
+		std::vector< std::string > variantLines = {
+			"20\t69506\t.\tG\tGACAC\t.\t.\t.",
+			"20\t69506\t.\tGACACACACACACACACACACACACACACA\tGACACACACACACACACACACACACACACACACA\t.\t.\t."
+		};
+		// ref allele
+		std::vector< IAllele::SharedPtr > refAllelePtrs = {
+			std::make_shared< Allele >("G", std::make_shared< AlleleMetaData >(0, 29)),
+			std::make_shared< Allele >("GACACACACACACACACACACACACACACA", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		auto refPtr = std::make_shared< EquivalentAllele >("GACACACACACACACACACACACACACACA", refAllelePtrs);
+		std::vector< IAllele::SharedPtr > refAllelePtrsList = { refPtr };
 
+		// alt allele
+		std::vector< IAllele::SharedPtr > altAlleleEqPtrs = {
+			std::make_shared< Allele >("GACACACACACACACACACACACACACACACACA", std::make_shared< AlleleMetaData >(0, 29)),
+			std::make_shared< Allele >("GACACACACACACACACACACACACACACACACA", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		std::vector< std::vector< IAllele::SharedPtr > > altAllelePtrsList = {};
+		auto altPtr = std::make_shared< EquivalentAllele >("GACACACACACACACACACACACACACACACACA", altAlleleEqPtrs);
+
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altPtr };
+		altAllelePtrsList.emplace_back(altAllelePtrs);
+
+		testCompoundVariants(variantLines, refAllelePtrsList, altAllelePtrsList);
+	}
 	TEST(CompoundVariantTests, BuildGraph4)
 	{
-		std::vector< std::string > variantLines = { "20\t72104\t.\tTA\tT\t1205.73\t.\tAC=2;AF=1.00;AN=2;DP=39;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.92\tGT:AD:DP:GQ:PL  1/1:0,36:36:99:1243,109,0", "20\t72104\t.\tTAA\tTA\t1062.05\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=36;CIGAR=1M1D1M;DP=39;DPB=59.6667;DPRA=0;EPP=9.04217;EPPR=5.18177;GTI=0;LEN=1;MEANALT=3;MQM=6", "20\t72719\t.\tC\tT\t1779.36\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=56;CIGAR=1X;DP=56;DPB=56;DPRA=0;EPP=3.63072;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=0;NS=1;N" };
-		std::vector< std::string > refSequence = { "TAA", "C" };
-		std::vector< std::vector< std::string > > altSequences ={ { "TA" }, { "T" } };
-		std::vector< std::vector< std::tuple< uint32_t, uint32_t > > > altSequencePadding = { { std::make_tuple< uint32_t, uint32_t >(0,1) }, { std::make_tuple< uint32_t, uint32_t >(0,0) } };
-		testCompoundVariants(variantLines, refSequence, altSequences, altSequencePadding);
+		std::vector< std::string > variantLines = {
+			"20\t72104\t.\tTA\tT\t.\t.\t.",
+			"20\t72104\t.\tTAA\tTA\t.\t.\t.",
+			"20\t72719\t.\tC\tT\t.\t.\t." };
+
+		// ref allele
+		std::vector< IAllele::SharedPtr > refAllelePtrs = {
+			std::make_shared< Allele >("TA", std::make_shared< AlleleMetaData >(0, 1)),
+			std::make_shared< Allele >("TAA", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		auto refPtr1 = std::make_shared< EquivalentAllele >("TAA", refAllelePtrs);
+		auto refPtr2 = std::make_shared< Allele >("C", std::make_shared< AlleleMetaData >(0, 0));
+		std::vector< IAllele::SharedPtr > refAllelePtrsList = { refPtr1, refPtr2 };
+
+
+		// alt allele
+		std::vector< IAllele::SharedPtr > altAlleleEqPtrs = {
+			std::make_shared< Allele >("TA", std::make_shared< AlleleMetaData >(0, 1)),
+			std::make_shared< Allele >("TA", std::make_shared< AlleleMetaData >(0, 0)),
+		};
+		std::vector< std::vector< IAllele::SharedPtr > > altAllelePtrsList = {};
+		auto altPtr1 = std::make_shared< EquivalentAllele >("TA", altAlleleEqPtrs);
+		auto altPtr2 = std::make_shared< Allele >("T", std::make_shared< AlleleMetaData >(0, 0));
+
+		std::vector< IAllele::SharedPtr > altAllelePtrs1 = { altPtr1 };
+		std::vector< IAllele::SharedPtr > altAllelePtrs2 = { altPtr2 };
+
+		altAllelePtrsList.emplace_back(altAllelePtrs1);
+		altAllelePtrsList.emplace_back(altAllelePtrs2);
+
+		testCompoundVariants(variantLines, refAllelePtrsList, altAllelePtrsList);
 	}
 
+	/*
 	TEST(CompoundVariantTests, BuildCompoundVariant5)
 	{
 		std::vector< std::string > variantLines = { "20\t86005\t.\tC\tCA\t31.73\t.\tAC=1;AF=0.500;AN=2;BaseQRankSum=-0.361;ClippingRankSum=0.361;DP=41;FS=7.782;MLEAC=1;MLEAF=0.500;MQ=58.77;MQ0=0;MQRankSum=0", "20\t86164\t.\tAG\tA\t2371.73\t.\tAC=2;AF=1.00;AN=2;DP=65;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=30.22     GT:AD:DP:GQ:PL  1/1:0,65:65:99:2409,196,0", "20\t86164\t.\tAGG\tAG\t2037.92\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=65;CIGAR=1M1D1M;DP=66;DPB=45;DPRA=0;EPP=3.04371;EPPR=0;GTI=0;LEN=1;MEANALT=2;MQM=59.8615;MQMR", "20\t87263\t.\tGA\tG\t1556.73\t.\tAC=2;AF=1.00;AN=2;DP=60;FS=0.000;MLEAC=2;MLEAF=1.00;MQ=60.00;MQ0=0;QD=25.95     GT:AD:DP:GQ:PL  1/1:0,53:53:99:1594,160,0", "20\t87263\t.\tGAAAAAAAAAT\tGAAAAAAAAT\t1679.52\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=54;CIGAR=1M1D9M;DP=55;DPB=56.4545;DPRA=0;EPP=3.6537;EPPR=0;GTI=0;LEN=1;MEANAL", "20\t87416\t.\tA\tC\t1752.74\t.\tAB=0;ABP=0;AC=2;AF=1;AN=2;AO=56;CIGAR=1X;DP=56;DPB=56;DPRA=0;EPP=3.16541;EPPR=0;GTI=0;LEN=1;MEANALT=1;MQM=60;MQMR=0;NS=1;N" };
