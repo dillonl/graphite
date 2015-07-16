@@ -17,13 +17,18 @@ namespace gwiz
 	{
 	public:
 	    EquivalentAllele(Sequence::SharedPtr sequence) : Allele(sequence) {}
+	    EquivalentAllele(const std::string& seqString, std::vector< IAllele::SharedPtr > allelePtrs) : Allele(seqString)
+		{
+			m_allele_ptrs = allelePtrs;
+			/* std::cout << "EquivalentAllele: " << m_sequence_ptr->getLength() << std::endl; */
+		}
 		~EquivalentAllele() {}
 
 		void addAllele(IAllele::SharedPtr allelePtr) { this->m_allele_ptrs.emplace_back(allelePtr); }
 		std::vector< IAllele::SharedPtr > getAllAlleles() { return this->m_allele_ptrs; }
 	private:
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
-		Sequence::SharedPtr m_sequence_ptr;
+		/* Sequence::SharedPtr m_sequence_ptr; */
 	};
 }
 

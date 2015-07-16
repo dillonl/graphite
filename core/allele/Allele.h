@@ -1,7 +1,7 @@
 #ifndef GWIZ_ALLELE_H
 #define GWIZ_ALLELE_H
 
-#include "core/sequence/Sequence.h"
+#include "core/sequence/SequenceManager.h"
 #include "IAllele.h"
 #include "AlleleMetaData.h"
 
@@ -18,7 +18,18 @@ namespace gwiz
 		{
 		}
 
-		Allele() = delete;
+	    Allele(const std::string& seqString) :
+			m_sequence_ptr(SequenceManager::Instance()->getSequence(seqString)),
+			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
+		{
+		}
+
+	    Allele(const std::string& seqString, AlleleMetaData::SharedPtr alleleMetaDataPtr) :
+			m_sequence_ptr(SequenceManager::Instance()->getSequence(seqString)),
+			m_allele_meta_data_ptr(alleleMetaDataPtr)
+		{
+		}
+
 		~Allele() {}
 
 
@@ -30,6 +41,8 @@ namespace gwiz
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() override { return this->m_allele_meta_data_ptr; }
 
 	protected:
+		Allele() {}
+
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
 	};
