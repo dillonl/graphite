@@ -20,7 +20,7 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< IAlignment > SharedPtr;
 
-	    IAlignment() : m_mapped(false) {}
+	    IAlignment() : m_mapped(false), m_score(0) {}
 		virtual ~IAlignment() {}
 
 		virtual const char* getSequence() = 0;
