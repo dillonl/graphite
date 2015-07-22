@@ -380,6 +380,7 @@ gssw_node_fill (gssw_node* node,
 gssw_graph*
 gssw_graph_fill (gssw_graph* graph,
                  const char* read_seq,
+				 const uint32_t read_length,
                  const int8_t* nt_table,
                  const int8_t* score_matrix,
                  const uint8_t weight_gapO,

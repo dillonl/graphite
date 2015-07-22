@@ -130,9 +130,9 @@ namespace gssw
 
 	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
 	{
-		std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
-		gssw_graph_fill(this->m_graph_ptr, readSeq.c_str(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr,readSeq.c_str(),readSeq.size(),m_match,m_mismatch,m_gap_open,m_gap_extension);
+		// std::string readSeq = std::string(alignmentPtr->getSequence(), alignmentPtr->getLength());
+		gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(),m_match,m_mismatch,m_gap_open,m_gap_extension);
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm) { gssw_graph_mapping_destroy(gm); };
 		return std::shared_ptr< gssw_graph_mapping >(graphMapping, graphMappingDeletor);
 	}

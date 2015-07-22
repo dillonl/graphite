@@ -71,13 +71,15 @@ namespace gssw
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			n->ref_len = referenceLength;
-			n->ref_seq = (char*)malloc(n->ref_len + 1);
-			strncpy(n->ref_seq, referenceSeq, n->ref_len); n->ref_seq[n->ref_len] = 0;
+			n->ref_seq = (char*)referenceSeq;
+			//n->ref_seq = (char*)malloc(n->ref_len + 1);
+			//strncpy(n->ref_seq, referenceSeq, n->ref_len); n->ref_seq[n->ref_len] = 0;
 			n->position = position;
 			n->id = m_next_id++;
 			n->len = len;
-			n->seq = (char*)malloc(len+1);
-			strncpy(n->seq, seq, len); n->seq[len] = 0;
+			n->seq = (char*)seq;
+			//n->seq = (char*)malloc(len+1);
+			//strncpy(n->seq, seq, len); n->seq[len] = 0;
 			n->data = (void*)data;
 			n->num = gssw_create_num(seq, len, nt_table);
 			n->count_prev = 0;

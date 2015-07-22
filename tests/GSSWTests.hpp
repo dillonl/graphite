@@ -19,7 +19,7 @@ void runTestsViaLambda(const std::string& alignment, const std::vector< gssw_nod
 		gssw_graph_add_node(graph, node);
 	}
 
-	gssw_graph_fill(graph, alignment.c_str(), nt_table, mat, gapOpen, gapExtension, 15, 2);
+	gssw_graph_fill(graph, alignment.c_str(), alignment.size(), nt_table, mat, gapOpen, gapExtension, 15, 2);
 	gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignment.c_str(), alignment.size(), match, mismatch, gapOpen, gapExtension);
 
 	funct(gm);

@@ -1598,6 +1598,7 @@ gssw_seed* gssw_create_seed_word(int32_t readLen, gssw_node** prev, int32_t coun
 gssw_graph*
 gssw_graph_fill (gssw_graph* graph,
                  const char* read_seq,
+				 const uint32_t read_length,
                  const int8_t* nt_table,
                  const int8_t* score_matrix,
                  const uint8_t weight_gapO,
@@ -1605,7 +1606,7 @@ gssw_graph_fill (gssw_graph* graph,
                  const int32_t maskLen,
                  const int8_t score_size) {
 
-    int32_t read_length = strlen(read_seq);
+    /* int32_t read_length = strlen(read_seq); */
     int8_t* read_num = gssw_create_num(read_seq, read_length, nt_table);
 	gssw_profile* prof = gssw_init(read_num, read_length, score_matrix, 5, score_size);
     gssw_seed* seed = NULL;
@@ -1635,7 +1636,7 @@ gssw_graph_fill (gssw_graph* graph,
             //max_score = 0;
             free(read_num);
             gssw_profile_destroy(prof);
-            return gssw_graph_fill(graph, read_seq, nt_table, score_matrix, weight_gapO, weight_gapE, maskLen, 1);
+            return gssw_graph_fill(graph, read_seq, read_length, nt_table, score_matrix, weight_gapO, weight_gapE, maskLen, 1);
         } else {
             if (!graph->max_node || n->alignment->score1 > max_score) {
                 graph->max_node = n;

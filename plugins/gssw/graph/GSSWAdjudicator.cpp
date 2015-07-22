@@ -32,7 +32,6 @@ namespace gssw
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr)
 	{
 		throw "GSSWAdjudicator::adjudicateGraph needs to be fixed";
-		// std::vector< IVariant::SharedPtr > variants;
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
@@ -44,25 +43,21 @@ namespace gssw
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				float percentage = (this->m_sw_percent * 0.01);
 				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
-				std::unordered_map< uint32_t, int32_t > alignmentIDVariants;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
-						// std::lock_guard< std::mutex > lock(this->m_adjudication_lock);
 						if (mapped)
 						{
 							variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
 						}
 						variantPtr->addPotentialAlignment(alignmentPtr);
-						// variants.emplace_back(variantPtr);
 					}
 				}
 				if (mapped)
 				{
-					// std::lock_guard< std::mutex > lock(this->m_adjudication_lock);
 					alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
 				}
 			}
@@ -71,7 +66,6 @@ namespace gssw
 		{
 			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
 		}
-		// return std::make_shared< VariantList >(variants);
 		return nullptr;
 	}
 }
