@@ -19,6 +19,12 @@ namespace gwiz
 			return this->m_sequence_ptr_map.emplace(sequence, std::make_shared< Sequence >(sequence)).first->second;
 		}
 
+		inline Sequence::SharedPtr getSequence(const char* sequence, size_t length)
+		{
+			auto sequencePtr = std::make_shared< Sequence >(sequence, length);
+			return this->m_sequence_ptr_map.emplace(sequencePtr->getSequenceString(), sequencePtr).first->second;
+		}
+
 		// created for testing
 		size_t getSequenceCount() { return this->m_sequence_ptr_map.size(); }
 		void clearSequences() { this->m_sequence_ptr_map.clear(); }

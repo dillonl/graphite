@@ -18,6 +18,13 @@ namespace gwiz
 		{
 		}
 
+	    Allele(const char* seq, size_t len) :
+			m_sequence_ptr(SequenceManager::Instance()->getSequence(seq, len)),
+			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
+		{
+		}
+
+
 	    Allele(const std::string& seqString) :
 			m_sequence_ptr(SequenceManager::Instance()->getSequence(seqString)),
 			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
@@ -33,6 +40,7 @@ namespace gwiz
 		~Allele() {}
 
 
+		size_t getLength() override { return this->m_sequence_ptr->getLength(); }
 		std::shared_ptr< Sequence > getSequencePtr() override { return this->m_sequence_ptr; }
 		const char* getSequence() override { return this->m_sequence_ptr->getSequence(); }
 		void setSequence(std::shared_ptr< Sequence > sequencePtr) override { this->m_sequence_ptr = sequencePtr; }

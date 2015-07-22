@@ -19,6 +19,11 @@ namespace gwiz
 		{
 		}
 
+	    Sequence(const char* seq, size_t len) :
+			m_seq(std::string(seq, len))
+		{
+		}
+
 		~Sequence() {}
 
 		const char* getSequence() const { return m_seq.c_str(); }

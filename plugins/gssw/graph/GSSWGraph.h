@@ -35,10 +35,8 @@ namespace gssw
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
 		int32_t getMatchValue() { return m_match; }
 	protected:
-		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr, size_t& variantReferenceSize, IGenotyperVariant::SharedPtr genotyperVariantPtr);
-
-		gssw_node* addReference(std::vector< gssw_node* > altAndRefVertices, gssw_node* referenceNode, IGenotyperVariant::SharedPtr genotyperPtr);
-		gssw_node* addAlternateNode(IVariant::SharedPtr variantPtr, INode::SharedPtr variantNodePtr, IGenotyperVariant::SharedPtr genotyperVariantPtr, uint32_t variantReferenceSize);
+		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr);
+		gssw_node* addReference(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		int32_t m_match;
@@ -59,29 +57,34 @@ namespace gssw
 	private:
 		void graphConstructed();
 		IVariantList::SharedPtr m_variant_list_ptr;
+		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
 										const uint32_t referenceLength,
-										const GenotyperAllele::Type data,
-										const char* seq,
-										const size_t len,
+										IAllele::SharedPtr allelePtr,
+										bool isReference,
 										const int8_t* nt_table,
 										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			n->ref_len = referenceLength;
 			n->ref_seq = (char*)referenceSeq;
-			//n->ref_seq = (char*)malloc(n->ref_len + 1);
-			//strncpy(n->ref_seq, referenceSeq, n->ref_len); n->ref_seq[n->ref_len] = 0;
 			n->position = position;
-			n->id = m_next_id++;
-			n->len = len;
-			n->seq = (char*)seq;
-			//n->seq = (char*)malloc(len+1);
-			//strncpy(n->seq, seq, len); n->seq[len] = 0;
-			n->data = (void*)data;
-			n->num = gssw_create_num(seq, len, nt_table);
+			// if this node is reference then the id is even otherwise it is odd
+			if (isReference)
+			{
+				this->m_next_id = (this->m_next_id % 2 == 0) ? this->m_next_id + 2 : this->m_next_id + 1;
+			}
+			else
+			{
+				this->m_next_id = (this->m_next_id % 2 != 0) ? this->m_next_id + 2 : this->m_next_id + 1;
+			}
+			n->id = this->m_next_id;
+			n->len = allelePtr->getLength();
+			n->seq = (char*)allelePtr->getSequence();
+			n->data = (void*)allelePtr.get();
+			n->num = gssw_create_num(n->seq, n->len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
