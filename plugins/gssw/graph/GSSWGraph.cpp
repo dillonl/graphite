@@ -63,7 +63,6 @@ namespace gssw
 				altAndRefVertices.push_back(referenceNode);
 			}
 
-			size_t variantReferenceSize;
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
 			referenceOffset += referenceSize + variantPtr->getRefAllelePtr()->getLength();
 		}
@@ -74,11 +73,11 @@ namespace gssw
 			auto referenceAllelePtr = std::make_shared< Allele >(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
 			addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
 		}
-		graphConstructed();
 	}
 
 	gssw_node* GSSWGraph::addReference(position position, IAllele::SharedPtr referenceAllelePtr, std::vector< gssw_node* > altAndRefVertices)
 	{
+		std::cout << "L80" << std::endl;
 		auto referenceNodePtr = gssw_node_create_alt(position, referenceAllelePtr->getSequence(), referenceAllelePtr->getLength(), referenceAllelePtr, true, this->m_nt_table, this->m_mat);
 		gssw_graph_add_node(this->m_graph_ptr, referenceNodePtr);
 		for (auto iter = altAndRefVertices.begin(); iter != altAndRefVertices.end(); ++iter)
@@ -94,10 +93,13 @@ namespace gssw
 	    std::vector< gssw_node* > vertices;
 		for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
 		{
+
 			auto altAlleleNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getSequencePtr()->getLength(), altAllelePtr, false, this->m_nt_table, this->m_mat);
 			gssw_graph_add_node(this->m_graph_ptr, altAlleleNode);
 			vertices.emplace_back(altAlleleNode);
 		}
+
+		std::cout << "L102" << std::endl;
 		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getLength(), variantPtr->getRefAllelePtr(), true, this->m_nt_table, this->m_mat);
 
 		gssw_graph_add_node(this->m_graph_ptr, variantReferenceNode);
@@ -137,112 +139,8 @@ namespace gssw
 		return nullptr;
 	}
 
-	/*
-	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
-	{
-		static std::mutex cigLock;
-		cigLock.lock();
-		std::string cigarString = "";
-		gssw_node_cigar* nc = graphMapping->cigar.elements;
-		std::string variantTypeTracebackPositions = "";
-		std::string variantTypeTraceback = "";
-		std::string genotypeAlleleString = "";
-		std::string alignmentMappedString = std::string(alignmentPtr->getSequence(), 100);
-		std::string referenceString = std::string((this->m_reference_ptr->getSequence() + alignmentPtr->getPosition()) - (graphMapping->position + 1), 100 + graphMapping->position);
-		std::string mappedString = alignmentPtr->isMapped() ? "Mapped" : "Unmapped";
-		std::string firstMateString = alignmentPtr->isFirstMate() ? "First" : "Second";
-		uint32_t softclipCorrection = 0;
-		uint32_t posOffset = 0;
-		uint32_t insertionCounter = 0;
-		bool firstTimeThrough = true;
-		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
-		{
-			for (int j = 0; j < nc->cigar->length; ++j)
-			{
-				if (i == 0 && j == 0 && nc->cigar->elements[j].type == 'S')
-				{
-					softclipCorrection = nc->cigar->elements[j].length;
-					auto alignmentSize = alignmentMappedString.size();
-					if (nc->cigar->elements[j].length == 1)
-					{
-						softclipCorrection -= 1;
-					}
-					alignmentMappedString = alignmentMappedString.substr(softclipCorrection, alignmentMappedString.size() - softclipCorrection);
-					cigarString += std::to_string(nc->cigar->elements[j].length) + "SC";
-				}
-				else
-				{
-					cigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
-				}
-			}
-			std::string suffix = (i < graphMapping->cigar.length - 1) ? "|" : "";
-			cigarString += suffix;
-			std::string typeString = "R";
-			{
-				auto genotyperAllele = m_genotyper_map.find(nc->node->id);
-				if (genotyperAllele != m_genotyper_map.end())
-				{
-					if (firstTimeThrough)
-					{
-						size_t addOne = (i == 0) ? 1 : 0;
-						referenceString = std::string((this->m_reference_ptr->getSequence() + genotyperAllele->second->getPosition()) - (genotypeAlleleString.size() + addOne), 100 + graphMapping->position);
-						firstTimeThrough = false;
-					}
-					genotyperAllele->second->addAlignment(alignmentPtr);
-					typeString = (genotyperAllele->second->getType() == GenotyperAllele::Type::ALTERNATE) ? "AV" : "RV";
-				}
-			}
-			uint32_t length = (i > 0) ?  nc->node->len : nc->node->len - graphMapping->position;
-			if (insertionCounter > 0)
-			{
-				if (posOffset + (insertionCounter - 1) < alignmentMappedString.size() - 1)
-				{
-					alignmentMappedString.insert(posOffset + (insertionCounter - 1), " ");
-				}
-				if (posOffset + graphMapping->position + (insertionCounter - 1) < referenceString.size() - 1)
-				{
-					referenceString.insert(posOffset + graphMapping->position + (insertionCounter - 1), " ");
-				}
-			}
-			++insertionCounter;
-			genotypeAlleleString += std::string(nc->node->seq, nc->node->len) + suffix;
-			variantTypeTraceback += typeString + suffix;
-			variantTypeTracebackPositions += std::to_string(alignmentPtr->getPosition() + posOffset) + suffix;
-			posOffset += length;
-		}
-		int32_t spaceCount = std::max< int32_t >(graphMapping->position, 0);
-		std::string spacing(spaceCount, ' ');
-		std::cout << "---------------------------------------------------------" << std::endl;
-		std::cout << "Score:              " << graphMapping->score << std::endl;
-		std::cout << "Variant Type:       " << variantTypeTraceback << std::endl;
-		std::cout << "Variant Positions:  " << variantTypeTracebackPositions << std::endl;
-		std::cout << "Cigar String:       " << cigarString << std::endl;
-		std::cout << "Reference String:   " << referenceString << std::endl;
-		std::cout << "Haplotype String:   " << genotypeAlleleString << std::endl;
-		std::cout << "Alignment String:   " << spacing;
-		std::cout.write(alignmentMappedString.c_str(), alignmentMappedString.size() - 1);
-		std::cout << std::endl;
-		std::cout << "Mapping:            " << mappedString << std::endl;
-		std::cout << "Mate:               " << firstMateString << std::endl;
-		std::cout << "Mapping Position:   " << graphMapping->position << std::endl;
-		std::cout << "Alignment Position: " << alignmentPtr->getPosition() << std::endl;
-		std::cout << "Reverse Strand:     " << alignmentPtr->isReverseStrand() << std::endl;
-		std::cout << "---------------------------------------------------------" << std::endl;
-		cigLock.unlock();
-	}
-	*/
-
 	void GSSWGraph::graphConstructed()
 	{
-		/*
-		IAlignment::SharedPtr alignmentPtr;
-		while (this->m_alignment_reader->getNextAlignment(alignmentPtr))
-		{
-			// if (std::string(alignmentPtr->getSequence()).find("<") != std::string::npos) { continue; } // skip symbolic variants for now
-			std::shared_ptr< gssw_graph_mapping > graphMapping = traceBackAlignment(alignmentPtr);
-			recordAlignmentVariants(graphMapping, alignmentPtr);
-		}
-		*/
 	}
 }
 }

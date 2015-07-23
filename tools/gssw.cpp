@@ -41,6 +41,8 @@ int main(int argc, char** argv)
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
+	std::cout << "loaded vcfs and bams" << std::endl;
+
 	// create an adjudicator for the graph
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent);
 	// the gsswGraphManager adjudicates on the variantManager's variants

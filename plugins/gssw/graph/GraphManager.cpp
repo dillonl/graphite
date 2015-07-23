@@ -38,15 +38,18 @@ namespace gssw
 			auto variantsListPtr = this->m_variant_manager_ptr->getVariantsInRegion(graphRegion);
 			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
-				// auto alignmentReaderPtr = this->m_alignment_reader_manager->generateAlignmentReader(); // create alignment reader
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
+				// auto alignmentRegion = std::make_shared< Region >("1:12307541-12309541");
 				// create region for alignmentReader
 				// alignmentReaderPtr->init();
 				// alignmentReaderPtr->setRegion(alignmentRegion); // set alignmentreader's region
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
-				if (alignmentListPtr->getCount() == 0) { continue; } // if there are no reads then continue
-				auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
-				ThreadPool::Instance()->enqueue(funct);
+				if (alignmentListPtr->getCount() > 0)
+				{
+					std::cout << "counts are greater than 0" << std::endl;
+					auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
+					ThreadPool::Instance()->enqueue(funct);
+				}
 			}
 			currentPosition += graphSize - overlap;
 		}
@@ -57,7 +60,7 @@ namespace gssw
 	{
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
-		this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentListPtr);
+		// this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentListPtr);
 	}
 
 }

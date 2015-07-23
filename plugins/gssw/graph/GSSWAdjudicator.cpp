@@ -3,6 +3,8 @@
 #include "core/variant/VariantList.h"
 #include "AlignmentReporter.h"
 
+#include <memory>
+
 namespace gwiz
 {
 namespace gssw
@@ -46,6 +48,9 @@ namespace gssw
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
+					IAllele::SharedPtr allelePtr = *(std::shared_ptr< IAllele >*)(nc->node->data);
+					std::cout << allelePtr->getSequence() << std::endl;
+					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
@@ -55,6 +60,7 @@ namespace gssw
 						}
 						variantPtr->addPotentialAlignment(alignmentPtr);
 					}
+					*/
 				}
 				if (mapped)
 				{
