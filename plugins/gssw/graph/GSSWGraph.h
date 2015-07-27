@@ -34,6 +34,7 @@ namespace gssw
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
 		int32_t getMatchValue() { return m_match; }
+		IAllele::SharedPtr getAllelePtrFromNodeID(uint32_t id);
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr);
 		gssw_node* addReference(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices);
@@ -58,6 +59,7 @@ namespace gssw
 		void graphConstructed();
 		IVariantList::SharedPtr m_variant_list_ptr;
 		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
+		std::unordered_map< uint32_t, IAllele::SharedPtr > m_node_id_to_allele_ptrs;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
@@ -81,9 +83,9 @@ namespace gssw
 				this->m_next_id = (this->m_next_id % 2 != 0) ? this->m_next_id + 2 : this->m_next_id + 1;
 			}
 			n->id = this->m_next_id;
+			m_node_id_to_allele_ptrs.emplace(n->id, allelePtr);
 			n->len = allelePtr->getLength();
 			n->seq = (char*)allelePtr->getSequence();
-			n->data = (void*)&allelePtr;
 			n->num = gssw_create_num(n->seq, n->len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;

@@ -39,7 +39,10 @@ namespace gwiz
 		{
 		}
 
-		~Allele() {}
+		~Allele()
+		{
+			std::cout << "allele deleted" << std::endl;
+		}
 
 
 		size_t getLength() override { return this->m_sequence_ptr->getLength(); }

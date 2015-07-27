@@ -37,7 +37,7 @@ namespace gssw
 	private:
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize);
 
-		std::queue< GSSWGraph::SharedPtr > m_gssw_graphs;
+		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;
 
 		IReference::SharedPtr m_reference_ptr;

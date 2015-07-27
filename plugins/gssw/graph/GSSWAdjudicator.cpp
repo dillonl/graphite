@@ -33,7 +33,7 @@ namespace gssw
 
 	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr)
 	{
-		throw "GSSWAdjudicator::adjudicateGraph needs to be fixed";
+		float percentage = (this->m_sw_percent * 0.01);
 		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
 		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
 		{
@@ -43,28 +43,28 @@ namespace gssw
 				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
 				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				float percentage = (this->m_sw_percent * 0.01);
-				bool mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
+				bool mapped = false;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
-					IAllele::SharedPtr allelePtr = *(std::shared_ptr< IAllele >*)(nc->node->data);
-					std::cout << allelePtr->getSequence() << std::endl;
+					IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
+					std::cout << "allele: " << allelePtr->getLength() << std::endl;
 					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)
 					{
+						mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
 						if (mapped)
 						{
-							variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
+							// variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
 						}
-						variantPtr->addPotentialAlignment(alignmentPtr);
+						// variantPtr->addPotentialAlignment(alignmentPtr);
 					}
 					*/
 				}
 				if (mapped)
 				{
-					alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
+					// alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
 				}
 			}
 		}

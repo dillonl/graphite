@@ -18,30 +18,14 @@ namespace gwiz
 	    Sequence(const std::string& seq) :
 		    m_seq(seq)
 		{
-			static uint32_t s_id1 = 0;
-			id = s_id1++;
 		}
 
-			/*
-	    Sequence(const char* seq, size_t len) :
-			m_seq(std::string(seq, len))
-		{
-			static uint32_t s_id2 = 1000000;
-			id = s_id2++;
-		}
-			*/
-
-		~Sequence()
-		{
-			std::cout << "deleting sequence: " << id << std::endl;
-		}
+		~Sequence(){}
 
 		const char* getSequence() const { return m_seq.c_str(); }
 		size_t getLength() const { return m_seq.size(); }
 
 		std::string getSequenceString() const { return m_seq; }
-
-		uint32_t id;
 	private:
 		std::string m_seq;
 	};

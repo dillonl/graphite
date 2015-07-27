@@ -46,7 +46,6 @@ namespace gssw
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
 				if (alignmentListPtr->getCount() > 0)
 				{
-					std::cout << "counts are greater than 0" << std::endl;
 					auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
 					ThreadPool::Instance()->enqueue(funct);
 				}
@@ -60,7 +59,8 @@ namespace gssw
 	{
 		auto gsswGraph = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize);
 		gsswGraph->constructGraph();
-		// this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentListPtr);
+		this->m_gssw_graphs.emplace_back(gsswGraph);
+		this->m_graph_adjudicator_ptr->adjudicateGraph(gsswGraph, alignmentListPtr);
 	}
 
 }
