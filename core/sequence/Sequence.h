@@ -22,12 +22,14 @@ namespace gwiz
 			id = s_id1++;
 		}
 
+			/*
 	    Sequence(const char* seq, size_t len) :
 			m_seq(std::string(seq, len))
 		{
 			static uint32_t s_id2 = 1000000;
 			id = s_id2++;
 		}
+			*/
 
 		~Sequence()
 		{

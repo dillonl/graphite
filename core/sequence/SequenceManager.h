@@ -22,23 +22,19 @@ namespace gwiz
 			{
 				auto sequencePtr = std::make_shared< Sequence >(sequence);
 				this->m_sequence_ptr_map[sequence] = sequencePtr;
-				std::cout << sequencePtr->id << std::endl;
+				/* std::cout << sequencePtr->id << std::endl; */
 				return sequencePtr;
 			}
 			else
 			{
-				std::cout << sequencePtrIter->second->id << std::endl;
+				/* std::cout << sequencePtrIter->second->id << std::endl; */
 				return sequencePtrIter->second;
 			}
 		}
 
+		/*
 		inline Sequence::SharedPtr getSequence(const char* sequence, size_t length)
 		{
-			/*
-			auto sequencePtr = std::make_shared< Sequence >(sequence, length);
-			std::cout << sequencePtr->id << std::endl;
-			return this->m_sequence_ptr_map.emplace(sequencePtr->getSequenceString(), sequencePtr).first->second;
-			*/
 
 			std::cout << "t2" << std::endl;
 			std::string sequenceString = std::string(sequence, length);
@@ -56,6 +52,7 @@ namespace gwiz
 				return sequencePtrIter->second;
 			}
 		}
+		*/
 
 		// created for testing
 		size_t getSequenceCount() { return this->m_sequence_ptr_map.size(); }

@@ -57,7 +57,8 @@ namespace gssw
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
-				auto referenceAllelePtr = std::make_shared< Allele >(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
+				std::string referenceSequenceString = std::string(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
+				auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
 				auto referenceNode = addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
@@ -70,7 +71,9 @@ namespace gssw
 		referenceSize = currentEndPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
 		{
-			auto referenceAllelePtr = std::make_shared< Allele >(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
+			std::string referenceSequenceString = std::string(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
+			auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
+			// auto referenceAllelePtr = std::make_shared< Allele >(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
 			addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
 		}
 	}
