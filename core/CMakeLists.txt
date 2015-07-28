@@ -33,6 +33,7 @@ set(GWIZ_CORE_REGION_SOURCES
 
 set(GWIZ_CORE_PATH_SOURCES
   path/Path.cpp
+  path/PathManager.cpp
   )
 
 set(GWIZ_CORE_ALIGNMENT_SOURCES

@@ -18,6 +18,7 @@ namespace gwiz
 		virtual std::vector< IAllele::SharedPtr > getAllelePath() = 0;
 		virtual uint32_t getPathSWPercent() = 0;
 		virtual IAlignment::SharedPtr getAlignment() = 0;
+		virtual size_t getHash() = 0;
 
 		virtual void addAlleleToPath(IAllele::SharedPtr allelePtr) = 0;
 		virtual void setPathSWPercent(uint32_t swPercent) = 0;

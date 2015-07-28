@@ -1,5 +1,7 @@
 #include "Path.h"
 
+#include <boost/functional/hash.hpp>
+
 namespace gwiz
 {
 	Path::Path()
@@ -25,6 +27,15 @@ namespace gwiz
 		return this->m_alignment_ptr;
 	}
 
+	size_t Path::getHash()
+	{
+		if (this->m_hash == 0)
+		{
+			computeAndSetHash();
+		}
+		return this->m_hash;
+	}
+
 	void Path::addAlleleToPath(IAllele::SharedPtr allelePtr)
 	{
 		this->m_allele_ptrs.emplace_back(allelePtr);
@@ -38,5 +49,10 @@ namespace gwiz
 	void Path::setAlignment(IAlignment::SharedPtr alignmentPtr)
 	{
 		this->m_alignment_ptr = alignmentPtr;
+	}
+
+	void Path::computeAndSetHash()
+	{
+		this->m_hash = boost::hash_range(m_allele_ptrs.begin(), m_allele_ptrs.end());
 	}
 }
