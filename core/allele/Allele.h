@@ -41,7 +41,6 @@ namespace gwiz
 
 		~Allele()
 		{
-			std::cout << "allele deleted" << std::endl;
 		}
 
 

@@ -1,7 +1,10 @@
 #ifndef GWIZ_IPATH_H
 #define GWIZ_IPATH_H
 
-#include <boost/noncopyable.h>
+#include "core/alignment/IAlignment.h"
+#include "core/allele/IAllele.h"
+
+#include <boost/noncopyable.hpp>
 
 namespace gwiz
 {
@@ -13,6 +16,12 @@ namespace gwiz
 		~IPath() {}
 
 		virtual std::vector< IAllele::SharedPtr > getAllelePath() = 0;
+		virtual uint32_t getPathSWPercent() = 0;
+		virtual IAlignment::SharedPtr getAlignment() = 0;
+
+		virtual void addAlleleToPath(IAllele::SharedPtr allelePtr) = 0;
+		virtual void setPathSWPercent(uint32_t swPercent) = 0;
+		virtual void setAlignment(IAlignment::SharedPtr allelePtr) = 0;
 	};
 }
 

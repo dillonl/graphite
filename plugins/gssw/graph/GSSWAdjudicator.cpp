@@ -48,7 +48,7 @@ namespace gssw
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
-					std::cout << "allele: " << allelePtr->getLength() << std::endl;
+
 					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
 					if (variantPtr != nullptr)

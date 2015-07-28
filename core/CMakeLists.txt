@@ -31,6 +31,10 @@ set(GWIZ_CORE_REGION_SOURCES
   region/Region.cpp
   )
 
+set(GWIZ_CORE_PATH_SOURCES
+  path/Path.cpp
+  )
+
 set(GWIZ_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
@@ -53,6 +57,7 @@ add_library(gwiz_core
   ${GWIZ_CORE_REGION_SOURCES}
   ${GWIZ_CORE_ALIGNMENT_SOURCES}
   ${GWIZ_CORE_VARIANT_SOURCES}
+  ${GWIZ_CORE_PATH_SOURCES}
   )
 
 SET(CORE_LIB gwiz_core CACHE STRING "THE CORE LIBRARY") #add gwiz_core and gwiz_utils to the list of core libs
