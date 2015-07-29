@@ -1,6 +1,7 @@
 #include "GSSWAdjudicator.h"
 #include "GSSWGraph.h"
 #include "core/variant/VariantList.h"
+#include "core/path/Path.h"
 #include "AlignmentReporter.h"
 
 #include <memory>
@@ -45,9 +46,14 @@ namespace gssw
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
 				bool mapped = false;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
+				auto pathPtr = std::make_shared< Path >();
+				pathPtr->setAlignment(alignmentPtr);
+				// pathPtr->setGSSWGraphMapping(graphMappingPtr);
+				// pathPtr->setPathSWPercent(graphMappingPtr->score);
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
+					// pathPtr->addAlleleToPath(allelePtr);
 
 					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);

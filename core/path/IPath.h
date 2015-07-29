@@ -13,8 +13,9 @@ namespace gwiz
 	public:
 		typedef std::shared_ptr< IPath > SharedPtr;
 		IPath() {}
-		~IPath() {}
+		virtual ~IPath() {}
 
+		/*
 		virtual std::vector< IAllele::SharedPtr > getAllelePath() = 0;
 		virtual uint32_t getPathSWPercent() = 0;
 		virtual IAlignment::SharedPtr getAlignment() = 0;
@@ -23,6 +24,7 @@ namespace gwiz
 		virtual void addAlleleToPath(IAllele::SharedPtr allelePtr) = 0;
 		virtual void setPathSWPercent(uint32_t swPercent) = 0;
 		virtual void setAlignment(IAlignment::SharedPtr allelePtr) = 0;
+		*/
 	};
 }
 

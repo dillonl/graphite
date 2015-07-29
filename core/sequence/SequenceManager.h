@@ -6,6 +6,7 @@
 #include <boost/noncopyable.hpp>
 #include <unordered_map>
 #include <cstring>
+#include <mutex>
 
 namespace gwiz
 {
