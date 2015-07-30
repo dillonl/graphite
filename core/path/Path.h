@@ -10,13 +10,14 @@
 
 namespace gwiz
 {
-class Path// : IPath
+class Path : IPath
 	{
 	public:
 		typedef std::shared_ptr< Path > SharedPtr;
         Path() {}
         ~Path() {}
 
+		/*
 std::vector< IAllele::SharedPtr > getAllelePath();
 uint32_t getPathSWPercent() ;
 IAlignment::SharedPtr getAlignment() ;
@@ -25,8 +26,8 @@ size_t getHash() ;
 void addAlleleToPath(IAllele::SharedPtr allelePtr) ;
 void setPathSWPercent(uint32_t swPercent) ;
 void setAlignment(IAlignment::SharedPtr allelePtr) ;
+		*/
 
-/*
 		std::vector< IAllele::SharedPtr > getAllelePath() override;
 		uint32_t getPathSWPercent() override;
 		IAlignment::SharedPtr getAlignment() override;
@@ -35,10 +36,9 @@ void setAlignment(IAlignment::SharedPtr allelePtr) ;
 		void addAlleleToPath(IAllele::SharedPtr allelePtr) override;
 		void setPathSWPercent(uint32_t swPercent) override;
 		void setAlignment(IAlignment::SharedPtr allelePtr) override;
-*/
-		/* void setGSSWGraphMapping(std::shared_ptr< gssw_graph_mapping > graphMappingPtr);
+		void setGSSWGraphMapping(std::shared_ptr< gssw_graph_mapping > graphMappingPtr);
 
-		/* void printLongFormat(); */
+		void printLongFormat();
 
 	private:
 		void computeAndSetHash();

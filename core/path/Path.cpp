@@ -58,7 +58,6 @@ namespace gwiz
 		this->m_hash = boost::hash_range(m_allele_ptrs.begin(), m_allele_ptrs.end());
 	}
 
-	/*
 	void Path::setGSSWGraphMapping(std::shared_ptr< gssw_graph_mapping > graphMappingPtr)
 	{
 		m_graph_mapping_ptr = graphMappingPtr;
@@ -170,5 +169,4 @@ namespace gwiz
 
 		std::cout << reportString;
 	}
-*/
 }

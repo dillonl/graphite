@@ -48,12 +48,12 @@ namespace gssw
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				auto pathPtr = std::make_shared< Path >();
 				pathPtr->setAlignment(alignmentPtr);
-				// pathPtr->setGSSWGraphMapping(graphMappingPtr);
-				// pathPtr->setPathSWPercent(graphMappingPtr->score);
+				pathPtr->setGSSWGraphMapping(graphMappingPtr);
+				pathPtr->setPathSWPercent(graphMappingPtr->score);
 				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
 				{
 					IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
-					// pathPtr->addAlleleToPath(allelePtr);
+					pathPtr->addAlleleToPath(allelePtr);
 
 					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
@@ -72,6 +72,7 @@ namespace gssw
 				{
 					// alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
 				}
+				pathPtr->printLongFormat();
 			}
 		}
 		else
