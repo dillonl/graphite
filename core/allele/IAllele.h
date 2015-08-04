@@ -11,7 +11,7 @@ namespace gwiz
 {
 	class VCFReader;
 	class Sequence;
-	class IAllele : private boost::noncopyable
+	class IAllele : private boost::noncopyable, public std::enable_shared_from_this< IAllele >
 	{
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
@@ -32,6 +32,11 @@ namespace gwiz
 
 		inline void incrementForwardCount() { ++this->m_forward_count; ++this->m_total_count; }
 		inline void incrementReverseCount() { ++this->m_reverse_count; ++this->m_total_count; }
+
+		inline SharedPtr getSharedPtr()
+		{
+			return shared_from_this();
+		}
 
 	protected:
 

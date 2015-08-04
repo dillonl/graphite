@@ -8,6 +8,7 @@ set(GWIZ_GSSW_GRAPH_SOURCES
 	graph/AlignmentReporter.cpp
 	graph/AlignmentReport.cpp
 	graph/GSSWAdjudicator.cpp
+	graph/GSSWMapping.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/src/)

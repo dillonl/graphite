@@ -2,7 +2,9 @@
 #include "GSSWGraph.h"
 #include "core/variant/VariantList.h"
 #include "core/path/Path.h"
+#include "core/mapping/MappingManager.h"
 #include "AlignmentReporter.h"
+#include "GSSWMapping.h"
 
 #include <memory>
 
@@ -41,19 +43,21 @@ namespace gssw
 			IAlignment::SharedPtr alignmentPtr;
 			while (alignmentListPtr->getNextAlignment(alignmentPtr))
 			{
-				auto graphMappingPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr);
-				gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
+				auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+				MappingManager::Instance()->registerMapping(gsswMappingPtr);
+				// gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
 				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
+				/*
 				bool mapped = false;
 				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
 				auto pathPtr = std::make_shared< Path >();
 				pathPtr->setAlignment(alignmentPtr);
-				pathPtr->setGSSWGraphMapping(graphMappingPtr);
-				pathPtr->setPathSWPercent(graphMappingPtr->score);
-				for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
-				{
-					IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
-					pathPtr->addAlleleToPath(allelePtr);
+				*/
+				// pathPtr->setGSSWGraphMapping(graphMappingPtr);
+				// for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
+				// {
+					// IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
+					// pathPtr->addAlleleToPath(allelePtr);
 
 					/*
 					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
@@ -67,12 +71,12 @@ namespace gssw
 						// variantPtr->addPotentialAlignment(alignmentPtr);
 					}
 					*/
-				}
-				if (mapped)
-				{
+				// }
+				// if (mapped)
+				// {
 					// alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
-				}
-				pathPtr->printLongFormat();
+				// }
+				// pathPtr->printLongFormat();
 			}
 		}
 		else

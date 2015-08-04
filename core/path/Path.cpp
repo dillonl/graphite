@@ -4,15 +4,13 @@
 
 namespace gwiz
 {
-	/*
 	Path::Path()
 	{
 	}
 
-	Pathh::~Pathh()
+	Path::~Path()
 	{
 	}
-	*/
 
 	std::vector< IAllele::SharedPtr > Path::getAllelePath()
 	{

@@ -36,8 +36,8 @@ target_link_libraries(gwiz_tests
 	BamTools
 	BamTools-utils
 	${VCFLIB_LIBRARIES}
-	${CORE_LIB}
 	${PLUGIN_LIBS}
+	${CORE_LIB}
 	fastahack_lib
 	${GSSW_LIB}
 	ssw_lib

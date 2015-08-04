@@ -14,19 +14,8 @@ class Path : IPath
 	{
 	public:
 		typedef std::shared_ptr< Path > SharedPtr;
-        Path() {}
-        ~Path() {}
-
-		/*
-std::vector< IAllele::SharedPtr > getAllelePath();
-uint32_t getPathSWPercent() ;
-IAlignment::SharedPtr getAlignment() ;
-size_t getHash() ;
-
-void addAlleleToPath(IAllele::SharedPtr allelePtr) ;
-void setPathSWPercent(uint32_t swPercent) ;
-void setAlignment(IAlignment::SharedPtr allelePtr) ;
-		*/
+        Path();
+        ~Path();
 
 		std::vector< IAllele::SharedPtr > getAllelePath() override;
 		uint32_t getPathSWPercent() override;

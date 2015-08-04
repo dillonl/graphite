@@ -86,6 +86,7 @@ namespace gssw
 			m_node_id_to_allele_ptrs.emplace(n->id, allelePtr);
 			n->len = allelePtr->getLength();
 			n->seq = (char*)allelePtr->getSequence();
+			n->data = (void*)allelePtr.get();
 			n->num = gssw_create_num(n->seq, n->len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;

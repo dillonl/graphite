@@ -39,20 +39,20 @@ add_executable(pathtrace
 target_link_libraries(gssw
   BamTools
   BamTools-utils
+  ${PLUGIN_LIBS}
   ${CORE_LIB}
   fastahack_lib
   ${SCI_BOOST_LIBRARY}
-  ${PLUGIN_LIBS}
   ${GSSW_LIB}
 )
 
 target_link_libraries(pathtrace
   BamTools
   BamTools-utils
+  ${PLUGIN_LIBS}
   ${CORE_LIB}
   fastahack_lib
   ${SCI_BOOST_LIBRARY}
-  ${PLUGIN_LIBS}
   ${GSSW_LIB}
 )
 
