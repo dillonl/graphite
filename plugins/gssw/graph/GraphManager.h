@@ -1,10 +1,9 @@
 #ifndef GWIZ_GSSW_GSSWGRAPHMANAGER_H
 #define GWIZ_GSSW_GSSWGRAPHMANAGER_H
 
-//#include "core/alignment/IAlignmentReaderManager.h"
 #include "core/alignment/IAlignmentManager.h"
 #include "core/variant/IVariantManager.h"
-#include "core/adjudicator/IGraphAdjudicator.h"
+#include "core/adjudicator/IAdjudicator.h"
 
 #include "GSSWGraph.h"
 
@@ -23,7 +22,7 @@ namespace gssw
 	public:
 		typedef std::shared_ptr< GraphManager > SharedPtr;
 
-		GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IGraphAdjudicator::SharedPtr graphAdjudicatorPtr);
+		GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IAdjudicator::SharedPtr adjudicatorPtr);
 		~GraphManager() {}
 
 		/*
@@ -43,7 +42,7 @@ namespace gssw
 		IReference::SharedPtr m_reference_ptr;
 		IVariantManager::SharedPtr m_variant_manager_ptr;
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
-		IGraphAdjudicator::SharedPtr m_graph_adjudicator_ptr;
+		IAdjudicator::SharedPtr m_adjudicator_ptr;
 	};
 }
 }

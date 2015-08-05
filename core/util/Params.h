@@ -27,6 +27,10 @@ namespace gwiz
 		Region::SharedPtr getRegion();
 		uint32_t getPercent();
 		uint32_t getThreadCount();
+		int getMatchValue();
+		int getMisMatchValue();
+		int getGapOpenValue();
+		int getGapExtensionValue();
 	private:
 		std::shared_ptr< boost::program_options::options_description > m_options_description_ptr;
 		boost::program_options::variables_map m_variables_map;

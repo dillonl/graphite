@@ -1,10 +1,11 @@
 #include "core/alignment/BamAlignmentManager.h"
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
+#include "core/mapping/MappingManager.h"
 #include "core/util/Params.h"
+#include "core/util/ThreadPool.hpp"
 #include "gssw/graph/GraphManager.h"
 #include "gssw/graph/GSSWAdjudicator.h"
-#include "core/util/ThreadPool.hpp"
 
 #include <thread>
 
@@ -24,6 +25,7 @@ int main(int argc, char** argv)
 	auto regionPtr = params.getRegion();
 	auto swPercent = params.getPercent();
 	auto threadCount = params.getThreadCount();
+	int matchValue = 1;
 	gwiz::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
@@ -44,10 +46,12 @@ int main(int argc, char** argv)
 	std::cout << "loaded vcfs and bams" << std::endl;
 
 	// create an adjudicator for the graph
-	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent);
+	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent, matchValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
+
+	gwiz::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();

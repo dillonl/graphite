@@ -1,9 +1,7 @@
 #ifndef GWIZ_GSSW_GSSWADJUDICATOR_H
 #define GWIZ_GSSW_GSSWADJUDICATOR_H
 
-#include "core/adjudicator/IGraphAdjudicator.h"
-#include "core/alignment/IAlignmentList.h"
-#include "GSSWGraph.h"
+#include "core/adjudicator/IAdjudicator.h"
 
 #include <mutex>
 
@@ -11,29 +9,19 @@ namespace gwiz
 {
 namespace gssw
 {
-	class GSSWAdjudicator : public IGraphAdjudicator
+	class GSSWAdjudicator : public IAdjudicator
 	{
 	public:
 		typedef std::shared_ptr< GSSWAdjudicator > SharedPtr;
-		GSSWAdjudicator(uint32_t swPercent);
+		GSSWAdjudicator(uint32_t swPercent, int matchValue);
 		~GSSWAdjudicator();
 
-		IVariantList::SharedPtr adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr) override;
-		int m_id;
+		void adjudicateMapping(IMapping::SharedPtr mappingPtr) override;
 	private:
-		void printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment);
-		bool isAmbiguousFinalNodeCall(gssw_node* node)
-		{
-			if (node->count_prev > 0)
-			{
-				auto prevNode = node->prev[0];
-				gssw_node* tmpNode;
-				/* for (int i = 0; i <  */
-			}
-			return false;
-		}
+
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;
+		int m_match_value;
 	};
 }
 }

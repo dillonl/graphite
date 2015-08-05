@@ -12,78 +12,33 @@ namespace gwiz
 {
 namespace gssw
 {
-	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent) :
-		m_sw_percent(swPercent)
+	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent, int matchValue) :
+		m_sw_percent(swPercent),
+		m_match_value(matchValue)
 	{
-		static int id = 0;
-		m_id = ++id;
 	}
 
 	GSSWAdjudicator::~GSSWAdjudicator()
 	{
 	}
 
-	void GSSWAdjudicator::printNodes(GSSWGraph::SharedPtr graphPtr, const std::string& alignment)
+	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr)
 	{
-		auto gsswGraph = graphPtr->getGSSWGraph();
-		for (uint32_t i = 0; i < gsswGraph->size; ++i)
+		auto swScore = mappingPtr->getMappingScore();
+		auto alignmentPtr = mappingPtr->getAlignmentPtr();
+		float swPercent = (swScore / (alignmentPtr->getLength() * this->m_match_value));
+		if (swPercent >= this->m_sw_percent)
 		{
-			auto node = gsswGraph->nodes[i];
-			std::cout << "pos: " << node->position << std::endl;
-			gssw_print_score_matrix(node->seq, node->len, alignment.c_str(), alignment.size(), node->alignment);
-		}
-	}
-
-	IVariantList::SharedPtr GSSWAdjudicator::adjudicateGraph(IGraph::SharedPtr graphPtr, IAlignmentList::SharedPtr alignmentListPtr)
-	{
-		float percentage = (this->m_sw_percent * 0.01);
-		auto gsswGraphPtr = std::dynamic_pointer_cast< GSSWGraph >(graphPtr);
-		if (gsswGraphPtr) // kind of punting for now. in the future this should be updated so it handles all igraphs the same
-		{
-			IAlignment::SharedPtr alignmentPtr;
-			while (alignmentListPtr->getNextAlignment(alignmentPtr))
+			if (alignmentPtr->isReverseStrand())
 			{
-				auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
-				MappingManager::Instance()->registerMapping(gsswMappingPtr);
-				// gssw_node_cigar* nc = graphMappingPtr->cigar.elements;
-				// printNodes(gsswGraphPtr, std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()));
-				/*
-				bool mapped = false;
-				std::vector< std::tuple< uint32_t, std::string > > variantInformation;
-				auto pathPtr = std::make_shared< Path >();
-				pathPtr->setAlignment(alignmentPtr);
-				*/
-				// pathPtr->setGSSWGraphMapping(graphMappingPtr);
-				// for (int i = 0; i < graphMappingPtr->cigar.length; ++i, ++nc)
-				// {
-					// IAllele::SharedPtr allelePtr = gsswGraphPtr->getAllelePtrFromNodeID(nc->node->id);
-					// pathPtr->addAlleleToPath(allelePtr);
-
-					/*
-					auto variantPtr = gsswGraphPtr->getVariantFromNodeID(nc->node->id);
-					if (variantPtr != nullptr)
-					{
-						mapped = (graphMappingPtr->score >= ((alignmentPtr->getLength() * gsswGraphPtr->getMatchValue()) * percentage));
-						if (mapped)
-						{
-							// variantInformation.emplace_back(std::make_tuple< uint32_t, std::string >(variantPtr->getVariantID(), std::string(nc->node->seq, nc->node->len)));
-						}
-						// variantPtr->addPotentialAlignment(alignmentPtr);
-					}
-					*/
-				// }
-				// if (mapped)
-				// {
-					// alignmentPtr->setMappingInformation(graphMappingPtr->score, variantInformation);
-				// }
-				// pathPtr->printLongFormat();
+				for (auto& allelePtr : mappingPtr->getAllelePtrs()) { allelePtr->incrementReverseCount(); }
+			}
+			else
+			{
+				for (auto& allelePtr : mappingPtr->getAllelePtrs()) { allelePtr->incrementForwardCount(); }
 			}
 		}
-		else
-		{
-			throw "adjudicateGraph has not been implemented for non-GSSWGraphs";
-		}
-		return nullptr;
 	}
+
 }
 }

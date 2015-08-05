@@ -2,8 +2,10 @@
 #define GWIZ_MAPPINGMANAGER_H
 
 #include "IMapping.h"
+#include "core/adjudicator/IAdjudicator.h"
 
 #include <unordered_map>
+#include <mutex>
 
 #include <boost/noncopyable.hpp>
 
@@ -20,13 +22,13 @@ namespace gwiz
 		 * mappingPtr's mapping score is larger.
 		 */
 		void registerMapping(IMapping::SharedPtr mappingPtr);
-		void evaluateAlignmentMappings();
+		void evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr);
 	private:
-		void evaluateMapping(IMapping::SharedPtr mappingPtr);
 		MappingManager();
 		~MappingManager();
 
 		static MappingManager* s_instance;
+		std::mutex m_alignment_mapping_map_mutex;
 		std::unordered_map< IAlignment::SharedPtr, IMapping::SharedPtr > m_alignment_mapping_map;
 	};
 }

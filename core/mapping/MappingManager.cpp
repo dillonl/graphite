@@ -26,6 +26,7 @@ namespace gwiz
 
 	void MappingManager::registerMapping(IMapping::SharedPtr mappingPtr)
 	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
 		auto iter = this->m_alignment_mapping_map.find(alignmentPtr);
 		if (iter == this->m_alignment_mapping_map.end() || iter->second->getMappingScore() < mappingPtr->getMappingScore())
@@ -34,17 +35,13 @@ namespace gwiz
 		}
 	}
 
-	void MappingManager::evaluateAlignmentMappings()
+	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		for (auto& iter : this->m_alignment_mapping_map)
 		{
-			auto funct = std::bind(&MappingManager::evaluateMapping, this, iter.second);
+			auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, iter.second);
 			ThreadPool::Instance()->enqueue(funct);
 		}
-	}
-
-	void MappingManager::evaluateMapping(IMapping::SharedPtr mappingPtr)
-	{
-
 	}
 }

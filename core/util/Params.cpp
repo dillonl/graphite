@@ -24,6 +24,10 @@ namespace gwiz
 			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output VCF file [optional - default is stdout]")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
 			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")
+			(",m", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Match Value [optional - default is 1]")
+			(",s", boost::program_options::value< uint32_t >()->default_value(4), "Smith-Waterman MisMatch Value [optional - default is 4]")
+			(",g", boost::program_options::value< uint32_t >()->default_value(6), "Smith-Waterman Gap Open Value [optional - default is 6]")
+			(",e", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Gap Extension Value [optional - default is 1]")
 			(",t", boost::program_options::value< uint32_t >()->default_value(std::thread::hardware_concurrency() * 2), "Thread count [optional - default is number of cores x 2]");
 		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
 		boost::program_options::store(parseCommandLine, m_variables_map);
@@ -105,6 +109,26 @@ namespace gwiz
 	uint32_t Params::getThreadCount()
 	{
 		return m_variables_map["-t"].as< uint32_t >();
+	}
+
+	int Params::getMatchValue()
+	{
+		return m_variables_map["-m"].as< uint32_t >();
+	}
+
+	int Params::getMisMatchValue()
+	{
+		return m_variables_map["-s"].as< uint32_t >();
+	}
+
+	int Params::getGapOpenValue()
+	{
+		return m_variables_map["-g"].as< uint32_t >();
+	}
+
+	int Params::getGapExtensionValue()
+	{
+		return m_variables_map["-e"].as< uint32_t >();
 	}
 
 }
