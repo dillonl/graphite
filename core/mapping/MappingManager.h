@@ -5,18 +5,28 @@
 
 #include <unordered_map>
 
+#include <boost/noncopyable.hpp>
+
 namespace gwiz
 {
-	class MappingManager
+	class MappingManager : private boost::noncopyable
 	{
 	public:
 		static MappingManager* Instance();
+
+		/*
+		 * Checks the mapping's mappingScore and only
+		 * adds the alignmentPtr if the passed in
+		 * mappingPtr's mapping score is larger.
+		 */
+		void registerMapping(IMapping::SharedPtr mappingPtr);
+		void evaluateAlignmentMappings();
+	private:
+		void evaluateMapping(IMapping::SharedPtr mappingPtr);
 		MappingManager();
 		~MappingManager();
 
-		void registerMapping(IMapping::SharedPtr mappingPtr);
-	private:
-		MappingManager* s_instance;
+		static MappingManager* s_instance;
 		std::unordered_map< IAlignment::SharedPtr, IMapping::SharedPtr > m_alignment_mapping_map;
 	};
 }
