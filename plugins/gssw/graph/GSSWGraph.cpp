@@ -16,12 +16,12 @@ namespace gwiz
 namespace gssw
 {
 
-	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize) :
+	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue) :
 		IGraph(referencePtr, variantListPtr),
-		m_match(1),
-		m_mismatch(4),
-		m_gap_open(6),
-		m_gap_extension(1),
+		m_match(matchValue),
+		m_mismatch(misMatchValue),
+		m_gap_open(gapOpenValue),
+		m_gap_extension(gapExtensionValue),
 		m_variant_list_ptr(variantListPtr),
 		m_start_position(startPosition),
 		m_graph_size(graphSize)

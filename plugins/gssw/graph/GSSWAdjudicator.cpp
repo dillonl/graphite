@@ -12,9 +12,12 @@ namespace gwiz
 {
 namespace gssw
 {
-	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent, int matchValue) :
+	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue) :
 		m_sw_percent(swPercent),
-		m_match_value(matchValue)
+		m_match_value(matchValue),
+		m_mismatch_value(misMatchValue),
+		m_gap_open_value(gapOpenValue),
+		m_gap_extension_value(gapExtensionValue)
 	{
 	}
 
@@ -38,6 +41,26 @@ namespace gssw
 				for (auto& allelePtr : mappingPtr->getAllelePtrs()) { allelePtr->incrementForwardCount(); }
 			}
 		}
+	}
+
+	int GSSWAdjudicator::getMatchValue()
+	{
+		return this->m_match_value;
+	}
+
+	int GSSWAdjudicator::getMisMatchValue()
+	{
+		return this->m_mismatch_value;
+	}
+
+	int GSSWAdjudicator::getGapOpenValue()
+	{
+		return this->m_gap_open_value;
+	}
+
+	int GSSWAdjudicator::getGapExtensionValue()
+	{
+		return this->m_gap_extension_value;
 	}
 
 }

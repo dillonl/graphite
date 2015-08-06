@@ -15,7 +15,12 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
-	    IAllele() { }
+	    IAllele() :
+		    m_forward_count(0),
+			m_reverse_count(0),
+			m_total_count(0)
+		{
+		}
 
 		virtual ~IAllele() {}
 		virtual size_t getLength() = 0;

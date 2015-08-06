@@ -25,7 +25,10 @@ int main(int argc, char** argv)
 	auto regionPtr = params.getRegion();
 	auto swPercent = params.getPercent();
 	auto threadCount = params.getThreadCount();
-	int matchValue = 1;
+	auto matchValue = params.getMatchValue();
+	auto misMatchValue = params.getMisMatchValue();
+	auto gapOpenValue = params.getGapOpenValue();
+	auto gapExtensionValue = params.getGapExtensionValue();
 	gwiz::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
@@ -46,7 +49,7 @@ int main(int argc, char** argv)
 	std::cout << "loaded vcfs and bams" << std::endl;
 
 	// create an adjudicator for the graph
-	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent, matchValue);
+	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);

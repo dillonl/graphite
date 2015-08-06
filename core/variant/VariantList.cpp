@@ -228,4 +228,8 @@ namespace gwiz
 		auto variantPtrs = std::vector< IVariant::SharedPtr >(lowerBound, upperBound);
 		return std::make_shared< VariantList >(variantPtrs);
 	}
+
+	void VariantList::calculateAllAlleleOverlap()
+	{
+	}
 }

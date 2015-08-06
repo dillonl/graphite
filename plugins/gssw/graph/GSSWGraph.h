@@ -25,7 +25,7 @@ namespace gssw
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
-		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize);
+		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;

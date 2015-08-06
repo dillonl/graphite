@@ -13,6 +13,10 @@ namespace gwiz
 		virtual ~IAdjudicator() {}
 
 		virtual void adjudicateMapping(IMapping::SharedPtr mappingPtr) = 0;
+		virtual int getMatchValue() = 0;
+		virtual int getMisMatchValue() = 0;
+		virtual int getGapOpenValue() = 0;
+		virtual int getGapExtensionValue() = 0;
 	private:
 	};
 }

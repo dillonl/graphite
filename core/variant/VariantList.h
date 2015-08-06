@@ -23,6 +23,7 @@ namespace gwiz
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
+		void calculateAllAlleleOverlap();
 
 	protected:
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);
