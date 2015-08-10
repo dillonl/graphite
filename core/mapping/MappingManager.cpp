@@ -3,6 +3,8 @@
 
 #include "core/util/ThreadPool.hpp"
 
+#include <iostream>
+
 namespace gwiz
 {
 	MappingManager* MappingManager::s_instance = nullptr;
@@ -28,6 +30,7 @@ namespace gwiz
 	{
 		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
+		std::cout << alignmentPtr->getPosition() << std::endl;
 		auto iter = this->m_alignment_mapping_map.find(alignmentPtr);
 		if (iter == this->m_alignment_mapping_map.end() || iter->second->getMappingScore() < mappingPtr->getMappingScore())
 		{
@@ -43,5 +46,6 @@ namespace gwiz
 			auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, iter.second);
 			ThreadPool::Instance()->enqueue(funct);
 		}
+		gwiz::ThreadPool::Instance()->joinAll();
 	}
 }

@@ -69,7 +69,7 @@ namespace gwiz
 		// Otherwise use the specified end position.
 		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? getLastPositionInBam() : this->m_region_ptr->getEndPosition();
 
-		while (endPosition < bamLastPosition)// this->m_region_ptr->getEndPosition())
+		do
 		{
             std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 			auto regionPtr = std::make_shared< Region >(regionString);
@@ -79,7 +79,7 @@ namespace gwiz
 			futureAlignmentListPtrs.emplace_back(functFuture);
 			startPosition = endPosition + 1;
 			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
-		}
+		} while (endPosition < bamLastPosition);// this->m_region_ptr->getEndPosition());
 		uint32_t count = 0;
 		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
 		{

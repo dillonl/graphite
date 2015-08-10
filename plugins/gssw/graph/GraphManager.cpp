@@ -61,7 +61,6 @@ namespace gssw
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
-
 			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}

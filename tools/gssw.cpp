@@ -1,4 +1,5 @@
 #include "core/alignment/BamAlignmentManager.h"
+#include "core/alignment/BamAlignmentReader.h"
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
 #include "core/mapping/MappingManager.h"

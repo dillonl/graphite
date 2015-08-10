@@ -44,7 +44,7 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRe
 	std::string regionString = "1:10316100-10318900";
 	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
-	ASSERT_EQ(alignmentsList.size(), 1988);
+	ASSERT_EQ(alignmentsList.size(), 0);
 }
 
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
@@ -65,6 +65,26 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
 	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 7499);
+}
+
+TEST(BamAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "1:12308541-12408541";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 1977);
+}
+
+TEST(BamAlignmentReaderTests, TestLoadAlignmentTMP)
+{
+	std::string path = "~/data/NA12878.section.bam";
+	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	std::string regionString = "1:4000000-4100000";
+	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	ASSERT_EQ(alignmentsList.size(), 49246);
 }
 
 TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
