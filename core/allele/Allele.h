@@ -57,6 +57,7 @@ namespace gwiz
 
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
+
 	};
 }
 

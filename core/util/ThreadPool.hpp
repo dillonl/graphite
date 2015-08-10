@@ -82,6 +82,12 @@ namespace gwiz
 			start();
 		}
 
+		int getTaskCount()
+		{
+			std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
+			return this->m_tasks.size();
+		}
+
 	private:
 
 		ThreadPool() :

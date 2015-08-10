@@ -55,10 +55,16 @@ int main(int argc, char** argv)
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
+	std::cout << "test1" << std::endl;
+
 	gwiz::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
+
+	std::cout << "test2" << std::endl;
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+	gwiz::ThreadPool::Instance()->joinAll();
+
 	if (outputVCFPath.size() > 0)
 	{
 		std::ofstream outVCF;

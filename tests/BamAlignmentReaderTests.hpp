@@ -77,6 +77,7 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
 	ASSERT_EQ(alignmentsList.size(), 1977);
 }
 
+/*
 TEST(BamAlignmentReaderTests, TestLoadAlignmentTMP)
 {
 	std::string path = "~/data/NA12878.section.bam";
@@ -86,6 +87,7 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentTMP)
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 49246);
 }
+*/
 
 TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
 {

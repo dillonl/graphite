@@ -30,7 +30,7 @@ namespace gwiz
 	{
 		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
-		std::cout << alignmentPtr->getPosition() << std::endl;
+		// std::cout << alignmentPtr->getPosition() << std::endl;
 		auto iter = this->m_alignment_mapping_map.find(alignmentPtr);
 		if (iter == this->m_alignment_mapping_map.end() || iter->second->getMappingScore() < mappingPtr->getMappingScore())
 		{

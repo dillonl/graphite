@@ -57,7 +57,11 @@ namespace gssw
 	{
 		auto gsswGraphPtr = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue());
 		gsswGraphPtr->constructGraph();
-		this->m_gssw_graphs.emplace_back(gsswGraphPtr);
+		{
+			std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
+			this->m_gssw_graphs.emplace_back(gsswGraphPtr);
+		}
+
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{

@@ -29,7 +29,7 @@ namespace gssw
 	{
 		auto swScore = mappingPtr->getMappingScore();
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
-		float swPercent = (swScore / (alignmentPtr->getLength() * this->m_match_value));
+		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 		if (swPercent >= this->m_sw_percent)
 		{
 			if (alignmentPtr->isReverseStrand())

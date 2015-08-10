@@ -67,6 +67,7 @@ namespace gssw
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
 			referenceOffset += referenceSize + variantPtr->getRefAllelePtr()->getLength();
 		}
+
 		position currentEndPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > endPosition) ? endPosition : this->m_reference_ptr->getRegion()->getEndPosition();
 		referenceSize = currentEndPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
