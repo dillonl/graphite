@@ -15,10 +15,7 @@ namespace gwiz
 	{
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
-	    IAllele() :
-		    m_forward_count(0),
-			m_reverse_count(0),
-			m_total_count(0)
+	    IAllele()
 		{
 		}
 
@@ -31,12 +28,12 @@ namespace gwiz
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
 
-		inline uint32_t getForwardCount() { return this->m_forward_count.load(); }
-		inline uint32_t getReverseCount() { return this->m_reverse_count.load(); }
-		inline uint32_t getTotalCount() { return this->m_total_count.load(); }
+		virtual inline uint32_t getForwardCount() = 0;
+		virtual inline uint32_t getReverseCount() = 0;
+		virtual inline uint32_t getTotalCount() = 0;
 
-		inline void incrementForwardCount() { ++this->m_forward_count; ++this->m_total_count; }
-		inline void incrementReverseCount() { ++this->m_reverse_count; ++this->m_total_count; }
+		virtual inline void incrementForwardCount() = 0;
+		virtual inline void incrementReverseCount() = 0;
 
 		inline SharedPtr getSharedPtr()
 		{
@@ -44,10 +41,6 @@ namespace gwiz
 		}
 
 	protected:
-
-		std::atomic< uint32_t > m_forward_count; // since this needs to be accessed by several threads make it atomic
-		std::atomic< uint32_t > m_reverse_count; // since this needs to be accessed by several threads make it atomic
-		std::atomic< uint32_t > m_total_count; // since this needs to be accessed by several threads make it atomic
 
 	private:
 

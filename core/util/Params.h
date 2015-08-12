@@ -22,7 +22,7 @@ namespace gwiz
 		std::string getFastaPath();
 		std::vector< std::string > getInVCFPaths();
 		std::string getBAMPath();
-		std::string getOutVCFPath();
+		std::string getOutputDirectory();
 		std::string getFilePrefix();
 		Region::SharedPtr getRegion();
 		uint32_t getPercent();

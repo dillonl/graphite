@@ -173,7 +173,6 @@ namespace gwiz
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
 				uint32_t paddingSuffix = variantString.size() - (altString.size() + paddingPrefix);
 				altAllelePtr->setAlleleMetaData(std::make_shared< AlleleMetaData >(paddingPrefix, paddingSuffix));
-				// std::cout << "building aa: " << altAllelePtr->getSequence() << "(" << altAllelePtr->getAlleleMetaData()->getPaddingPrefix() << "," << altAllelePtr->getAlleleMetaData()->getPaddingSuffix() << ")" << std::endl;
 
 				// if this sequence is not in the map then add it. If it is in the map then
 				// switch it with an equivalentAllele. The equivalentAllele keeps track of

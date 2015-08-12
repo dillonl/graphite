@@ -36,6 +36,8 @@ namespace gwiz
 			return vcfFileReaderPtr;
 		}
 
+		std::string getFilePath();
+
 		uint32_t getID() { return this->m_id; }
 		std::vector< IVariant::SharedPtr > getVariantsInRegion(Region::SharedPtr regionPtr);
 	protected:
@@ -47,6 +49,7 @@ namespace gwiz
 		position getPositionFromLine(const char* line);
 		void setFileReader(const std::string& path);
 
+		std::string m_path;
 		VCFFileReader::WeakPtr m_this_wk_ptr;
 		IFile::SharedPtr m_file_ptr;
 		VariantParser< const char* > m_vcf_parser;

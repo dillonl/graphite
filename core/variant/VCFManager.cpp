@@ -5,6 +5,7 @@
 #include "core/util/ThreadPool.hpp"
 
 #include <functional>
+#include <unordered_map>
 
 namespace gwiz
 {
@@ -43,27 +44,38 @@ namespace gwiz
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::vector< std::thread > vcfLoadThreads;
-		std::vector< std::shared_ptr< std::future< std::vector< IVariant::SharedPtr > > > > vcfFutureVariantListPtrs;
+		std::unordered_map< std::string, std::shared_ptr< std::future< std::vector< IVariant::SharedPtr > > > > vcfFutureVariantListPtrsMap;
 		for (const auto& vcfFileReaderPtr : this->m_vcf_file_reader_ptrs)
 		{
 			auto funct = std::bind(&VCFFileReader::getVariantsInRegion, vcfFileReaderPtr, this->m_region_ptr);
 			auto functFuture = ThreadPool::Instance()->enqueue(funct);
-			vcfFutureVariantListPtrs.emplace_back(functFuture);
+			vcfFutureVariantListPtrsMap.emplace(vcfFileReaderPtr->getFilePath(), functFuture);
 		}
 
 		std::vector< IVariant::SharedPtr > variantPtrs;
-		for (auto& vcfFuturePtr : vcfFutureVariantListPtrs)
+		for (const auto& vcfFileReaderPtr : this->m_vcf_file_reader_ptrs)
 		{
+			std::string filePath = vcfFileReaderPtr->getFilePath();
+			auto  vcfFuturePtr = vcfFutureVariantListPtrsMap[filePath];
+		// }
+		// for (auto& vcfFuturePtr : vcfFutureVariantListPtrs)
+		// {
 			vcfFuturePtr->wait();
 			auto vcfVariantPtrs = vcfFuturePtr->get();
+			this->m_path_vcf_variant_list_ptrs_map.emplace(filePath, std::make_shared< VariantList >(vcfVariantPtrs));
 			variantPtrs.insert(variantPtrs.end(), vcfVariantPtrs.begin(), vcfVariantPtrs.end());
 		}
 
-		vcfFutureVariantListPtrs.clear();
+		vcfFutureVariantListPtrsMap.clear();
 		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs);
 		this->m_variant_list_ptr->sort();
 		this->m_variant_list_ptr->normalizeOverlappingVariants();
 		this->m_loaded_vcfs = true;
+	}
+
+	std::unordered_map< std::string, VariantList::SharedPtr > VCFManager::getVCFPathsAndVariantListsMap()
+	{
+		return this->m_path_vcf_variant_list_ptrs_map;
 	}
 
 	void VCFManager::waitForVCFsToLoadAndProcess()

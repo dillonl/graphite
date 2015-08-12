@@ -10,6 +10,8 @@
 
 #include <thread>
 
+#include <boost/filesystem.hpp>
+
 int main(int argc, char** argv)
 {
 	gwiz::Params params;
@@ -22,7 +24,7 @@ int main(int argc, char** argv)
 	auto fastaPath = params.getFastaPath();
 	auto vcfPaths = params.getInVCFPaths();
 	auto bamPath = params.getBAMPath();
-	auto outputVCFPath = params.getOutVCFPath();
+	auto outputDirectory = params.getOutputDirectory();
 	auto regionPtr = params.getRegion();
 	auto swPercent = params.getPercent();
 	auto threadCount = params.getThreadCount();
@@ -47,34 +49,43 @@ int main(int argc, char** argv)
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
-	std::cout << "loaded vcfs and bams" << std::endl;
-
 	// create an adjudicator for the graph
 	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
 	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-	std::cout << "test1" << std::endl;
-
 	gwiz::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
-
-	std::cout << "test2" << std::endl;
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	gwiz::ThreadPool::Instance()->joinAll();
 
-	if (outputVCFPath.size() > 0)
+	if (outputDirectory.size() == 0)
 	{
-		std::ofstream outVCF;
-		outVCF.open(outputVCFPath, std::ios::out | std::ios::trunc);
-		variantListPtr->printToVCF(outVCF);
-		outVCF.close();
+		variantListPtr->printToVCF(std::cout);
 	}
 	else
 	{
-		variantListPtr->printToVCF(std::cout);
+		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
+		for (auto& iter : vcfPathsAndVariantListPtrsMap)
+		{
+			boost::filesystem::path vcfPath(iter.first);
+			auto variantListPtr = iter.second;
+			boost::filesystem::path outputDirectoryPath(outputDirectory);
+			boost::filesystem::path extension(".vcf");
+			boost::filesystem::path outputVCFPath = outputDirectoryPath / vcfPath.stem() / extension;
+			uint32_t counter = 1;
+			while (boost::filesystem::exists(outputVCFPath))
+			{
+				boost::filesystem::path countPath("_" + std::to_string(counter++));
+				outputVCFPath = outputDirectoryPath / vcfPath.stem() / countPath / extension;
+			}
+			std::ofstream outVCF;
+			outVCF.open(outputVCFPath.string(), std::ios::out | std::ios::trunc);
+			variantListPtr->printToVCF(outVCF);
+			outVCF.close();
+		}
 	}
 	return 0;
 }

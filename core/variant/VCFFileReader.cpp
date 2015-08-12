@@ -19,13 +19,19 @@
 namespace gwiz
 {
 
-	VCFFileReader::VCFFileReader(const std::string& path)
+	VCFFileReader::VCFFileReader(const std::string& path) :
+		m_path(path)
 	{
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
 		++s_vcf_id;
-		setFileReader(path);
+		setFileReader(m_path);
 		Open();
+	}
+
+	std::string VCFFileReader::getFilePath()
+	{
+		return this->m_path;
 	}
 
 	void VCFFileReader::setFileReader(const std::string& path)

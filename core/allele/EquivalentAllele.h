@@ -26,6 +26,50 @@ namespace gwiz
 
 		void addAllele(IAllele::SharedPtr allelePtr) { this->m_allele_ptrs.emplace_back(allelePtr); }
 		std::vector< IAllele::SharedPtr > getAllAlleles() { return this->m_allele_ptrs; }
+
+		inline uint32_t getForwardCount() override
+		{
+			uint32_t count = 0;
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				count += allelePtr->getForwardCount();
+			}
+			return count;
+		}
+		inline uint32_t getReverseCount() override
+		{
+			uint32_t count = 0;
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				count += allelePtr->getReverseCount();
+			}
+			return count;
+		}
+		inline uint32_t getTotalCount() override
+		{
+			uint32_t count = 0;
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				count += allelePtr->getForwardCount();
+				count += allelePtr->getReverseCount();
+			}
+			return count;
+		}
+
+		inline void incrementForwardCount() override
+		{
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				allelePtr->incrementForwardCount();
+			}
+		}
+		inline void incrementReverseCount() override
+		{
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				allelePtr->incrementReverseCount();
+			}
+		}
 	private:
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
 	};

@@ -20,8 +20,8 @@ namespace gwiz
 			("help,h","Print help message")
 			(",b", boost::program_options::value< std::string >()->required(), "Path to input BAM file")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
-			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file")
-			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output VCF file [optional - default is stdout]")
+			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s]")
+			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
 			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")
 			(",m", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Match Value [optional - default is 1]")
@@ -85,7 +85,7 @@ namespace gwiz
 		return m_variables_map["-b"].as< std::string >();
 	}
 
-	std::string Params::getOutVCFPath()
+	std::string Params::getOutputDirectory()
 	{
 		return m_variables_map["-o"].as< std::string >();
 	}
