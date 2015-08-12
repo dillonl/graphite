@@ -67,6 +67,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+		std::vector< std::thread > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
 		for (auto& iter : vcfPathsAndVariantListPtrsMap)
 		{
@@ -74,17 +75,25 @@ int main(int argc, char** argv)
 			auto variantListPtr = iter.second;
 			boost::filesystem::path outputDirectoryPath(outputDirectory);
 			boost::filesystem::path extension(".vcf");
-			boost::filesystem::path outputVCFPath = outputDirectoryPath / vcfPath.stem() / extension;
+			boost::filesystem::path outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + extension.string());
+			std::string outputVCFPathString = "";
 			uint32_t counter = 1;
-			while (boost::filesystem::exists(outputVCFPath))
+			while (boost::filesystem::exists(outputVCFPath.string()))
 			{
 				boost::filesystem::path countPath("_" + std::to_string(counter++));
-				outputVCFPath = outputDirectoryPath / vcfPath.stem() / countPath / extension;
+				outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + countPath.string() + extension.string());
 			}
-			std::ofstream outVCF;
-			outVCF.open(outputVCFPath.string(), std::ios::out | std::ios::trunc);
-			variantListPtr->printToVCF(outVCF);
-			outVCF.close();
+			auto fileWriterThread = std::thread([](std::string _outputVCFPathString, gwiz::VariantList::SharedPtr _variantListPtr)
+			{
+				std::ofstream outVCF;
+				outVCF.open(_outputVCFPathString, std::ios::out | std::ios::trunc);
+				_variantListPtr->printToVCF(outVCF);
+				outVCF.close();
+			}, outputVCFPathString, variantListPtr);
+		}
+		for (auto& fileWriterThread : fileWriters)
+		{
+			fileWriterThread.join();
 		}
 	}
 	return 0;
