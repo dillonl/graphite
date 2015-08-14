@@ -57,9 +57,6 @@ namespace gwiz
 		{
 			std::string filePath = vcfFileReaderPtr->getFilePath();
 			auto  vcfFuturePtr = vcfFutureVariantListPtrsMap[filePath];
-		// }
-		// for (auto& vcfFuturePtr : vcfFutureVariantListPtrs)
-		// {
 			vcfFuturePtr->wait();
 			auto vcfVariantPtrs = vcfFuturePtr->get();
 			this->m_path_vcf_variant_list_ptrs_map.emplace(filePath, std::make_shared< VariantList >(vcfVariantPtrs));

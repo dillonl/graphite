@@ -12,6 +12,15 @@
 
 #include <boost/filesystem.hpp>
 
+// void writeVariantListToFile(const std::string& path, gwiz::VariantList::SharedPtr variantListPtr);
+void writeVariantListToFile(std::string path, gwiz::VariantList::SharedPtr variantListPtr)
+{
+	std::ofstream outVCF;
+	outVCF.open(path, std::ios::out | std::ios::trunc);
+	variantListPtr->printToVCF(outVCF);
+	outVCF.close();
+}
+
 int main(int argc, char** argv)
 {
 	gwiz::Params params;
@@ -58,16 +67,17 @@ int main(int argc, char** argv)
 	gwiz::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
-	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
+
 	gwiz::ThreadPool::Instance()->joinAll();
 
 	if (outputDirectory.size() == 0)
 	{
+		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 		variantListPtr->printToVCF(std::cout);
 	}
 	else
 	{
-		std::vector< std::thread > fileWriters;
+		std::vector< std::shared_ptr< std::thread > > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
 		for (auto& iter : vcfPathsAndVariantListPtrsMap)
 		{
@@ -76,25 +86,20 @@ int main(int argc, char** argv)
 			boost::filesystem::path outputDirectoryPath(outputDirectory);
 			boost::filesystem::path extension(".vcf");
 			boost::filesystem::path outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + extension.string());
-			std::string outputVCFPathString = "";
 			uint32_t counter = 1;
 			while (boost::filesystem::exists(outputVCFPath.string()))
 			{
 				boost::filesystem::path countPath("_" + std::to_string(counter++));
 				outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + countPath.string() + extension.string());
 			}
-			auto fileWriterThread = std::thread([](std::string _outputVCFPathString, gwiz::VariantList::SharedPtr _variantListPtr)
-			{
-				std::ofstream outVCF;
-				outVCF.open(_outputVCFPathString, std::ios::out | std::ios::trunc);
-				_variantListPtr->printToVCF(outVCF);
-				outVCF.close();
-			}, outputVCFPathString, variantListPtr);
+			auto fileWriterThread = std::make_shared< std::thread >(writeVariantListToFile, outputVCFPath.string(), variantListPtr);
+			fileWriters.emplace_back(fileWriterThread);
 		}
 		for (auto& fileWriterThread : fileWriters)
 		{
-			fileWriterThread.join();
+			fileWriterThread->join();
 		}
+		fileWriters.clear(); // clear file writer threads
 	}
 	return 0;
 }
