@@ -1,5 +1,5 @@
 # =================================
-# gwiz
+# graphite
 #
 # tools/CMakeLists.txt
 # =================================
@@ -7,8 +7,8 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
 
 # set header and source files
-set(GWIZ_TOOLS_SOURCES
-	gssw.cpp
+set(GRAPHITE_TOOLS_SOURCES
+	graphite.cpp
 )
 
 # set header and source files
@@ -28,15 +28,15 @@ endif()
 set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
 #create binary
-add_executable(gssw
-  ${GWIZ_TOOLS_SOURCES}
+add_executable(graphite
+  ${GRAPHITE_TOOLS_SOURCES}
 )
 add_executable(pathtrace
   ${PATHTRACE_TOOLS_SOURCES}
 )
 
 # link libraries to executables
-target_link_libraries(gssw
+target_link_libraries(graphite
   BamTools
   BamTools-utils
   ${PLUGIN_LIBS}

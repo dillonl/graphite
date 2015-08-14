@@ -1,5 +1,5 @@
-#ifndef GWIZ_GENOTYPERALLELE_H
-#define GWIZ_GENOTYPERALLELE_H
+#ifndef GRAPHITE_GENOTYPERALLELE_H
+#define GRAPHITE_GENOTYPERALLELE_H
 
 #include "core/alignment/IAlignment.h"
 
@@ -7,7 +7,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class GenotyperAllele : private boost::noncopyable
 	{
@@ -59,4 +59,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_GENOTYPERALLELE_H
+#endif //GRAPHITE_GENOTYPERALLELE_H

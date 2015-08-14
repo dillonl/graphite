@@ -1,5 +1,5 @@
-#ifndef GWIZ_BAMALIGNMENTREADER_HPP
-#define GWIZ_BAMALIGNMENTREADER_HPP
+#ifndef GRAPHITE_BAMALIGNMENTREADER_HPP
+#define GRAPHITE_BAMALIGNMENTREADER_HPP
 
 #include "api/BamReader.h"
 #include "api/BamAlignment.h"
@@ -11,7 +11,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class BamAlignmentReader : private IAlignmentReader
 	{
@@ -28,4 +28,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_BAMALIGNMENTREADER_HPP
+#endif //GRAPHITE_BAMALIGNMENTREADER_HPP

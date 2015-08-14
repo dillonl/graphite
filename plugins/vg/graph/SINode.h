@@ -1,10 +1,10 @@
-#ifndef GWIZ_VG_VGNODE
-#define GWIZ_VG_VGNODE
+#ifndef GRAPHITE_VG_VGNODE
+#define GRAPHITE_VG_VGNODE
 
 #include "core/graph/INode.h"
 #include "core/util/Types.h"
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -19,6 +19,6 @@ namespace gwiz
 
 		};
 	}// end namespace vg
-}// end namespace gwiz
+}// end namespace graphite
 
-#endif //GWIZ_VG_VGNODE
+#endif //GRAPHITE_VG_VGNODE

@@ -12,8 +12,8 @@
 
 #include <boost/filesystem.hpp>
 
-// void writeVariantListToFile(const std::string& path, gwiz::VariantList::SharedPtr variantListPtr);
-void writeVariantListToFile(std::string path, gwiz::VariantList::SharedPtr variantListPtr)
+// void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
+void writeVariantListToFile(std::string path, graphite::VariantList::SharedPtr variantListPtr)
 {
 	std::ofstream outVCF;
 	outVCF.open(path, std::ios::out | std::ios::trunc);
@@ -23,7 +23,7 @@ void writeVariantListToFile(std::string path, gwiz::VariantList::SharedPtr varia
 
 int main(int argc, char** argv)
 {
-	gwiz::Params params;
+	graphite::Params params;
 	params.parseGSSW(argc, argv);
 	if (params.showHelp() || !params.validateRequired())
 	{
@@ -41,16 +41,16 @@ int main(int argc, char** argv)
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
 	auto gapExtensionValue = params.getGapExtensionValue();
-	gwiz::ThreadPool::Instance()->setThreadCount(threadCount);
+	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
-	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 	// load bam alignments
-	auto bamAlignmentManager = std::make_shared< gwiz::BamAlignmentManager >(bamPath, regionPtr);
+	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(bamPath, regionPtr);
 	bamAlignmentManager->asyncLoadAlignments(); // begin the process of loading the alignments asynchronously
 
 	// load variants from vcf
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(vcfPaths, regionPtr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
@@ -59,16 +59,16 @@ int main(int argc, char** argv)
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 	// create an adjudicator for the graph
-	auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
+	auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
-	auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
+	auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
-	gwiz::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
+	graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
 
-	gwiz::ThreadPool::Instance()->joinAll();
+	graphite::ThreadPool::Instance()->joinAll();
 
 	if (outputDirectory.size() == 0)
 	{

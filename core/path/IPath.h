@@ -1,12 +1,12 @@
-#ifndef GWIZ_IPATH_H
-#define GWIZ_IPATH_H
+#ifndef GRAPHITE_IPATH_H
+#define GRAPHITE_IPATH_H
 
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class IPath : boost::noncopyable
 	{
@@ -26,4 +26,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IPATH_H
+#endif //GRAPHITE_IPATH_H

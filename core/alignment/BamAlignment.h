@@ -1,5 +1,5 @@
-#ifndef GWIZ_BAMALIGNMENT_H
-#define GWIZ_BAMALIGNMENT_H
+#ifndef GRAPHITE_BAMALIGNMENT_H
+#define GRAPHITE_BAMALIGNMENT_H
 
 #include "core/region/Region.h"
 #include "IAlignment.h"
@@ -9,7 +9,7 @@
 
 typedef std::shared_ptr< BamTools::BamAlignment > BamAlignmentPtr;
 
-namespace gwiz
+namespace graphite
 {
 	class BamAlignment : public IAlignment
 	{
@@ -32,4 +32,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_BAMALIGNMENT_H
+#endif //GRAPHITE_BAMALIGNMENT_H

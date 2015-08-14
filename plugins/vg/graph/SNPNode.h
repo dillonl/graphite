@@ -1,11 +1,11 @@
-#ifndef GWIZ_VG_SNPNODE
-#define GWIZ_VG_SNPNODE
+#ifndef GRAPHITE_VG_SNPNODE
+#define GRAPHITE_VG_SNPNODE
 
 #include "IVariantNode.h"
 #include "core/graph/INode.h"
 #include "core/util/Types.h"
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -22,6 +22,6 @@ namespace gwiz
 
 		};
 	}// end namespace vg
-}// end namespace gwiz
+}// end namespace graphite
 
-#endif //GWIZ_VG_SNPNODE
+#endif //GRAPHITE_VG_SNPNODE

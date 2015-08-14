@@ -2,7 +2,7 @@
 # vg
 # =================================
 
-set(GWIZ_ADJUDICATOR_GRAPH_SOURCES
+set(GRAPHITE_ADJUDICATOR_GRAPH_SOURCES
 	graph/AdjudicatorGraph.cpp
 	graph/VariantContig.cpp
 )
@@ -21,17 +21,17 @@ endif()
 
 #set(CMAKE_BUILD_TYPE Debug)
 
-add_library(adjudicator_lib ${GWIZ_ADJUDICATOR_GRAPH_SOURCES})
+add_library(adjudicator_lib ${GRAPHITE_ADJUDICATOR_GRAPH_SOURCES})
 
 SET(TMP_PLUGINS ${PLUGIN_LIBS}) # store a temp plugin var
 UNSET(PLUGIN_LIBS CACHE)  #unset the plugin_libs var
 SET(PLUGIN_LIBS "${TMP_PLUGINS};adjudicator_lib" CACHE LIST "A LIST OF THE PLUGIN LIBRARIES") #add adjudicator_lib to the list of plugins
 
 #create binary
-#add_executable(gwiz
-#  ${GWIZ_TOOLS_SOURCES}
+#add_executable(graphite
+#  ${GRAPHITE_TOOLS_SOURCES}
 #)
 
 # link libraries to executables
-#target_link_libraries(gwiz BamTools BamTools-utils ${SCI_BOOST_LIBRARY})
+#target_link_libraries(graphite BamTools BamTools-utils ${SCI_BOOST_LIBRARY})
 

@@ -2,7 +2,7 @@
 #include "BamAlignment.h"
 #include "AlignmentList.h"
 
-namespace gwiz
+namespace graphite
 {
 	BamAlignmentReader::BamAlignmentReader(const std::string& filePath) :
 		m_file_path(filePath)

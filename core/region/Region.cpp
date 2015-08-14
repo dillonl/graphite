@@ -3,7 +3,7 @@
 
 #include "Region.h"
 
-namespace gwiz
+namespace graphite
 {
 	using namespace boost::xpressive;
 

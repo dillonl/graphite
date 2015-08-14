@@ -1,9 +1,9 @@
-#ifndef GWIZ_ALLELEMETADATA_H
-#define GWIZ_ALLELEMETADATA_H
+#ifndef GRAPHITE_ALLELEMETADATA_H
+#define GRAPHITE_ALLELEMETADATA_H
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class AlleleMetaData : private boost::noncopyable
 	{
@@ -24,4 +24,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_ALLELEMETADATA_H
+#endif //GRAPHITE_ALLELEMETADATA_H

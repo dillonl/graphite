@@ -1,5 +1,5 @@
-#ifndef GWIZ_SEQUENCE_MANAGER_H
-#define GWIZ_SEQUENCE_MANAGER_H
+#ifndef GRAPHITE_SEQUENCE_MANAGER_H
+#define GRAPHITE_SEQUENCE_MANAGER_H
 
 #include "Sequence.h"
 
@@ -8,7 +8,7 @@
 #include <cstring>
 #include <mutex>
 
-namespace gwiz
+namespace graphite
 {
 	class SequenceManager : private boost::noncopyable
 	{
@@ -56,4 +56,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_SEQUENCE_MANAGER_H
+#endif //GRAPHITE_SEQUENCE_MANAGER_H

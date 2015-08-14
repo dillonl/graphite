@@ -1,6 +1,6 @@
 #include "BamAlignment.h"
 
-namespace gwiz
+namespace graphite
 {
 	BamAlignment::BamAlignment(BamAlignmentPtr bamAlignmentPtr) :
 		m_bam_alignment_ptr(bamAlignmentPtr)

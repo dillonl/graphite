@@ -1,5 +1,5 @@
-#ifndef GWIZ_VCF_FILE_TESTS_HPP
-#define GWIZ_VCF_FILE_TESTS_HPP
+#ifndef GRAPHITE_VCF_FILE_TESTS_HPP
+#define GRAPHITE_VCF_FILE_TESTS_HPP
 
 #include <stdexcept>
 
@@ -13,15 +13,15 @@ TEST(VCFFileReaderTests, ReadAllChrom20)
 {
 	std::string chrom = "20";
     std::string regionString = chrom;
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	uint32_t totalCount = 181;
 	std::string path = TEST_VCF_FILE;
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
@@ -34,22 +34,22 @@ TEST(VCFFileReaderTests, ReadAllChrom20)
 TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingAndEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 1;
-	gwiz::position endPosition = 4000000;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 3728155;
+	graphite::position startPosition = 1;
+	graphite::position endPosition = 4000000;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 3728155;
 	uint32_t totalCount = 12;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
-	gwiz::position tmpPosition;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -64,22 +64,22 @@ TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingAndEnd)
 TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingNonExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 909434;
-	gwiz::position endPosition = 4000000;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 3728155;
+	graphite::position startPosition = 909434;
+	graphite::position endPosition = 4000000;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 3728155;
 	uint32_t totalCount = 12;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
-	gwiz::position tmpPosition;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -94,22 +94,22 @@ TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingNonExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 1;
-	gwiz::position endPosition = 3728155;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 3728155;
+	graphite::position startPosition = 1;
+	graphite::position endPosition = 3728155;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 3728155;
 	uint32_t totalCount = 12;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
-	gwiz::position tmpPosition;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -124,22 +124,22 @@ TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 909434;
-	gwiz::position endPosition = 3728155;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 3728155;
+	graphite::position startPosition = 909434;
+	graphite::position endPosition = 3728155;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 3728155;
 	uint32_t totalCount = 12;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
-	gwiz::position tmpPosition;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -154,19 +154,19 @@ TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 246020849;
-	gwiz::position endPosition = 248828840;
-	gwiz::position lastPosition = 248828840;
+	graphite::position startPosition = 246020849;
+	graphite::position endPosition = 248828840;
+	graphite::position lastPosition = 248828840;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
 		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
@@ -177,19 +177,19 @@ TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginningExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 246020749;
-	gwiz::position endPosition = 248828840;
-	gwiz::position lastPosition = 248828840;
+	graphite::position startPosition = 246020749;
+	graphite::position endPosition = 248828840;
+	graphite::position lastPosition = 248828840;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
 		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
@@ -200,19 +200,19 @@ TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginningExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingNonExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 246020749;
-	gwiz::position endPosition = 300000000;
-	gwiz::position lastPosition = 248828840;
+	graphite::position startPosition = 246020749;
+	graphite::position endPosition = 300000000;
+	graphite::position lastPosition = 248828840;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
 		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
@@ -223,20 +223,20 @@ TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingNonExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginingNonExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 238828840;
-	gwiz::position endPosition = 348828840;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 248828840;
+	graphite::position startPosition = 238828840;
+	graphite::position endPosition = 348828840;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 248828840;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
 		tmpPosition = variantPtr->getPosition(); // this will store the last position of the next variant, that way I have access to the last position
@@ -247,20 +247,20 @@ TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginingNonExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition =  36314453;
-	gwiz::position endPosition = 38686990;
-	gwiz::position firstPosition =  36314453;
-	gwiz::position lastPosition = 38686990;
+	graphite::position startPosition =  36314453;
+	graphite::position endPosition = 38686990;
+	graphite::position firstPosition =  36314453;
+	graphite::position lastPosition = 38686990;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -273,20 +273,20 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition =  36314450;
-	gwiz::position endPosition = 38686990;
-	gwiz::position firstPosition =  36314453;
-	gwiz::position lastPosition = 38686990;
+	graphite::position startPosition =  36314450;
+	graphite::position endPosition = 38686990;
+	graphite::position firstPosition =  36314453;
+	graphite::position lastPosition = 38686990;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -299,20 +299,20 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingNonExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition =  36314453;
-	gwiz::position endPosition = 38686991;
-	gwiz::position firstPosition =  36314453;
-	gwiz::position lastPosition = 38686990;
+	graphite::position startPosition =  36314453;
+	graphite::position endPosition = 38686991;
+	graphite::position firstPosition =  36314453;
+	graphite::position lastPosition = 38686990;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -325,20 +325,20 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingNonExactEnd)
 TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingNonExactEnd)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition =  36314452;
-	gwiz::position endPosition = 38686991;
-	gwiz::position firstPosition =  36314453;
-	gwiz::position lastPosition = 38686990;
+	graphite::position startPosition =  36314452;
+	graphite::position endPosition = 38686991;
+	graphite::position firstPosition =  36314453;
+	graphite::position lastPosition = 38686990;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
-	gwiz::position tmpPosition;
+	graphite::IVariant::SharedPtr variantPtr;
+	graphite::position tmpPosition;
 	variantListPtr->getNextVariant(variantPtr);
 	ASSERT_EQ(variantPtr->getPosition(), firstPosition);
 	while (variantListPtr->getNextVariant(variantPtr))
@@ -354,13 +354,13 @@ TEST(VCFFileReaderTests, ReadRegionNonExistantChrom)
 	uint32_t totalCount = 0;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom;
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
@@ -372,22 +372,22 @@ TEST(VCFFileReaderTests, ReadRegionNonExistantChrom)
 TEST(VCFFileReaderTests, ReadRegionWithNoVariants)
 {
 	std::string chrom = "1";
-	gwiz::position startPosition = 1;
-	gwiz::position endPosition = 100;
-	gwiz::position firstPosition = 909434;
-	gwiz::position lastPosition = 3728155;
+	graphite::position startPosition = 1;
+	graphite::position endPosition = 100;
+	graphite::position firstPosition = 909434;
+	graphite::position lastPosition = 3728155;
 	uint32_t totalCount = 0;
 	std::string path = TEST_VCF_FILE;
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-	gwiz::IVariant::SharedPtr variantPtr;
+	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
-	gwiz::position tmpPosition;
+	graphite::position tmpPosition;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
 		++count;
@@ -404,14 +404,14 @@ TEST(VCFFileReaderTests, ReadAllRegionsCheckCount)
 		std::string chrom = std::to_string(i);
 		std::string path = TEST_VCF_FILE;
 		std::string regionString = chrom;
-		auto regionPtr = std::make_shared< gwiz::Region >(regionString);
-		auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(path, regionPtr);
+		auto regionPtr = std::make_shared< graphite::Region >(regionString);
+		auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr);
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-		gwiz::IVariant::SharedPtr variantPtr;
-		gwiz::position tmpPosition;
+		graphite::IVariant::SharedPtr variantPtr;
+		graphite::position tmpPosition;
 		while (variantListPtr->getNextVariant(variantPtr))
 		{
 			ASSERT_STREQ(chrom.c_str(), variantPtr->getChrom().c_str());
@@ -421,4 +421,4 @@ TEST(VCFFileReaderTests, ReadAllRegionsCheckCount)
 	ASSERT_EQ(count, totalCount);
 }
 
-#endif // GWIZ_VCF_FILE_TESTS_HPP
+#endif // GRAPHITE_VCF_FILE_TESTS_HPP

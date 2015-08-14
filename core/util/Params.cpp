@@ -2,7 +2,7 @@
 
 #include <thread>
 
-namespace gwiz
+namespace graphite
 {
 	Params::Params()
 	{

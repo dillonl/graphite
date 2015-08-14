@@ -1,6 +1,6 @@
 #include "ASCIIFileWriter.h"
 
-namespace gwiz
+namespace graphite
 {
 	ASCIIFileWriter::ASCIIFileWriter(const std::string& path) :
 		IFile(path)

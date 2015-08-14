@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSW_ALIGNMENTREPORT_H
-#define GWIZ_GSSW_ALIGNMENTREPORT_H
+#ifndef GRAPHITE_GSSW_ALIGNMENTREPORT_H
+#define GRAPHITE_GSSW_ALIGNMENTREPORT_H
 
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
@@ -9,7 +9,7 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -33,4 +33,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_ALIGNMENTREPORT_H
+#endif //GRAPHITE_GSSW_ALIGNMENTREPORT_H

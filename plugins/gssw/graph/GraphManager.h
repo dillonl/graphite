@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSW_GSSWGRAPHMANAGER_H
-#define GWIZ_GSSW_GSSWGRAPHMANAGER_H
+#ifndef GRAPHITE_GSSW_GSSWGRAPHMANAGER_H
+#define GRAPHITE_GSSW_GSSWGRAPHMANAGER_H
 
 #include "core/alignment/IAlignmentManager.h"
 #include "core/variant/IVariantManager.h"
@@ -13,7 +13,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -47,4 +47,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_GSSWGRAPHMANAGER_H
+#endif //GRAPHITE_GSSW_GSSWGRAPHMANAGER_H

@@ -1,5 +1,5 @@
-#ifndef GWIZ_VG_PATHTRACEVISITOR_H
-#define GWIZ_VG_PATHTRACEVISITOR_H
+#ifndef GRAPHITE_VG_PATHTRACEVISITOR_H
+#define GRAPHITE_VG_PATHTRACEVISITOR_H
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace gwiz
+namespace graphite
 {
 namespace vg
 {
@@ -70,4 +70,4 @@ namespace vg
 }
 }
 
-#endif //GWIZ_VG_PATHTRACEVISITOR_H
+#endif //GRAPHITE_VG_PATHTRACEVISITOR_H

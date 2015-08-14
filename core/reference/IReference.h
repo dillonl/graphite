@@ -1,5 +1,5 @@
-#ifndef GWIZ_IREFERENCE_H
-#define GWIZ_IREFERENCE_H
+#ifndef GRAPHITE_IREFERENCE_H
+#define GRAPHITE_IREFERENCE_H
 
 #include <boost/noncopyable.hpp>
 
@@ -9,7 +9,7 @@
 #include "core/region/Region.h"
 #include "core/util/Types.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	class IReference : private boost::noncopyable
@@ -31,4 +31,4 @@ namespace gwiz
 	};
 }
 
-#endif // GWIZ_IREFERENCE_H
+#endif // GRAPHITE_IREFERENCE_H

@@ -1,10 +1,10 @@
-#ifndef GWIZ_VG_REFERENCE_NODE
-#define GWIZ_VG_REFERENCE_NODE
+#ifndef GRAPHITE_VG_REFERENCE_NODE
+#define GRAPHITE_VG_REFERENCE_NODE
 
 #include "core/reference/IReference.h"
 #include "core/graph/INode.h"
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -34,4 +34,4 @@ namespace gwiz
 	}
 }
 
-#endif //GWIZ_VG_REFERENCE_NODE
+#endif //GRAPHITE_VG_REFERENCE_NODE

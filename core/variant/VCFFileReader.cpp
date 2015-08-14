@@ -16,7 +16,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
 	VCFFileReader::VCFFileReader(const std::string& path) :
@@ -111,4 +111,4 @@ namespace gwiz
 		return variantPtrs;
 	}
 
-} // end namespace gwiz
+} // end namespace graphite

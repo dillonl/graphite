@@ -1,6 +1,6 @@
 #include "SequenceManager.h"
 
-namespace gwiz
+namespace graphite
 {
 	SequenceManager* SequenceManager::s_instance = nullptr;
 

@@ -1,11 +1,11 @@
 # =================================
-# gwiz - test
+# graphite - test
 #
 # text/CMakeLists.txt
 # =================================
 
 # set header and source files
-set(GWIZ_TEST_SOURCES
+set(GRAPHITE_TEST_SOURCES
   gtest_main.cpp
 )
 
@@ -27,11 +27,11 @@ endif()
 
 
 #create binary
-add_executable(gwiz_tests
-  ${GWIZ_TEST_SOURCES}
+add_executable(graphite_tests
+  ${GRAPHITE_TEST_SOURCES}
 )
 
-target_link_libraries(gwiz_tests
+target_link_libraries(graphite_tests
 	gtest
 	BamTools
 	BamTools-utils

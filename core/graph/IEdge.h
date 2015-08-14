@@ -1,5 +1,5 @@
-#ifndef GWIZ_IEDGE_H
-#define GWIZ_IEDGE_H
+#ifndef GRAPHITE_IEDGE_H
+#define GRAPHITE_IEDGE_H
 
 #include <boost/noncopyable.hpp>
 
@@ -8,7 +8,7 @@
 
 #include "INode.h"
 
-namespace gwiz
+namespace graphite
 {
 	class IEdge : boost::noncopyable
 	{
@@ -24,4 +24,4 @@ namespace gwiz
 	};
 }
 
-#endif // GWIZ_IEDGE_H
+#endif // GRAPHITE_IEDGE_H

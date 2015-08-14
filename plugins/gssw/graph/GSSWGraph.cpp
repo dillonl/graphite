@@ -11,7 +11,7 @@
 #include <map>
 #include <algorithm>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

@@ -1,5 +1,5 @@
-#ifndef GWIZ_IALIGNMENTMANAGER_H
-#define GWIZ_IALIGNMENTMANAGER_H
+#ifndef GRAPHITE_IALIGNMENTMANAGER_H
+#define GRAPHITE_IALIGNMENTMANAGER_H
 
 #include "IAlignmentList.h"
 #include "core/region/Region.h"
@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class IAlignmentManager : private boost::noncopyable
 	{
@@ -22,4 +22,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IALIGNMENTMANAGER_H
+#endif //GRAPHITE_IALIGNMENTMANAGER_H

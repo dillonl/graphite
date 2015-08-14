@@ -1,6 +1,6 @@
 #include "AdjudicatorGraph.h"
 
-namespace gwiz
+namespace graphite
 {
 namespace adjudicator
 {
@@ -48,4 +48,4 @@ namespace adjudicator
 	}
 
 } // end namespace adjudicator
-} // end namespace gwiz
+} // end namespace graphite

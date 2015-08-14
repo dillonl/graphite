@@ -1,7 +1,7 @@
 #include "Variant.h"
 #include "core/alignment/IAlignment.h"
 
-namespace gwiz
+namespace graphite
 {
 	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_total_allele_count_low_quality(0), m_total_allele_count(0)
 	{

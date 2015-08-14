@@ -1,9 +1,9 @@
-#ifndef GWIZ_SHAREDCREATOR_H
-#define GWIZ_SHAREDCREATOR_H
+#ifndef GRAPHITE_SHAREDCREATOR_H
+#define GRAPHITE_SHAREDCREATOR_H
 
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	template <class T>
 	class SharedCreator
@@ -25,4 +25,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_SHAREDCREATOR_H
+#endif //GRAPHITE_SHAREDCREATOR_H

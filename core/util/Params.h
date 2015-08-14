@@ -1,11 +1,11 @@
-#ifndef GWIZ_PARAMS_H
-#define GWIZ_PARAMS_H
+#ifndef GRAPHITE_PARAMS_H
+#define GRAPHITE_PARAMS_H
 
 #include "core/region/Region.h"
 #include <boost/noncopyable.hpp>
 #include <boost/program_options.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class Params : private boost::noncopyable
 	{
@@ -37,4 +37,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_PARAMS_H
+#endif //GRAPHITE_PARAMS_H

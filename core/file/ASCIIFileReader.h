@@ -1,5 +1,5 @@
-#ifndef GWIZ_ASCIIFILEREADER_H
-#define GWIZ_ASCIIFILEREADER_H
+#ifndef GRAPHITE_ASCIIFILEREADER_H
+#define GRAPHITE_ASCIIFILEREADER_H
 
 #include <fcntl.h>    /* For O_RDWR */
 #include <unistd.h>   /* For open(), creat() */
@@ -10,7 +10,7 @@
 
 #include "IFile.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	class ASCIIFileReader : public IFile
@@ -51,6 +51,6 @@ namespace gwiz
 		const char* m_end_file_ptr;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_ASCIIFILEREADER_H
+#endif //GRAPHITE_ASCIIFILEREADER_H

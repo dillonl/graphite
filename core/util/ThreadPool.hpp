@@ -1,5 +1,5 @@
-#ifndef GWIZ_THREADPOOL_HPP
-#define GWIZ_THREADPOOL_HPP
+#ifndef GRAPHITE_THREADPOOL_HPP
+#define GRAPHITE_THREADPOOL_HPP
 
 #include <vector>
 #include <queue>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <boost/bind.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
     class ThreadPool : private boost::noncopyable
@@ -139,4 +139,4 @@ namespace gwiz
 
 }
 
-#endif //GWIZ_THREADPOOL_HPP
+#endif //GRAPHITE_THREADPOOL_HPP

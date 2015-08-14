@@ -8,7 +8,7 @@
 #include <deque>
 #include <set>
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -157,4 +157,4 @@ namespace gwiz
 
 	}// end namespace vg
 
-}// end namespace gwiz
+}// end namespace graphite

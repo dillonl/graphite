@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

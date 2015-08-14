@@ -1,5 +1,5 @@
-#ifndef GWIZ_GENOTYPER_H
-#define GWIZ_GENOTYPER_H
+#ifndef GRAPHITE_GENOTYPER_H
+#define GRAPHITE_GENOTYPER_H
 
 #include "IGenotyperVariant.h"
 
@@ -10,7 +10,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class IGenotyper : private boost::noncopyable
 	{
@@ -83,4 +83,4 @@ return a->getPosition() < b->getPosition();
 	};
 }
 
-#endif //GWIZ_GENOTYPER_H
+#endif //GRAPHITE_GENOTYPER_H

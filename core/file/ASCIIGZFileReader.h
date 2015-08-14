@@ -1,5 +1,5 @@
-#ifndef GWIZ_ASCIIGZFILEREADER_H
-#define GWIZ_ASCIIGZFILEREADER_H
+#ifndef GRAPHITE_ASCIIGZFILEREADER_H
+#define GRAPHITE_ASCIIGZFILEREADER_H
 
 #include "IFile.h"
 
@@ -11,7 +11,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/seek.hpp>
 /* #include <boost/iostreams/positioning.hpp> */
-namespace gwiz
+namespace graphite
 {
 	class ASCIIGZFileReader : public IFile
 	{
@@ -39,4 +39,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_ASCIIGZFILEREADER_H
+#endif //GRAPHITE_ASCIIGZFILEREADER_H

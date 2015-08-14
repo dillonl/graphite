@@ -5,12 +5,12 @@
 #include "plugins/vg/graph/VariantGraph.h"
 #include "plugins/vg/graph/SNPNode.h"
 
-void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes);
-void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out);
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes);
+void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out);
 
 int main(int argc, char** argv)
 {
-	gwiz::Params params;
+	graphite::Params params;
 	params.parsePathTrace(argc, argv);
 	if (params.showHelp() || !params.validateRequired())
 	{
@@ -22,10 +22,10 @@ int main(int argc, char** argv)
 	auto regionPtr = params.getRegion();
 	auto filePrefix = params.getFilePrefix();
 
-	auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
+	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 	// load variants from vcf
-	auto variantManagerPtr = std::make_shared< gwiz::VCFManager >(vcfPaths, regionPtr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
@@ -33,26 +33,26 @@ int main(int argc, char** argv)
 	auto variantListPtr = variantManagerPtr->getVariantsInRegion(regionPtr);
 	std::cout << "variants in region" << std::endl;
 
-	auto variantGraphPtr = std::make_shared< gwiz::vg::VariantGraph >(fastaReferencePtr, variantListPtr);
+	auto variantGraphPtr = std::make_shared< graphite::vg::VariantGraph >(fastaReferencePtr, variantListPtr);
 	std::cout << "starting graph construction" << std::endl;
 	variantGraphPtr->constructGraph();
 
 	std::vector< std::string > paths;
-	std::vector< std::vector< gwiz::INode::SharedPtr > > nodes;
+	std::vector< std::vector< graphite::INode::SharedPtr > > nodes;
 	variantGraphPtr->getAllPaths(paths, nodes);
 	printNodesToFasta(filePrefix, nodes);
 
 	return 0;
 }
 
-void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out)
+void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out)
 {
 	std::string pathString;
 	std::string header;
 	for (auto node : nodes)
 	{
-		auto referenceNodePtr = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >(node);
-		auto variantNodePtr = std::dynamic_pointer_cast< gwiz::vg::SNPNode >(node);
+		auto referenceNodePtr = std::dynamic_pointer_cast< graphite::vg::ReferenceNode >(node);
+		auto variantNodePtr = std::dynamic_pointer_cast< graphite::vg::SNPNode >(node);
 		header += "{" + std::to_string(node->getPosition());
 		if (referenceNodePtr != nullptr)
 		{
@@ -70,11 +70,11 @@ void printNodes(std::vector< gwiz::INode::SharedPtr >& nodes, std::ostream& out)
 		pathString += std::string(node->getSequence(), node->getLength());
 	}
 	header = header.substr(0, header.size() - 1);
-	gwiz::FastaWriter fastaWriter(header, pathString);
+	graphite::FastaWriter fastaWriter(header, pathString);
 	fastaWriter.write(out);
 }
 
-void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< gwiz::INode::SharedPtr > >& nodes)
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes)
 {
 	size_t count = 1;
 	for (auto nodeList : nodes)

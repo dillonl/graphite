@@ -8,62 +8,62 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
-set(GWIZ_UTIL_SOURCES
+set(GRAPHITE_UTIL_SOURCES
   util/Params.cpp
   )
 
-set(GWIZ_SEQUENCE_SOURCES
+set(GRAPHITE_SEQUENCE_SOURCES
   sequence/SequenceManager.cpp
   )
 
-set(GWIZ_FILE_SOURCES
+set(GRAPHITE_FILE_SOURCES
   file/ASCIIFileReader.cpp
   file/ASCIIGZFileReader.cpp
   )
 
-set(GWIZ_CORE_REFERENCE_SOURCES
+set(GRAPHITE_CORE_REFERENCE_SOURCES
   reference/Reference.cpp
   reference/FastaReference.cpp
   reference/FastaWriter.cpp
   )
 
-set(GWIZ_CORE_REGION_SOURCES
+set(GRAPHITE_CORE_REGION_SOURCES
   region/Region.cpp
   )
 
-set(GWIZ_CORE_PATH_SOURCES
+set(GRAPHITE_CORE_PATH_SOURCES
   path/Path.cpp
   path/PathManager.cpp
   )
 
-set(GWIZ_CORE_MAPPING_SOURCES
+set(GRAPHITE_CORE_MAPPING_SOURCES
   mapping/MappingManager.cpp
   )
 
-set(GWIZ_CORE_ALIGNMENT_SOURCES
+set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
   alignment/BamAlignment.cpp
   alignment/BamAlignmentReader.cpp
   )
 
-set(GWIZ_CORE_VARIANT_SOURCES
+set(GRAPHITE_CORE_VARIANT_SOURCES
   variant/Variant.cpp
   variant/VariantList.cpp
   variant/VCFManager.cpp
   variant/VCFFileReader.cpp
   )
 
-add_library(gwiz_core
-  ${GWIZ_UTIL_SOURCES}
-  ${GWIZ_SEQUENCE_SOURCES}
-  ${GWIZ_FILE_SOURCES}
-  ${GWIZ_CORE_REFERENCE_SOURCES}
-  ${GWIZ_CORE_REGION_SOURCES}
-  ${GWIZ_CORE_ALIGNMENT_SOURCES}
-  ${GWIZ_CORE_VARIANT_SOURCES}
-  ${GWIZ_CORE_PATH_SOURCES}
-  ${GWIZ_CORE_MAPPING_SOURCES}
+add_library(graphite_core
+  ${GRAPHITE_UTIL_SOURCES}
+  ${GRAPHITE_SEQUENCE_SOURCES}
+  ${GRAPHITE_FILE_SOURCES}
+  ${GRAPHITE_CORE_REFERENCE_SOURCES}
+  ${GRAPHITE_CORE_REGION_SOURCES}
+  ${GRAPHITE_CORE_ALIGNMENT_SOURCES}
+  ${GRAPHITE_CORE_VARIANT_SOURCES}
+  ${GRAPHITE_CORE_PATH_SOURCES}
+  ${GRAPHITE_CORE_MAPPING_SOURCES}
   )
 
-SET(CORE_LIB gwiz_core CACHE STRING "THE CORE LIBRARY") #add gwiz_core and gwiz_utils to the list of core libs
+SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs

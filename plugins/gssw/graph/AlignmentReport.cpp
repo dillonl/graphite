@@ -5,7 +5,7 @@
 
 #include <map>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

@@ -1,5 +1,5 @@
-#ifndef GWIZ_CHROMPARSER_H
-#define GWIZ_CHROMPARSER_H
+#ifndef GRAPHITE_CHROMPARSER_H
+#define GRAPHITE_CHROMPARSER_H
 
 #include "core/util/Types.h"
 
@@ -12,7 +12,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
 	template<typename Iterator>
@@ -51,6 +51,6 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, position() > start;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_CHROMPARSER_H
+#endif //GRAPHITE_CHROMPARSER_H

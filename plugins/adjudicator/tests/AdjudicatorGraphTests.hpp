@@ -1,5 +1,5 @@
-#ifndef GWIZ_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
-#define GWIZ_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
+#ifndef GRAPHITE_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
+#define GRAPHITE_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
 #include <chrono>
 #include <thread>
 
@@ -19,13 +19,13 @@
 namespace
 {
 
-	class AdjudicatorGraphTest : public gwiz::adjudicator::AdjudicatorGraph
+	class AdjudicatorGraphTest : public graphite::adjudicator::AdjudicatorGraph
 	{
 	public:
 		typedef std::shared_ptr< AdjudicatorGraphTest > AdjudicatorGraphTestPtr;
 
-		AdjudicatorGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
-			gwiz::adjudicator::AdjudicatorGraph(referencePtr, variantListPtr)
+		AdjudicatorGraphTest(graphite::IReference::SharedPtr referencePtr, graphite::IVariantList::SharedPtr variantListPtr) :
+			graphite::adjudicator::AdjudicatorGraph(referencePtr, variantListPtr)
 		{
 		}
 
@@ -33,12 +33,12 @@ namespace
 		{
 		}
 
-		gwiz::vg::VariantGraph::VariantVertexDescriptor getReferenceVertexContainsPositionTest(gwiz::position pos)
+		graphite::vg::VariantGraph::VariantVertexDescriptor getReferenceVertexContainsPositionTest(graphite::position pos)
 		{
 			return getReferenceVertexContainsPosition(pos);
 		}
 
-		gwiz::vg::VariantGraph::GraphPtr getGraph()
+		graphite::vg::VariantGraph::GraphPtr getGraph()
 		{
 			return this->m_graph_ptr;
 		}
@@ -50,16 +50,16 @@ namespace
 	/*
 	TEST(AdjudicatorTests, TestFindPositionSingleVertex)
 	{
-		gwiz::position pos = 6000;
-		gwiz::position firstVariantPositionOffset = 10;
-		gwiz::position secondVariantPositionOffset = 19;
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_adj_reference_string, "20", pos);
+		graphite::position pos = 6000;
+		graphite::position firstVariantPositionOffset = 10;
+		graphite::position secondVariantPositionOffset = 19;
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_adj_reference_string, "20", pos);
 		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
 		auto referenceVertex = variantGraph->getReferenceVertexContainsPositionTest(6000);
-		auto referenceNode = std::dynamic_pointer_cast< gwiz::vg::ReferenceNode >((*variantGraph->getGraph())[referenceVertex]);
+		auto referenceNode = std::dynamic_pointer_cast< graphite::vg::ReferenceNode >((*variantGraph->getGraph())[referenceVertex]);
 
 		bool refEq = memcmp(referenceNode->getSequence(), testReferenceVariantGenerator.getReference()->getSequence(), referenceNode->getLength())  == 0;
 		ASSERT_TRUE(refEq);
@@ -68,10 +68,10 @@ namespace
 
 	TEST(AdjudicatorTests, TestFindPosition)
 	{
-		gwiz::position pos = 6000;
-		gwiz::position firstVariantPositionOffset = 10;
-		gwiz::position secondVariantPositionOffset = 19;
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_adj_reference_string, "20", pos);
+		graphite::position pos = 6000;
+		graphite::position firstVariantPositionOffset = 10;
+		graphite::position secondVariantPositionOffset = 19;
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_adj_reference_string, "20", pos);
 		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		std::vector< std::string > variants;
 		variants.push_back("G");
@@ -89,13 +89,13 @@ namespace
 	{
 
 
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+		graphite::Region::SharedPtr regionPtr = std::make_shared< graphite::Region >("20");
 
 		std::string fastaPath = TEST_FASTA_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReader = std::make_shared<gwiz::VCFFileReader>(vcfPath);
+		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
+		auto vcfFileReader = std::make_shared<graphite::VCFFileReader>(vcfPath);
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(fastaReferencePtr, vcfFileReader);
 		variantGraph->constructGraph();
 
@@ -114,11 +114,11 @@ namespace
 		// variantGraph->printGraph("test1.dot");
 
 
-		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+		// graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
 		// testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
-		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+		// auto variantGraph = std::make_shared< graphite::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
 }
 
-#endif //GWIZ_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP
+#endif //GRAPHITE_ADJUDICATOR_VARIANT_GRAPH_TESTS_HPP

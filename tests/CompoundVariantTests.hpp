@@ -1,5 +1,5 @@
-#ifndef GWIZ_COMPOUNDVARIANTTESTS_HPP
-#define GWIZ_COMPOUNDVARIANTTESTS_HPP
+#ifndef GRAPHITE_COMPOUNDVARIANTTESTS_HPP
+#define GRAPHITE_COMPOUNDVARIANTTESTS_HPP
 
 #include <vector>
 
@@ -15,7 +15,7 @@
 
 namespace
 {
-	using namespace gwiz;
+	using namespace graphite;
 
 	void compareAlleles(IAllele::SharedPtr allele1, IAllele::SharedPtr allele2)
 	{
@@ -227,4 +227,4 @@ namespace
 	*/
 }
 
-#endif //GWIZ_COMPOUNDVARIANTTESTS_HPP
+#endif //GRAPHITE_COMPOUNDVARIANTTESTS_HPP

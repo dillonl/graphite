@@ -1,5 +1,5 @@
-#ifndef GWIZ_PATH_H
-#define GWIZ_PATH_H
+#ifndef GRAPHITE_PATH_H
+#define GRAPHITE_PATH_H
 
 #include "IPath.h"
 
@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 class Path : IPath
 	{
@@ -40,4 +40,4 @@ class Path : IPath
 	};
 }
 
-#endif //GWIZ_PATH_H
+#endif //GRAPHITE_PATH_H

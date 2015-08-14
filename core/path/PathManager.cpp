@@ -1,6 +1,6 @@
 #include "PathManager.h"
 
-namespace gwiz
+namespace graphite
 {
 	PathManager* PathManager::s_instance = nullptr;
 

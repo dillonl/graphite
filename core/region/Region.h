@@ -1,5 +1,5 @@
-#ifndef GWIZ_REGION_H
-#define GWIZ_REGION_H
+#ifndef GRAPHITE_REGION_H
+#define GRAPHITE_REGION_H
 
 #include <boost/noncopyable.hpp>
 
@@ -9,7 +9,7 @@
 #include "core/util/Types.h"
 #include "core/parser/RegionParser.hpp"
 
-namespace gwiz
+namespace graphite
 {
 
 	/*
@@ -40,4 +40,4 @@ namespace gwiz
 
 }
 
-#endif //GWIZ_REGION_H
+#endif //GRAPHITE_REGION_H

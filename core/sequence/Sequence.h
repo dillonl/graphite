@@ -1,5 +1,5 @@
-#ifndef GWIZ_SEQUENCE_H
-#define GWIZ_SEQUENCE_H
+#ifndef GRAPHITE_SEQUENCE_H
+#define GRAPHITE_SEQUENCE_H
 
 #include <boost/noncopyable.hpp>
 
@@ -8,7 +8,7 @@
 #include <vector>
 #include <iostream>
 
-namespace gwiz
+namespace graphite
 {
 	class Sequence : private boost::noncopyable
 	{
@@ -31,4 +31,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_SEQUENCE_H
+#endif //GRAPHITE_SEQUENCE_H

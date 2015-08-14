@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSW_GSSWGRAPH_TESTS_HPP
-#define GWIZ_GSSW_GSSWGRAPH_TESTS_HPP
+#ifndef GRAPHITE_GSSW_GSSWGRAPH_TESTS_HPP
+#define GRAPHITE_GSSW_GSSWGRAPH_TESTS_HPP
 
 #include <chrono>
 #include <thread>
@@ -33,14 +33,14 @@
 namespace
 {
 
-	class GSSWGraphTest : public gwiz::gssw::GSSWGraph
+	class GSSWGraphTest : public graphite::gssw::GSSWGraph
 	{
 	public:
 		typedef std::shared_ptr< GSSWGraphTest > GSSWGraphTestPtr;
 
 		/*
-		GSSWGraphTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
-			gwiz::gssw::GSSWGraph(referencePtr, variantListPtr)
+		GSSWGraphTest(graphite::IReference::SharedPtr referencePtr, graphite::IVariantList::SharedPtr variantListPtr) :
+			graphite::gssw::GSSWGraph(referencePtr, variantListPtr)
 		{
 		}
 
@@ -49,32 +49,32 @@ namespace
 		}
 		*/
 		/*
-		gwiz::gssw::GSSWGraph::VariantVertexDescriptor getReferenceVertexContainsPositionTest(gwiz::position pos)
+		graphite::gssw::GSSWGraph::VariantVertexDescriptor getReferenceVertexContainsPositionTest(graphite::position pos)
 		{
 			return getReferenceVertexContainsPosition(pos);
 		}
 
-		gwiz::gssw::GSSWGraph::GraphPtr getGraph()
+		graphite::gssw::GSSWGraph::GraphPtr getGraph()
 		{
 			return this->m_graph_ptr;
 		}
 		*/
 
 		/*
-		static void GenerateGenericGraphTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr)
+		static void GenerateGenericGraphTestData(graphite::IReference::SharedPtr& referencePtr, graphite::IVariantList::SharedPtr& variantListPtr)
 		{
 		}
 		*/
 
 		/*
-		static void Build31VariantsTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr, gwiz::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
+		static void Build31VariantsTestData(graphite::IReference::SharedPtr& referencePtr, graphite::IVariantList::SharedPtr& variantListPtr, graphite::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
 		{
 			std::string referenceSequence = "ATGTCACCTCTCCCCCAACTCTAGGCAATGCAGCTTGGGGATAGACTCCTTCCACTTGGGGGAAGAAGAGGGAAGAGTACAGAGGGCTTTGCCTTGCAACTTGGGTACCAGCTCAGCCACAGTAAAGTAAAGTATCAAAAGTTACCCAGCATGGTGCCAGCTGTGGTGGCCACTGGACTTGCCCTTCCCCCAACTCCAAGCAGCCTGGCACAGAGAGAGAGACTCCTTTTGTTTGGGGGTAAATGAGGGAAGAGAAGAAGAAACTCTGCCTGGTAACCCAGGGAATTTGGCCAAATTTAAACCCCAGCCCACTAAGGTGGTTCCTCTAGGACTCAGCGAGAGTTGCAGTGTTTCTGAGCTTAGGGCACCCTCTAGTGCTGATATAGTTTCAATAATCACAGGCTCAAATCACAACACTCAATCTCCTTCAAATACCTGAAAAGCCTTCCCAAGAAGGATGGGTGCAAACAAGCCCAGATTGTGAAGGCTACAATATGTATCTAACTCTTCAATGCCCAGACATCAACAACCATCTTCAAGAGTTAAGAACATCCAGGGAAATATGACCTCATCAAATGAACTAAATAAGGCATCAGTGACCAATCTGAGAATGATGGAGATATGTGACTTTTTAGACAAATAATTCAAAATAGCTGTCTTGATGAAGCTCAACAAACTTCAAGACAACACAGAGAAAGAATTCAGAATTACATCAGAGAAGTTTCACAAAGAAATTGAAGTAATTTCTAAAAAATCAAGCAGAAATTCTGGCACTGAAAAGTTTGATTGTCAAAGTGAAAAATGCATAAGAGTCTTTCAACGGCAGAATTGATCAAGCAGAAGGAACTGGTGAGAACTGGCTATCCAAATATACACGAAGCCAAAAAAAGAATTAAAAAAGAATAAAGTATGCCTACAAAATGTAGAAAATAGTCTCAAAAGGGTAAATCCAAGAGTTATTGGTCTTAAAGAGGATGTAGAGGGAGAGAAAAGGGTAAATAG";
 
-			gwiz::position startPosition = 200000;
+			graphite::position startPosition = 200000;
 			std::string referenceString = std::string(startPosition, 'x');
 			referenceString += referenceSequence;
-			gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", 1);
+			graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "20", 1);
             testReferenceVariantGenerator.addVariant(startPosition + 14, ".", 1, {"G"});
 			testReferenceVariantGenerator.addVariant(startPosition + 18, ".", 1, {"GAAAG"});
 			testReferenceVariantGenerator.addVariant(startPosition + 26, ".", 1, {"G"});
@@ -108,7 +108,7 @@ namespace
 			testReferenceVariantGenerator.addVariant(startPosition + 969, ".", 1, {"C"});
 			testReferenceVariantGenerator.addVariant(startPosition + 981, ".", 1, {"C"});
 
-			alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+			alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
 			alignmentReaderPtr->addAlignment(199924, "GGACCTTTCTCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAGAAAGCTCTAGG");
 			alignmentReaderPtr->addAlignment(199933, "TCAGCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCACCTCTCCCCCAACTCTAGGCAATGCAGC");
 			alignmentReaderPtr->addAlignment(199936, "GCAGCAGTGAACTTGGGGTGCTCACAACCTGTGCAAAACCAGCTGTGGTGGCTAAGGATTGCCTATGTCAACTCTCCCCCAACCCCAAGCAAAGCAGCCTG");
@@ -193,18 +193,18 @@ namespace
 		}
 		*/
 
-		static void Build31VariantsTestData(gwiz::IReference::SharedPtr& referencePtr, gwiz::IVariantList::SharedPtr& variantListPtr, gwiz::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
+		static void Build31VariantsTestData(graphite::IReference::SharedPtr& referencePtr, graphite::IVariantList::SharedPtr& variantListPtr, graphite::testing::TestAlignmentReader::SharedPtr& alignmentReaderPtr)
         {
             std::string referenceSequence = "GGACCTTTCTCAGCAGCAGTGAACTTGGTAG";
-            gwiz::position startPosition = 0;
+            graphite::position startPosition = 0;
             std::string referenceString = std::string(startPosition, 'x');
             referenceString += referenceSequence;
 			// std::cout << "asdf9" << std::endl;
-            gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "10", startPosition);
+            graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceString, "10", startPosition);
             testReferenceVariantGenerator.addVariant(startPosition + 1, ".", 1, {"A"});
             // testReferenceVariantGenerator.addVariant(startPosition + 3, ".", 1, {"C"});
             // testReferenceVariantGenerator.addVariant(startPosition + 20, ".", 1, {"G"});
-            alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
+            alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
             alignmentReaderPtr->addAlignment(2,"GACCT");
             alignmentReaderPtr->addAlignment(2,"AACCT");
             alignmentReaderPtr->addAlignment(25,"TTGGT");
@@ -223,14 +223,14 @@ namespace
 	TEST(GSSWGraphManagerTests, TestBuildGraphNoVariants)
 	{
 		// test setup start
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 
-		gwiz::position startPosition = 200000;
+		graphite::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		alignmentReaderPtr->addAlignment(20000, std::string("AAAGAGGATG"));
 
 		referencePtr = testReferenceVariantGenerator.getReference();
@@ -238,25 +238,25 @@ namespace
 		alignmentReaderPtr->setRegion(referencePtr->getRegion()->getRegionString());
 		// test setup end
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 10, 5, 0);
 
-		gwiz::Variant::SharedPtr variantPtr;
+		graphite::Variant::SharedPtr variantPtr;
 		ASSERT_FALSE(variantList->getNextVariant(variantPtr));
 	}
 
 	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariant)
 	{
 		// test setup start
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 
-		gwiz::position startPosition = 200000;
+		graphite::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
@@ -265,11 +265,11 @@ namespace
 		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 		// test setup end
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
 
-		gwiz::Variant::SharedPtr variantPtr;
+		graphite::Variant::SharedPtr variantPtr;
 		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
 
 	}
@@ -277,14 +277,14 @@ namespace
 	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatch)
 	{
 		// test setup start
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 
-		gwiz::position startPosition = 200000;
+		graphite::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
@@ -293,8 +293,8 @@ namespace
 		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 		// test setup end
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
 
 		std::map< std::string, uint32_t > alleleCount;
@@ -302,7 +302,7 @@ namespace
 		alleleCount["G"] = 0;
 
 
-		gwiz::Variant::SharedPtr variantPtr;
+		graphite::Variant::SharedPtr variantPtr;
 		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
 		for (auto variantAllele : variantPtr->getAlt())
 		{
@@ -316,14 +316,14 @@ namespace
 	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatchTwoReads)
 	{
 		// test setup start
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 
-		gwiz::position startPosition = 200000;
+		graphite::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATG";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 2, ".", 1, {"G"});
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
@@ -333,8 +333,8 @@ namespace
 		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 		// test setup end
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 20, 5, 0);
 
 		std::map< std::string, uint32_t > alleleCount;
@@ -342,7 +342,7 @@ namespace
 		alleleCount["G"] = 1;
 
 
-		gwiz::Variant::SharedPtr variantPtr;
+		graphite::Variant::SharedPtr variantPtr;
 		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
 		for (auto variantAllele : variantPtr->getAlt())
 		{
@@ -357,14 +357,14 @@ namespace
 	TEST(GSSWGraphManagerTests, TestBuildGraphOneVariantMismatchTwoGraphs)
 	{
 		// test setup start
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		auto alignmentReaderPtr = std::make_shared< gwiz::testing::TestAlignmentReader >();
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		auto alignmentReaderPtr = std::make_shared< graphite::testing::TestAlignmentReader >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 
-		gwiz::position startPosition = 200000;
+		graphite::position startPosition = 200000;
 		std::string referenceSequence = "AAAGAGGATGATGTGCAAATA";
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(referenceSequence, "20", startPosition);
 		testReferenceVariantGenerator.addVariant(startPosition + 15, ".", 1, {"G"});
 		referencePtr = testReferenceVariantGenerator.getReference();
 		variantListPtr = testReferenceVariantGenerator.getVariants();
@@ -374,8 +374,8 @@ namespace
 		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 		// test setup end
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(alignmentReaderPtr->getRegion(), 15, 5, 2);
 
 		std::map< std::string, uint32_t > alleleCount;
@@ -383,7 +383,7 @@ namespace
 		alleleCount["G"] = 1;
 
 
-		gwiz::Variant::SharedPtr variantPtr;
+		graphite::Variant::SharedPtr variantPtr;
 		ASSERT_TRUE(variantList->getNextVariant(variantPtr));
 		for (auto variantAllele : variantPtr->getAlt())
 		{
@@ -398,22 +398,22 @@ namespace
 	/*
 	TEST(GSSWTests, TestAlignmentReport)
 	{
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		gwiz::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		graphite::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
 		GSSWGraphTest::Build31VariantsTestData(referencePtr, variantListPtr, alignmentReaderPtr);
 
-		auto alignmentReaderManagerPtr = std::make_shared< gwiz::testing::TestAlignmentReaderManager >();
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::testing::TestAlignmentReaderManager >();
 		alignmentReaderManagerPtr->addAlignments(alignmentReaderPtr);
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(referencePtr, variantListPtr, alignmentReaderManagerPtr, gsswAdjudicator);
 
 		auto variantList = gsswGraphManager->buildGraphs(referencePtr->getRegion(), 3000, 1000, 100);
 
 		// std::ofstream outStream;
 		// outStream.open("og.txt", std::ios::out);
-		// gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		// graphite::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		// outStream.close();
 
 		std::ofstream outVCF;
@@ -431,18 +431,18 @@ namespace
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		std::string bamPath = TEST_BAM_FILE;
 
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-		auto vcfFileReaderPtr = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
-		// auto bamAlignmentReaderManager = std::make_shared< gwiz::BamAlignmentReaderManager >(bamPath);
-		// auto graphManagerPtr = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
-		auto bamAlignmentReaderPreloadManager = std::make_shared< gwiz::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
+		graphite::Region::SharedPtr regionPtr = std::make_shared< graphite::Region >("20");
+		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
+		auto vcfFileReaderPtr = std::make_shared< graphite::VariantListVCFPreloaded >(vcfPath, regionPtr);
+		// auto bamAlignmentReaderManager = std::make_shared< graphite::BamAlignmentReaderManager >(bamPath);
+		// auto graphManagerPtr = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderManager, 25);
+		auto bamAlignmentReaderPreloadManager = std::make_shared< graphite::BamAlignmentReaderPreloadManager >(bamPath, regionPtr);
 		vcfFileReaderPtr->loadVariantsFromFile();
 
 		std::cout << "Finished loading BAM and VCF" << std::endl;
 
-		auto gsswAdjudicator = std::make_shared< gwiz::gssw::GSSWAdjudicator >();
-		auto gsswGraphManager = std::make_shared< gwiz::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
+		auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >();
+		auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, vcfFileReaderPtr, bamAlignmentReaderPreloadManager, gsswAdjudicator);
 		auto variantList = gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
 		std::cout << "starting to print vcf" << std::endl;
@@ -456,7 +456,7 @@ namespace
 
 		std::ofstream outStream;
 		outStream.open("og.txt", std::ios::out);
-		gwiz::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
+		graphite::gssw::AlignmentReporter::Instance()->printAlignmentReportsToStream(outStream);
 		outStream.close();
 	}
 	*/
@@ -464,9 +464,9 @@ namespace
 	TEST(GSSWTests, TestConstructTestData)
 	{
 		/*
-		gwiz::IReference::SharedPtr referencePtr;
-		gwiz::IVariantList::SharedPtr variantListPtr;
-		gwiz::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
+		graphite::IReference::SharedPtr referencePtr;
+		graphite::IVariantList::SharedPtr variantListPtr;
+		graphite::testing::TestAlignmentReader::SharedPtr alignmentReaderPtr;
 		GSSWGraphTest::Build31VariantsTestData(referencePtr, variantListPtr, alignmentReaderPtr);
 
 		auto gsswGraph = std::make_shared< GSSWGraphTest >(referencePtr, variantListPtr, alignmentReaderPtr);
@@ -478,4 +478,4 @@ namespace
 
 }
 
-#endif //GWIZ_GSSW_GSSWGRAPH_TESTS_HPP
+#endif //GRAPHITE_GSSW_GSSWGRAPH_TESTS_HPP

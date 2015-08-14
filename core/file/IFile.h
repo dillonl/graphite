@@ -1,11 +1,11 @@
-#ifndef GWIZ_IFILE_H
-#define GWIZ_IFILE_H
+#ifndef GRAPHITE_IFILE_H
+#define GRAPHITE_IFILE_H
 
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class IFile : private boost::noncopyable
 	{
@@ -40,6 +40,6 @@ namespace gwiz
 		bool m_opened;
 		size_t m_file_size;
 	};
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif // GWIZ_IFILE_H
+#endif // GRAPHITE_IFILE_H

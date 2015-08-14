@@ -1,14 +1,14 @@
 # =================================
-# gwiz
+# graphite
 #
-# gwiz/CMakeLists.tx
+# graphite/CMakeLists.tx
 # =================================
 
 #Set up min CMake version
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 #Set project name
-PROJECT(gwiz)
+PROJECT(graphite)
 
 SET(VERSION_MAJOR "0")
 SET(VERSION_MINOR "1")

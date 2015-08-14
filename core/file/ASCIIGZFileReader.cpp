@@ -4,7 +4,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/copy.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	ASCIIGZFileReader::ASCIIGZFileReader(const std::string& path) :
 		IFile(path)

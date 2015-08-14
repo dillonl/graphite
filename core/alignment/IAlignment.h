@@ -1,5 +1,5 @@
-#ifndef GWIZ_IALIGNMENT_H
-#define GWIZ_IALIGNMENT_H
+#ifndef GRAPHITE_IALIGNMENT_H
+#define GRAPHITE_IALIGNMENT_H
 
 #include <boost/noncopyable.hpp>
 
@@ -10,9 +10,8 @@
 #include <string>
 
 #include "core/util/Types.h"
-// #include "core/variant/Variant.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	class IAlignment : private boost::noncopyable
@@ -78,4 +77,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IALIGNMENT_H
+#endif //GRAPHITE_IALIGNMENT_H

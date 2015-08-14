@@ -1,14 +1,14 @@
-#ifndef GWIZ_VG_VARIANT_GRAPH_TESTS_HPP
- #define GWIZ_VG_VARIANT_GRAPH_TESTS_HPP
- #include <chrono>
- #include <thread>
+#ifndef GRAPHITE_VG_VARIANT_GRAPH_TESTS_HPP
+#define GRAPHITE_VG_VARIANT_GRAPH_TESTS_HPP
+#include <chrono>
+#include <thread>
 
- #include "gtest/gtest.h"
+#include "gtest/gtest.h"
 
- #include "config/TestConfig.h"
- #include "tests/classes/TestReference.hpp"
- #include "tests/classes/TestVariantList.hpp"
- #include "tests/classes/TestReferenceVariantGenerator.hpp"
+#include "config/TestConfig.h"
+#include "tests/classes/TestReference.hpp"
+#include "tests/classes/TestVariantList.hpp"
+#include "tests/classes/TestReferenceVariantGenerator.hpp"
 #include "plugins/vg/graph/VariantGraph.h"
 
 #include "core/variants/VCFFileReader.h"
@@ -19,12 +19,12 @@
  namespace
  {
 
-	 class VGTest : public gwiz::vg::VariantGraph
+	 class VGTest : public graphite::vg::VariantGraph
 	 {
 	 public:
 		 typedef std::shared_ptr< VGTest > VGTestPtr;
 
-		 VGTest(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr) :
+		 VGTest(graphite::IReference::SharedPtr referencePtr, graphite::IVariantList::SharedPtr variantListPtr) :
 			 VariantGraph(referencePtr, variantListPtr)
 		 {
 
@@ -34,9 +34,9 @@
 		 {
 		 }
 
-		 bool testGetNextCompoundVariant(gwiz::Variant::SharedPtr& variant)
+		 bool testGetNextCompoundVariant(graphite::Variant::SharedPtr& variant)
 		 {
-			 return gwiz::IGraph::getNextCompoundVariant(variant);
+			 return graphite::IGraph::getNextCompoundVariant(variant);
 		 }
 
 	 };
@@ -47,11 +47,11 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantEmptyTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_TRUE(variantPtr == NULL);
 	 }
@@ -59,15 +59,15 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantSingleTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 3;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 3;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, ".", 1, {"T"});
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
          variantGraph->testGetNextCompoundVariant(variantPtr);
 		 ASSERT_STREQ(variantPtr->getRef().c_str(), std::string(m_reference_string.c_str() + variantPositionOffset, 1).c_str());
 
@@ -77,9 +77,9 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantSNPSinglePositionTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 3;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 3;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "1", 1, {"A"});
@@ -88,7 +88,7 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 
@@ -99,16 +99,16 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantMultiSinglePositionTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 3;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 3;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "1", 2, {"AC"});
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "2", 1, {"G"});
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 2);
@@ -119,9 +119,9 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantMultiWithDeletionTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 3;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 3;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 // ref = TAAAAGTTAT
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "1", 10, {"TT"});
@@ -129,7 +129,7 @@
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 10);
@@ -141,9 +141,9 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantMultipleSingleVariantTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("G");
@@ -151,7 +151,7 @@
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "2", 1, variants);
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
@@ -162,15 +162,15 @@
 
 	 TEST(VariantGraphTest, getCompoundVariantNoOverlapTest)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos, "1", 1, {"T"});
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "2", 1, {"G"});
 
 		 auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
-		 gwiz::Variant::SharedPtr variantPtr;
+		 graphite::Variant::SharedPtr variantPtr;
 		 variantGraph->testGetNextCompoundVariant(variantPtr);
 		 std::string reference = std::string(m_reference_string.c_str() + variantPositionOffset, 1);
 		 ASSERT_STREQ(variantPtr->getRef().c_str(), reference.c_str());
@@ -180,9 +180,9 @@
 
 	 TEST(VariantGraphTest, ConstructSingleVertexGraph)
 	 {
-		 gwiz::position pos = 6000;
-		gwiz::position variantPositionOffset = 1;
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		graphite::position variantPositionOffset = 1;
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
         //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 
 		auto variantGraph = std::make_shared< VGTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
@@ -192,9 +192,9 @@
 
 	 TEST(VariantGraphTest, ConstructSingleVariantVertexGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, ".", 1, { "G" });
 
@@ -205,9 +205,9 @@
 
 	 TEST(VariantGraphTest, ConstructSinglePositionMultiVariantVertexGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("G");
@@ -221,9 +221,9 @@
 
 	 TEST(VariantGraphTest, ConstructSingleVariantVertexStartPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos, ".", 1, { "G" });
 
@@ -234,9 +234,9 @@
 
 	 TEST(VariantGraphTest, ConstructSinglePositionMultiVariantVertexStartPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("G");
@@ -250,9 +250,9 @@
 
 	 TEST(VariantGraphTest, ConstructSinglePositionMultiVariant_MSVVertexStartPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 5;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 5;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, ".", 10, { "A" });
 
@@ -263,9 +263,9 @@
 
 	 TEST(VariantGraphTest, ConstructMultiPositionMultiVariant_MSVVertexStartPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = 5;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = 5;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("G");
@@ -279,10 +279,10 @@
 
 	 TEST(VariantGraphTest, ConstructMultiplePositionMultiVariantVertexGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position firstVariantPositionOffset = 10;
-		 gwiz::position secondVariantPositionOffset = 19;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position firstVariantPositionOffset = 10;
+		 graphite::position secondVariantPositionOffset = 19;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("G");
@@ -297,10 +297,10 @@
 
 	 TEST(VariantGraphTest, ConstructMultiplePositionMultiVariantVertexBackToBackGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position firstVariantPositionOffset = 10;
-		 gwiz::position secondVariantPositionOffset = 19;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position firstVariantPositionOffset = 10;
+		 graphite::position secondVariantPositionOffset = 19;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + firstVariantPositionOffset, ".", 1, { "A"});
 		 testReferenceVariantGenerator.addVariant(pos + firstVariantPositionOffset + 1, ".", 1, { "G" });
@@ -312,9 +312,9 @@
 
 	 TEST(VariantGraphTest, ConstructSingleVariantVertexEndPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = m_reference_string.size() - 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = m_reference_string.size() - 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, ".", 1, { "A" });
 
@@ -325,9 +325,9 @@
 
 	 TEST(VariantGraphTest, ConstructMultiVariantVertexEndPositionGraph)
 	 {
-		 gwiz::position pos = 6000;
-		 gwiz::position variantPositionOffset = m_reference_string.size() - 1;
-		 gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
+		 graphite::position pos = 6000;
+		 graphite::position variantPositionOffset = m_reference_string.size() - 1;
+		 graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", pos);
 		 //AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		 std::vector< std::string > variants;
 		 variants.push_back("T");
@@ -343,18 +343,18 @@
 	TEST(VariantGraphTest, ConstructGraphYChr)
 	{
 
-		gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20:60343-61343");
-		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("20");
+		graphite::Region::SharedPtr regionPtr = std::make_shared< graphite::Region >("20:60343-61343");
+		// graphite::Region::SharedPtr regionPtr = std::make_shared< graphite::Region >("20");
 		// problem is at position: 2820410
-		// gwiz::Region::SharedPtr regionPtr = std::make_shared< gwiz::Region >("Y:2820000-2821510");
+		// graphite::Region::SharedPtr regionPtr = std::make_shared< graphite::Region >("Y:2820000-2821510");
 
 		std::string fastaPath = TEST_FASTA_FILE;
 		// std::string vcfPath = TEST_1KG_CHRY_VCF_FILE;
 		std::string vcfPath = TEST_1KG_CHR20_VCF_FILE;
 		// std::string vcfPath = TEST_1KG_VCF_FILE;
 
-		auto fastaReferencePtr = std::make_shared< gwiz::FastaReference >(fastaPath, regionPtr);
-        auto vcfFileReader = std::make_shared< gwiz::VariantListVCFPreloaded >(vcfPath, regionPtr);
+		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
+        auto vcfFileReader = std::make_shared< graphite::VariantListVCFPreloaded >(vcfPath, regionPtr);
         auto variantGraph = std::make_shared< VGTest >(fastaReferencePtr, vcfFileReader);
 		vcfFileReader->loadVariantsFromFile();
 		variantGraph->constructGraph();
@@ -363,9 +363,9 @@
 		variantGraph->printGraph("test1.dot");
 
 
-		// gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
+		// graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_reference_string, "20", 6000);
 		// testReferenceVariantGenerator.addVariant(6010, ".", {"A","C"});
-		// auto variantGraph = std::make_shared< gwiz::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
+		// auto variantGraph = std::make_shared< graphite::vg::VariantGraph >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 
 	}
 

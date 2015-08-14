@@ -1,13 +1,13 @@
-#ifndef GWIZ_TYPES_H
-#define GWIZ_TYPES_H
+#ifndef GRAPHITE_TYPES_H
+#define GRAPHITE_TYPES_H
 
 #include <stdint.h>
 #include <limits>
 
-namespace gwiz
+namespace graphite
 {
 	typedef uint32_t position;
 	static position MAX_POSITION = std::numeric_limits< position >::max();
 }
 
-#endif //GWIZ_TYPES_H
+#endif //GRAPHITE_TYPES_H

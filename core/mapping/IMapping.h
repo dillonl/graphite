@@ -1,5 +1,5 @@
-#ifndef GWIZ_IMAPPING_H
-#define GWIZ_IMAPPING_H
+#ifndef GRAPHITE_IMAPPING_H
+#define GRAPHITE_IMAPPING_H
 
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
@@ -9,7 +9,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class IMapping : private boost::noncopyable
 	{
@@ -24,4 +24,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IMAPPING_H
+#endif //GRAPHITE_IMAPPING_H

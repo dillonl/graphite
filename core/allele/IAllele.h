@@ -1,5 +1,5 @@
-#ifndef GWIZ_IALLELE_H
-#define GWIZ_IALLELE_H
+#ifndef GRAPHITE_IALLELE_H
+#define GRAPHITE_IALLELE_H
 
 #include "AlleleMetaData.h"
 
@@ -7,7 +7,7 @@
 
 #include <atomic>
 
-namespace gwiz
+namespace graphite
 {
 	class VCFReader;
 	class Sequence;
@@ -47,4 +47,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IALLELE_H
+#endif //GRAPHITE_IALLELE_H

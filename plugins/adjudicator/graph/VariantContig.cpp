@@ -8,7 +8,7 @@
 #include <map>
 #include <thread>
 
-namespace gwiz
+namespace graphite
 {
 namespace adjudicator
 {
@@ -92,4 +92,4 @@ namespace adjudicator
 	}
 
 } // namespace adjudicator
-} // namespace gwiz
+} // namespace graphite

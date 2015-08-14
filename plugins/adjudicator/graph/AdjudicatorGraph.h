@@ -1,5 +1,5 @@
-#ifndef GWIZ_ADJUDICATOR_ADJUDICATORGRAPH
-#define GWIZ_ADJUDICATOR_ADJUDICATORGRAPH
+#ifndef GRAPHITE_ADJUDICATOR_ADJUDICATORGRAPH
+#define GRAPHITE_ADJUDICATOR_ADJUDICATORGRAPH
 
 #include <chrono>
 #include <thread>
@@ -14,7 +14,7 @@
 
 #include "bamtools/src/api/BamAlignment.h"
 
-namespace gwiz
+namespace graphite
 {
 namespace adjudicator
 {
@@ -99,6 +99,6 @@ namespace adjudicator
 
 	};
 } // end namespace adjudicator
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_ADJUDICATOR_ADJUDICATORGRAPH
+#endif //GRAPHITE_ADJUDICATOR_ADJUDICATORGRAPH

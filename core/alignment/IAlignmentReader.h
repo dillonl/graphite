@@ -1,12 +1,12 @@
-#ifndef GWIZ_IALIGNMENTREADER_HPP
-#define GWIZ_IALIGNMENTREADER_HPP
+#ifndef GRAPHITE_IALIGNMENTREADER_HPP
+#define GRAPHITE_IALIGNMENTREADER_HPP
 
 #include "IAlignmentList.h"
 #include "core/region/Region.h"
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class IAlignmentReader : private boost::noncopyable
 	{
@@ -18,4 +18,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IALIGNMENTREADER_HPP
+#endif //GRAPHITE_IALIGNMENTREADER_HPP

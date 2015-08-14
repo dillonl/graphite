@@ -13,7 +13,7 @@
 namespace
 {
 
-	class VariantTest : public gwiz::Variant
+	class VariantTest : public graphite::Variant
 	{
 	public:
 		std::string getGenotypeTest() { return getGenotype(); }
@@ -24,8 +24,8 @@ namespace
 			if (alleles.size() != alleleCounts.size()) { throw "alleles must be matched by allele counts"; }
 			for (uint32_t i = 0; i < alleles.size(); ++i)
 			{
-				auto sequencePtr = gwiz::SequenceManager::Instance()->getSequence(alleles[i].c_str());
-				auto allelePtr = std::make_shared< gwiz::Allele >(sequencePtr);
+				auto sequencePtr = graphite::SequenceManager::Instance()->getSequence(alleles[i].c_str());
+				auto allelePtr = std::make_shared< graphite::Allele >(sequencePtr);
 				this->m_total_allele_count += std::get< 0 >(alleleCounts[i]) + std::get< 1 >(alleleCounts[i]);
 				this->m_allele_count[alleles[i]] = alleleCounts[i];
 				if (i == 0)	{ m_ref_allele_ptr = allelePtr; }
@@ -47,9 +47,9 @@ namespace
 		std::string chromVCF = "Y"; // this matches the first variant line of the test_vcf_file
 		std::string notChromVCF = "0";
 
-        gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+        graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 		std::string chrom = variantPtr->getChrom();
 		EXPECT_STREQ(chrom.c_str(), chromVCF.c_str());
 		EXPECT_STRNE(chromVCF.c_str(), notChromVCF.c_str()); // make sure the chrom number and the not chrom number are not equal
@@ -62,9 +62,9 @@ namespace
 		uint32_t positionVCF = 2655180; // this matches the first variant line of the test_vcf_file
 		uint32_t notPositionVCF = 0;
 
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 	    uint32_t position = variantPtr->getPosition();
 		EXPECT_EQ(position, positionVCF);
@@ -77,9 +77,9 @@ namespace
 		std::string idVCF = "rs11575897"; // this matches the first variant line of the test_vcf_file
 		std::string notIDVCF = "0";
 
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		std::string id = variantPtr->getID();
 		EXPECT_STREQ(id.c_str(), idVCF.c_str());
@@ -90,9 +90,9 @@ namespace
 
 	TEST(VariantsTest, ParseVariantRefTest)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		auto refAllele = variantPtr->getRefAllelePtr();
 		ASSERT_STREQ(refAllele->getSequence(),"G");
@@ -103,9 +103,9 @@ namespace
 	{
 		const char* altVCF = "A"; // this matches the first variant line of the test_vcf_file
 
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_EQ(altAllelePtrs.size(), 1);
@@ -116,9 +116,9 @@ namespace
 	{
 		std::vector<std::string> altVCF = {"A","TTA"};
 
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF[0].c_str());
@@ -129,9 +129,9 @@ namespace
 	{
 		std::vector<std::string> altVCF = {"A","TTA", "TTA"};
 
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF[0].c_str());
@@ -141,9 +141,9 @@ namespace
 
 	TEST(VariantsTest, ParseVariantQualTest)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		std::string qual = variantPtr->getQual();
 		ASSERT_STREQ(qual.c_str(),"34439.5");;
@@ -151,9 +151,9 @@ namespace
 
 	TEST(VariantsTest, ParseVariantFilterTest)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		std::string filter = variantPtr->getFilter();
 		ASSERT_STREQ(filter.c_str(),"PASS");
@@ -173,9 +173,9 @@ namespace
 		infoMap["EUR_AF"] = "0.0000";
 		infoMap["SAS_AF"] = "0.0000";
 		infoMap["EAS_AF"] = "0.0451";
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
 
 		auto infoFields = variantPtr->getInfoFields();
 		for (auto infoFieldIter : infoMap)
@@ -188,9 +188,9 @@ namespace
 
 	TEST(VariantsTest, ParseVariantSymbolidTest)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_3.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_3.c_str(), vcfParser);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "C");
 		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "<CN0>");
@@ -198,9 +198,9 @@ namespace
 
 	TEST(VariantsTest, ParseVariantQual2Test)
 	{
-		gwiz::VariantParser< const char* > vcfParser;
-		gwiz::Variant::SharedPtr variantPtr;
-		variantPtr = gwiz::Variant::BuildVariant(VCF_LINE_4.c_str(), vcfParser);
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_4.c_str(), vcfParser);
 
 		std::string qual = variantPtr->getQual();
 		ASSERT_STREQ(qual.c_str(),"100");

@@ -1,5 +1,5 @@
-#ifndef GWIZ_INODE_H
-#define GWIZ_INODE_H
+#ifndef GRAPHITE_INODE_H
+#define GRAPHITE_INODE_H
 
 #include <boost/noncopyable.hpp>
 
@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace gwiz
+namespace graphite
 {
 
 	class INode : private boost::noncopyable
@@ -38,6 +38,6 @@ namespace gwiz
 		std::vector< INode::SharedPtr > m_next_nodes;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif // GWIZ_INODE_H
+#endif // GRAPHITE_INODE_H

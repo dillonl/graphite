@@ -1,5 +1,5 @@
-#ifndef GWIZ_PLUGIN_TESTS_H
-#define GWIZ_PLUGIN_TESTS_H
+#ifndef GRAPHITE_PLUGIN_TESTS_H
+#define GRAPHITE_PLUGIN_TESTS_H
 
 /*
  * Add test include files for the plugins here
@@ -12,4 +12,4 @@
 */
 
 
-#endif // GWIZ_PLUGIN_TESTS_H
+#endif // GRAPHITE_PLUGIN_TESTS_H

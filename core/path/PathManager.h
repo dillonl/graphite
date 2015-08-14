@@ -1,5 +1,5 @@
-#ifndef GWIZ_PATHMANAGER_H
-#define GWIZ_PATHMANAGER_H
+#ifndef GRAPHITE_PATHMANAGER_H
+#define GRAPHITE_PATHMANAGER_H
 
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
@@ -11,7 +11,7 @@
 #include <vector>
 #include <mutex>
 
-namespace gwiz
+namespace graphite
 {
 	class PathManager : private boost::noncopyable
 	{
@@ -36,4 +36,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_PATHMANAGER_H
+#endif //GRAPHITE_PATHMANAGER_H

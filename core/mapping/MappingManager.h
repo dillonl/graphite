@@ -1,5 +1,5 @@
-#ifndef GWIZ_MAPPINGMANAGER_H
-#define GWIZ_MAPPINGMANAGER_H
+#ifndef GRAPHITE_MAPPINGMANAGER_H
+#define GRAPHITE_MAPPINGMANAGER_H
 
 #include "IMapping.h"
 #include "core/adjudicator/IAdjudicator.h"
@@ -9,7 +9,7 @@
 
 #include <boost/noncopyable.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	class MappingManager : private boost::noncopyable
 	{
@@ -33,4 +33,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_MAPPINGMANAGER_H
+#endif //GRAPHITE_MAPPINGMANAGER_H

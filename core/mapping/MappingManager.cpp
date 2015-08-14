@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace gwiz
+namespace graphite
 {
 	MappingManager* MappingManager::s_instance = nullptr;
 
@@ -46,6 +46,6 @@ namespace gwiz
 			auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, iter.second);
 			ThreadPool::Instance()->enqueue(funct);
 		}
-		gwiz::ThreadPool::Instance()->joinAll();
+		ThreadPool::Instance()->joinAll();
 	}
 }

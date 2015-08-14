@@ -1,5 +1,5 @@
-#ifndef GWIZ_INFOFIELDPARSER_H
-#define GWIZ_INFOFIELDPARSER_H
+#ifndef GRAPHITE_INFOFIELDPARSER_H
+#define GRAPHITE_INFOFIELDPARSER_H
 
 #include "core/util/Types.h"
 
@@ -12,7 +12,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
 	template<typename Iterator>
@@ -33,6 +33,6 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, std::string() > key, value;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_INFOFIELDPARSER_H
+#endif //GRAPHITE_INFOFIELDPARSER_H

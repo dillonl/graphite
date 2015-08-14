@@ -7,7 +7,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace gwiz
+namespace graphite
 {
 	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr) :
 		m_loaded_vcfs(false),

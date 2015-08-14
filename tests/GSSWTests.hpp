@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSWTESTS_HPP
-#define GWIZ_GSSWTESTS_HPP
+#ifndef GRAPHITE_GSSWTESTS_HPP
+#define GRAPHITE_GSSWTESTS_HPP
 
 #include "gssw/gssw.h"
 
@@ -170,4 +170,4 @@ TEST(GSSWTests, GSSWComplexDiamondGraph2)
 }
 */
 
-#endif //GWIZ_GSSWTESTS_HPP
+#endif //GRAPHITE_GSSWTESTS_HPP

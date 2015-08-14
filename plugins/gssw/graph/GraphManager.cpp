@@ -13,7 +13,7 @@
 
 #include <boost/bind.hpp>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSW_ALIGNMENTREPORTER_H
-#define GWIZ_GSSW_ALIGNMENTREPORTER_H
+#ifndef GRAPHITE_GSSW_ALIGNMENTREPORTER_H
+#define GRAPHITE_GSSW_ALIGNMENTREPORTER_H
 
 #include "AlignmentReport.h"
 
@@ -7,7 +7,7 @@
 #include <memory>
 #include <mutex>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -31,4 +31,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_ALIGNMENTREPORTER_H
+#endif //GRAPHITE_GSSW_ALIGNMENTREPORTER_H

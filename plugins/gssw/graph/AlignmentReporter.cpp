@@ -1,7 +1,7 @@
 #include "AlignmentReporter.h"
 
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

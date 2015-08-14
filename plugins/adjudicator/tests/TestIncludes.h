@@ -1,7 +1,7 @@
-#ifndef GWIZ_ADJUDICATOR_TEST_H
-#define GWIZ_ADJUDICATOR_TEST_H
+#ifndef GRAPHITE_ADJUDICATOR_TEST_H
+#define GRAPHITE_ADJUDICATOR_TEST_H
 
 #include "AdjudicatorGraphTests.hpp"
 #include "VariantContigTests.hpp"
 
-#endif // GWIZ_ADJUDICATOR_TEST_H
+#endif // GRAPHITE_ADJUDICATOR_TEST_H

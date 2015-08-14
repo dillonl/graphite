@@ -1,5 +1,5 @@
-#ifndef GWIZ_REFERENCE_H
-#define GWIZ_REFERENCE_H
+#ifndef GRAPHITE_REFERENCE_H
+#define GRAPHITE_REFERENCE_H
 
 #include <stdint.h>
 #include <string>
@@ -7,7 +7,7 @@
 
 #include "IReference.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	class Reference : public IReference
@@ -21,4 +21,4 @@ namespace gwiz
 
 }
 
-#endif //GWIZ_REFERENCE_H
+#endif //GRAPHITE_REFERENCE_H

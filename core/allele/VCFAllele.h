@@ -1,9 +1,9 @@
-#ifndef GWIZ_VCFALLELE_H
-#define GWIZ_VCFALLELE_H
+#ifndef GRAPHITE_VCFALLELE_H
+#define GRAPHITE_VCFALLELE_H
 
 #include "Allele.h"
 
-namespace gwiz
+namespace graphite
 {
 	class VCFFileReader;
 	class VCFAllele : public Allele
@@ -52,4 +52,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_VCFALLELE_H
+#endif //GRAPHITE_VCFALLELE_H

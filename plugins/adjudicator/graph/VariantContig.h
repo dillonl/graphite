@@ -1,5 +1,5 @@
-#ifndef GWIZ_ADJUDICATOR_VARIANTCONTIG_H
-#define GWIZ_ADJUDICATOR_VARIANTCONTIG_H
+#ifndef GRAPHITE_ADJUDICATOR_VARIANTCONTIG_H
+#define GRAPHITE_ADJUDICATOR_VARIANTCONTIG_H
 
 #include <chrono>
 #include <tuple>
@@ -11,7 +11,7 @@
 #include "vg/graph/VariantGraph.h"
 #include "vg/graph/ReferenceNode.h"
 
-namespace gwiz
+namespace graphite
 {
 namespace adjudicator
 {
@@ -56,6 +56,6 @@ namespace adjudicator
 	};
 
 } // namespace adjudicator
-} // namespace gwiz
+} // namespace graphite
 
-#endif //GWIZ_ADJUDICATOR_VARIANTCONTIG_H
+#endif //GRAPHITE_ADJUDICATOR_VARIANTCONTIG_H

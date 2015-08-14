@@ -1,5 +1,5 @@
-#ifndef GWIZ_VG_VARIANT_GRAPH_H
-#define GWIZ_VG_VARIANT_GRAPH_H
+#ifndef GRAPHITE_VG_VARIANT_GRAPH_H
+#define GRAPHITE_VG_VARIANT_GRAPH_H
 
 #include "ReferenceNode.h"
 #include "core/graph/IGraph.h"
@@ -10,7 +10,7 @@
 
 #include <mutex>
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -78,4 +78,4 @@ namespace gwiz
 	}
 }
 
-#endif // GWIZ_VG_VARIANT_GRAPH_H
+#endif // GRAPHITE_VG_VARIANT_GRAPH_H

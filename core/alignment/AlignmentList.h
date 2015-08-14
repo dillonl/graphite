@@ -1,10 +1,10 @@
-#ifndef GWIZ_ALIGNMENTLIST_H
-#define GWIZ_ALIGNMENTLIST_H
+#ifndef GRAPHITE_ALIGNMENTLIST_H
+#define GRAPHITE_ALIGNMENTLIST_H
 
 #include "IAlignment.h"
 #include "IAlignmentList.h"
 
-namespace gwiz
+namespace graphite
 {
 	class AlignmentList : public IAlignmentList
 	{
@@ -23,4 +23,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_ALIGNMENTLIST_H
+#endif //GRAPHITE_ALIGNMENTLIST_H

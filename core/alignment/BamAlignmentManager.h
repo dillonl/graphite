@@ -1,5 +1,5 @@
-#ifndef GWIZ_BAMALIGNMENTMANAGER_H
-#define GWIZ_BAMALIGNMENTMANAGER_H
+#ifndef GRAPHITE_BAMALIGNMENTMANAGER_H
+#define GRAPHITE_BAMALIGNMENTMANAGER_H
 
 #include "IAlignmentManager.h"
 #include "core/region/Region.h"
@@ -10,7 +10,7 @@
 #include <memory>
 #include <future>
 
-namespace gwiz
+namespace graphite
 {
 	class BamAlignmentManager : public IAlignmentManager
 	{
@@ -36,4 +36,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_BAMALIGNMENTMANAGER_H
+#endif //GRAPHITE_BAMALIGNMENTMANAGER_H

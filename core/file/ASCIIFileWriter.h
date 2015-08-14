@@ -1,12 +1,12 @@
-#ifndef GWIZ_ASCIIFILEWRITER
-#define GWIZ_ASCIIFILEWRITER
+#ifndef GRAPHITE_ASCIIFILEWRITER
+#define GRAPHITE_ASCIIFILEWRITER
 
 #include <iostream>
 #include <fstream>
 
 #include "IFile.h"
 
-namespace gwiz
+namespace graphite
 {
 	class ASCIIFileWriter : public IFile
 	{
@@ -23,4 +23,4 @@ namespace gwiz
 		std::ofstream m_out_stream;
 	};
 }
-#endif //GWIZ_ASCIIFILEWRITER
+#endif //GRAPHITE_ASCIIFILEWRITER

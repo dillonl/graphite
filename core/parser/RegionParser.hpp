@@ -1,5 +1,5 @@
-#ifndef GWIZ_REGIONPARSER_H
-#define GWIZ_REGIONPARSER_H
+#ifndef GRAPHITE_REGIONPARSER_H
+#define GRAPHITE_REGIONPARSER_H
 
 #include "core/util/Types.h"
 
@@ -12,7 +12,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
 	template<typename Iterator>
@@ -54,6 +54,6 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, position&, position& >() > start;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_REGIONPARSER_H
+#endif //GRAPHITE_REGIONPARSER_H

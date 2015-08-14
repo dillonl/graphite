@@ -1,5 +1,5 @@
-#ifndef GWIZ_VCFPARSER_H
-#define GWIZ_VCFPARSER_H
+#ifndef GRAPHITE_VCFPARSER_H
+#define GRAPHITE_VCFPARSER_H
 
 #include <string>
 #include <vector>
@@ -15,7 +15,7 @@
 #include <boost/fusion/include/io.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
-namespace gwiz
+namespace graphite
 {
 
 	template<typename Iterator>
@@ -86,6 +86,6 @@ namespace gwiz
 		boost::spirit::qi::rule<Iterator, boost::fusion::vector< std::string&, uint32_t&, std::string&, std::string&, std::vector<std::string>&, std::string&, std::string&, std::string& >() > start;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_VCFPARSER_H
+#endif //GRAPHITE_VCFPARSER_H

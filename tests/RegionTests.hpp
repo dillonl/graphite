@@ -1,5 +1,5 @@
-#ifndef GWIZ_TESTS_REGION_HPP
-#define GWIZ_TESTS_REGION_HPP
+#ifndef GRAPHITE_TESTS_REGION_HPP
+#define GRAPHITE_TESTS_REGION_HPP
 
 #include <stdexcept>
 
@@ -8,7 +8,7 @@
 TEST(RegionTest, ConstructorWithGetRegionString)
 {
 	std::string regionString = "20:10-100";
-	gwiz::Region region(regionString);
+	graphite::Region region(regionString);
 	EXPECT_STREQ(regionString.c_str(), region.getRegionString().c_str());
 	std::string regionNotEqual = "1:1-1";
 	EXPECT_STRNE(regionNotEqual.c_str(), region.getRegionString().c_str());
@@ -19,7 +19,7 @@ TEST(RegionTest, GetReferenceID)
 {
 	std::string reference = "20";
 	std::string regionString = reference + ":10-100";
-	gwiz::Region region(regionString);
+	graphite::Region region(regionString);
 	EXPECT_STREQ(reference.c_str(), region.getReferenceID().c_str());
 	std::string referenceNotEqual = "1";
 	regionString = referenceNotEqual + ":10-100";
@@ -28,12 +28,12 @@ TEST(RegionTest, GetReferenceID)
 
 TEST(RegionTest, GetStartPosition)
 {
-	gwiz::position startPosition = 2000;
+	graphite::position startPosition = 2000;
 	std::string startPositionString = std::to_string(startPosition);
 	std::string regionString = "20:" + startPositionString + "-100000";
-	gwiz::Region region(regionString);
+	graphite::Region region(regionString);
 	EXPECT_EQ(startPosition, region.getStartPosition());
-	gwiz::position startPositionNotEqual = 1;
+	graphite::position startPositionNotEqual = 1;
 	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
 	EXPECT_NE(startPositionNotEqual, region.getStartPosition());
 
@@ -44,19 +44,19 @@ TEST(RegionTest, TestRegionRegionIDOnly)
 	bool success = false;
 	std::string regionString = "Y";
 
-	gwiz::Region region(regionString);
+	graphite::Region region(regionString);
 	EXPECT_EQ(regionString, region.getReferenceID());
-	gwiz::position startPositionNotEqual = 1;
+	graphite::position startPositionNotEqual = 1;
 	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
 	EXPECT_EQ(region.getStartPosition(), 0);
-	EXPECT_EQ(region.getEndPosition(), gwiz::MAX_POSITION);
+	EXPECT_EQ(region.getEndPosition(), graphite::MAX_POSITION);
 }
 
 TEST(RegionTest, TestRegionInvalidArgument)
 {
 	bool success = false;
 	std::string invalidString = "";
-	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
+	ASSERT_THROW(graphite::Region region(invalidString), std::invalid_argument);
 }
 
 // Tests invalid position
@@ -64,7 +64,7 @@ TEST(RegionTest, TestRegionInvalidStartAndEndPositions)
 {
 	bool success = false;
 	std::string invalidString = "10:10000-1";
-	ASSERT_THROW(gwiz::Region region(invalidString), std::invalid_argument);
+	ASSERT_THROW(graphite::Region region(invalidString), std::invalid_argument);
 }
 
-#endif //GWIZ_TESTS_REGION_HPP
+#endif //GRAPHITE_TESTS_REGION_HPP

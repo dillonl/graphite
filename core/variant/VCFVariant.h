@@ -1,10 +1,10 @@
-#ifndef GWIZ_VCFVARIANT_H
-#define GWIZ_VCFVARIANT_H
+#ifndef GRAPHITE_VCFVARIANT_H
+#define GRAPHITE_VCFVARIANT_H
 
 #include "Variant.h"
 #include "VCFFileReader.h"
 
-namespace gwiz
+namespace graphite
 {
 	class VCFVariant : public Variant
 	{
@@ -24,4 +24,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_VCFVARIANT_H
+#endif //GRAPHITE_VCFVARIANT_H

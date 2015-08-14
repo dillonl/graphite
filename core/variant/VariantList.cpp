@@ -2,7 +2,7 @@
 #include "Variant.h"
 #include "core/allele/EquivalentAllele.h"
 
-namespace gwiz
+namespace graphite
 {
 	VariantList::VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs) :
 		m_variant_ptrs(variantPtrs),

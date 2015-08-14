@@ -1,5 +1,5 @@
-#ifndef GWIZ_IVARIANTMANAGER_H
-#define GWIZ_IVARIANTMANAGER_H
+#ifndef GRAPHITE_IVARIANTMANAGER_H
+#define GRAPHITE_IVARIANTMANAGER_H
 
 #include "IVariantList.h"
 #include "core/region/Region.h"
@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class IVariantManager : boost::noncopyable
 	{
@@ -23,4 +23,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_IVARIANTMANAGER_H
+#endif //GRAPHITE_IVARIANTMANAGER_H

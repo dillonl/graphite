@@ -1,5 +1,5 @@
-#ifndef GWIZ_IVARIANTLIST_H
-#define GWIZ_IVARIANTLIST_H
+#ifndef GRAPHITE_IVARIANTLIST_H
+#define GRAPHITE_IVARIANTLIST_H
 
 #include <boost/noncopyable.hpp>
 
@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <iostream>
 
-namespace gwiz
+namespace graphite
 {
 	/* class IVariant; */
 	/*
@@ -31,6 +31,6 @@ namespace gwiz
 		virtual void printToVCF(std::ostream& out) = 0;
 	};
 
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif //GWIZ_IVARIANTLIST_H
+#endif //GRAPHITE_IVARIANTLIST_H

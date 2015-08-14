@@ -1,5 +1,5 @@
-#ifndef GWIZ_BAMALIGNMENTREADERTESTS_HPP
-#define GWIZ_BAMALIGNMENTREADERTESTS_HPP
+#ifndef GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
+#define GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
 
 #include "core/alignment/AlignmentList.h"
 #include "core/alignment/BamAlignmentReader.h"
@@ -9,9 +9,9 @@
 TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "20";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 
 	ASSERT_EQ(alignmentsList.size(), 5940);
@@ -20,9 +20,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "20:1-100";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 0);
 }
@@ -30,9 +30,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "20:1-10000000";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 1988);
 }
@@ -40,9 +40,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRegion)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:10316100-10318900";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 0);
 }
@@ -50,9 +50,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRe
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:10000000-20000000";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 1979);
 }
@@ -60,9 +60,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:100000000-600000000";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 7499);
 }
@@ -70,9 +70,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:12308541-12408541";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 1977);
 }
@@ -81,9 +81,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentTMP)
 {
 	std::string path = "~/data/NA12878.section.bam";
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:4000000-4100000";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 49246);
 }
@@ -92,9 +92,9 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentTMP)
 TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
 {
 	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< gwiz::BamAlignmentReader >(path);
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	std::string regionString = "1:100000000-600000000";
-	auto regionPtr = std::make_shared< gwiz::Region >(regionString);
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	for (auto alignmentPtr : alignmentsList)
 	{
@@ -104,4 +104,4 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
 }
 
 
-#endif //GWIZ_BAMALIGNMENTREADERTESTS_HPP
+#endif //GRAPHITE_BAMALIGNMENTREADERTESTS_HPP

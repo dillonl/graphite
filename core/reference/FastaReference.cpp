@@ -1,6 +1,6 @@
 #include "FastaReference.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	FastaReference::FastaReference(const std::string& path, Region::SharedPtr region) :
@@ -39,4 +39,4 @@ namespace gwiz
 		}
 	}
 
-} // end namespace gwiz
+} // end namespace graphite

@@ -5,7 +5,7 @@
 #include <algorithm>  // for std::find
 #include <cstring>
 
-namespace gwiz
+namespace graphite
 {
 	ASCIIFileReader::ASCIIFileReader(const std::string& path) :
 		IFile(path),

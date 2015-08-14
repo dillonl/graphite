@@ -1,11 +1,11 @@
-#ifndef GWIZ_GSSW_GSSWADJUDICATOR_H
-#define GWIZ_GSSW_GSSWADJUDICATOR_H
+#ifndef GRAPHITE_GSSW_GSSWADJUDICATOR_H
+#define GRAPHITE_GSSW_GSSWADJUDICATOR_H
 
 #include "core/adjudicator/IAdjudicator.h"
 
 #include <mutex>
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -33,4 +33,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_GSSWADJUDICATOR_H
+#endif //GRAPHITE_GSSW_GSSWADJUDICATOR_H

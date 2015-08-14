@@ -1,5 +1,5 @@
-#ifndef GWIZ_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP
-#define GWIZ_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP
+#ifndef GRAPHITE_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP
+#define GRAPHITE_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP
 #include <chrono>
 #include <thread>
 
@@ -19,13 +19,13 @@
 namespace
 {
 
-	class VariantContigTest : public gwiz::adjudicator::VariantContig
+	class VariantContigTest : public graphite::adjudicator::VariantContig
 	{
 	public:
 		typedef std::shared_ptr< VariantContigTest > VariantContigTestPtr;
 
-		VariantContigTest(uint32_t padding, gwiz::vg::VariantGraph::GraphPtr graphPtr, gwiz::vg::VariantGraph::VariantVertexDescriptor startVertex, gwiz::vg::VariantGraph::VariantVertexDescriptor endVertex) :
-			gwiz::adjudicator::VariantContig(padding, graphPtr, startVertex, endVertex)
+		VariantContigTest(uint32_t padding, graphite::vg::VariantGraph::GraphPtr graphPtr, graphite::vg::VariantGraph::VariantVertexDescriptor startVertex, graphite::vg::VariantGraph::VariantVertexDescriptor endVertex) :
+			graphite::adjudicator::VariantContig(padding, graphPtr, startVertex, endVertex)
 		{
 
 		}
@@ -34,7 +34,7 @@ namespace
 		{
 		}
 
-		// gwiz::VariantGraph::Graph getGraph() { return this->m_graph_ptr; }
+		// graphite::VariantGraph::Graph getGraph() { return this->m_graph_ptr; }
 
 	};
 
@@ -42,9 +42,9 @@ namespace
 
 	TEST(VariantContigTests, TestBuildVariantsMultiSingleSite)
 	{
-		gwiz::position pos = 6000;
-		gwiz::position variantPositionOffset = 10;
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_var_contig_reference_string, "20", pos);
+		graphite::position pos = 6000;
+		graphite::position variantPositionOffset = 10;
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_var_contig_reference_string, "20", pos);
 		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		std::vector< std::string > variants;
 		variants.push_back("G");
@@ -54,8 +54,8 @@ namespace
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
 
-		gwiz::position startPos = 6001;
-		gwiz::position endPos = 6025;
+		graphite::position startPos = 6001;
+		graphite::position endPos = 6025;
 
 		auto startVertex = variantGraph->getReferenceVertexContainsPositionTest(startPos);
 		auto endVertex = variantGraph->getReferenceVertexContainsPositionTest(endPos);
@@ -64,7 +64,7 @@ namespace
 		contig->buildVariantContig();
 		auto contigs = contig->getContigs();
 		std::vector< std::string > contigStrings;
-		for_each (contigs.begin(), contigs.end(), [&](const gwiz::adjudicator::VariantContig::ContigTuplePtr& con) {
+		for_each (contigs.begin(), contigs.end(), [&](const graphite::adjudicator::VariantContig::ContigTuplePtr& con) {
 				contigStrings.push_back(std::get< 1 >(*con));
 			});
 		ASSERT_EQ(contigs.size(), 3);
@@ -76,9 +76,9 @@ namespace
 
 	TEST(VariantContigTests, TestBuildVariantsMultipleSite)
 	{
-		gwiz::position pos = 6000;
-		gwiz::position variantPositionOffset = 10;
-		gwiz::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_var_contig_reference_string, "20", pos);
+		graphite::position pos = 6000;
+		graphite::position variantPositionOffset = 10;
+		graphite::testing::TestReferenceVariantGenerator testReferenceVariantGenerator(m_var_contig_reference_string, "20", pos);
 		//AAATAAAAGTTATCCACCCACCTTGGCCTCCCAAAGCGCTG
 		testReferenceVariantGenerator.addVariant(pos + variantPositionOffset, "2", 1,{"A"});
 		testReferenceVariantGenerator.addVariant(pos + variantPositionOffset + 1, "2", 1, {"G"});
@@ -86,20 +86,20 @@ namespace
 		auto variantGraph = std::make_shared< AdjudicatorGraphTest >(testReferenceVariantGenerator.getReference(), testReferenceVariantGenerator.getVariants());
 		variantGraph->constructGraph();
 
-		gwiz::position startPos = 6001;
-		gwiz::position endPos = 6025;
+		graphite::position startPos = 6001;
+		graphite::position endPos = 6025;
 
 		auto startVertex = variantGraph->getReferenceVertexContainsPositionTest(startPos);
 		auto endVertex = variantGraph->getReferenceVertexContainsPositionTest(endPos);
 
 		// std::string regionString = "20:" + to_string(startPos) + "-" + to_string(endPos);
-		// auto region = std::make_shared< gwiz::Region >(regionString);
+		// auto region = std::make_shared< graphite::Region >(regionString);
 
 		auto contig = std::make_shared< VariantContigTest >(5, variantGraph->getGraph(), startVertex, endVertex);
 		contig->buildVariantContig();
 		auto contigs = contig->getContigs();
 		std::vector< std::string > contigStrings;
-		for_each (contigs.begin(), contigs.end(), [&](const gwiz::adjudicator::VariantContig::ContigTuplePtr& con) {
+		for_each (contigs.begin(), contigs.end(), [&](const graphite::adjudicator::VariantContig::ContigTuplePtr& con) {
 				contigStrings.push_back(std::get< 1 >(*con));
 			});
 		ASSERT_EQ(contigs.size(), 4);
@@ -115,4 +115,4 @@ namespace
 	}
 }
 
-#endif //GWIZ_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP
+#endif //GRAPHITE_ADJUDICATOR_VARIANTCONTIG_TESTS_HPP

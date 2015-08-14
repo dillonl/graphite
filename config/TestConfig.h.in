@@ -1,5 +1,5 @@
-#ifndef GWIZ_TEST_CONFIG_H
-#define GWIZ_TEST_CONFIG_H
+#ifndef GRAPHITE_TEST_CONFIG_H
+#define GRAPHITE_TEST_CONFIG_H
 
 #define TEST_LINE_NUMBERS_FILE "@CMAKE_SOURCE_DIR@/tests/data/test_line_numbers.txt";
 #define TEST_LINE_NUMBERS_GZ_FILE "@CMAKE_SOURCE_DIR@/tests/data/test_line_numbers.txt.gz";
@@ -8,4 +8,4 @@
 #define TEST_INVALID_FILE "invalid.txt";
 
 
-#endif // GWIZ_TEST_CONFIG_H
+#endif // GRAPHITE_TEST_CONFIG_H

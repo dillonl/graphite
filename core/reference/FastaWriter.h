@@ -1,11 +1,11 @@
-#ifndef GWIZ_FASTAWRITER_H
-#define GWIZ_FASTAWRITER_H
+#ifndef GRAPHITE_FASTAWRITER_H
+#define GRAPHITE_FASTAWRITER_H
 
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class FastaWriter : boost::noncopyable
 	{
@@ -22,4 +22,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_FASTAWRITER_H
+#endif //GRAPHITE_FASTAWRITER_H

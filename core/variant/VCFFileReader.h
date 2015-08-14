@@ -1,5 +1,5 @@
-#ifndef GWIZ_VCFFILEREADER_H
-#define GWIZ_VCFFILEREADER_H
+#ifndef GRAPHITE_VCFFILEREADER_H
+#define GRAPHITE_VCFFILEREADER_H
 
 #include "core/variant/IVariantList.h"
 #include "core/file/IFile.h"
@@ -21,7 +21,7 @@
 #include <mutex>
 #include <future>
 
-namespace gwiz
+namespace graphite
 {
 	class VCFFileReader : private boost::noncopyable
 	{
@@ -58,6 +58,6 @@ namespace gwiz
 		std::mutex m_region_mutex;
 
 	};
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif  //GWIZ_VCFFILEREADER_H
+#endif  //GRAPHITE_VCFFILEREADER_H

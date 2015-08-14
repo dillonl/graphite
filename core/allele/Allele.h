@@ -1,11 +1,11 @@
-#ifndef GWIZ_ALLELE_H
-#define GWIZ_ALLELE_H
+#ifndef GRAPHITE_ALLELE_H
+#define GRAPHITE_ALLELE_H
 
 #include "core/sequence/SequenceManager.h"
 #include "IAllele.h"
 #include "AlleleMetaData.h"
 
-namespace gwiz
+namespace graphite
 {
 	class VCFFileReader;
 	class Allele : public IAllele
@@ -77,4 +77,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_ALLELE_H
+#endif //GRAPHITE_ALLELE_H

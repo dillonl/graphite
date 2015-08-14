@@ -5,7 +5,7 @@
 
 #include <functional>
 
-namespace gwiz
+namespace graphite
 {
 	BamAlignmentManager::BamAlignmentManager(const std::string& bamPath, Region::SharedPtr regionPtr) :
 		m_bam_path(bamPath),

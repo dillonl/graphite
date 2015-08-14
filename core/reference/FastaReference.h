@@ -1,5 +1,5 @@
-#ifndef GWIZ_FASTA_REFERENCE_H
-#define GWIZ_FASTA_REFERENCE_H
+#ifndef GRAPHITE_FASTA_REFERENCE_H
+#define GRAPHITE_FASTA_REFERENCE_H
 
 #include "IReference.h"
 
@@ -9,7 +9,7 @@
 #include <map>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class FastaReference : public IReference
 	{
@@ -28,6 +28,6 @@ namespace gwiz
 		std::shared_ptr< fastahack::FastaReference > m_fasta_reference;
 
 	};
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif // GWIZ_FASTA_REFERENCE_H
+#endif // GRAPHITE_FASTA_REFERENCE_H

@@ -1,6 +1,6 @@
 #include "Reference.h"
 
-namespace gwiz
+namespace graphite
 {
 
 	Reference::Reference(std::string& regionString)

@@ -1,5 +1,5 @@
-#ifndef GWIZ_GSSW_GSSWGRAPH_H
-#define GWIZ_GSSW_GSSWGRAPH_H
+#ifndef GRAPHITE_GSSW_GSSWGRAPH_H
+#define GRAPHITE_GSSW_GSSWGRAPH_H
 
 #include <tuple>
 #include <deque>
@@ -13,7 +13,7 @@
 #include "core/genotyper/IGenotyperVariant.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -25,7 +25,7 @@ namespace gssw
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
-		GSSWGraph(gwiz::IReference::SharedPtr referencePtr, gwiz::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
+		GSSWGraph(graphite::IReference::SharedPtr referencePtr, graphite::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
@@ -99,4 +99,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_GSSWGRAPH_H
+#endif //GRAPHITE_GSSW_GSSWGRAPH_H

@@ -1,5 +1,5 @@
-#ifndef GWIZ_VCFMANAGER_H
-#define GWIZ_VCFMANAGER_H
+#ifndef GRAPHITE_VCFMANAGER_H
+#define GRAPHITE_VCFMANAGER_H
 
 #include "core/region/Region.h"
 #include "VariantList.h"
@@ -13,7 +13,7 @@
 #include <mutex>
 #include <future>
 
-namespace gwiz
+namespace graphite
 {
 	class VCFManager : public IVariantManager
 	{
@@ -45,4 +45,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_VCFMANAGER_H
+#endif //GRAPHITE_VCFMANAGER_H

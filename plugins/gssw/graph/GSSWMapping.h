@@ -1,11 +1,11 @@
-#ifndef GWIZ_GSSW_MAPPING_H
-#define GWIZ_GSSW_MAPPING_H
+#ifndef GRAPHITE_GSSW_MAPPING_H
+#define GRAPHITE_GSSW_MAPPING_H
 
 #include "core/mapping/IMapping.h"
 
 #include "gssw/gssw.h"
 
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {
@@ -30,4 +30,4 @@ namespace gssw
 }
 }
 
-#endif //GWIZ_GSSW_MAPPING_H
+#endif //GRAPHITE_GSSW_MAPPING_H

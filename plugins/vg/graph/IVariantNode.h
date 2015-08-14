@@ -1,12 +1,12 @@
-#ifndef GWIZ_VG_IVARIANTNODE
-#define GWIZ_VG_IVARIANTNODE
+#ifndef GRAPHITE_VG_IVARIANTNODE
+#define GRAPHITE_VG_IVARIANTNODE
 
 #include "core/graph/INode.h"
 
 #include "core/variant/Variant.h"
 #include "core/util/Types.h"
 
-namespace gwiz
+namespace graphite
 {
 	namespace vg
 	{
@@ -37,6 +37,6 @@ namespace gwiz
 			size_t m_alt_index;
 		};
 	}// end namespace vg
-}// end namespace gwiz
+}// end namespace graphite
 
-#endif //GWIZ_VG_IVARIANTNODE
+#endif //GRAPHITE_VG_IVARIANTNODE

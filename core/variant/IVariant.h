@@ -1,5 +1,5 @@
-#ifndef GWIZ_IVARIANT_H
-#define GWIZ_IVARIANT_H
+#ifndef GRAPHITE_IVARIANT_H
+#define GRAPHITE_IVARIANT_H
 
 #include "core/util/Types.h"
 #include "core/allele/IAllele.h"
@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class IAllele;
 	class IAlignment;
@@ -41,4 +41,4 @@ namespace gwiz
     };
 }
 
-#endif// GWIZ_IVARIANT_H
+#endif// GRAPHITE_IVARIANT_H

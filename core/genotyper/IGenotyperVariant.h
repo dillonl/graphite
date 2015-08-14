@@ -1,5 +1,5 @@
-#ifndef GWIZ_GENOTYPERVARIANT_H
-#define GWIZ_GENOTYPERVARIANT_H
+#ifndef GRAPHITE_GENOTYPERVARIANT_H
+#define GRAPHITE_GENOTYPERVARIANT_H
 
 #include <memory>
 
@@ -7,7 +7,7 @@
 
 #include "GenotyperAllele.hpp"
 
-namespace gwiz
+namespace graphite
 {
 	class IGenotyperVariant : private boost::noncopyable
 	{
@@ -37,4 +37,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_GENOTYPERVARIANT_H
+#endif //GRAPHITE_GENOTYPERVARIANT_H

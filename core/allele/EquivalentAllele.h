@@ -1,9 +1,9 @@
-#ifndef GWIZ_EQUIVALENTALLELE_H
-#define GWIZ_EQUIVALENTALLELE_H
+#ifndef GRAPHITE_EQUIVALENTALLELE_H
+#define GRAPHITE_EQUIVALENTALLELE_H
 
 #include "Allele.h"
 
-namespace gwiz
+namespace graphite
 {
 	/*
 	 * The purpose of this allele class is to contain alleles
@@ -75,4 +75,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_EQUIVALENTALLELE_H
+#endif //GRAPHITE_EQUIVALENTALLELE_H

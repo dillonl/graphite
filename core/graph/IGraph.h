@@ -1,5 +1,5 @@
-#ifndef GWIZ_IGRAPH_H
-#define GWIZ_IGRAPH_H
+#ifndef GRAPHITE_IGRAPH_H
+#define GRAPHITE_IGRAPH_H
 
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
@@ -12,7 +12,7 @@
 #include <string>
 #include <memory>
 
-namespace gwiz
+namespace graphite
 {
 	class IGraph : private boost::noncopyable
 	{
@@ -35,6 +35,6 @@ namespace gwiz
 
 
 	};
-} // end namespace gwiz
+} // end namespace graphite
 
-#endif // GWIZ_IGRAPH_H
+#endif // GRAPHITE_IGRAPH_H

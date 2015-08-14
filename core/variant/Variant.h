@@ -1,5 +1,5 @@
-#ifndef GWIZ_VARIANT_H
-#define GWIZ_VARIANT_H
+#ifndef GRAPHITE_VARIANT_H
+#define GRAPHITE_VARIANT_H
 
 #include <mutex>
 #include <exception>
@@ -17,7 +17,7 @@
 #include "core/reference/Reference.h"
 
 
-namespace gwiz
+namespace graphite
 {
 
 	class IAlignment;
@@ -235,4 +235,4 @@ namespace gwiz
 
 }
 
-#endif //GWIZ_VARIANT_H
+#endif //GRAPHITE_VARIANT_H

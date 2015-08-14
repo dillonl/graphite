@@ -1,5 +1,5 @@
-#ifndef GWIZ_VARIANTLIST_H
-#define GWIZ_VARIANTLIST_H
+#ifndef GRAPHITE_VARIANTLIST_H
+#define GRAPHITE_VARIANTLIST_H
 
 #include "IVariantList.h"
 #include "core/region/Region.h"
@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace gwiz
+namespace graphite
 {
 	class VariantList : public IVariantList
 	{
@@ -37,4 +37,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_VARIANTLIST_H
+#endif //GRAPHITE_VARIANTLIST_H

@@ -1,6 +1,6 @@
 #include "AlignmentList.h"
 
-namespace gwiz
+namespace graphite
 {
 	AlignmentList::AlignmentList(std::vector< IAlignment::SharedPtr > alignmentPtrs) :
 		m_alignment_ptrs(alignmentPtrs),

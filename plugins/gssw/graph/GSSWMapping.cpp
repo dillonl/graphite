@@ -1,7 +1,6 @@
 #include "GSSWMapping.h"
 
-
-namespace gwiz
+namespace graphite
 {
 namespace gssw
 {

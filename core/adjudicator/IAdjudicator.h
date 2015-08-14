@@ -1,9 +1,9 @@
-#ifndef GWIZ_IADJUDICATOR_H
-#define GWIZ_IADJUDICATOR_H
+#ifndef GRAPHITE_IADJUDICATOR_H
+#define GRAPHITE_IADJUDICATOR_H
 
 #include "core/mapping/IMapping.h"
 
-namespace gwiz
+namespace graphite
 {
 	class IAdjudicator : private boost::noncopyable
 	{
@@ -21,4 +21,4 @@ namespace gwiz
 	};
 }
 
-#endif //GWIZ_ADJUDICATOR_H
+#endif //GRAPHITE_ADJUDICATOR_H

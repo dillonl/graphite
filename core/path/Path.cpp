@@ -2,7 +2,7 @@
 
 #include <boost/functional/hash.hpp>
 
-namespace gwiz
+namespace graphite
 {
 	Path::Path()
 	{
