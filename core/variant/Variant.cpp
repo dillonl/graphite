@@ -3,9 +3,8 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_total_allele_count_low_quality(0), m_total_allele_count(0)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter)
 	{
-		init();
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
 
@@ -14,96 +13,25 @@ namespace graphite
 		this->m_all_allele_ptrs.insert(this->m_all_allele_ptrs.end(), this->m_alt_allele_ptrs.begin(), this->m_alt_allele_ptrs.end());
 	}
 
-	Variant::Variant() :
-		m_total_allele_count_low_quality(0),
-		m_total_allele_count(0)
+	Variant::Variant()
 	{
-		init();
 	}
 
 	Variant::~Variant()
 	{
 	}
 
-	void Variant::init()
+	uint32_t Variant::getTotalAlleleCount()
 	{
-		static uint32_t uniqueID;
-		m_unique_id = uniqueID;
-		++uniqueID;
-	}
-
-	/*
-	Variant::SharedPtr Variant::copyVariant(IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs)
-	{
-		auto variantPtr = std::make_shared< Variant >();
-		variantPtr->m_position = this->m_position;
-		variantPtr->m_chrom = this->m_chrom;
-		variantPtr->m_id = this->m_id;
-		variantPtr->m_qual = this->m_qual;
-		variantPtr->m_filter = this->m_filter;
-		variantPtr->m_ref_allele_ptr = refAllelePtr;
-		variantPtr->m_alt_allele_ptrs = altAllelePtrs;
-		variantPtr->m_all_allele_ptrs.reserve(altAllelePtrs.size() + 1);
-		variantPtr->m_all_allele_ptrs[0] = refAllelePtr;
-		// variantPtr->m_all_allele_ptrs.push_back(altAllelePtrs);
-		return variantPtr;
-	}
-	*/
-
-	void Variant::incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr)
-	{
-		std::lock_guard< std::mutex > lock(this->m_allele_count_mutex);
-		auto alignmentID = alignmentPtr->getID();
-		if (this->m_alignment_ids_low_quality.find(alignmentID) != this->m_alignment_ids_low_quality.end()) { return; } // because of graph overlap we make sure we aren't counting alignments we've already counted
-		this->m_alignment_ids_low_quality.emplace(alignmentID, true);
-		++m_total_allele_count_low_quality;
-	}
-
-	void Variant::setAltAllelePadding(const std::vector< std::tuple< uint32_t, uint32_t > >& altAllelePadding)
-	{
-		/*
-		for (size_t i = 0; i < this->m_alt_allele_ptrs.size(); ++i)
+		uint32_t totalCount = 0;
+		totalCount += this->m_ref_allele_ptr->getForwardCount();
+		totalCount += this->m_ref_allele_ptr->getReverseCount();
+		for (auto allelePtr : getAltAllelePtrs())
 		{
-			auto altAllelePtr = this->m_alt_allele_ptrs[i];
-			altAllelePtr->setPaddingPrefix(std::get< 0 >(altAllelePadding[i]));
-			altAllelePtr->setPaddingSuffix(std::get< 1 >(altAllelePadding[i]));
+			totalCount += allelePtr->getForwardCount();
+			totalCount += allelePtr->getReverseCount();
 		}
-		*/
-	}
-
-	void Variant::increaseCount(std::shared_ptr< IAlignment > alignmentPtr)
-	{
-		std::string allele = alignmentPtr->getVariantAllele(getVariantID());
-		auto allelePtr = getAllelePtr(allele);
-		if (allelePtr != nullptr && !alignmentPtr->isReverseStrand())
-		{
-			allelePtr->incrementForwardCount();
-		}
-		else if (allelePtr != nullptr)
-		{
-			allelePtr->incrementReverseCount();
-		}
-		++this->m_total_allele_count;
-	}
-
-	size_t Variant::getSmallestAlleleSize()
-	{
-		size_t smallest = this->m_ref.size();
-		for (auto variant : this->m_alt)
-		{
-			if (variant.size() < smallest) { smallest = variant.size(); }
-		}
-		return smallest;
-	}
-
-	size_t Variant::getLargestAlleleSize()
-	{
-		size_t largest = this->m_ref.size();
-		for (auto& variant : this->m_alt)
-		{
-			if (variant.size() > largest) { largest = variant.size(); }
-		}
-		return largest;
+		return totalCount;
 	}
 
 	std::string Variant::getAlleleCountString()
@@ -130,33 +58,6 @@ namespace graphite
 			if (iter != lastIter) { ss << ","; } // don't add a comma on the end of the alt section
 		}
 		return ss.str();
-	}
-
-	bool Variant::hasAlts()
-	{
-		return (this->m_total_allele_count > getRefAllelePtr()->getTotalCount());
-	}
-
-	void Variant::addPotentialAlignment(const IAlignment::SharedPtr alignmentPtr)
-	{
-		std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
-		this->m_potential_alignments.emplace_back(alignmentPtr);
-	}
-
-	void Variant::calculateAlleleCounts()
-	{
-		std::lock_guard< std::mutex > lock(this->m_potential_alignment_mutex);
-		std::unordered_map< IAlignment::SharedPtr, bool > seenAlignments;
-		for (const auto alignmentPtr : this->m_potential_alignments)
-		{
-			if (seenAlignments.find(alignmentPtr) != seenAlignments.end()) { continue; }
-			seenAlignments[alignmentPtr] = true;
-			int32_t mappingScore = alignmentPtr->getVariantMappingScore(getVariantID());
-			if (0 <= mappingScore)
-			{
-				increaseCount(alignmentPtr);
-			}
-		}
 	}
 
 	std::string Variant::getGenotype()
@@ -210,9 +111,7 @@ namespace graphite
 
 	void Variant::printVariant(std::ostream& out)
 	{
-		calculateAlleleCounts();
-		uint32_t totalCount = this->m_total_allele_count + this->m_total_allele_count_low_quality;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << this->m_total_allele_count << ";DP4=" << getAlleleCountString() << ";TC=" << totalCount <<  std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << std::endl;
 	}
 
 }

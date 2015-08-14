@@ -19,6 +19,7 @@ namespace
 		std::string getGenotypeTest() { return getGenotype(); }
 		void setAlleleCounts(std::vector< std::string > alleles, std::vector< std::tuple< uint32_t, uint32_t > >& alleleCounts)
 		{
+			this->m_total_allele_count = 0;
 			this->m_alt_allele_ptrs.clear();
 			this->m_allele_count.clear();
 			if (alleles.size() != alleleCounts.size()) { throw "alleles must be matched by allele counts"; }
@@ -35,6 +36,10 @@ namespace
 			this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
 			this->m_all_allele_ptrs.insert(this->m_all_allele_ptrs.end(), this->m_alt_allele_ptrs.begin(), this->m_alt_allele_ptrs.end());
 		}
+
+	protected:
+		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > m_allele_count;
+		uint32_t m_total_allele_count;
 	};
 
     static std::string VCF_LINE_1 = "Y\t2655180\trs11575897\tG\tA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line

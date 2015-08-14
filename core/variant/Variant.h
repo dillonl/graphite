@@ -30,8 +30,6 @@ namespace graphite
 		Variant();
 		~Variant();
 
-		/* Variant::SharedPtr copyVariant(IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs); */
-
 		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser)
 		{
 			std::string fields;
@@ -42,8 +40,6 @@ namespace graphite
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
-
-			/* auto altsDupsRemoved = removeDuplicateAltAlleles(alts); */
 
 			variantPtr->setRefAllele(ref);
 			variantPtr->setAltAlleles(alts);
@@ -129,21 +125,14 @@ namespace graphite
 			return true;
 		}
 
-		void setAltAllelePadding(const std::vector< std::tuple< uint32_t, uint32_t > >& altAllelePadding);
-
-		void increaseCount(std::shared_ptr< IAlignment > alignmentPtr);
-
 		void setFilter(std::string filter)
 		{
 			this->m_filter = filter;
 		}
 
-		void incrementLowQualityCount(std::shared_ptr< IAlignment > alignmentPtr);
-
 		std::string getAlleleCountString();
 		std::string alleleString();
-		bool hasAlts();
-		void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr);
+		/* void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr); */
 
 		std::string getChrom() const { return m_chrom; }
 		position getPosition() override { return m_position; }
@@ -151,18 +140,12 @@ namespace graphite
 		std::string getFilter() const { return m_filter; }
 		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
-		/* std::string const getRef() { return m_ref; } */
 		std::string getRef() { return std::string(this->m_ref_allele_ptr->getSequence()); }
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
-		/* std::vector< std::string > const getAlt() { return m_alt; } */
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
-		size_t getSmallestAlleleSize() override; // returns the smallest allele in this variant (including reference allele)
-		size_t getLargestAlleleSize() override; // returns the largest allele in this variant (including reference allele)
 		void printVariant(std::ostream& out) override;
 
 	protected:
-		void init();
-
 		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)
 		{
 			std::vector< std::string > tmpAlts;
@@ -194,29 +177,8 @@ namespace graphite
 			}
 		}
 
-		IAllele::SharedPtr getAllelePtr(const std::string& allele)
-		{
-			for (auto allelePtr : this->m_all_allele_ptrs)
-			{
-				if (memcmp(allelePtr->getSequence(), allele.c_str(), allele.size()))
-				{
-					return allelePtr;
-				}
-			}
-			return nullptr;
-		}
-
 		std::string getGenotype();
-		void calculateAlleleCounts();
-		void initializeAlleleCounters();
-
-		std::mutex m_allele_count_mutex;
-		std::mutex m_potential_alignment_mutex;
-		std::unordered_map< std::string, std::tuple< uint32_t, uint32_t > > m_allele_count; // the key is the allele and the value is a tuple of forward at 0 index and reverse for 1 index
-		std::map< std::string, bool > m_alignment_ids;
-		std::map< std::string, bool > m_alignment_ids_low_quality;
-		uint32_t m_total_allele_count; // an efficiency that technically could be calculated from m_allele_count
-		uint32_t m_total_allele_count_low_quality; // all reads that pass through this variant are counted (even if their quality is too low to be counted in m_total_allele_count)
+		uint32_t getTotalAlleleCount();
 
 		uint32_t m_position;
 		std::string m_chrom;
@@ -229,8 +191,6 @@ namespace graphite
 		std::vector< IAllele::SharedPtr > m_alt_allele_ptrs;
 		std::vector< IAllele::SharedPtr > m_all_allele_ptrs;
 		std::unordered_map< std::string, std::string > m_info_fields;
-		std::vector< std::shared_ptr< IAlignment > > m_potential_alignments;
-		uint32_t m_unique_id;
 	};
 
 }
