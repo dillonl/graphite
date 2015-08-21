@@ -9,6 +9,7 @@
 #include "BamAlignmentReaderTests.hpp"
 #include "BamAlignmentManagerTests.hpp"
 #include "GSSWTests.hpp"
+#include "AdjudicationTests.hpp"
 #include "plugins/TestIncludes.h"
 
 GTEST_API_ int main(int argc, char** argv)
