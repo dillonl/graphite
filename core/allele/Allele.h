@@ -20,15 +20,6 @@ namespace graphite
 		{
 		}
 
-			/*
-	    Allele(const char* seq, size_t len) :
-			m_sequence_ptr(SequenceManager::Instance()->getSequence(seq, len)),
-			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
-		{
-		}
-			*/
-
-
 	    Allele(const std::string& seqString) :
 		    m_forward_count(0),
 			m_reverse_count(0),

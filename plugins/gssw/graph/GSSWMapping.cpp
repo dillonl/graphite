@@ -6,7 +6,8 @@ namespace gssw
 {
     GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
 		m_gssw_mapping_ptr(gsswMappingPtr),
-		m_alignment_ptr(alignmentPtr)
+		m_alignment_ptr(alignmentPtr),
+		m_node_count(gsswMappingPtr->cigar.length)
 	{
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)

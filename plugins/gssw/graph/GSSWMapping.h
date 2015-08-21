@@ -25,6 +25,7 @@ namespace gssw
 		std::shared_ptr< gssw_graph_mapping > m_gssw_mapping_ptr;
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
 		IAlignment::SharedPtr m_alignment_ptr;
+		uint32_t m_node_count;
 	};
 
 }

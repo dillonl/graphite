@@ -32,13 +32,10 @@ namespace gssw
 		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 		if (swPercent >= this->m_sw_percent)
 		{
-			if (alignmentPtr->isReverseStrand())
+			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
+			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
-				for (auto& allelePtr : mappingPtr->getAllelePtrs()) { allelePtr->incrementReverseCount(); }
-			}
-			else
-			{
-				for (auto& allelePtr : mappingPtr->getAllelePtrs()) { allelePtr->incrementForwardCount(); }
+				(*allelePtr.*incrementFunct)();
 			}
 		}
 	}
