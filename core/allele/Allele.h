@@ -56,6 +56,10 @@ namespace graphite
 		virtual inline void incrementForwardCount() override { ++this->m_forward_count; }
 		virtual inline void incrementReverseCount() override { ++this->m_reverse_count; }
 
+		void setSharedAllelePrefixAndSuffix(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes, std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes)
+		{
+		}
+
 	protected:
 		Allele() {}
 
@@ -64,6 +68,9 @@ namespace graphite
 
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
+
+		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > m_shared_prefixes;
+		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > m_shared_suffixes;
 
 	};
 }

@@ -6,6 +6,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <atomic>
+#include <unordered_map>
 
 namespace graphite
 {
@@ -27,6 +28,7 @@ namespace graphite
 		virtual void setSequence(std::shared_ptr< Sequence > sequencePtr) = 0;
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
+		virtual void setSharedAllelePrefixAndSuffix(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes, std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes) = 0;
 
 		virtual inline uint32_t getForwardCount() = 0;
 		virtual inline uint32_t getReverseCount() = 0;

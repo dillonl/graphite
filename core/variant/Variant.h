@@ -144,6 +144,7 @@ namespace graphite
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
 		void printVariant(std::ostream& out) override;
+		void processOverlappingAlleles() override;
 
 	protected:
 		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)

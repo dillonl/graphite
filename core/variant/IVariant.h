@@ -26,6 +26,7 @@ namespace graphite
 			virtual std::string getChrom() const = 0;
 			virtual IAllele::SharedPtr getRefAllelePtr() = 0;
 			virtual std::vector< IAllele::SharedPtr > getAltAllelePtrs() = 0;
+			virtual void processOverlappingAlleles() = 0;
 			virtual void printVariant(std::ostream& out) = 0;
     };
 }

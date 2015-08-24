@@ -21,7 +21,10 @@ namespace gssw
 		IAlignment::SharedPtr getAlignmentPtr();
 		std::vector< IAllele::SharedPtr > getAllelePtrs();
 
+		void printLongFormat();
+
     private:
+
 		std::shared_ptr< gssw_graph_mapping > m_gssw_mapping_ptr;
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
 		IAlignment::SharedPtr m_alignment_ptr;

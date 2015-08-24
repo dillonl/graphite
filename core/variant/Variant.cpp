@@ -60,6 +60,41 @@ namespace graphite
 		return ss.str();
 	}
 
+	/*
+	std::string getCommonPrefix(const std::string& s1, const std::string& s2)
+	{
+		if (s1.size() > s2.size()) { return getCommonPrefix(s2, s1); }
+		return std::string(s1.begin(), std::mismatch(s1.begin(), s1.end(), s2.begin()).first);
+	}
+
+	std::string getCommonSuffix(const std::string& s1, const std::string& s2)
+	{
+		if (s1.size() > s2.size()) { return getCommonSuffix(s2, s1); }
+		return std::string(s1.begin(), std::mismatch(s1.rbegin(), s1.rend(), s2.rbegin()).first);
+	}
+	--- these are to be used in processOverlappingalleles
+
+	*/
+
+	void Variant::processOverlappingAlleles()
+	{
+		/*
+		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes;
+		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes;
+		std::unordered_map< std::pair< IAllele::SharedPtr, IAllele::SharedPtr >, bool > alleleComparisonMap;
+		for (auto& allelePtr1 : this->m_all_allele_ptrs)
+		{
+
+			for (auto& allelePtr2 : this->m_all_allele_ptrs)
+			{
+				if (allelePtr1.get() == allelePtr2.get() || alleleComparisonMap.find(std::make_pair(allelePtr2, allelePtr1)) != alleleComparisonMap.end()) { continue; }
+
+				alleleComparisonMap.insert(std::make_pair(allelePtr1, allelePtr2), true);
+			}
+		}
+		*/
+	}
+
 	std::string Variant::getGenotype()
 	{
 		/*
