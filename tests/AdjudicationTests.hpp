@@ -359,8 +359,8 @@ namespace adj_test
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
-		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 1);
-		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 1);
+		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
+		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 0);
 	}
 
 }

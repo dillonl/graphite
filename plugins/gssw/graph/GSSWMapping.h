@@ -20,6 +20,7 @@ namespace gssw
 		int getMappingScore();
 		IAlignment::SharedPtr getAlignmentPtr();
 		std::vector< IAllele::SharedPtr > getAllelePtrs();
+		gssw_align* getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr);
 
 		void printLongFormat();
 
@@ -27,6 +28,7 @@ namespace gssw
 
 		std::shared_ptr< gssw_graph_mapping > m_gssw_mapping_ptr;
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
+		std::unordered_map< IAllele::SharedPtr, gssw_align* > m_allele_alignment_map;
 		IAlignment::SharedPtr m_alignment_ptr;
 		uint32_t m_node_count;
 	};

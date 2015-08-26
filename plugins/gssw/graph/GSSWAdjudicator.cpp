@@ -25,6 +25,21 @@ namespace gssw
 	{
 	}
 
+	/*
+	  typedef struct {
+	  uint16_t score1;
+	  uint16_t score2;
+	  int32_t ref_begin1;
+	  int32_t ref_end1;
+	  int32_t	read_begin1;
+	  int32_t read_end1;
+	  int32_t ref_end2;
+	  gssw_seed seed;
+	  uint8_t is_byte;
+	  void* mH;
+	  } gssw_align;
+	*/
+
 	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr)
 	{
 		auto swScore = mappingPtr->getMappingScore();
@@ -35,6 +50,8 @@ namespace gssw
 			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
 			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
+				// auto alignPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
+				// std::cout << "align: " << std::string(alignmentPtr->getSequence() + alignPtr->read_begin1, alignPtr->read_begin2 - alignPtr->read_begin1) << std::endl;
 				(*allelePtr.*incrementFunct)();
 			}
 		}

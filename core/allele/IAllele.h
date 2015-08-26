@@ -28,19 +28,23 @@ namespace graphite
 		virtual void setSequence(std::shared_ptr< Sequence > sequencePtr) = 0;
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
-		virtual void setSharedAllelePrefixAndSuffix(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes, std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes) = 0;
 
-		virtual inline uint32_t getForwardCount() = 0;
-		virtual inline uint32_t getReverseCount() = 0;
-		virtual inline uint32_t getTotalCount() = 0;
+		virtual uint32_t getForwardCount() = 0;
+		virtual uint32_t getReverseCount() = 0;
+		virtual uint32_t getTotalCount() = 0;
 
-		virtual inline void incrementForwardCount() = 0;
-		virtual inline void incrementReverseCount() = 0;
+		virtual void incrementForwardCount() = 0;
+		virtual void incrementReverseCount() = 0;
 
 		inline SharedPtr getSharedPtr()
 		{
 			return shared_from_this();
 		}
+
+		virtual size_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) = 0;
+		virtual size_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) = 0;
+		virtual void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtrs) = 0;
+		virtual void addCommonSuffixInformation(uint32_t suffixSize, IAllele::SharedPtr allelePtrs) = 0;
 
 	protected:
 

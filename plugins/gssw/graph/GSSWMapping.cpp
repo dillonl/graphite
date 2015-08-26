@@ -14,12 +14,27 @@ namespace gssw
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
-			m_allele_ptrs.emplace_back(((IAllele*)nc->node->data)->getSharedPtr());
+			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
+			m_allele_ptrs.emplace_back(allelePtr);
+			m_allele_alignment_map.emplace(allelePtr, nc->node->alignment);
 		}
 	}
 
 	GSSWMapping::~GSSWMapping()
 	{
+	}
+
+	gssw_align* GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)
+	{
+		auto iter = m_allele_alignment_map.find(allelePtr);
+		if (iter != m_allele_alignment_map.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			return nullptr;
+		}
 	}
 
 	int GSSWMapping::getMappingScore()

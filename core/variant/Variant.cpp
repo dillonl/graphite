@@ -60,39 +60,26 @@ namespace graphite
 		return ss.str();
 	}
 
-	/*
-	std::string getCommonPrefix(const std::string& s1, const std::string& s2)
-	{
-		if (s1.size() > s2.size()) { return getCommonPrefix(s2, s1); }
-		return std::string(s1.begin(), std::mismatch(s1.begin(), s1.end(), s2.begin()).first);
-	}
-
-	std::string getCommonSuffix(const std::string& s1, const std::string& s2)
-	{
-		if (s1.size() > s2.size()) { return getCommonSuffix(s2, s1); }
-		return std::string(s1.begin(), std::mismatch(s1.rbegin(), s1.rend(), s2.rbegin()).first);
-	}
-	--- these are to be used in processOverlappingalleles
-
-	*/
-
 	void Variant::processOverlappingAlleles()
 	{
-		/*
 		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes;
 		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes;
-		std::unordered_map< std::pair< IAllele::SharedPtr, IAllele::SharedPtr >, bool > alleleComparisonMap;
+		std::unordered_map< IAllele::SharedPtr, std::unordered_map< IAllele::SharedPtr, bool > > alleleComputedChecker;
 		for (auto& allelePtr1 : this->m_all_allele_ptrs)
 		{
-
 			for (auto& allelePtr2 : this->m_all_allele_ptrs)
 			{
-				if (allelePtr1.get() == allelePtr2.get() || alleleComparisonMap.find(std::make_pair(allelePtr2, allelePtr1)) != alleleComparisonMap.end()) { continue; }
-
-				alleleComparisonMap.insert(std::make_pair(allelePtr1, allelePtr2), true);
+				auto iter = alleleComputedChecker.find(allelePtr2);
+				if (allelePtr1.get() == allelePtr2.get() || (iter != alleleComputedChecker.end() && iter->second.find(allelePtr1) != iter->second.end())) { continue; } // don't compare identical alleles or alleles where the prefix/suffix have already been computed
+				auto commonPrefixSize = allelePtr1->getCommonPrefixSize(allelePtr2);
+				auto commonSuffixSize = allelePtr1->getCommonSuffixSize(allelePtr2);
+				allelePtr1->addCommonPrefixInformation(commonPrefixSize, allelePtr2);
+				allelePtr1->addCommonSuffixInformation(commonSuffixSize, allelePtr2);
+				allelePtr2->addCommonPrefixInformation(commonPrefixSize, allelePtr1);
+				allelePtr2->addCommonSuffixInformation(commonSuffixSize, allelePtr1);
+				alleleComputedChecker[allelePtr2].emplace(allelePtr1, true);
 			}
 		}
-		*/
 	}
 
 	std::string Variant::getGenotype()
