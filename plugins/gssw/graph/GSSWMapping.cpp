@@ -11,12 +11,24 @@ namespace gssw
 		m_alignment_ptr(alignmentPtr),
 		m_node_count(gsswMappingPtr->cigar.length)
 	{
+		uint32_t offset = m_gssw_mapping_ptr->position;
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
 			m_allele_ptrs.emplace_back(allelePtr);
-			m_allele_alignment_map.emplace(allelePtr, nc->node->alignment);
+			std::vector< char > cigarOperations;
+			std::vector< uint32_t > cigarOperationLengths;
+			uint32_t offsetLength = 0;
+			for (int j = 0; j < nc->cigar->length; ++j)
+			{
+				cigarOperations.emplace_back(nc->cigar->elements[j].type);
+				cigarOperationLengths.emplace_back(nc->cigar->elements[j].length);
+				offsetLength += nc->cigar->elements[j].length;
+			}
+			auto mappingAlignmentPtr = std::make_shared< MappingAlignment >(alignmentPtr, offset, offsetLength, nc->node->alignment->score1, cigarOperations, cigarOperationLengths);
+			offset += offsetLength;
+			m_allele_mappingalignment_map.emplace(allelePtr, mappingAlignmentPtr);
 		}
 	}
 
@@ -24,10 +36,10 @@ namespace gssw
 	{
 	}
 
-	gssw_align* GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)
+	MappingAlignment::SharedPtr GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)
 	{
-		auto iter = m_allele_alignment_map.find(allelePtr);
-		if (iter != m_allele_alignment_map.end())
+		auto iter = m_allele_mappingalignment_map.find(allelePtr);
+		if (iter != m_allele_mappingalignment_map.end())
 		{
 			return iter->second;
 		}

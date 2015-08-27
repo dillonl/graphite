@@ -50,8 +50,22 @@ namespace gssw
 			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
 			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
-				// auto alignPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
-				// std::cout << "align: " << std::string(alignmentPtr->getSequence() + alignPtr->read_begin1, alignPtr->read_begin2 - alignPtr->read_begin1) << std::endl;
+				auto mappingAlignInfoPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
+				std::cout << "Mapping: " << mappingAlignInfoPtr->getMappingOffset() << " " << mappingAlignInfoPtr->getMappingSequence().size() << " " <<  alignmentPtr->getLength() << std::endl;
+				if (mappingAlignInfoPtr->getMappingOffset() == 0 && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), mappingAlignInfoPtr->getMappingSequence().size()) == 0) // if the mapping is at the beginning then check the prefix for differences
+				{
+					continue;
+				}
+				if (memcmp((allelePtr->getSequence() + allelePtr->getLength() - mappingAlignInfoPtr->getMappingSequence().size()), mappingAlignInfoPtr->getMappingSequence().c_str(), mappingAlignInfoPtr->getMappingSequence().size()) == 0)
+				{
+					std::cout << "Mapped to the END!!!" << std::endl;
+					continue;
+				}
+				// else if ((mappingAlignInfoPtr->getMappingOffset() + ) == alignmentPtr->getLength()) // if the mapping is at the end check the suffix
+				// {
+				// std::cout << "Mapped to the END!!!" << std::endl;
+					// continue;
+				// }
 				(*allelePtr.*incrementFunct)();
 			}
 		}

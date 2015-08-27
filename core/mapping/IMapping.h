@@ -3,6 +3,7 @@
 
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
+#include "core/mapping/MappingAlignmentInfo.h"
 
 #include <memory>
 #include <vector>
@@ -21,6 +22,7 @@ namespace graphite
 		virtual int getMappingScore() = 0;
 		virtual IAlignment::SharedPtr getAlignmentPtr() = 0;
 		virtual std::vector< IAllele::SharedPtr > getAllelePtrs() = 0;
+		virtual MappingAlignment::SharedPtr getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr) = 0;
 	};
 }
 

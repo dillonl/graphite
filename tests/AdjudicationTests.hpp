@@ -333,8 +333,8 @@ namespace adj_test
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
 
 		auto refAllelePtr = std::make_shared< Allele >("TTCCCCTGACCCT");
-		auto altAllele1Ptr = std::make_shared< Allele >("TTCCCCTGTTTTA");
-		auto altAllele2Ptr = std::make_shared< Allele >("TTCCGTTTTA");
+		auto altAllele1Ptr = std::make_shared< Allele >("TTCCCCTGTTTTATCTTTT");
+		auto altAllele2Ptr = std::make_shared< Allele >("TTCCGTTTTATCTTTT");
 		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllele1Ptr, altAllele2Ptr };
 		position pos = 157;
 		std::string chrom = "1";
@@ -355,6 +355,43 @@ namespace adj_test
 		auto alignmentPtr = std::make_shared< AlignmentTest >("GTTTTATCTTTTATTCTCCAAATTTCTTTCCAATTCATCTTTGTTCTTCCCTTTCCTTTTTACTCTCTTTAAACATTCTATGGACTCTGCCTCCTTCACACTGATATTGAACGCCCATAGTTTCATATTTTGGATTGCGATTGTTTTATT", 1);
 
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+		MappingManager::Instance()->registerMapping(gsswMappingPtr);
+		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
+		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 0);
+	}
+
+	TEST(AdjudicationTest, AdjudicateDualIdenticalOutOfVariant)
+	{
+		std::string seq = TEST_REFERENCE_SEQUENCE;
+		auto regionPtr = std::make_shared< Region >("1:1-3720");
+
+		auto refAllelePtr = std::make_shared< Allele >("TGACCCTTCTTTTATTCTC");
+		auto altAllele1Ptr = std::make_shared< Allele >("TGACCCTTACCTG");
+		auto altAllele2Ptr = std::make_shared< Allele >("TGACCCTTGATTC");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllele1Ptr, altAllele2Ptr };
+		position pos = 163;
+		std::string chrom = "1";
+		std::string dot = ".";
+		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
+		variantPtr->processOverlappingAlleles();
+		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
+		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+
+		uint32_t percent = 80;
+		int match = 1;
+		int mismatch = 4;
+		int gapOpen = 6;
+		int gapExtension = 1;
+		auto gsswAdjudicatorPtr = std::make_shared< GSSWAdjudicator >(percent, match, mismatch, gapOpen, gapExtension);
+		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
+		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTTATTCCTTCCCCTGACCCTT", 1);
+
+		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+		gsswMappingPtr->printLongFormat();
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
 
