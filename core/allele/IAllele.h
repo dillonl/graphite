@@ -12,6 +12,7 @@ namespace graphite
 {
 	class VCFReader;
 	class Sequence;
+	class IVariant;
 	class IAllele : private boost::noncopyable, public std::enable_shared_from_this< IAllele >
 	{
 	public:
@@ -36,17 +37,26 @@ namespace graphite
 		virtual void incrementForwardCount() = 0;
 		virtual void incrementReverseCount() = 0;
 
+		void setVariantWPtr(std::weak_ptr< IVariant > variantWPtr) { m_variant_wptr = variantWPtr; }
+		std::weak_ptr< IVariant > getVariantWPtr() { return m_variant_wptr; }
+
 		inline SharedPtr getSharedPtr()
 		{
 			return shared_from_this();
 		}
 
-		virtual size_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) = 0;
-		virtual size_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) = 0;
+		virtual uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) = 0;
+		virtual uint32_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) = 0;
+		/*
+		virtual bool checkForOverlapPrefixLength(uint32_t overlapSize) = 0;
+		virtual bool checkForOverlapSuffixLength(uint32_t overlapSize) = 0;
 		virtual void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtrs) = 0;
 		virtual void addCommonSuffixInformation(uint32_t suffixSize, IAllele::SharedPtr allelePtrs) = 0;
+		*/
 
 	protected:
+
+			std::weak_ptr< IVariant > m_variant_wptr;
 
 	private:
 

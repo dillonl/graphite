@@ -50,22 +50,23 @@ namespace gssw
 			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
 			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
-				auto mappingAlignInfoPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
-				std::cout << "Mapping: " << mappingAlignInfoPtr->getMappingOffset() << " " << mappingAlignInfoPtr->getMappingSequence().size() << " " <<  alignmentPtr->getLength() << std::endl;
-				if (mappingAlignInfoPtr->getMappingOffset() == 0 && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), mappingAlignInfoPtr->getMappingSequence().size()) == 0) // if the mapping is at the beginning then check the prefix for differences
+				if (auto variantPtr = allelePtr->getVariantWPtr().lock()) // get the weakptr and lock it (checks if not expired)
 				{
-					continue;
+					auto prefixOverlapCount = variantPtr->getAllelePrefixOverlapMaxCount(allelePtr);
+					auto suffixOverlapCount = variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr);
+
+					auto mappingAlignInfoPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
+					/*
+					if (mappingOffsetLength <= prefixOverlapCount && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), prefixOverlapCount) == 0)
+					{
+						continue;
+					}
+					if (mappingOffsetLength <= suffixOverlapCount && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), prefixOverlapCount) == 0)
+					{
+					}
+					*/
 				}
-				if (memcmp((allelePtr->getSequence() + allelePtr->getLength() - mappingAlignInfoPtr->getMappingSequence().size()), mappingAlignInfoPtr->getMappingSequence().c_str(), mappingAlignInfoPtr->getMappingSequence().size()) == 0)
-				{
-					std::cout << "Mapped to the END!!!" << std::endl;
-					continue;
-				}
-				// else if ((mappingAlignInfoPtr->getMappingOffset() + ) == alignmentPtr->getLength()) // if the mapping is at the end check the suffix
-				// {
-				// std::cout << "Mapped to the END!!!" << std::endl;
-					// continue;
-				// }
+
 				(*allelePtr.*incrementFunct)();
 			}
 		}

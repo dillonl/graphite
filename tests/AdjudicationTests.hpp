@@ -340,7 +340,7 @@ namespace adj_test
 		std::string chrom = "1";
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
-		variantPtr->processOverlappingAlleles();
+		// variantPtr->processOverlappingAlleles();
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
 		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
@@ -376,7 +376,7 @@ namespace adj_test
 		std::string chrom = "1";
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
-		variantPtr->processOverlappingAlleles();
+		// variantPtr->processOverlappingAlleles();
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
 		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
@@ -391,7 +391,7 @@ namespace adj_test
 		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTTATTCCTTCCCCTGACCCTT", 1);
 
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
-		gsswMappingPtr->printLongFormat();
+		// gsswMappingPtr->printLongFormat();
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
 

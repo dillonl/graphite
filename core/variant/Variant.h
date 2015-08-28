@@ -25,6 +25,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< Variant > SharedPtr;
+		typedef std::weak_ptr< Variant > WeakPtr;
 		Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs);
 
 		Variant();
@@ -146,7 +147,12 @@ namespace graphite
 		void printVariant(std::ostream& out) override;
 		void processOverlappingAlleles() override;
 
+		uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
+		uint32_t getAlleleSuffixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
+
 	protected:
+		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
+
 		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)
 		{
 			std::vector< std::string > tmpAlts;
@@ -180,6 +186,11 @@ namespace graphite
 
 		std::string getGenotype();
 		uint32_t getTotalAlleleCount();
+
+		uint32_t m_max_prefix_match_length;
+		uint32_t m_max_suffix_match_length;
+		std::unordered_map< IAllele::SharedPtr, uint32_t > m_allele_prefix_max_overlap_map;
+		std::unordered_map< IAllele::SharedPtr, uint32_t > m_allele_suffix_max_overlap_map;
 
 		uint32_t m_position;
 		std::string m_chrom;

@@ -56,38 +56,35 @@ namespace graphite
 		virtual void incrementForwardCount() override { ++this->m_forward_count; }
 		virtual void incrementReverseCount() override { ++this->m_reverse_count; }
 
-		void setSharedAllelePrefixAndSuffix(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes, std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedSuffixes)
+		uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) override
 		{
+			uint32_t commonIndex = 0;
+			uint32_t minSize = (this->getLength() < allelePtr->getLength()) ? this->getLength() : allelePtr->getLength();
+			for (uint32_t i = 0; i < minSize; ++i) { if (this->getSequence()[i] != allelePtr->getSequence()[i]) { return i; } }
+			return minSize;
 		}
 
-		size_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) override
+		uint32_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) override
 		{
-			size_t commonIndex = 0;
-			if (this->getLength() < allelePtr->getLength())
-			{
-				commonIndex = this->getSequenceString().find_first_not_of(allelePtr->getSequenceString());
-			}
-			else
-			{
-				commonIndex = allelePtr->getSequenceString().find_first_not_of(this->getSequenceString());
-			}
-			// note: if nothing is found then the commonindex is -1 (when we return we add 1 so we return 0. Excellent!!!)
-			return commonIndex + 1;
+			uint32_t commonIndex = 0;
+			uint32_t minSize = (this->getLength() < allelePtr->getLength()) ? this->getLength() : allelePtr->getLength();
+			for (uint32_t i = 0; i < minSize; ++i) { if (this->getSequence()[(this->getLength() - 1) - i] != allelePtr->getSequence()[(allelePtr->getLength() - 1) - i]) { return i; } }
+			return minSize;
 		}
 
-		size_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) override
+		/*
+		bool checkForOverlapPrefixLength(uint32_t overlapSize) override
 		{
-			size_t commonIndex = 0;
-			if (this->getLength() < allelePtr->getLength())
-			{
-				commonIndex = this->getSequenceString().find_last_not_of(allelePtr->getSequenceString());
-			}
-			else
-			{
-				commonIndex = allelePtr->getSequenceString().find_last_not_of(this->getSequenceString());
-			}
-			// note: if nothing is found then the commonindex is -1 (when we return we add 1 so we return 0. Excellent!!!)
-			return commonIndex + 1;
+			bool test = (this->m_shared_prefixes.find(overlapSize) != this->m_shared_prefixes.end());
+			std::cout << "prefix: " << std::to_string(test) << std::endl;
+			return test;
+		}
+
+		bool checkForOverlapSuffixLength(uint32_t overlapSize)  override
+		{
+			bool test = (this->m_shared_suffixes.find(overlapSize) != this->m_shared_suffixes.end());
+			std::cout << "suffix: " << std::to_string(test) << std::endl;
+			return test;
 		}
 
 		void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtr) override
@@ -99,10 +96,12 @@ namespace graphite
 		{
 			addCommonInformationHelper(m_shared_suffixes, suffixSize, allelePtr);
 		}
+		*/
 
 	protected:
 		Allele() {}
 
+		/*
 		void addCommonInformationHelper(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > >& sharedMap, uint32_t sharedSize, IAllele::SharedPtr allelePtr)
 		{
 			auto iter = sharedMap.find(sharedSize);
@@ -115,15 +114,13 @@ namespace graphite
 				iter->second.emplace_back(allelePtr);
 			}
 		}
+		*/
 
 		std::atomic< uint32_t > m_forward_count; // since this needs to be accessed by several threads make it atomic
 		std::atomic< uint32_t > m_reverse_count; // since this needs to be accessed by several threads make it atomic
 
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
-
-		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > m_shared_prefixes;
-		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > m_shared_suffixes;
 
 	};
 }

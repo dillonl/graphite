@@ -60,6 +60,51 @@ namespace graphite
 		return ss.str();
 	}
 
+	uint32_t Variant::getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr)
+	{
+		auto iter = this->m_allele_prefix_max_overlap_map.find(allelePtr);
+		return (iter != this->m_allele_prefix_max_overlap_map.end()) ? iter->second : 0;
+	}
+
+	uint32_t Variant::getAlleleSuffixOverlapMaxCount(IAllele::SharedPtr allelePtr)
+	{
+		auto iter = this->m_allele_suffix_max_overlap_map.find(allelePtr);
+		return (iter != this->m_allele_suffix_max_overlap_map.end()) ? iter->second : 0;
+	}
+
+	void Variant::setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount)
+	{
+		auto iter = alleleOverlapCountMap.find(allelePtr);
+		if (iter == alleleOverlapCountMap.end() || iter->second < overlapCount)
+		{
+			alleleOverlapCountMap[allelePtr] = overlapCount;
+		}
+	}
+
+	void Variant::processOverlappingAlleles()
+	{
+		std::weak_ptr< IVariant > weakPtr = shared_from_this();
+		uint32_t alleleCount = 1;
+		m_max_prefix_match_length = 0;
+		m_max_suffix_match_length = 0;
+		for (auto& allelePtr1 : this->m_all_allele_ptrs)
+		{
+			allelePtr1->setVariantWPtr(weakPtr);
+			for (uint32_t i = alleleCount; i < this->m_all_allele_ptrs.size(); ++i)
+			{
+				auto allelePtr2 = this->m_all_allele_ptrs[i];
+				auto tmpMaxPrefixCount = allelePtr1->getCommonPrefixSize(allelePtr2);
+				auto tmpMaxSuffixCount = allelePtr1->getCommonSuffixSize(allelePtr2);
+				setAlleleOverlapMaxCountIfGreaterThan(allelePtr1, this->m_allele_prefix_max_overlap_map, tmpMaxPrefixCount);
+				setAlleleOverlapMaxCountIfGreaterThan(allelePtr2, this->m_allele_prefix_max_overlap_map, tmpMaxPrefixCount);
+				setAlleleOverlapMaxCountIfGreaterThan(allelePtr1, this->m_allele_suffix_max_overlap_map, tmpMaxSuffixCount);
+				setAlleleOverlapMaxCountIfGreaterThan(allelePtr2, this->m_allele_suffix_max_overlap_map, tmpMaxSuffixCount);
+			}
+			++alleleCount;
+		}
+	}
+
+	/*
 	void Variant::processOverlappingAlleles()
 	{
 		std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > > sharedPrefixes;
@@ -73,14 +118,23 @@ namespace graphite
 				if (allelePtr1.get() == allelePtr2.get() || (iter != alleleComputedChecker.end() && iter->second.find(allelePtr1) != iter->second.end())) { continue; } // don't compare identical alleles or alleles where the prefix/suffix have already been computed
 				auto commonPrefixSize = allelePtr1->getCommonPrefixSize(allelePtr2);
 				auto commonSuffixSize = allelePtr1->getCommonSuffixSize(allelePtr2);
-				allelePtr1->addCommonPrefixInformation(commonPrefixSize, allelePtr2);
-				allelePtr1->addCommonSuffixInformation(commonSuffixSize, allelePtr2);
-				allelePtr2->addCommonPrefixInformation(commonPrefixSize, allelePtr1);
-				allelePtr2->addCommonSuffixInformation(commonSuffixSize, allelePtr1);
+				std::cout << "cps "<< commonPrefixSize << std::endl;
+				std::cout << "css "<< commonSuffixSize << std::endl;
+				if (commonPrefixSize > 0)
+				{
+					allelePtr1->addCommonPrefixInformation(commonPrefixSize, allelePtr2);
+					allelePtr2->addCommonPrefixInformation(commonPrefixSize, allelePtr1);
+				}
+				if (commonSuffixSize > 0)
+				{
+					allelePtr1->addCommonSuffixInformation(commonSuffixSize, allelePtr2);
+					allelePtr2->addCommonSuffixInformation(commonSuffixSize, allelePtr1);
+				}
 				alleleComputedChecker[allelePtr2].emplace(allelePtr1, true);
 			}
 		}
 	}
+	*/
 
 	std::string Variant::getGenotype()
 	{
