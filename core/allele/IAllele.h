@@ -47,18 +47,10 @@ namespace graphite
 
 		virtual uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) = 0;
 		virtual uint32_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) = 0;
-		/*
-		virtual bool checkForOverlapPrefixLength(uint32_t overlapSize) = 0;
-		virtual bool checkForOverlapSuffixLength(uint32_t overlapSize) = 0;
-		virtual void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtrs) = 0;
-		virtual void addCommonSuffixInformation(uint32_t suffixSize, IAllele::SharedPtr allelePtrs) = 0;
-		*/
 
 	protected:
 
 			std::weak_ptr< IVariant > m_variant_wptr;
-
-	private:
 
 	};
 }

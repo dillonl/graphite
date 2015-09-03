@@ -42,31 +42,42 @@ namespace gssw
 
 	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr)
 	{
+		static std::mutex mlock;
+		std::lock_guard< std::mutex > guard(mlock);
+		std::cout << "locked" << std::endl;
+
+		// ((GSSWMapping*)mappingPtr.get())->printLongFormat();
+
 		auto swScore = mappingPtr->getMappingScore();
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
 		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 		if (swPercent >= this->m_sw_percent)
 		{
 			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
+			uint32_t count = 0;
 			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
+				uint32_t alleleMappingScorePercent = ((mappingPtr->getMappingScore() / (double)(allelePtr->getLength() * this->m_match_value)) * 100);
+				/*
+				std::cout << "ms: " << mappingPtr->getMappingScore() << std::endl;
+				std::cout << "al: " << allelePtr->getLength() << std::endl;
+				std::cout << "mv: " << m_match_value << std::endl;
+				std::cout << "allele score: " << alleleMappingScorePercent << std::endl;
+				*/
+				if (this->m_sw_percent > alleleMappingScorePercent) { continue; } // if the mapping score for this allele is too low then do not count it
+
+				// check that the alignment maps to unique areas of the allele
 				if (auto variantPtr = allelePtr->getVariantWPtr().lock()) // get the weakptr and lock it (checks if not expired)
 				{
-					auto prefixOverlapCount = variantPtr->getAllelePrefixOverlapMaxCount(allelePtr);
-					auto suffixOverlapCount = variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr);
-
 					auto mappingAlignInfoPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
-					/*
-					if (mappingOffsetLength <= prefixOverlapCount && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), prefixOverlapCount) == 0)
+					std::cout << "mapping length: " << mappingAlignInfoPtr->getMappingOffsetLength() << std::endl;
+					// check the mapping prefix and suffix to make sure the alignment covers more than the pre/suffix
+					if ((count == 0 && mappingAlignInfoPtr->getMappingOffsetLength() <= variantPtr->getAllelePrefixOverlapMaxCount(allelePtr)) ||
+						(count == (mappingPtr->getAllelePtrs().size() - 1) && mappingAlignInfoPtr->getMappingOffsetLength() <= variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr)))
 					{
 						continue;
 					}
-					if (mappingOffsetLength <= suffixOverlapCount && memcmp(allelePtr->getSequence(), mappingAlignInfoPtr->getMappingSequence().c_str(), prefixOverlapCount) == 0)
-					{
-					}
-					*/
 				}
-
 				(*allelePtr.*incrementFunct)();
 			}
 		}

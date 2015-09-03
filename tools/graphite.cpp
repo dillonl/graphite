@@ -43,6 +43,26 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
+	// make sure paths exist
+	if (!boost::filesystem::exists(fastaPath))
+	{
+		std::cout << "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	for (auto vcfPath : vcfPaths)
+	{
+		if (!boost::filesystem::exists(vcfPath))
+		{
+			std::cout << "Invalid VCF path: " << vcfPath << ", please provide the correct path to the VCF and rerun Graphite" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+	if (!boost::filesystem::exists(bamPath))
+	{
+		std::cout << "Invalid BAM path, please provide the correct path to the BAM file and rerun Graphite" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 	// load bam alignments
@@ -77,6 +97,11 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+		if (!boost::filesystem::exists(outputDirectory))
+		{
+			boost::filesystem::path dir(outputDirectory);
+			boost::filesystem::create_directory(dir);
+		}
 		std::vector< std::shared_ptr< std::thread > > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
 		for (auto& iter : vcfPathsAndVariantListPtrsMap)

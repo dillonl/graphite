@@ -370,7 +370,7 @@ namespace adj_test
 
 		auto refAllelePtr = std::make_shared< Allele >("TGACCCTTCTTTTATTCTC");
 		auto altAllele1Ptr = std::make_shared< Allele >("TGACCCTTACCTG");
-		auto altAllele2Ptr = std::make_shared< Allele >("TGACCCTTGATTC");
+		auto altAllele2Ptr = std::make_shared< Allele >("TGACCCTTGATT");
 		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllele1Ptr, altAllele2Ptr };
 		position pos = 163;
 		std::string chrom = "1";
