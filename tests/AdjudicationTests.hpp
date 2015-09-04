@@ -120,6 +120,39 @@ namespace adj_test
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
 	}
 
+	TEST(AdjudicationTest, AdjudicateDualSNPMisMatch)
+	{
+		std::string seq = TEST_REFERENCE_SEQUENCE;
+		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto refAllelePtr = std::make_shared< Allele >("A");
+		auto altAllelePtr = std::make_shared< Allele >("C");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		position pos = 10;
+		std::string chrom = "1";
+		std::string dot = ".";
+		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
+		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
+		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+
+		uint32_t percent = 80;
+		int match = 1;
+		int mismatch = 4;
+		int gapOpen = 6;
+		int gapExtension = 1;
+		auto gsswAdjudicatorPtr = std::make_shared< GSSWAdjudicator >(percent, match, mismatch, gapOpen, gapExtension);
+		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
+		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAAGTAGAATCTACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTT", 2);
+
+		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+		MappingManager::Instance()->registerMapping(gsswMappingPtr);
+		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+	}
+
 	TEST(AdjudicationTest, AdjudicateDuoSNPMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;

@@ -710,6 +710,7 @@ gssw_align* gssw_align_create (void) {
     a->mH = NULL;
 	a->ref_begin1 = -1;
 	a->read_begin1 = -1;
+	a->cigar = NULL;
     return a;
 }
 
@@ -906,16 +907,16 @@ gssw_cigar* gssw_alignment_trace_back_byte (gssw_align* alignment,
 			gssw_cigar_push_back(result, 'M', 1);
             h = d;
             --i; --j;
-        } else if (h == n && (d - mismatch == h && ref[i] != read[j])) {
+        } else if (h == n && (d - mismatch == h && ref[i] != read[j])) { // if we mismatch
 			gssw_cigar_push_back(result, 'X', 1);
 			h = d;
             --i; --j;
-		} else if (l == n && (l - gap_open == h || l - gap_extension == h)) {
+		} else if (l == n && (l - gap_open == h || l - gap_extension == h)) { // if deletion
             //fprintf(stderr, "D\n");
             gssw_cigar_push_back(result, 'D', 1);
             h = l;
             --i;
-        } else if (u == n && (u - gap_open == h || u - gap_extension == h)) {
+        } else if (u == n && (u - gap_open == h || u - gap_extension == h)) { // if insertion
             //fprintf(stderr, "I\n");
             gssw_cigar_push_back(result, 'I', 1);
             h = u;
@@ -1196,6 +1197,7 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
 		uint16_t possible_mismatch = actual_score + mismatch;
 		uint16_t possible_gap_open = actual_score + gap_open;
 		uint16_t possible_gap_extension = actual_score + gap_extension;
+
 		/*
 		fprintf(stdout, "actual high score: %u\n", actual_score);
 		fprintf(stdout, "match:             %u\n", possible_match);
@@ -1209,6 +1211,8 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
         // rationale: we have to check the left and diagonal directions
         // vertical would stay on this node even if we are in the last column
 
+		bool isMatch = true;
+
         // note that the loop is split depending on alignment score width...
         // this is done out of paranoia that optimization will not factor two loops into two if there
         // is an if statement with a consistent result inside of each iteration
@@ -1220,6 +1224,7 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
                 l = ((uint8_t*)cn->alignment->mH)[readLen*(cn->len-1) + readEnd];
 				if (d == possible_match || d == possible_mismatch)
 				{
+					if (n->seq[refEnd] != read[readEnd]) { isMatch = false; }
 					max_score = d;
 					max_diag = 1;
 					max_prev = cn;
@@ -1257,6 +1262,7 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
 
 				if (d == possible_match || d == possible_mismatch)
 				{
+					if (n->seq[refEnd] != read[readEnd]) { isMatch = false; }
 					max_score = d;
 					max_diag = 1;
 					max_prev = cn;
@@ -1285,7 +1291,8 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
             if (max_diag) {
                 --readEnd;
                 //fprintf(stderr, "M\n");
-				gssw_cigar_push_front(nc->cigar, 'M', 1);
+				char matchChar = (isMatch) ? 'M' : 'X';
+				gssw_cigar_push_front(nc->cigar, matchChar, 1);
             } else {
                 //fprintf(stderr, "D\n");
                 gssw_cigar_push_front(nc->cigar, 'D', 1);
@@ -1299,10 +1306,15 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
     }
 
     //fprintf(stderr, "at end of traceback loop\n");
-    // 
     gssw_reverse_graph_cigar(gc);
 
     gm->position = (refEnd + 1 < 0 ? 0 : refEnd + 1); // drop last step by -1 on ref position
+
+	for (uint32_t i = 0; i < gc->length; ++i)
+	{
+		gssw_node_cigar element = gc->elements[i];
+		element.node->alignment->cigar = element.cigar;
+	}
 
     return gm;
 

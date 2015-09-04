@@ -5,7 +5,7 @@
 
 namespace graphite
 {
-	class IAdjudicator : private boost::noncopyable
+	class IAdjudicator : private boost::noncopyable, public std::enable_shared_from_this< IAdjudicator >
 	{
 	public:
 		typedef std::shared_ptr< IAdjudicator > SharedPtr;

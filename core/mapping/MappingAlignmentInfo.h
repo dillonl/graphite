@@ -3,10 +3,13 @@
 
 #include "core/alignment/IAlignment.h"
 
+#include "externals/gssw/gssw.h"
+
 #include <boost/noncopyable.hpp>
 
 namespace graphite
 {
+	class IAdjudicator;
 	class MappingAlignment : private boost::noncopyable
 	{
 	public:
@@ -19,7 +22,36 @@ namespace graphite
 		~MappingAlignment() {}
 
 		IAlignment::SharedPtr getAlignmentPtr() { return this->m_alignment_ptr; }
-		uint32_t getMappingScore() { return this->m_mapping_score; }
+		uint32_t getMappingScore(std::shared_ptr< IAdjudicator > adjudicatorPtr)
+		{
+			/*
+			if (this->m_mapping_score < 0) { this->m_mapping_score = 0; }
+			gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+			for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+			{
+				for (int j = 0; j < nc->cigar->length; ++j)
+				{
+					switch (nc->cigar->elements[j].type)
+					{
+					case 'M':
+						this->m_mapping_score += (adjudicatorPtr->getMatchValue() * nc->cigar->elements[j].length);
+						break;
+					case 'X':
+						this->m_mapping_score -= (adjudicatorPtr->getMisMatchValue() * nc->cigar->elements[j].length);
+						break;
+					case 'I': // I and D are treated the same
+					case 'D':
+						this->m_mapping_score -= adjudicatorPtr->getGapOpenValue();
+						this->m_mapping_score -= (adjudicatorPtr->getGapExtensionValue() * (nc->cigar->elements[j].length -1));
+						break;
+					default:
+					}
+					this->m_mapping_score = (this->m_mapping_score < 0) ? 0 : this->m_mapping_score; // the floor of the mapping score is 0
+				}
+			}
+			*/
+			return this->m_mapping_score;
+		}
 		uint32_t getMappingOffset() { return this->m_mapping_offset; }
 		uint32_t getMappingOffsetLength() { return this->m_mapping_offset_length; }
 		std::string getMappingSequence() { return this->m_mapping_sequence; }
@@ -28,7 +60,7 @@ namespace graphite
 
 	private:
 		IAlignment::SharedPtr m_alignment_ptr;
-		uint32_t m_mapping_score;
+		int32_t m_mapping_score;
 		uint32_t m_mapping_offset;
 		uint32_t m_mapping_offset_length;
 		std::string m_mapping_sequence;

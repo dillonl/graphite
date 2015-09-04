@@ -42,6 +42,8 @@ typedef struct {
 					cigar = 0 when the best alignment path is not available
 	@field	cigarLen	length of the cigar string; cigarLen = 0 when the best alignment path is not available
 */
+typedef struct gssw_cigar _gssw_cigar;
+
 typedef struct {
 	uint16_t score1;
 	uint16_t score2;
@@ -53,6 +55,7 @@ typedef struct {
     gssw_seed seed;
     uint8_t is_byte;
     void* mH;
+	_gssw_cigar* cigar;
 } gssw_align;
 
 typedef struct {
@@ -66,7 +69,7 @@ typedef struct {
     uint32_t length;
 } gssw_cigar_element;
 
-typedef struct {
+typedef struct gssw_cigar {
     int32_t length;
     gssw_cigar_element* elements;
 } gssw_cigar;

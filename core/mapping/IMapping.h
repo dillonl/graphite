@@ -19,6 +19,7 @@ namespace graphite
 		IMapping() {}
 		~IMapping() {}
 
+		virtual int32_t getMappingScoreOfAllele(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr) = 0;
 		virtual int getMappingScore() = 0;
 		virtual IAlignment::SharedPtr getAlignmentPtr() = 0;
 		virtual std::vector< IAllele::SharedPtr > getAllelePtrs() = 0;

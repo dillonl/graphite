@@ -1,4 +1,5 @@
 #include "GSSWMapping.h"
+#include "core/adjudicator/IAdjudicator.h"
 
 #include <iostream>
 
@@ -15,8 +16,12 @@ namespace gssw
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
+
+			// try setting the allele ptrs and the cigar in the nc->cigar for loop
+
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
 			m_allele_ptrs.emplace_back(allelePtr);
+			m_allele_gssw_nodes_map[allelePtr] = nc->node;
 			std::vector< char > cigarOperations;
 			std::vector< uint32_t > cigarOperationLengths;
 			uint32_t offsetLength = 0;
@@ -34,6 +39,38 @@ namespace gssw
 
 	GSSWMapping::~GSSWMapping()
 	{
+	}
+
+	int32_t GSSWMapping::getMappingScoreOfAllele(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
+	{
+		// see above message
+		auto iter = m_allele_gssw_nodes_map.find(allelePtr);
+		// std::cout << "ap: " << allelePtr->getSequenceString() << std::endl;
+		if (iter == m_allele_gssw_nodes_map.end()) { return 0; }
+		if (iter->second->alignment->cigar == NULL) { std::cout << "NULL" << std::endl; return allelePtr->getLength(); }
+		auto gsswNodeCigar = iter->second->alignment->cigar;
+		int32_t score = 0;
+		for (int j = 0; j < gsswNodeCigar->length; ++j)
+		{
+			switch (gsswNodeCigar->elements[j].type)
+			{
+			case 'M':
+				score += (adjudicatorPtr->getMatchValue() * gsswNodeCigar->elements[j].length);
+				break;
+			case 'X':
+				score -= (adjudicatorPtr->getMisMatchValue() * gsswNodeCigar->elements[j].length);
+				break;
+			case 'I': // I and D are treated the same
+			case 'D':
+				score -= adjudicatorPtr->getGapOpenValue();
+				score -= (adjudicatorPtr->getGapExtensionValue() * (gsswNodeCigar->elements[j].length -1));
+				break;
+			default:
+				break;
+			}
+			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
+		}
+		return score;
 	}
 
 	MappingAlignment::SharedPtr GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)

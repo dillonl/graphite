@@ -22,7 +22,6 @@ namespace gssw
 		int getGapOpenValue() override;
 		int getGapExtensionValue() override;
 	private:
-
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;
 		int m_match_value;
