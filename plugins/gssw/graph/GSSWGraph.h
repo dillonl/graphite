@@ -91,6 +91,7 @@ namespace gssw
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
+			n->cigar = NULL;
 			return n;
 		}
 

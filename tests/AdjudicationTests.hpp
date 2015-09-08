@@ -118,6 +118,7 @@ namespace adj_test
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+		delete gsswMappingPtr.get();
 	}
 
 	TEST(AdjudicationTest, AdjudicateDualSNPMisMatch)
@@ -151,6 +152,7 @@ namespace adj_test
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+		delete gsswMappingPtr.get();
 	}
 
 	TEST(AdjudicationTest, AdjudicateDuoSNPMatch)
@@ -186,6 +188,7 @@ namespace adj_test
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+		delete gsswMappingPtr.get();
 	}
 
 	TEST(AdjudicationTest, AdjudicateTriSNPMisMatch)
@@ -223,6 +226,7 @@ namespace adj_test
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 0);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+		delete gsswMappingPtr.get();
 	}
 
 	TEST(AdjudicationTest, AdjudicateTriSNPMatch)
@@ -258,6 +262,7 @@ namespace adj_test
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
+		delete gsswMappingPtr.get();
 	}
 
 	TEST(AdjudicationTest, AdjudicateShortDeletionMatch)

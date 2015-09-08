@@ -120,7 +120,12 @@ namespace gssw
 	{
 		gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
 		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(),m_match,m_mismatch,m_gap_open,m_gap_extension);
-		gssw_print_graph_mapping(graphMapping);
+		gssw_node_cigar* nc = graphMapping->cigar.elements;
+		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+		{
+			nc->node->cigar = nc->cigar;
+		}
+		// gssw_print_graph_mapping(graphMapping);
 		// gssw_graph_print_score_matrices(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength());
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm) { gssw_graph_mapping_destroy(gm); };
 		return std::shared_ptr< gssw_graph_mapping >(graphMapping, graphMappingDeletor);

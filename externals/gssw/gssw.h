@@ -55,7 +55,6 @@ typedef struct {
     gssw_seed seed;
     uint8_t is_byte;
     void* mH;
-	_gssw_cigar* cigar;
 } gssw_align;
 
 typedef struct {
@@ -101,6 +100,7 @@ typedef struct _gssw_node {
     gssw_node** next;
     int32_t count_next;
     gssw_align* alignment;
+	_gssw_cigar* cigar;
 } _gssw_node;
 
 typedef struct {

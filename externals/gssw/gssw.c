@@ -710,7 +710,6 @@ gssw_align* gssw_align_create (void) {
     a->mH = NULL;
 	a->ref_begin1 = -1;
 	a->read_begin1 = -1;
-	a->cigar = NULL;
     return a;
 }
 
@@ -1166,7 +1165,7 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
         }
         
         nc->node = n;
-        ++gc->length;
+		++gc->length;
 		/* fprintf(stdout, "node: %s\n", n->seq); */
 		/* fprintf(stdout, "score: %d\n", score); */
 		/* fprintf(stdout, "score: %d", score); */
@@ -1237,22 +1236,6 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
 					max_prev = cn;
 					break;
 				}
-
-                // we need to check if we have a match and a gap which are both possible
-                // under the scores and the relationship between the query and target strings
-                // if both are possible, we should prefer the match
-
-				/*
-                if (d > max_score) {
-                    max_score = d;
-                    max_prev = cn;
-                    max_diag = 1;
-                } else if (l > max_score) {
-                    max_score = l;
-                    max_prev = cn;
-                    max_diag = 0 || max_diag;
-                }
-				*/
             }
         } else {
             for (i = 0; i < n->count_prev; ++i) {
@@ -1303,18 +1286,13 @@ gssw_graph_mapping* gssw_graph_trace_back (gssw_graph* graph,
             break;
         }
 
+
     }
 
     //fprintf(stderr, "at end of traceback loop\n");
     gssw_reverse_graph_cigar(gc);
 
     gm->position = (refEnd + 1 < 0 ? 0 : refEnd + 1); // drop last step by -1 on ref position
-
-	for (uint32_t i = 0; i < gc->length; ++i)
-	{
-		gssw_node_cigar element = gc->elements[i];
-		element.node->alignment->cigar = element.cigar;
-	}
 
     return gm;
 

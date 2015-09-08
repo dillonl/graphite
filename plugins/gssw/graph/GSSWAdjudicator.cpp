@@ -58,6 +58,7 @@ namespace gssw
 			for (auto& allelePtr : mappingPtr->getAllelePtrs())
 			{
 				auto swAlleleScore = mappingPtr->getMappingScoreOfAllele(allelePtr, shared_from_this());
+				if (swAlleleScore == 0) { std::cout << "returned 0" << std::endl; continue; }
 				uint32_t alleleMappingScorePercent = ((swAlleleScore / (double)(allelePtr->getLength() * this->m_match_value)) * 100);
 				// std::cout << "score: " << swAlleleScore << std::endl;
 				// std::cout << "amp: " << alleleMappingScorePercent << std::endl;
