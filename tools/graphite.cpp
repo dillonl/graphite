@@ -84,6 +84,19 @@ int main(int argc, char** argv)
 	auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
+	if (outputDirectory.size() == 0)
+	{
+		variantManagerPtr->getCompleteVariantList()->processOverlappingAlleles();
+	}
+	else
+	{
+		for (auto& iter : variantManagerPtr->getVCFPathsAndVariantListsMap())
+		{
+			graphite::ThreadPool::Instance()->enqueue(std::bind(&graphite::IVariantList::processOverlappingAlleles, iter.second));
+		}
+	}
+	graphite::ThreadPool::Instance()->joinAll();
+
 	graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
