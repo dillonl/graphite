@@ -1,14 +1,14 @@
-[![Build Status](https://travis-ci.org/dillonl/gwiz.svg?branch=master)](https://travis-ci.org/dillonl/gwiz)
+[![Build Status](https://travis-ci.org/dillonl/graphite.svg?branch=master)](https://travis-ci.org/dillonl/graphite)
 
-GWiz
+Graphite
 ====
 
-GWiz uses cmake. To build GWiz run:
+Graphite uses cmake. To build Graphite run:
 
 mkdir bin/
 cd bin
 cmake ../
 
-To run GWiz's adjudication:
+To run Graphite's adjudication:
 
-./gssw
+./graphite
