@@ -10,61 +10,40 @@ namespace gssw
 {
     GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
 		m_gssw_mapping_ptr(gsswMappingPtr),
-		m_alignment_ptr(alignmentPtr),
-		m_node_count(gsswMappingPtr->cigar.length)
+		m_alignment_ptr(alignmentPtr)
 	{
 		uint32_t offset = m_gssw_mapping_ptr->position;
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
-
-			// try setting the allele ptrs and the cigar in the nc->cigar for loop
-
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
 			m_allele_ptrs.push_back(allelePtr);
-
 			m_allele_gssw_nodes_map[allelePtr.get()] = nc->node;
-			std::cout << "putting: " << allelePtr.get() << std::endl;
-			/*
-			std::vector< char > cigarOperations;
-			std::vector< uint32_t > cigarOperationLengths;
-			uint32_t offsetLength = 0;
-			for (int j = 0; j < nc->cigar->length; ++j)
-			{
-				cigarOperations.emplace_back(nc->cigar->elements[j].type);
-				cigarOperationLengths.emplace_back(nc->cigar->elements[j].length);
-				offsetLength += nc->cigar->elements[j].length;
-			}
-			auto mappingAlignmentPtr = std::make_shared< MappingAlignment >(alignmentPtr, offset, offsetLength, nc->node->alignment->score1, cigarOperations, cigarOperationLengths);
-			offset += offsetLength;
-			m_allele_mappingalignment_map.emplace(allelePtr, mappingAlignmentPtr);
-			*/
 		}
-		std::cout << "count: " << m_allele_ptrs.size() << std::endl;
 	}
 
 	GSSWMapping::~GSSWMapping()
 	{
-		std::cout << "deleting mapping" << std::endl;
 	}
 
-	int32_t GSSWMapping::getMappingScoreOfAllele(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
+	MappingAlignmentInfo::SharedPtr GSSWMapping::getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
 	{
-
 		// see above message
 		auto iter = m_allele_gssw_nodes_map.find(allelePtr.get());
-		std::cout << "getting: " << allelePtr.get() << std::endl;
-		// std::cout << "ap: " << allelePtr->getSequenceString() << std::endl;
-		if (iter == m_allele_gssw_nodes_map.end()) { std::cout << "Not found: " << std::endl; return 0; }
-		if (iter->second->cigar == NULL) { std::cout << "NULL: " << iter->second << std::endl; return 0; }
+		if (iter == m_allele_gssw_nodes_map.end() || iter->second->cigar == NULL) { return nullptr; }
 		auto gsswNodeCigar = iter->second->cigar;
+		auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >();
 		int32_t score = 0;
-		std::cout << "cigarLength: " << gsswNodeCigar->length << std::endl;
+		uint32_t length = 0;
+		uint32_t prefixMatch = 0;
+		uint32_t suffixMatch = 0;
 		for (int j = 0; j < gsswNodeCigar->length; ++j)
 		{
 			switch (gsswNodeCigar->elements[j].type)
 			{
 			case 'M':
+				if (j == 0) { prefixMatch = gsswNodeCigar->elements[j].length; }
+				if (j == gsswNodeCigar->length - 1) { suffixMatch = gsswNodeCigar->elements[j].length; }
 				score += (adjudicatorPtr->getMatchValue() * gsswNodeCigar->elements[j].length);
 				break;
 			case 'X':
@@ -78,11 +57,17 @@ namespace gssw
 			default:
 				break;
 			}
-			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
+			length += gsswNodeCigar->elements[j].length;
 		}
-		return score;
+		score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
+		mappingAlignmentInfo->setSWScore(score);
+		mappingAlignmentInfo->setLength(length);
+		mappingAlignmentInfo->setPrefixMatch(prefixMatch);
+		mappingAlignmentInfo->setSuffixMatch(suffixMatch);
+		return  mappingAlignmentInfo;
 	}
 
+	/*
 	MappingAlignment::SharedPtr GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)
 	{
 		auto iter = m_allele_mappingalignment_map.find(allelePtr);
@@ -95,6 +80,7 @@ namespace gssw
 			return nullptr;
 		}
 	}
+	*/
 
 	int GSSWMapping::getMappingScore()
 	{
@@ -108,15 +94,6 @@ namespace gssw
 
 	std::vector< IAllele::SharedPtr > GSSWMapping::getAllelePtrs()
 	{
-		/*
-		std::vector< IAllele::SharedPtr > allelePtrs;
-		for (auto iter : m_allele_gssw_nodes_map)
-		{
-			allelePtrs.emplace_back(iter.first);
-		}
-		return allelePtrs;
-		*/
-		std::cout << "getAllelePtrs.size(): " << m_allele_ptrs.size() << std::endl;
 		return this->m_allele_ptrs;
 	}
 

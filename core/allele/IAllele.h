@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <unordered_map>
+#include <iostream>
 
 namespace graphite
 {

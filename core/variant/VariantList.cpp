@@ -228,7 +228,11 @@ namespace graphite
 		return std::make_shared< VariantList >(variantPtrs);
 	}
 
-	void VariantList::calculateAllAlleleOverlap()
+	void VariantList::processOverlappingAlleles()
 	{
+		for (auto variantPtr : this->m_variant_ptrs)
+		{
+			variantPtr->processOverlappingAlleles();
+		}
 	}
 }

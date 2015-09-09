@@ -49,4 +49,9 @@ namespace graphite
 		}
 		ThreadPool::Instance()->joinAll();
 	}
+
+	void MappingManager::clearRegisteredMappings()
+	{
+		this->m_alignment_mapping_map.clear();
+	}
 }

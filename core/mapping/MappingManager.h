@@ -23,6 +23,7 @@ namespace graphite
 		 */
 		void registerMapping(IMapping::SharedPtr mappingPtr);
 		void evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr);
+		void clearRegisteredMappings();
 	private:
 		MappingManager();
 		~MappingManager();

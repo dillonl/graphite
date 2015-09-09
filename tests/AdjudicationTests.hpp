@@ -4,6 +4,7 @@
 #include "TestConfig.h"
 
 #include "core/reference/IReference.h"
+#include "core/util/ThreadPool.hpp"
 #include "core/variant/IVariantList.h"
 #include "core/variant/IVariant.h"
 #include "core/adjudicator/IAdjudicator.h"
@@ -22,6 +23,14 @@ namespace adj_test
 {
 	using namespace graphite;
 	using namespace graphite::gssw;
+
+	class AdjudicationTest : public ::testing::Test
+	{
+		virtual void TearDown()
+		{
+			MappingManager::Instance()->clearRegisteredMappings();
+		}
+	};
 
 	class ReferenceTest : public IReference
 	{
@@ -87,8 +96,9 @@ namespace adj_test
 		return gsswGraphPtr;
 	}
 
-	TEST(AdjudicationTest, AdjudicateDualSNPMatch)
+	TEST_F(AdjudicationTest, AdjudicateDualSNPMatch)
 	{
+		ThreadPool::Instance()->setThreadCount(1);
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
 		auto refAllelePtr = std::make_shared< Allele >("A");
@@ -111,17 +121,19 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAAGTAGAATCTACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTT", 2);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
-		delete gsswMappingPtr.get();
 	}
 
-	TEST(AdjudicationTest, AdjudicateDualSNPMisMatch)
+	TEST_F(AdjudicationTest, AdjudicateDualSNPMisMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -145,17 +157,19 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAAGTAGAATCTACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTT", 2);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
-		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
-		delete gsswMappingPtr.get();
+		// ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
 	}
 
-	TEST(AdjudicationTest, AdjudicateDuoSNPMatch)
+	TEST_F(AdjudicationTest, AdjudicateDuoSNPMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -181,17 +195,19 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >(std::string(seq.c_str() + alignmentOffset, alignmentSize), alignmentOffset);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
 		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
-		delete gsswMappingPtr.get();
 	}
 
-	TEST(AdjudicationTest, AdjudicateTriSNPMisMatch)
+	TEST_F(AdjudicationTest, AdjudicateTriSNPMisMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -218,18 +234,20 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >(std::string(seq.c_str() + alignmentOffset, alignmentSize), alignmentOffset);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 0);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
-		delete gsswMappingPtr.get();
 	}
 
-	TEST(AdjudicationTest, AdjudicateTriSNPMatch)
+	TEST_F(AdjudicationTest, AdjudicateTriSNPMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -254,18 +272,20 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("AAATCAACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTTATTCCTTC", 6);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
-		delete gsswMappingPtr.get();
 	}
 
-	TEST(AdjudicationTest, AdjudicateShortDeletionMatch)
+	TEST_F(AdjudicationTest, AdjudicateShortDeletionMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -289,16 +309,20 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("TACTCTCTCATATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTTATTCCTTCCCCTG", 6);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+		// this is why you aren't deleting mappings
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
 	}
 
-	TEST(AdjudicationTest, AdjudicateShortInsertionMatch)
+	TEST_F(AdjudicationTest, AdjudicateShortInsertionMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -323,16 +347,19 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("ACTCAGGGGGGGGGGAGTAAAATCTACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCT", 1);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 1);
 		ASSERT_EQ(gsswMappingPtr->getMappingScore(), (alignmentPtr->getLength() * match));
 	}
 
-	TEST(AdjudicationTest, AdjudicateShortInsertionMultipleMatch)
+	TEST_F(AdjudicationTest, AdjudicateShortInsertionMultipleMatch)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -357,15 +384,18 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("ACTCAGGGGGGGGGGAGTAAAATCTACTCTCTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCT", 1);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 1);
 	}
 
-	TEST(AdjudicationTest, AdjudicateDualIdenticalIntoVariant)
+	TEST_F(AdjudicationTest, AdjudicateDualIdenticalIntoVariant)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -392,16 +422,19 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("GTTTTATCTTTTATTCTCCAAATTTCTTTCCAATTCATCTTTGTTCTTCCCTTTCCTTTTTACTCTCTTTAAACATTCTATGGACTCTGCCTCCTTCACACTGATATTGAACGCCCATAGTTTCATATTTTGGATTGCGATTGTTTTATT", 1);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 0);
 	}
 
-	TEST(AdjudicationTest, AdjudicateDualIdenticalOutOfVariant)
+	TEST_F(AdjudicationTest, AdjudicateDualIdenticalOutOfVariant)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
 		auto regionPtr = std::make_shared< Region >("1:1-3720");
@@ -428,10 +461,13 @@ namespace adj_test
 		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr);
 		auto alignmentPtr = std::make_shared< AlignmentTest >("CTCAGGTGTTCATAATGTATCAATGTATATTGCTTTAAGCCTGAAGGTAACCTAAGTAAAGATGTACCATGTTCCACCAATGCTTCTTTTGATCATCATTTTATCCTGTTTTTTCTTTAGGATTCTTTCTTATTCCTTCCCCTGACCCTT", 1);
 
+		variantListPtr->processOverlappingAlleles();
+
 		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 		// gsswMappingPtr->printLongFormat();
 		MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
 
 		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);

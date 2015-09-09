@@ -25,59 +25,26 @@ namespace gssw
 	{
 	}
 
-	/*
-	  typedef struct {
-	  uint16_t score1;
-	  uint16_t score2;
-	  int32_t ref_begin1;
-	  int32_t ref_end1;
-	  int32_t	read_begin1;
-	  int32_t read_end1;
-	  int32_t ref_end2;
-	  gssw_seed seed;
-	  uint8_t is_byte;
-	  void* mH;
-	  } gssw_align;
-	*/
-
 	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr)
 	{
-		static std::mutex mlock;
-		std::lock_guard< std::mutex > guard(mlock);
-		std::cout << "locked" << std::endl;
-
-		// ((GSSWMapping*)mappingPtr.get())->printLongFormat();
-
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
 		auto swScore = mappingPtr->getMappingScore();
 		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 		if (swPercent >= this->m_sw_percent)
 		{
 			auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
-			uint32_t count = 0;
-			for (auto& allelePtr : mappingPtr->getAllelePtrs())
+			auto allelePtrs = mappingPtr->getAllelePtrs();
+			for (uint32_t i = 0; i < allelePtrs.size(); ++i)
 			{
-				auto swAlleleScore = mappingPtr->getMappingScoreOfAllele(allelePtr, shared_from_this());
-				if (swAlleleScore == 0) { std::cout << "returned 0" << std::endl; continue; }
-				uint32_t alleleMappingScorePercent = ((swAlleleScore / (double)(allelePtr->getLength() * this->m_match_value)) * 100);
-				// std::cout << "score: " << swAlleleScore << std::endl;
-				// std::cout << "amp: " << alleleMappingScorePercent << std::endl;
-				/*
-				std::cout << "ms: " << mappingPtr->getMappingScore() << std::endl;
-				std::cout << "al: " << allelePtr->getLength() << std::endl;
-				std::cout << "mv: " << m_match_value << std::endl;
-				std::cout << "allele score: " << alleleMappingScorePercent << std::endl;
-				*/
+				auto allelePtr = allelePtrs[i];
+				auto mappingAlignmentInfoPtr = mappingPtr->getMappingAlignmentInfo(allelePtr, shared_from_this());
+				auto alleleMappingScorePercent = ((mappingAlignmentInfoPtr->getSWScore() / (double)(mappingAlignmentInfoPtr->getLength() * this->m_match_value)) * 100);
 				if (this->m_sw_percent > alleleMappingScorePercent) { continue; } // if the mapping score for this allele is too low then do not count it
 
 				// check that the alignment maps to unique areas of the allele
 				if (auto variantPtr = allelePtr->getVariantWPtr().lock()) // get the weakptr and lock it (checks if not expired)
 				{
-					auto mappingAlignInfoPtr = mappingPtr->getGSSWAlignmentPtrFromAllelePtr(allelePtr);
-					// std::cout << "mapping length: " << mappingAlignInfoPtr->getMappingOffsetLength() << std::endl;
-					// check the mapping prefix and suffix to make sure the alignment covers more than the pre/suffix
-					if ((count == 0 && mappingAlignInfoPtr->getMappingOffsetLength() <= variantPtr->getAllelePrefixOverlapMaxCount(allelePtr)) ||
-						(count == (mappingPtr->getAllelePtrs().size() - 1) && mappingAlignInfoPtr->getMappingOffsetLength() <= variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr)))
+					if ((i == 0 && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getPrefixMatch()) || (i == allelePtrs.size() - 1 && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getSuffixMatch()))
 					{
 						continue;
 					}

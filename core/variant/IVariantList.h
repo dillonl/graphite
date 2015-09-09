@@ -25,6 +25,7 @@ namespace graphite
 		IVariantList(){}
 		virtual ~IVariantList() {}
 
+		virtual void processOverlappingAlleles() = 0;
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;

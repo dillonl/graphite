@@ -23,7 +23,7 @@ namespace graphite
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
-		void calculateAllAlleleOverlap();
+		void processOverlappingAlleles();
 
 	protected:
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);
