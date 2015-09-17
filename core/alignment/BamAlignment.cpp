@@ -3,6 +3,24 @@
 namespace graphite
 {
 	BamAlignment::BamAlignment(BamAlignmentPtr bamAlignmentPtr) :
+		m_position(bamAlignmentPtr->Position),
+		m_sequence_string(bamAlignmentPtr->QueryBases),
+		m_first_mate(bamAlignmentPtr->IsFirstMate()),
+		m_mapped(bamAlignmentPtr->IsMapped()),
+		m_reverse_strand(bamAlignmentPtr->IsReverseStrand()),
+		m_original_map_quality(bamAlignmentPtr->MapQuality)
+	{
+		m_id = (bamAlignmentPtr->IsFirstMate()) ? bamAlignmentPtr->Name + "1" : bamAlignmentPtr->Name + "0";
+
+	}
+
+	BamAlignment::~BamAlignment()
+	{
+	}
+
+
+	/*
+	BamAlignment::BamAlignment(BamAlignmentPtr bamAlignmentPtr) :
 		m_bam_alignment_ptr(bamAlignmentPtr)
 	{
 	}
@@ -25,4 +43,5 @@ namespace graphite
 	{
 		return this->m_bam_alignment_ptr->QueryBases.size();
 	}
+	*/
 }

@@ -20,7 +20,7 @@ namespace graphite
 			("help,h","Print help message")
 			(",b", boost::program_options::value< std::string >()->required(), "Path to input BAM file")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
-			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s]")
+			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
 			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
 			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")

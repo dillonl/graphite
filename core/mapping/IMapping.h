@@ -23,6 +23,7 @@ namespace graphite
 		virtual int getMappingScore() = 0;
 		virtual IAlignment::SharedPtr getAlignmentPtr() = 0;
 		virtual std::vector< IAllele::SharedPtr > getAllelePtrs() = 0;
+		virtual position getPosition() = 0;
 		/* virtual MappingAlignment::SharedPtr getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr) = 0; */
 	};
 }

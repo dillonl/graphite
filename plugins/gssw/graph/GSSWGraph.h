@@ -10,6 +10,7 @@
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
+#include "core/allele/Allele.h"
 #include "core/genotyper/IGenotyperVariant.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 

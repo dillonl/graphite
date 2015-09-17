@@ -1,5 +1,4 @@
 #include "GSSWMapping.h"
-#include "core/adjudicator/IAdjudicator.h"
 
 #include <iostream>
 #include <thread>
@@ -10,12 +9,17 @@ namespace gssw
 {
     GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
 		m_gssw_mapping_ptr(gsswMappingPtr),
-		m_alignment_ptr(alignmentPtr)
+		m_alignment_ptr(alignmentPtr),
+		m_position(0)
 	{
 		uint32_t offset = m_gssw_mapping_ptr->position;
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
+			if (i == 0)
+			{
+				this->m_position = nc->node->position + m_gssw_mapping_ptr->position;
+			}
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
 			m_allele_ptrs.push_back(allelePtr);
 			m_allele_gssw_nodes_map[allelePtr.get()] = nc->node;
@@ -26,17 +30,66 @@ namespace gssw
 	{
 	}
 
+	std::vector< MappingAlignmentInfo::SharedPtr > GSSWMapping::getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr)
+	{
+		std::vector< MappingAlignmentInfo::SharedPtr > mappingAlignmentInfoPtrs;
+		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+		{
+			int32_t score = 0;
+			uint32_t length = 0;
+			uint32_t prefixMatch = 0;
+			uint32_t suffixMatch = 0;
+			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
+			for (int j = 0; j < nc->cigar->length; ++j)
+			{
+				switch (nc->cigar->elements[j].type)
+				{
+				case 'M':
+					if (j == 0) { prefixMatch = nc->cigar->elements[j].length; }
+					if (j == nc->cigar->length - 1) { suffixMatch = nc->cigar->elements[j].length; }
+					score += (adjudicatorPtr->getMatchValue() * nc->cigar->elements[j].length);
+					break;
+				case 'X':
+					score -= (adjudicatorPtr->getMisMatchValue() * nc->cigar->elements[j].length);
+					break;
+				case 'I': // I and D are treated the same
+				case 'D':
+					score -= adjudicatorPtr->getGapOpenValue();
+					score -= (adjudicatorPtr->getGapExtensionValue() * (nc->cigar->elements[j].length -1));
+					break;
+				default:
+					break;
+				}
+				length += nc->cigar->elements[j].length;
+			}
+			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
+			auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >(allelePtr, score, length, prefixMatch, suffixMatch);
+			mappingAlignmentInfoPtrs.emplace_back(mappingAlignmentInfo);
+		}
+		return mappingAlignmentInfoPtrs;
+	}
+
 	MappingAlignmentInfo::SharedPtr GSSWMapping::getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
 	{
+		static std::mutex smutex;
+		std::lock_guard< std::mutex > guard(smutex);
 		// see above message
 		auto iter = m_allele_gssw_nodes_map.find(allelePtr.get());
 		if (iter == m_allele_gssw_nodes_map.end() || iter->second->cigar == NULL) { return nullptr; }
 		auto gsswNodeCigar = iter->second->cigar;
-		auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >();
 		int32_t score = 0;
 		uint32_t length = 0;
 		uint32_t prefixMatch = 0;
 		uint32_t suffixMatch = 0;
+		if (gsswNodeCigar->length < 0 || gsswNodeCigar->length > 1000)
+		{
+			std::cout << "----------------------" << std::endl;
+			std::cout << iter->second->position << std::endl;
+			gssw_print_graph_mapping(m_gssw_mapping_ptr.get());
+			std::cout << "length: " << gsswNodeCigar->length << std::endl;
+			std::cout << "----------------------" << std::endl;
+		}
 		for (int j = 0; j < gsswNodeCigar->length; ++j)
 		{
 			switch (gsswNodeCigar->elements[j].type)
@@ -60,10 +113,7 @@ namespace gssw
 			length += gsswNodeCigar->elements[j].length;
 		}
 		score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
-		mappingAlignmentInfo->setSWScore(score);
-		mappingAlignmentInfo->setLength(length);
-		mappingAlignmentInfo->setPrefixMatch(prefixMatch);
-		mappingAlignmentInfo->setSuffixMatch(suffixMatch);
+		auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >(allelePtr, score, length, prefixMatch, suffixMatch);
 		return  mappingAlignmentInfo;
 	}
 

@@ -1,7 +1,7 @@
 #include "GSSWGraph.h"
-#include "vg/graph/ReferenceNode.h"
-#include "vg/graph/SNPNode.h"
-#include "vg/graph/IVariantNode.h"
+// #include "vg/graph/ReferenceNode.h"
+// #include "vg/graph/SNPNode.h"
+// #include "vg/graph/IVariantNode.h"
 #include "core/genotyper/IGenotyper.h"
 #include "AlignmentReporter.h"
 
@@ -47,7 +47,7 @@ namespace gssw
 
 		size_t referenceOffset = 0;//startPosition;
 		int64_t referenceSize;
-		IVariant::SharedPtr variantPtr;
+		IVariant::SharedPtr variantPtr = nullptr;
 		std::vector< gssw_node* > altAndRefVertices;
 
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))

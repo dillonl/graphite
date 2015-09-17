@@ -2,6 +2,7 @@
 #define GRAPHITE_GSSW_MAPPING_H
 
 #include "core/mapping/IMapping.h"
+#include "core/adjudicator/IAdjudicator.h"
 
 #include "gssw/gssw.h"
 
@@ -18,12 +19,15 @@ namespace gssw
 		~GSSWMapping();
 
 		int getMappingScore();
-		MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr);
+		MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr);
 		IAlignment::SharedPtr getAlignmentPtr();
 		std::vector< IAllele::SharedPtr > getAllelePtrs();
+		position getPosition() override { return m_position; }
 		/* MappingAlignment::SharedPtr getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr) override; */
 
 		void printLongFormat();
+
+		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);
 
     private:
 
@@ -31,6 +35,7 @@ namespace gssw
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
 		std::unordered_map< IAllele*, gssw_node* > m_allele_gssw_nodes_map;
 		IAlignment::SharedPtr m_alignment_ptr;
+		position m_position;
 	};
 
 }

@@ -18,6 +18,15 @@ namespace graphite
 		BamAlignment(BamAlignmentPtr bamAlignmentPtr);
         virtual ~BamAlignment();
 
+		const char* getSequence() override { return m_sequence_string.c_str(); }
+		const size_t getLength() override { return m_sequence_string.size(); };
+		const position getPosition() override { return m_position; }
+		const std::string getID() override { return m_id; }
+		const bool isFirstMate() override {return m_first_mate;}
+		const bool isMapped() override { return m_mapped; }
+		const bool isReverseStrand() override { return m_reverse_strand; }
+		const uint16_t getOriginalMapQuality() override { return m_original_map_quality; }
+		/*
 		const char* getSequence() override;
 		const position getPosition() override;
 		const size_t getLength() override;
@@ -26,9 +35,19 @@ namespace graphite
 		const bool isMapped() override { return this->m_bam_alignment_ptr->IsMapped(); }
 		const bool isReverseStrand() override { return this->m_bam_alignment_ptr->IsReverseStrand(); }
 		const uint16_t getOriginalMapQuality() override { return this->m_bam_alignment_ptr->MapQuality; }
+		*/
 
     private:
-        BamAlignmentPtr m_bam_alignment_ptr;
+		char* m_sequence;
+		size_t m_length;
+		std::string m_sequence_string;
+		position m_position;
+		std::string m_id;
+		bool m_first_mate;
+		bool m_mapped;
+		bool m_reverse_strand;
+		uint16_t m_original_map_quality;
+        /* BamAlignmentPtr m_bam_alignment_ptr; */
 	};
 }
 

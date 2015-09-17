@@ -59,7 +59,9 @@ namespace graphite
 			auto  vcfFuturePtr = vcfFutureVariantListPtrsMap[filePath];
 			vcfFuturePtr->wait();
 			auto vcfVariantPtrs = vcfFuturePtr->get();
-			this->m_path_vcf_variant_list_ptrs_map.emplace(filePath, std::make_shared< VariantList >(vcfVariantPtrs));
+			auto tmpVCFVariantListPtr = std::make_shared< VariantList >(vcfVariantPtrs);
+			tmpVCFVariantListPtr->processOverlappingAlleles();
+			this->m_path_vcf_variant_list_ptrs_map.emplace(filePath, tmpVCFVariantListPtr);
 			variantPtrs.insert(variantPtrs.end(), vcfVariantPtrs.begin(), vcfVariantPtrs.end());
 		}
 
@@ -67,6 +69,10 @@ namespace graphite
 		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs);
 		this->m_variant_list_ptr->sort();
 		this->m_variant_list_ptr->normalizeOverlappingVariants();
+		// for (auto iter : this->m_path_vcf_variant_list_ptrs_map)
+		// {
+		// 	iter.second->processOverlappingAlleles();
+		// }
 		this->m_loaded_vcfs = true;
 	}
 

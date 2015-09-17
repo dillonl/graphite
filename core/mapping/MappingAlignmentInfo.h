@@ -14,26 +14,23 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< MappingAlignmentInfo > SharedPtr;
-		MappingAlignmentInfo()
+	    MappingAlignmentInfo(IAllele::SharedPtr allelePtr, uint32_t swScore, uint32_t length, uint32_t prefixMatch, uint32_t suffixMatch) :
+		    m_allele_ptr(allelePtr), m_sw_score(swScore), m_length(length), m_prefix_match(prefixMatch), m_suffix_match(suffixMatch)
 		{
 		}
-
-		void setSWScore(uint32_t swScore) { m_sw_score = swScore; }
-		void setLength(uint32_t length) { m_length = length; }
-		void setPrefixMatch(uint32_t prefixMatch) { m_prefix_match = prefixMatch; }
-		void setSuffixMatch(uint32_t suffixMatch) { m_suffix_match = suffixMatch; }
+		~MappingAlignmentInfo() {}
 
 		uint32_t getSWScore() { return m_sw_score; }
 		uint32_t getLength() { return m_length; }
 		uint32_t getPrefixMatch() { return m_prefix_match; }
 		uint32_t getSuffixMatch() { return m_suffix_match; }
-
-		~MappingAlignmentInfo() {}
+		IAllele::SharedPtr getAllelePtr() { return m_allele_ptr; }
 	private:
 		uint32_t m_sw_score;
 		uint32_t m_length;
 		uint32_t m_prefix_match;
 		uint32_t m_suffix_match;
+		IAllele::SharedPtr m_allele_ptr;
 	};
 }
 

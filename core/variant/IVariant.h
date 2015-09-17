@@ -30,6 +30,9 @@ namespace graphite
 			virtual void processOverlappingAlleles() = 0; // set all allele variantwptrs to be this
 			virtual uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) = 0;
 			virtual uint32_t getAlleleSuffixOverlapMaxCount(IAllele::SharedPtr allelePtr) = 0;
+			virtual void incrementUnmappedToMappedCount() = 0;
+			virtual void incrementMappedToUnmappedCount() = 0;
+			virtual void incrementRepositionedCount() = 0;
 			virtual void printVariant(std::ostream& out) = 0;
     };
 }

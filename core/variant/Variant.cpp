@@ -3,7 +3,7 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -13,7 +13,8 @@ namespace graphite
 		this->m_all_allele_ptrs.insert(this->m_all_allele_ptrs.end(), this->m_alt_allele_ptrs.begin(), this->m_alt_allele_ptrs.end());
 	}
 
-	Variant::Variant()
+	Variant::Variant() :
+		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0)
 	{
 	}
 
@@ -104,6 +105,21 @@ namespace graphite
 		}
 	}
 
+	void Variant::incrementUnmappedToMappedCount()
+	{
+		++this->m_unmapped_to_mapped_count;
+	}
+
+	void Variant::incrementMappedToUnmappedCount()
+	{
+		++this->m_mapped_to_unmapped_count;
+	}
+
+	void Variant::incrementRepositionedCount()
+	{
+		++this->m_repositioned_count;
+	}
+
 	/*
 	void Variant::processOverlappingAlleles()
 	{
@@ -187,7 +203,7 @@ namespace graphite
 
 	void Variant::printVariant(std::ostream& out)
 	{
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << ";U2M=" << std::to_string(this->m_unmapped_to_mapped_count.load()) << ";M2U=" << std::to_string(this->m_mapped_to_unmapped_count.load()) << ";AR=" << std::to_string(this->m_repositioned_count.load()) << std::endl;
 	}
 
 }

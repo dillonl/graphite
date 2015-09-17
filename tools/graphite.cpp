@@ -62,6 +62,11 @@ int main(int argc, char** argv)
 		std::cout << "Invalid BAM path, please provide the correct path to the BAM file and rerun Graphite" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	if (outputDirectory.size() > 0 && !boost::filesystem::exists(outputDirectory))
+	{
+		std::cout << "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
@@ -84,6 +89,11 @@ int main(int argc, char** argv)
 	auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
 
+	// for (auto& iter : variantManagerPtr->getVCFPathsAndVariantListsMap())
+	// {
+	// 	std::cout << "processOverlappingAlleles()" << std::endl;
+	// 	iter.second->processOverlappingAlleles();
+	// }
 	graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
 	// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.

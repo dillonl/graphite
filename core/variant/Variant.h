@@ -42,12 +42,13 @@ namespace graphite
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
 
-			variantPtr->setRefAllele(ref);
-			variantPtr->setAltAlleles(alts);
+			variantPtr->setRefAndAltAlleles(ref, alts);
 
+			/*
 			variantPtr->m_all_allele_ptrs.reserve(variantPtr->m_alt_allele_ptrs.size() + 1);
 			variantPtr->m_all_allele_ptrs.emplace_back(variantPtr->m_ref_allele_ptr);
 			variantPtr->m_all_allele_ptrs.insert(variantPtr->m_all_allele_ptrs.end(), variantPtr->m_alt_allele_ptrs.begin(), variantPtr->m_alt_allele_ptrs.end());
+			*/
 
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
 			return variantPtr;
@@ -149,6 +150,9 @@ namespace graphite
 
 		uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
 		uint32_t getAlleleSuffixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
+		void incrementUnmappedToMappedCount() override;
+		void incrementMappedToUnmappedCount() override;
+		void incrementRepositionedCount() override;
 
 	protected:
 		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
@@ -168,19 +172,19 @@ namespace graphite
 			return tmpAlts;
 		}
 
-		void setRefAllele(const std::string& ref)
+		void setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts)
 		{
+			this->m_all_allele_ptrs.clear();
 			this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref.c_str()));
-		}
-
-		void setAltAlleles(const std::vector< std::string >& alts)
-		{
+			this->m_all_allele_ptrs.reserve(alts.size() + 1);
+			this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
 			this->m_alt_allele_ptrs.clear();
 			for (const auto& alt : alts)
 			{
 				auto sequencePtr = SequenceManager::Instance()->getSequence(alt.c_str());
 				auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
 				this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
+				this->m_all_allele_ptrs.emplace_back(altAllelePtr);
 			}
 		}
 
@@ -203,6 +207,9 @@ namespace graphite
 		std::vector< IAllele::SharedPtr > m_alt_allele_ptrs;
 		std::vector< IAllele::SharedPtr > m_all_allele_ptrs;
 		std::unordered_map< std::string, std::string > m_info_fields;
+		std::atomic< uint32_t > m_unmapped_to_mapped_count;
+		std::atomic< uint32_t > m_mapped_to_unmapped_count;
+		std::atomic< uint32_t > m_repositioned_count;
 	};
 
 }

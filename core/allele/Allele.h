@@ -72,49 +72,8 @@ namespace graphite
 			return minSize;
 		}
 
-		/*
-		bool checkForOverlapPrefixLength(uint32_t overlapSize) override
-		{
-			bool test = (this->m_shared_prefixes.find(overlapSize) != this->m_shared_prefixes.end());
-			std::cout << "prefix: " << std::to_string(test) << std::endl;
-			return test;
-		}
-
-		bool checkForOverlapSuffixLength(uint32_t overlapSize)  override
-		{
-			bool test = (this->m_shared_suffixes.find(overlapSize) != this->m_shared_suffixes.end());
-			std::cout << "suffix: " << std::to_string(test) << std::endl;
-			return test;
-		}
-
-		void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtr) override
-		{
-			addCommonInformationHelper(m_shared_prefixes, prefixSize, allelePtr);
-		}
-
-		void addCommonSuffixInformation(uint32_t suffixSize, IAllele::SharedPtr allelePtr) override
-		{
-			addCommonInformationHelper(m_shared_suffixes, suffixSize, allelePtr);
-		}
-		*/
-
 	protected:
 		Allele() {}
-
-		/*
-		void addCommonInformationHelper(std::unordered_map< uint32_t, std::vector< IAllele::SharedPtr > >& sharedMap, uint32_t sharedSize, IAllele::SharedPtr allelePtr)
-		{
-			auto iter = sharedMap.find(sharedSize);
-			if (iter == sharedMap.end())
-			{
-				sharedMap[sharedSize] = { allelePtr };
-			}
-			else
-			{
-				iter->second.emplace_back(allelePtr);
-			}
-		}
-		*/
 
 		std::atomic< uint32_t > m_forward_count; // since this needs to be accessed by several threads make it atomic
 		std::atomic< uint32_t > m_reverse_count; // since this needs to be accessed by several threads make it atomic

@@ -63,6 +63,9 @@ namespace graphite
 		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">" << std::endl;
 		out << "##INFO=<ID=TC,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
 		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth including non-counted low quality reads\">" << std::endl;
+		out << "##INFO=<ID=M2U,Number=1,Type=Integer,Description=\"The number of reads that were mapped but this program unmapped\">" << std::endl;
+		out << "##INFO=<ID=U2M,Number=1,Type=Integer,Description=\"The number of reads that were unmapped but this program mapped\">" << std::endl;
+		out << "##INFO=<ID=AR,Number=1,Type=Integer,Description=\"The number of alignments that were repositioned\">" << std::endl;
 		out << "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">" << std::endl;
 		out << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE" << std::endl;
 	}
