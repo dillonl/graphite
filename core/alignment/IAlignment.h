@@ -14,13 +14,14 @@
 namespace graphite
 {
 
+	class IMapping;
 	class IAlignment : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IAlignment > SharedPtr;
 
-	    IAlignment() : m_mapped(false), m_score(0) {}
-		virtual ~IAlignment() {}
+	    IAlignment() : m_mapped(false), m_score(0), m_mapping_mutex(new std::recursive_mutex()) {}
+		virtual ~IAlignment() { delete this->m_mapping_mutex; }
 
 		virtual const char* getSequence() = 0;
 		virtual const position getPosition() = 0;
@@ -30,6 +31,13 @@ namespace graphite
 		virtual const bool isMapped() { return false; }
 		virtual const bool isReverseStrand() { return false; }
 		virtual const uint16_t getOriginalMapQuality() { return 0; }
+		virtual std::weak_ptr< IMapping > getMapping() { return this->m_mapping_wptr; }
+		virtual void setMapping(std::shared_ptr< IMapping > mappingPtr)
+		{
+			std::lock_guard< std::recursive_mutex > r_lock(*this->m_mapping_mutex);
+			this->m_mapping_wptr = mappingPtr;
+		}
+		std::recursive_mutex* getMappingMutex() { return this->m_mapping_mutex; }
 
 		/*
 		 * the variantInformation is the variantID and the allele that was matched
@@ -74,6 +82,8 @@ namespace graphite
 		bool m_mapped;
 		uint32_t m_score;
 		std::unordered_map< uint32_t, std::string > m_mapped_variants_information;
+		std::weak_ptr< IMapping > m_mapping_wptr;
+		std::recursive_mutex* m_mapping_mutex;
 	};
 }
 

@@ -15,8 +15,17 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignment > SharedPtr;
-		BamAlignment(BamAlignmentPtr bamAlignmentPtr);
-        virtual ~BamAlignment();
+	    BamAlignment(BamAlignmentPtr bamAlignmentPtr) :
+		            m_position(bamAlignmentPtr->Position),
+					m_sequence_string(bamAlignmentPtr->QueryBases),
+					m_first_mate(bamAlignmentPtr->IsFirstMate()),
+					m_mapped(bamAlignmentPtr->IsMapped()),
+					m_reverse_strand(bamAlignmentPtr->IsReverseStrand()),
+					m_original_map_quality(bamAlignmentPtr->MapQuality),
+					m_id(bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate()))
+		{
+		}
+		virtual ~BamAlignment() {}
 
 		const char* getSequence() override { return m_sequence_string.c_str(); }
 		const size_t getLength() override { return m_sequence_string.size(); };
@@ -26,16 +35,6 @@ namespace graphite
 		const bool isMapped() override { return m_mapped; }
 		const bool isReverseStrand() override { return m_reverse_strand; }
 		const uint16_t getOriginalMapQuality() override { return m_original_map_quality; }
-		/*
-		const char* getSequence() override;
-		const position getPosition() override;
-		const size_t getLength() override;
-		const std::string getID() override { return (this->m_bam_alignment_ptr->IsFirstMate()) ? this->m_bam_alignment_ptr->Name + "1" : this->m_bam_alignment_ptr->Name + "0"; }
-		const bool isFirstMate() override {return this->m_bam_alignment_ptr->IsFirstMate();}
-		const bool isMapped() override { return this->m_bam_alignment_ptr->IsMapped(); }
-		const bool isReverseStrand() override { return this->m_bam_alignment_ptr->IsReverseStrand(); }
-		const uint16_t getOriginalMapQuality() override { return this->m_bam_alignment_ptr->MapQuality; }
-		*/
 
     private:
 		char* m_sequence;
@@ -47,7 +46,6 @@ namespace graphite
 		bool m_mapped;
 		bool m_reverse_strand;
 		uint16_t m_original_map_quality;
-        /* BamAlignmentPtr m_bam_alignment_ptr; */
 	};
 }
 

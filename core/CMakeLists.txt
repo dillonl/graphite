@@ -43,7 +43,6 @@ set(GRAPHITE_CORE_MAPPING_SOURCES
 set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
-  alignment/BamAlignment.cpp
   alignment/BamAlignmentReader.cpp
   )
 

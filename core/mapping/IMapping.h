@@ -16,6 +16,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< IMapping > SharedPtr;
+		typedef std::weak_ptr< IMapping > WeakPtr;
 		IMapping() {}
 		~IMapping() {}
 
