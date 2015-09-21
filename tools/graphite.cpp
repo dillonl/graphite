@@ -41,6 +41,7 @@ int main(int argc, char** argv)
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
 	auto gapExtensionValue = params.getGapExtensionValue();
+	auto graphSize = params.getGraphSize();
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	// make sure paths exist
@@ -87,7 +88,7 @@ int main(int argc, char** argv)
 	auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
 	auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), 3000, 1000, 100);
+	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
 
 	if (outputDirectory.size() == 0)
 	{

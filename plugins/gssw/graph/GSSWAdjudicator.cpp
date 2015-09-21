@@ -39,9 +39,9 @@ namespace gssw
 			uint32_t swAlignmentPercent = ((swAlignmentScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 			if (swAlignmentPercent <= swPercent) { return; }
 		}
+
 		auto gsswMappingPtr = (GSSWMapping*)mappingPtr.get();
 		auto mappingAlignmentInfoPtrs = gsswMappingPtr->getMappingAlignmentInfoPtrs(shared_from_this());
-		// position remapPosition = gsswMappingPtr->position;
 		bool mapped = false;
 		std::unordered_map< IVariant::SharedPtr, bool > variantMap;
 		auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
@@ -79,7 +79,7 @@ namespace gssw
 				}
 
 				// check that the alignment maps to unique areas of the allele
-				if ((i == 0 && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getPrefixMatch()) || (i == mappingAlignmentInfoPtrs.size() - 1 && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getSuffixMatch()))
+				if ((i == 0 && mappingAlignmentInfoPtr->getPrefixMatch() > 0 && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getPrefixMatch()) || (i == mappingAlignmentInfoPtrs.size() - 1 && mappingAlignmentInfoPtr->getSuffixMatch() > 0 && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) <= mappingAlignmentInfoPtr->getSuffixMatch()))
 				{
 					continue;
 				}

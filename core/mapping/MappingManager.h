@@ -31,6 +31,7 @@ namespace graphite
 		static MappingManager* s_instance;
 		std::mutex m_alignment_mapping_map_mutex;
 		std::unordered_map< IAlignment::SharedPtr, IMapping::SharedPtr > m_alignment_mapping_map;
+		std::vector< IMapping::SharedPtr > m_mappings;
 	};
 }
 

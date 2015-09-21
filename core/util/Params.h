@@ -31,6 +31,7 @@ namespace graphite
 		int getMisMatchValue();
 		int getGapOpenValue();
 		int getGapExtensionValue();
+		uint32_t getGraphSize();
 	private:
 		std::shared_ptr< boost::program_options::options_description > m_options_description_ptr;
 		boost::program_options::variables_map m_variables_map;
