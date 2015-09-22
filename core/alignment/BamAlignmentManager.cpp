@@ -103,4 +103,16 @@ namespace graphite
 	void BamAlignmentManager::releaseResources()
 	{
 	}
+
+	void BamAlignmentManager::processMappingStatistics()
+	{
+		for (auto alignmentPtr :  this->m_alignment_ptrs)
+		{
+			auto alignmentMappingMutexPtr = alignmentPtr->getMappingMutex();
+			std::lock_guard< std::recursive_mutex > lock(*alignmentMappingMutexPtr); // make sure the alignmentMapping isn't set during this
+			if (auto alignmentMappingWPtr = alignmentPtr->getMapping().lock()) // check if the alignment has already been aligned previously
+			{
+			}
+		}
+	}
 }

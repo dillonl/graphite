@@ -19,6 +19,7 @@ namespace graphite
 
         virtual IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
 		virtual void releaseResources() = 0;
+		virtual void processMappingStatistics() = 0;
 	};
 }
 
