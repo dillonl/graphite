@@ -101,18 +101,18 @@ namespace gssw
 			alignmentPtr->setMapping(mappingPtr);
 			mappingPtr->setMapped(true);
 		}
-		bool mappedToUnmapped = (!mapped && alignmentPtr->isMapped());
-		bool unmappedToMapped = (mapped && !alignmentPtr->isMapped());
+		// bool mappedToUnmapped = (!mapped && alignmentPtr->isMapped());
+		// bool unmappedToMapped = (mapped && !alignmentPtr->isMapped());
 
-		if (mappedToUnmapped || unmappedToMapped)
-		{
-			for (auto iter : variantMap)
-			{
-				if (unmappedToMapped) { iter.first->incrementUnmappedToMappedCount(); }
-				if (mappedToUnmapped) { iter.first->incrementMappedToUnmappedCount(); }
-				if (mapped && alignmentPtr->getPosition() != gsswMappingPtr->getPosition()) { iter.first->incrementRepositionedCount(); }
-			}
-		}
+		// if (mappedToUnmapped || unmappedToMapped)
+		// {
+		// 	for (auto iter : variantMap)
+		// 	{
+		// 		if (unmappedToMapped) { iter.first->incrementUnmappedToMappedCount(); }
+		// 		if (mappedToUnmapped) { iter.first->incrementMappedToUnmappedCount(); }
+		// 		if (mapped && alignmentPtr->getPosition() != gsswMappingPtr->getPosition()) { iter.first->incrementRepositionedCount(); }
+		// 	}
+		// }
 	}
 
 	int GSSWAdjudicator::getMatchValue()

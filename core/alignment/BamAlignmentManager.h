@@ -24,6 +24,7 @@ namespace graphite
 		void loadBam();
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
+		void processMappingStatistics() override;
 	private:
 		position getLastPositionInBam();
 
