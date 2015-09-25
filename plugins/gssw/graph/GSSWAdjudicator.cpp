@@ -33,18 +33,19 @@ namespace gssw
 		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 		auto alignmentMappingMutexPtr = alignmentPtr->getMappingMutex(); // lock the alignmentMappingMutex so no one else can set the mapping ptr
 		std::lock_guard< std::recursive_mutex > lock(*alignmentMappingMutexPtr); // make sure the alignmentMapping isn't set during this
-		if (auto alignmentMappingWPtr = alignmentPtr->getMapping().lock()) // check if the alignment has already been aligned previously
+		auto alignmentMappingWPtr = alignmentPtr->getMapping().lock();
+		if (alignmentMappingWPtr && alignmentMappingWPtr->getMapped()) // check if the alignment has already been aligned previously
 		{
 			auto swAlignmentScore = alignmentMappingWPtr->getMappingScore();
 			uint32_t swAlignmentPercent = ((swAlignmentScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 			if (swAlignmentPercent <= swPercent) { return; }
+			alignmentMappingWPtr->setMapped(false);
 		}
 
 		auto gsswMappingPtr = (GSSWMapping*)mappingPtr.get();
 		auto mappingAlignmentInfoPtrs = gsswMappingPtr->getMappingAlignmentInfoPtrs(shared_from_this());
 		bool mapped = false;
 		std::unordered_map< IVariant::SharedPtr, bool > variantMap;
-		auto incrementFunct = (alignmentPtr->isReverseStrand()) ? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
 
 		for (uint32_t i = 0; i < mappingAlignmentInfoPtrs.size(); ++i)
 		{
@@ -84,13 +85,21 @@ namespace gssw
 					continue;
 				}
 				mapped = true;
-				(*currentAllelePtr.*incrementFunct)();
+				if (alignmentPtr->isReverseStrand())
+				{
+					mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementReverseCount, currentAllelePtr));
+				}
+				else
+				{
+					mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementForwardCount, currentAllelePtr));
+				}
 			}
 		}
 
 		if (mapped)
 		{
 			alignmentPtr->setMapping(mappingPtr);
+			mappingPtr->setMapped(true);
 		}
 		bool mappedToUnmapped = (!mapped && alignmentPtr->isMapped());
 		bool unmappedToMapped = (mapped && !alignmentPtr->isMapped());

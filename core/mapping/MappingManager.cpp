@@ -51,16 +51,15 @@ namespace graphite
 				auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, mappingPtr);
 				ThreadPool::Instance()->enqueue(funct);
 			}
-			/*
-			for (auto& iter : this->m_alignment_mapping_map)
-			{
-				std::cout << "evaluating" << std::endl;
-				auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, iter.second);
-				ThreadPool::Instance()->enqueue(funct);
-			}
-			*/
 		}
 		ThreadPool::Instance()->joinAll();
+		{
+			std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
+			for (auto& mappingPtr : this->m_mappings)
+			{
+				mappingPtr->incrementAlleleCounts();
+			}
+		}
 	}
 
 	void MappingManager::clearRegisteredMappings()

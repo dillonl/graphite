@@ -23,11 +23,13 @@ namespace gssw
 		IAlignment::SharedPtr getAlignmentPtr();
 		std::vector< IAllele::SharedPtr > getAllelePtrs();
 		position getPosition() override { return m_position; }
-		/* MappingAlignment::SharedPtr getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr) override; */
+		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);
+		void incrementAlleleCounts() override;
+		void setMapped(bool mapped) override;
+		bool getMapped() override { return m_mapped; }
+		void addAlleleCountCallback(std::function< void () > functor);
 
 		void printLongFormat();
-
-		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);
 
     private:
 
@@ -36,6 +38,8 @@ namespace gssw
 		std::unordered_map< IAllele*, gssw_node* > m_allele_gssw_nodes_map;
 		IAlignment::SharedPtr m_alignment_ptr;
 		position m_position;
+		std::vector< std::function< void () > > m_allele_incrementor_callback_list;
+		bool m_mapped;
 	};
 
 }

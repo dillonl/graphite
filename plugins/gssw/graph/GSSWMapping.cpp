@@ -147,6 +147,31 @@ namespace gssw
 		return this->m_allele_ptrs;
 	}
 
+	void GSSWMapping::setMapped(bool mapped)
+	{
+		if (!mapped)
+		{
+			this->m_allele_incrementor_callback_list.clear();
+		}
+		this->m_mapped = mapped;
+	}
+
+	void GSSWMapping::incrementAlleleCounts()
+	{
+		if (m_mapped)
+		{
+			for (auto incrementFunct : this->m_allele_incrementor_callback_list)
+			{
+				incrementFunct();
+			}
+		}
+	}
+
+	void GSSWMapping::addAlleleCountCallback(std::function< void () > functor)
+	{
+		this->m_allele_incrementor_callback_list.emplace_back(functor);
+	}
+
 	void GSSWMapping::printLongFormat()
 	{
 		position startPosition = 0;
