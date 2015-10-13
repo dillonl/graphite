@@ -30,7 +30,7 @@ namespace graphite
 		void waitForVCFsToLoadAndProcess();
 		IVariantList::SharedPtr getCompleteVariantList() override;
 		void releaseResources() override;
-		void printToVCF(std::ostream& out);
+		void printToVCF(std::ostream& out, std::string& bamPath);
 		std::unordered_map< std::string, VariantList::SharedPtr > getVCFPathsAndVariantListsMap();
 	private:
 		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them

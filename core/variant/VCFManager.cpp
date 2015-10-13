@@ -96,9 +96,9 @@ namespace graphite
 		return this->m_variant_list_ptr;
 	}
 
-	void VCFManager::printToVCF(std::ostream& out)
+	void VCFManager::printToVCF(std::ostream& out, std::string& bamPath)
 	{
-		this->m_variant_list_ptr->printToVCF(out);
+		this->m_variant_list_ptr->printToVCF(out, bamPath);
 	}
 
 	void VCFManager::releaseResources()

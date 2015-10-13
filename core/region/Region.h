@@ -24,6 +24,12 @@ namespace graphite
 
 		std::string getRegionString() const { return m_region_string; }
 		std::string getReferenceID() const { return this->m_reference_id; }
+		/*
+		std::string getReferenceIDNormalized() const
+		{
+			return this->m_reference_id_normalized;
+		}
+		*/
 		position getStartPosition() const { return this->m_start_position; }
 		position getEndPosition() const { return this->m_end_position; }
 		void setStartPosition(position startPosition) { this->m_start_position = startPosition; }
@@ -32,6 +38,7 @@ namespace graphite
 	private:
 		std::string m_region_string;
 		std::string m_reference_id;
+		/* std::string m_reference_id_normalized; */
 		position m_start_position;
 		position m_end_position;
 

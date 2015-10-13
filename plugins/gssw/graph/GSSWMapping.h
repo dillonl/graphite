@@ -29,7 +29,8 @@ namespace gssw
 		bool getMapped() override { return m_mapped; }
 		void addAlleleCountCallback(std::function< void () > functor);
 
-		void printLongFormat();
+		void printMapping() override;
+		void printSimpleMapping();
 
     private:
 

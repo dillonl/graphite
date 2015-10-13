@@ -26,6 +26,19 @@ TEST(RegionTest, GetReferenceID)
 	EXPECT_STRNE(referenceNotEqual.c_str(), region.getReferenceID().c_str());
 }
 
+/*
+TEST(RegionTest, GetReferenceIDNormalized)
+{
+	std::string reference = "chr20";
+	std::string regionString = reference + ":10-100";
+	graphite::Region region(regionString);
+	EXPECT_STREQ("20", region.getReferenceIDNormalized().c_str());
+	std::string referenceNotEqual = "1";
+	regionString = referenceNotEqual + ":10-100";
+	EXPECT_STRNE(reference.c_str(), region.getReferenceIDNormalized().c_str());
+}
+*/
+
 TEST(RegionTest, GetStartPosition)
 {
 	graphite::position startPosition = 2000;

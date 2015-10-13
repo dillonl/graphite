@@ -12,12 +12,13 @@
 
 #include <boost/filesystem.hpp>
 
+std::string gBamPath;
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
 void writeVariantListToFile(std::string path, graphite::VariantList::SharedPtr variantListPtr)
 {
 	std::ofstream outVCF;
 	outVCF.open(path, std::ios::out | std::ios::trunc);
-	variantListPtr->printToVCF(outVCF);
+	variantListPtr->printToVCF(outVCF, gBamPath);
 	outVCF.close();
 }
 
@@ -43,6 +44,7 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto graphSize = params.getGraphSize();
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
+	gBamPath = bamPath;
 
 	// make sure paths exist
 	if (!boost::filesystem::exists(fastaPath))
@@ -112,7 +114,7 @@ int main(int argc, char** argv)
 	if (outputDirectory.size() == 0)
 	{
 		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-		variantListPtr->printToVCF(std::cout);
+		variantListPtr->printToVCF(std::cout, bamPath);
 	}
 	else
 	{

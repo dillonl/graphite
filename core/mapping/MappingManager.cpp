@@ -30,16 +30,6 @@ namespace graphite
 	{
 		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		this->m_mappings.emplace_back(mappingPtr);
-		/*
-		auto alignmentPtr = mappingPtr->getAlignmentPtr();
-		auto iter = this->m_alignment_mapping_map.find(alignmentPtr);
-		std::cout << "registering" << std::endl;
-		if (iter == this->m_alignment_mapping_map.end() || iter->second->getMappingScore() < mappingPtr->getMappingScore())
-		{
-			this->m_alignment_mapping_map.emplace(alignmentPtr, mappingPtr);
-			std::cout << "registered" << std::endl;
-		}
-		*/
 	}
 
 	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
@@ -58,6 +48,12 @@ namespace graphite
 			for (auto& mappingPtr : this->m_mappings)
 			{
 				mappingPtr->incrementAlleleCounts();
+				/*
+				if (mappingPtr->getMapped())
+				{
+					mappingPtr->printMapping();
+				}
+				*/
 			}
 		}
 	}

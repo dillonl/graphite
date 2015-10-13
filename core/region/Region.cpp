@@ -21,6 +21,7 @@ namespace graphite
 		{
 			this->m_end_position = MAX_POSITION;
 		}
+		// this->m_reference_id_normalized = (this->m_reference_id.find("chr") == 0) ? this->m_reference_id.substr(3, std::string::npos) : this->m_reference_id_normalized = this->m_reference_id;
 	}
 
 	Region::~Region()

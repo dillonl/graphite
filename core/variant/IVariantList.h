@@ -29,7 +29,7 @@ namespace graphite
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
-		virtual void printToVCF(std::ostream& out) = 0;
+		virtual void printToVCF(std::ostream& out, std::string& bamPath) = 0;
 	};
 
 } // end namespace graphite

@@ -53,7 +53,7 @@ namespace gssw
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
 			// if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
-			auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
+			// auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{

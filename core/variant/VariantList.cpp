@@ -57,9 +57,10 @@ namespace graphite
 		this->m_current_index = 0;
 	}
 
-	void VariantList::printHeader(std::ostream& out)
+	void VariantList::printHeader(std::ostream& out, std::string& bamPath)
 	{
 		out << "##fileformat=VCFv4.2" << std::endl;
+		out << "##samplefile=" << bamPath << std::endl;
 		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">" << std::endl;
 		out << "##INFO=<ID=TC,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">" << std::endl;
 		out << "##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth including non-counted low quality reads\">" << std::endl;
@@ -70,9 +71,9 @@ namespace graphite
 		out << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE" << std::endl;
 	}
 
-	void VariantList::printToVCF(std::ostream& out)
+	void VariantList::printToVCF(std::ostream& out, std::string& bamPath)
 	{
-		printHeader(out);
+		printHeader(out, bamPath);
 		for(const auto variantPtr : this->m_variant_ptrs)
 		{
 			variantPtr->printVariant(out);

@@ -17,6 +17,7 @@ namespace graphite
 
 		inline Sequence::SharedPtr getSequence(const std::string& sequence)
 		{
+			std::lock_guard< std::mutex > lock(this->m_seq_map_mutex);
 			auto sequencePtrIter = this->m_sequence_ptr_map.find(sequence);
 			if (sequencePtrIter == this->m_sequence_ptr_map.end())
 			{
@@ -31,15 +32,21 @@ namespace graphite
 		}
 
 		// created for testing
-		size_t getSequenceCount() { return this->m_sequence_ptr_map.size(); }
-		void clearSequences() { this->m_sequence_ptr_map.clear(); }
+		size_t getSequenceCount()
+		{
+			std::lock_guard< std::mutex > lock(this->m_seq_map_mutex);
+			return this->m_sequence_ptr_map.size();
+		}
+		void clearSequences()
+		{
+			std::lock_guard< std::mutex > lock(this->m_seq_map_mutex);
+			this->m_sequence_ptr_map.clear();
+		}
 
 		void printSize()
 		{
-			static std::mutex mtx;
-			mtx.lock();
+			std::lock_guard< std::mutex > lock(this->m_seq_map_mutex);
 			std::cout << "SM size: " << m_sequence_ptr_map.size() << std::endl;
-			mtx.unlock();
 		}
 
 	private:
@@ -50,6 +57,7 @@ namespace graphite
 
 		// contains all the sequences with the string representation as a key
 		/* std::unordered_map< const char*, Sequence::SharedPtr > m_sequence_ptr_map; */
+		std::mutex m_seq_map_mutex;
 		std::unordered_map< std::string, Sequence::SharedPtr > m_sequence_ptr_map;
 		std::vector< Sequence::SharedPtr > m_seq_vec;
 		static SequenceManager* s_instance;

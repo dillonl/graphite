@@ -525,6 +525,223 @@ namespace adj_test
 		ASSERT_EQ(altAllele1Ptr->getTotalCount(), 0);
 		ASSERT_EQ(refAllele2Ptr->getTotalCount(), 0);
 		ASSERT_EQ(altAllele2Ptr->getTotalCount(), 1);
+
+	}
+
+	void adjudicateAlleles(const std::string& seq, position pos, Allele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs, IAlignment::SharedPtr alignmentPtr)
+	{
+		auto regionPtr = std::make_shared< Region >("1:0-" + seq.size());
+		std::string chrom = "1";
+		std::string dot = ".";
+		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
+		variantPtr->processOverlappingAlleles();
+		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
+		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+
+		uint32_t percent = 80;
+		int match = 1;
+		int mismatch = 4;
+		int gapOpen = 6;
+		int gapExtension = 1;
+		auto gsswAdjudicatorPtr = std::make_shared< GSSWAdjudicator >(percent, match, mismatch, gapOpen, gapExtension);
+		auto gsswGraphPtr = getGSSWGraph(referencePtr, variantListPtr, gsswAdjudicatorPtr, seq.size(), 0);
+		variantListPtr->processOverlappingAlleles();
+
+		auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+		MappingManager::Instance()->registerMapping(gsswMappingPtr);
+		MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicatorPtr);
+		ThreadPool::Instance()->joinAll();
+	}
+
+		/*
+		  The key to the test names are
+		  Adjudicate{quality}{type}Match{W/P/N/A}
+		  W = whole node match
+		  P = partial node match
+		  N = does not go through node
+		  A = ambiguous, no call
+		 */
+	TEST_F(AdjudicationTest, AdjudicateExactReferenceMatchWWW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("ATACGTTTACGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactRefMatchWWP)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("ATACGTTTACG", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactRefMatchPWW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTTACGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactRefMatchPWP)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTTACG", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 1);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+	}
+
+    TEST_F(AdjudicationTest, AdjudicateExactAltMatchWWW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("ATACGTTAGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchWWP)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("ATACGTTAGC", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchPWP)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTAGC", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchPWW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTAGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchWPN)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTA", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchNPW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TAG");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("TTAGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchNWN)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("AGGGACCTAGGCT");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("AGGGACCTAGGCT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAltMatchNPN)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("AGGGACCTAGGCT");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("GGACCTAGG", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 1);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAmbiguousWAN)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACG");
+		auto altAllelePtr = std::make_shared< Allele >("TTACT");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("ATACGTTTAC", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
+	}
+
+	TEST_F(AdjudicationTest, AdjudicateExactAmbiguousNAW)
+	{
+		std::string seq = "ATACGTTTACGCTTACGT";
+		auto refAllelePtr = std::make_shared< Allele >("TTACGCT");
+		auto altAllelePtr = std::make_shared< Allele >("TGGCGCT");
+		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
+		auto alignmentPtr = std::make_shared< AlignmentTest >("CGCTTACGT", 0);
+		adjudicateAlleles(seq, 6, refAllelePtr, altAllelePtrs, alignmentPtr);
+
+		ASSERT_EQ(refAllelePtr->getTotalCount(), 0);
+		ASSERT_EQ(altAllelePtr->getTotalCount(), 0);
 	}
 }
 }

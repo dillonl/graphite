@@ -17,6 +17,19 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
 	ASSERT_EQ(alignmentsList.size(), 5940);
 }
 
+/*
+TEST(BamAlignmentReaderTests, TestLoadAlignmentRegionNormalized)
+{
+	std::string path = TEST_BAM_FILE;
+	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
+	std::string regionString = "chr20";
+	auto regionPtr = std::make_shared< graphite::Region >(regionString);
+	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+
+	ASSERT_EQ(alignmentsList.size(), 5940);
+}
+*/
+
 TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 {
 	std::string path = TEST_BAM_FILE;
