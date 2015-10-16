@@ -7,7 +7,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 	AlignmentReport::AlignmentReport(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingPtr, position graphStartPosition) :
 		m_reference_ptr(referencePtr),

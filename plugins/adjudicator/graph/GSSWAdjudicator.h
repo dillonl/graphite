@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_GSSW_GSSWADJUDICATOR_H
-#define GRAPHITE_GSSW_GSSWADJUDICATOR_H
+#ifndef GRAPHITE_ADJUDICATOR_GSSWADJUDICATOR_H
+#define GRAPHITE_ADJUDICATOR_GSSWADJUDICATOR_H
 
 #include "core/adjudicator/IAdjudicator.h"
 
@@ -7,7 +7,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 	class GSSWAdjudicator : public IAdjudicator
 	{
@@ -22,6 +22,8 @@ namespace gssw
 		int getGapOpenValue() override;
 		int getGapExtensionValue() override;
 	private:
+		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix);
+
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;
 		int m_match_value;

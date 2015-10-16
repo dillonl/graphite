@@ -44,12 +44,6 @@ namespace graphite
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
 
-			/*
-			variantPtr->m_all_allele_ptrs.reserve(variantPtr->m_alt_allele_ptrs.size() + 1);
-			variantPtr->m_all_allele_ptrs.emplace_back(variantPtr->m_ref_allele_ptr);
-			variantPtr->m_all_allele_ptrs.insert(variantPtr->m_all_allele_ptrs.end(), variantPtr->m_alt_allele_ptrs.begin(), variantPtr->m_alt_allele_ptrs.end());
-			*/
-
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
 			return variantPtr;
 		}
@@ -127,11 +121,7 @@ namespace graphite
 			return true;
 		}
 
-		void setFilter(std::string filter)
-		{
-			this->m_filter = filter;
-		}
-
+		void setFilter(std::string filter) { this->m_filter = filter; }
 		std::string getAlleleCountString();
 		std::string alleleString();
 		/* void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr); */
@@ -156,38 +146,7 @@ namespace graphite
 
 	protected:
 		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
-
-		static std::vector< std::string > removeDuplicateAltAlleles(const std::vector< std::string >& alts)
-		{
-			std::vector< std::string > tmpAlts;
-			std::unordered_map< std::string, bool > seqMap;
-			for (auto alt : alts)
-			{
-				if (seqMap.find(alt) == seqMap.end())
-				{
-					tmpAlts.emplace_back(alt);
-					seqMap[alt] = true;
-				}
-			}
-			return tmpAlts;
-		}
-
-		void setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts)
-		{
-			this->m_all_allele_ptrs.clear();
-			this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref.c_str()));
-			this->m_all_allele_ptrs.reserve(alts.size() + 1);
-			this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
-			this->m_alt_allele_ptrs.clear();
-			for (const auto& alt : alts)
-			{
-				auto sequencePtr = SequenceManager::Instance()->getSequence(alt.c_str());
-				auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
-				this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
-				this->m_all_allele_ptrs.emplace_back(altAllelePtr);
-			}
-		}
-
+		void setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts);
 		std::string getGenotype();
 		uint32_t getTotalAlleleCount();
 
@@ -195,7 +154,6 @@ namespace graphite
 		uint32_t m_max_suffix_match_length;
 		std::unordered_map< IAllele::SharedPtr, uint32_t > m_allele_prefix_max_overlap_map;
 		std::unordered_map< IAllele::SharedPtr, uint32_t > m_allele_suffix_max_overlap_map;
-
 		uint32_t m_position;
 		std::string m_chrom;
 		std::string m_id;

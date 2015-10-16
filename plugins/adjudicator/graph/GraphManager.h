@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_GSSW_GSSWGRAPHMANAGER_H
-#define GRAPHITE_GSSW_GSSWGRAPHMANAGER_H
+#ifndef GRAPHITE_ADJUDICATOR_GSSWGRAPHMANAGER_H
+#define GRAPHITE_ADJUDICATOR_GSSWGRAPHMANAGER_H
 
 #include "core/alignment/IAlignmentManager.h"
 #include "core/variant/IVariantManager.h"
@@ -15,7 +15,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 	class GraphManager : private boost::noncopyable
 	{

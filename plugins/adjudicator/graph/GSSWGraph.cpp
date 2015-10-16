@@ -1,7 +1,4 @@
 #include "GSSWGraph.h"
-// #include "vg/graph/ReferenceNode.h"
-// #include "vg/graph/SNPNode.h"
-// #include "vg/graph/IVariantNode.h"
 #include "core/genotyper/IGenotyper.h"
 #include "AlignmentReporter.h"
 
@@ -13,7 +10,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 
 	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue) :

@@ -1,7 +1,6 @@
-#ifndef GRAPHITE_ADJUDICATOR_TEST_H
-#define GRAPHITE_ADJUDICATOR_TEST_H
+#ifndef GRAPHITE_GSSWGRAPH_TEST_H
+#define GRAPHITE_GSSWGRAPH_TEST_H
 
-#include "AdjudicatorGraphTests.hpp"
-#include "VariantContigTests.hpp"
+#include "GSSWGraphTests.hpp"
 
 #endif // GRAPHITE_ADJUDICATOR_TEST_H

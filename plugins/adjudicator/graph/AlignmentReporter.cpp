@@ -3,7 +3,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 	AlignmentReporter* AlignmentReporter::s_instance = nullptr;
 

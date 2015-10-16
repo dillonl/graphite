@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_GSSW_ALIGNMENTREPORT_H
-#define GRAPHITE_GSSW_ALIGNMENTREPORT_H
+#ifndef GRAPHITE_ADJUDICATOR_ALIGNMENTREPORT_H
+#define GRAPHITE_ADJUDICATOR_ALIGNMENTREPORT_H
 
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
@@ -11,7 +11,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 	class AlignmentReport : private boost::noncopyable
 	{

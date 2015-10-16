@@ -10,9 +10,9 @@
 #include "core/adjudicator/IAdjudicator.h"
 #include "core/mapping/MappingManager.h"
 
-#include "plugins/gssw/graph/GSSWGraph.h"
-#include "plugins/gssw/graph/GSSWAdjudicator.h"
-#include "plugins/gssw/graph/GSSWMapping.h"
+#include "plugins/adjudicator/graph/GSSWGraph.h"
+#include "plugins/adjudicator/graph/GSSWAdjudicator.h"
+#include "plugins/adjudicator/graph/GSSWMapping.h"
 
 
 #include <vector>
@@ -22,7 +22,7 @@ namespace
 namespace adj_test
 {
 	using namespace graphite;
-	using namespace graphite::gssw;
+	using namespace graphite::adjudicator;
 
 	class AdjudicationTest : public ::testing::Test
 	{
@@ -530,7 +530,7 @@ namespace adj_test
 
 	void adjudicateAlleles(const std::string& seq, position pos, Allele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs, IAlignment::SharedPtr alignmentPtr)
 	{
-		auto regionPtr = std::make_shared< Region >("1:0-" + seq.size());
+		auto regionPtr = std::make_shared< Region >("1:0-" + std::to_string(seq.size()));
 		std::string chrom = "1";
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);

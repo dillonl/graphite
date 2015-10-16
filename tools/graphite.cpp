@@ -3,10 +3,12 @@
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
 #include "core/mapping/MappingManager.h"
+#include "core/variant/VCFHeader.h"
 #include "core/util/Params.h"
 #include "core/util/ThreadPool.hpp"
-#include "gssw/graph/GraphManager.h"
-#include "gssw/graph/GSSWAdjudicator.h"
+#include "adjudicator/graph/GraphManager.h"
+#include "adjudicator/graph/GSSWAdjudicator.h"
+#include "core/variant/VCFHeader.h"
 
 #include <thread>
 
@@ -14,12 +16,24 @@
 
 std::string gBamPath;
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
-void writeVariantListToFile(std::string path, graphite::VariantList::SharedPtr variantListPtr)
+void writeVariantListToFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
 {
 	std::ofstream outVCF;
 	outVCF.open(path, std::ios::out | std::ios::trunc);
-	variantListPtr->printToVCF(outVCF, gBamPath);
+
+	variantListPtr->printToVCF(vcfHeaderPtr, outVCF);
 	outVCF.close();
+}
+
+void validatePath(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
+{
+	if (!boost::filesystem::exists(path))
+	{
+		std::cout << errorMessage << std::endl;
+		if (exitOnFailure) {
+			exit(EXIT_FAILURE);
+		}
+	}
 }
 
 int main(int argc, char** argv)
@@ -47,28 +61,15 @@ int main(int argc, char** argv)
 	gBamPath = bamPath;
 
 	// make sure paths exist
-	if (!boost::filesystem::exists(fastaPath))
-	{
-		std::cout << "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
+	validatePath(bamPath, "Invalid BAM path, please provide the correct path to the BAM file and rerun Graphite", true);
 	for (auto vcfPath : vcfPaths)
 	{
-		if (!boost::filesystem::exists(vcfPath))
-		{
-			std::cout << "Invalid VCF path: " << vcfPath << ", please provide the correct path to the VCF and rerun Graphite" << std::endl;
-			exit(EXIT_FAILURE);
-		}
+		validatePath(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
 	}
-	if (!boost::filesystem::exists(bamPath))
+	if (outputDirectory.size() > 0)
 	{
-		std::cout << "Invalid BAM path, please provide the correct path to the BAM file and rerun Graphite" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	if (outputDirectory.size() > 0 && !boost::filesystem::exists(outputDirectory))
-	{
-		std::cout << "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite" << std::endl;
-		exit(EXIT_FAILURE);
+		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
 
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
@@ -87,9 +88,9 @@ int main(int argc, char** argv)
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 	// create an adjudicator for the graph
-	auto gsswAdjudicator = std::make_shared< graphite::gssw::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
+	auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	// the gsswGraphManager adjudicates on the variantManager's variants
-	auto gsswGraphManager = std::make_shared< graphite::gssw::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
+	auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 	gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
 
 	if (outputDirectory.size() == 0)
@@ -111,18 +112,15 @@ int main(int argc, char** argv)
 
 	graphite::ThreadPool::Instance()->joinAll();
 
+	graphite::VCFHeader::SharedPtr vcfHeaderPtr = std::make_shared< graphite::VCFHeader >();
+	vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
 	if (outputDirectory.size() == 0)
 	{
 		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-		variantListPtr->printToVCF(std::cout, bamPath);
+		variantListPtr->printToVCF(vcfHeaderPtr, std::cout);
 	}
 	else
 	{
-		if (!boost::filesystem::exists(outputDirectory))
-		{
-			boost::filesystem::path dir(outputDirectory);
-			boost::filesystem::create_directory(dir);
-		}
 		std::vector< std::shared_ptr< std::thread > > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
 		for (auto& iter : vcfPathsAndVariantListPtrsMap)
@@ -138,14 +136,11 @@ int main(int argc, char** argv)
 				boost::filesystem::path countPath("_" + std::to_string(counter++));
 				outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + countPath.string() + extension.string());
 			}
-			auto fileWriterThread = std::make_shared< std::thread >(writeVariantListToFile, outputVCFPath.string(), variantListPtr);
-			fileWriters.emplace_back(fileWriterThread);
+			auto funct = std::bind(&writeVariantListToFile, outputVCFPath.string(), vcfHeaderPtr, variantListPtr);
+			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
 		}
-		for (auto& fileWriterThread : fileWriters)
-		{
-			fileWriterThread->join();
-		}
-		fileWriters.clear(); // clear file writer threads
+
+		graphite::ThreadPool::Instance()->joinAll();
 	}
 	return 0;
 }

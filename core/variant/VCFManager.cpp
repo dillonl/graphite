@@ -69,10 +69,6 @@ namespace graphite
 		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs);
 		this->m_variant_list_ptr->sort();
 		this->m_variant_list_ptr->normalizeOverlappingVariants();
-		// for (auto iter : this->m_path_vcf_variant_list_ptrs_map)
-		// {
-		// 	iter.second->processOverlappingAlleles();
-		// }
 		this->m_loaded_vcfs = true;
 	}
 
@@ -96,9 +92,9 @@ namespace graphite
 		return this->m_variant_list_ptr;
 	}
 
-	void VCFManager::printToVCF(std::ostream& out, std::string& bamPath)
+	void VCFManager::printToVCF(VCFHeader::SharedPtr vcfHeaderPtr, std::ostream& out)
 	{
-		this->m_variant_list_ptr->printToVCF(out, bamPath);
+		this->m_variant_list_ptr->printToVCF(vcfHeaderPtr, out);
 	}
 
 	void VCFManager::releaseResources()

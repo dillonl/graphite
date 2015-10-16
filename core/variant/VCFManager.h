@@ -6,6 +6,7 @@
 #include "VCFFileReader.h"
 #include "IVariantManager.h"
 #include "IVariant.h"
+#include "VCFHeader.h"
 
 #include <atomic>
 #include <memory>
@@ -30,7 +31,7 @@ namespace graphite
 		void waitForVCFsToLoadAndProcess();
 		IVariantList::SharedPtr getCompleteVariantList() override;
 		void releaseResources() override;
-		void printToVCF(std::ostream& out, std::string& bamPath);
+		void printToVCF(VCFHeader::SharedPtr vcfHeader, std::ostream& out);
 		std::unordered_map< std::string, VariantList::SharedPtr > getVCFPathsAndVariantListsMap();
 	private:
 		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them

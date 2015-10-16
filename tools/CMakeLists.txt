@@ -35,6 +35,8 @@ add_executable(pathtrace
   ${PATHTRACE_TOOLS_SOURCES}
 )
 
+MESSAGE("PLUGIN_LIBS: ${PLUGIN_LIBS}")
+
 # link libraries to executables
 target_link_libraries(graphite
   BamTools

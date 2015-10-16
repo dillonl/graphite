@@ -2,8 +2,8 @@
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
 #include "core/reference/FastaWriter.h"
-#include "plugins/vg/graph/VariantGraph.h"
-#include "plugins/vg/graph/SNPNode.h"
+#include "plugins/pathtrace/graph/VariantGraph.h"
+#include "plugins/pathtrace/graph/SNPNode.h"
 
 void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes);
 void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out);

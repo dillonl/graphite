@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_GSSW_GSSWGRAPH_H
-#define GRAPHITE_GSSW_GSSWGRAPH_H
+#ifndef GRAPHITE_ADJUDICATOR_GSSWGRAPH_H
+#define GRAPHITE_ADJUDICATOR_GSSWGRAPH_H
 
 #include <tuple>
 #include <deque>
@@ -16,7 +16,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 
 	class GSSWGraph : public IGraph

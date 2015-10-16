@@ -51,6 +51,7 @@ set(GRAPHITE_CORE_VARIANT_SOURCES
   variant/VariantList.cpp
   variant/VCFManager.cpp
   variant/VCFFileReader.cpp
+  variant/VCFHeader.cpp
   )
 
 add_library(graphite_core

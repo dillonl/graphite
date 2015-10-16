@@ -15,7 +15,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 
 	GraphManager::GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IAdjudicator::SharedPtr adjudicatorPtr) :

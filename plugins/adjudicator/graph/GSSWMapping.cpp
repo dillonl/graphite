@@ -6,7 +6,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
     GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
 		m_gssw_mapping_ptr(gsswMappingPtr),

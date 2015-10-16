@@ -1,6 +1,0 @@
-#ifndef GRAPHITE_GSSWGRAPH_TEST_H
-#define GRAPHITE_GSSWGRAPH_TEST_H
-
-#include "GSSWGraphTests.hpp"
-
-#endif // GRAPHITE_ADJUDICATOR_TEST_H

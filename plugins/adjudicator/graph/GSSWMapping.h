@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_GSSW_MAPPING_H
-#define GRAPHITE_GSSW_MAPPING_H
+#ifndef GRAPHITE_ADJUDICATOR_MAPPING_H
+#define GRAPHITE_ADJUDICATOR_MAPPING_H
 
 #include "core/mapping/IMapping.h"
 #include "core/adjudicator/IAdjudicator.h"
@@ -8,7 +8,7 @@
 
 namespace graphite
 {
-namespace gssw
+namespace adjudicator
 {
 
 	class GSSWMapping : public IMapping
