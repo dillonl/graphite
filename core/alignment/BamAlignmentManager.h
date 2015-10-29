@@ -3,6 +3,7 @@
 
 #include "IAlignmentManager.h"
 #include "core/region/Region.h"
+#include "Sample.hpp"
 
 #include <mutex>
 #include <thread>
@@ -12,21 +13,22 @@
 
 namespace graphite
 {
+	class IAlignmentReader;
 	class BamAlignmentManager : public IAlignmentManager
 	{
 	public:
 		typedef std::shared_ptr< BamAlignmentManager > SharedPtr;
-	    BamAlignmentManager(const std::string& bamPath, Region::SharedPtr regionPtr);
+		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr);
 		~BamAlignmentManager();
 
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 		void asyncLoadAlignments();
-		void loadBam();
+		void loadBam(const std::string& bamPath);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		void processMappingStatistics() override;
+		std::vector< Sample::SharedPtr > getSamplePtrs() override;
 	private:
-		position getLastPositionInBam();
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;
@@ -34,6 +36,7 @@ namespace graphite
 		Region::SharedPtr m_region_ptr;
 		std::shared_ptr< std::thread > m_loading_thread_ptr;
         std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
+		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};
 }
 

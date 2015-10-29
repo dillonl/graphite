@@ -27,21 +27,21 @@ namespace graphite
 		void addAllele(IAllele::SharedPtr allelePtr) { this->m_allele_ptrs.emplace_back(allelePtr); }
 		std::vector< IAllele::SharedPtr > getAllAlleles() { return this->m_allele_ptrs; }
 
-		inline uint32_t getForwardCount() override
+		inline uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getForwardCount();
+				count += allelePtr->getForwardCount(samplePtr);
 			}
 			return count;
 		}
-		inline uint32_t getReverseCount() override
+		inline uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getReverseCount();
+				count += allelePtr->getReverseCount(samplePtr);
 			}
 			return count;
 		}
@@ -50,24 +50,23 @@ namespace graphite
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getForwardCount();
-				count += allelePtr->getReverseCount();
+				count += allelePtr->getTotalCount();
 			}
 			return count;
 		}
 
-		inline void incrementForwardCount() override
+		inline void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementForwardCount();
+				allelePtr->incrementForwardCount(alignmentPtr);
 			}
 		}
-		inline void incrementReverseCount() override
+		inline void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementReverseCount();
+				allelePtr->incrementReverseCount(alignmentPtr);
 			}
 		}
 

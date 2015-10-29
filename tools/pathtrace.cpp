@@ -5,8 +5,8 @@
 #include "plugins/pathtrace/graph/VariantGraph.h"
 #include "plugins/pathtrace/graph/SNPNode.h"
 
-void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes);
-void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out);
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes, const std::string& region);
+void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out, size_t id, const std::string& region);
 
 int main(int argc, char** argv)
 {
@@ -29,52 +29,47 @@ int main(int argc, char** argv)
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
-	std::cout << "variants loaded" << std::endl;
 	auto variantListPtr = variantManagerPtr->getVariantsInRegion(regionPtr);
-	std::cout << "variants in region" << std::endl;
 
 	auto variantGraphPtr = std::make_shared< graphite::vg::VariantGraph >(fastaReferencePtr, variantListPtr);
-	std::cout << "starting graph construction" << std::endl;
 	variantGraphPtr->constructGraph();
 
 	std::vector< std::string > paths;
 	std::vector< std::vector< graphite::INode::SharedPtr > > nodes;
 	variantGraphPtr->getAllPaths(paths, nodes);
-	printNodesToFasta(filePrefix, nodes);
+	printNodesToFasta(filePrefix, nodes, regionPtr->getRegionString());
 
 	return 0;
 }
 
-void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out)
+void printNodes(std::vector< graphite::INode::SharedPtr >& nodes, std::ostream& out, size_t id, const std::string& region)
 {
 	std::string pathString;
-	std::string header;
+	std::string header = std::to_string(id) + " Region=" + region;
+	std::string variantsString = "Variants=";
+	uint32_t variantsCount = 0;
 	for (auto node : nodes)
 	{
 		auto referenceNodePtr = std::dynamic_pointer_cast< graphite::vg::ReferenceNode >(node);
 		auto variantNodePtr = std::dynamic_pointer_cast< graphite::vg::SNPNode >(node);
-		header += "{" + std::to_string(node->getPosition());
-		if (referenceNodePtr != nullptr)
+		if (variantNodePtr != nullptr)
 		{
-			header += " r}: ";
+			std::string suffix = (variantsCount > 0) ? "," : "";
+			variantsString += suffix + std::to_string(variantNodePtr->getPosition()) + ":" + variantNodePtr->getSequence() + ":" + variantNodePtr->getReferenceSequence();
+			++variantsCount;
 		}
-		else if (variantNodePtr != nullptr)
-		{
-			header += " s}: ";
-		}
-		else
-		{
-			throw "There was an error with generating the header";
-		}
-		header += std::string(node->getSequence(), node->getLength()) + "|";
+		// header += std::string(node->getSequence(), node->getLength()) + "|";
 		pathString += std::string(node->getSequence(), node->getLength());
 	}
-	header = header.substr(0, header.size() - 1);
+	if (variantsCount > 0)
+	{
+		header += " " + variantsString;
+	}
 	graphite::FastaWriter fastaWriter(header, pathString);
 	fastaWriter.write(out);
 }
 
-void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes)
+void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< graphite::INode::SharedPtr > >& nodes, const std::string& region)
 {
 	size_t count = 1;
 	for (auto nodeList : nodes)
@@ -84,13 +79,14 @@ void printNodesToFasta(const std::string& filePrefix, std::vector< std::vector< 
 			std::string fileName = filePrefix + "_" + std::to_string(count++) + ".fa";
 			ofstream out;
 			out.open(fileName, std::ios::out | std::ios::trunc);
-			printNodes(nodeList, out);
+			printNodes(nodeList, out, (count - 1), region);
 			out.close();
 		}
 		else
 		{
-			printNodes(nodeList, std::cout);
+			printNodes(nodeList, std::cout, (count - 1), region);
 			std::cout << std::endl;
 		}
+		++count;
 	}
 }

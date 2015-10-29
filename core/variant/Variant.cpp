@@ -22,6 +22,7 @@ namespace graphite
 	{
 	}
 
+	/*
 	uint32_t Variant::getTotalAlleleCount()
 	{
 		uint32_t totalCount = 0;
@@ -48,6 +49,7 @@ namespace graphite
 		}
 		return alleleCountString;
 	}
+	*/
 
 	std::string Variant::alleleString()
 	{
@@ -146,9 +148,39 @@ namespace graphite
 		return "";
 	}
 
-	void Variant::printVariant(std::ostream& out)
+	std::string Variant::getInfoFieldsString()
 	{
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << ";U2M=" << std::to_string(this->m_unmapped_to_mapped_count.load()) << ";M2U=" << std::to_string(this->m_mapped_to_unmapped_count.load()) << ";AR=" << std::to_string(this->m_repositioned_count.load()) << std::endl;
+		std::string infoFields = "";
+		for (auto infoField : this->m_info_fields)
+		{
+			std::string prefix = (infoFields.size() > 0) ? "\t" : "";
+			infoFields += prefix + infoField.first + "=" + infoField.second;
+		}
+		return (this->m_info_fields.size() > 0) ? infoFields : ".";
+	}
+
+	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs)
+	{
+		// out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << "\t" << getSampleCounts(samplePtrs) << std::endl;
+	}
+
+	std::string Variant::getSampleCounts(std::vector< std::shared_ptr< Sample > > samplePtrs)
+	{
+		std::string alleleCountString = "";
+		for (auto samplePtr : samplePtrs)
+		{
+			std::string prefix = (alleleCountString.size() > 0) ? "\t" : "";
+			alleleCountString += prefix + std::to_string(this->m_ref_allele_ptr->getForwardCount(samplePtr)) + ",";
+			alleleCountString += std::to_string(this->m_ref_allele_ptr->getReverseCount(samplePtr));
+			for (auto altAllelePtr : getAltAllelePtrs())
+			{
+				alleleCountString += ",";
+				alleleCountString += std::to_string(altAllelePtr->getForwardCount(samplePtr)) + ",";
+				alleleCountString += std::to_string(altAllelePtr->getReverseCount(samplePtr));
+			}
+		}
+		return alleleCountString;
 	}
 
 }

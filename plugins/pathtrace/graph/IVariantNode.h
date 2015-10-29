@@ -27,9 +27,9 @@ namespace graphite
 
 			const char* getSequence() override { return m_variant->getAltAllelePtrs()[m_alt_index]->getSequence(); }
 
-			static IVariantNode::SharedPtr BuildVariantNodes(IVariant::SharedPtr variant, uint32_t altIndex)
+			static IVariantNode::SharedPtr BuildVariantNodes(IVariant::SharedPtr variant, uint32_t altIndex, const std::string& referenceSequence)
 			{
-				return std::dynamic_pointer_cast< IVariantNode >(std::make_shared< SNPNode >(variant, altIndex));
+				return std::dynamic_pointer_cast< IVariantNode >(std::make_shared< SNPNode >(variant, altIndex, referenceSequence));
 			}
 
 		private:

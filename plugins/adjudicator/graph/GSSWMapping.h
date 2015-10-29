@@ -18,16 +18,16 @@ namespace adjudicator
         GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr);
 		~GSSWMapping();
 
-		int getMappingScore();
-		MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr);
-		IAlignment::SharedPtr getAlignmentPtr();
-		std::vector< IAllele::SharedPtr > getAllelePtrs();
+		int getMappingScore() override;
+		MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr) override;
+		IAlignment::SharedPtr getAlignmentPtr() override;
+		std::vector< IAllele::SharedPtr > getAllelePtrs() override;
 		position getPosition() override { return m_position; }
 		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);
 		void incrementAlleleCounts() override;
 		void setMapped(bool mapped) override;
 		bool getMapped() override { return m_mapped; }
-		void addAlleleCountCallback(std::function< void () > functor);
+		void addAlleleCountCallback(std::function< void () > functor) override;
 
 		void printMapping() override;
 		void printSimpleMapping();

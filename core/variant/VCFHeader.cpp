@@ -28,4 +28,9 @@ namespace graphite
 		}
 		return header;
 	}
+
+	void VCFHeader::registerSample(std::shared_ptr< Sample > samplePtr)
+	{
+		m_sample_ptrs.emplace_back(samplePtr);
+	}
 }

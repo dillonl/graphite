@@ -16,11 +16,11 @@
 #include "core/parser/VCFParser.hpp"
 #include "core/reference/Reference.h"
 
-
 namespace graphite
 {
 
 	class IAlignment;
+	class IAlignmentReader;
 	class Variant : public IVariant
 	{
 	public:
@@ -122,11 +122,11 @@ namespace graphite
 		}
 
 		void setFilter(std::string filter) { this->m_filter = filter; }
-		std::string getAlleleCountString();
+		/* std::string getAlleleCountString(); */
 		std::string alleleString();
 		/* void addPotentialAlignment(const std::shared_ptr< IAlignment > alignmentPtr); */
 
-		std::string getChrom() const { return m_chrom; }
+		std::string getChrom() const override { return m_chrom; }
 		position getPosition() override { return m_position; }
 		std::string getQual() const { return m_qual; }
 		std::string getFilter() const { return m_filter; }
@@ -135,7 +135,7 @@ namespace graphite
 		std::string getRef() { return std::string(this->m_ref_allele_ptr->getSequence()); }
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
-		void printVariant(std::ostream& out) override;
+		void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) override;
 		void processOverlappingAlleles() override;
 
 		uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
@@ -148,7 +148,9 @@ namespace graphite
 		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
 		void setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts);
 		std::string getGenotype();
-		uint32_t getTotalAlleleCount();
+		std::string getInfoFieldsString();
+		/* uint32_t getTotalAlleleCount(); */
+		std::string getSampleCounts(std::vector< std::shared_ptr< Sample > > samplePtrs);
 
 		uint32_t m_max_prefix_match_length;
 		uint32_t m_max_suffix_match_length;

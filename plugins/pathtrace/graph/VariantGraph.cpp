@@ -129,7 +129,7 @@ namespace graphite
 			std::vector< VariantVertexDescriptor > vertices;
 			for (uint32_t i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
 			{
-				INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i);
+				INode::SharedPtr variantNode = IVariantNode::BuildVariantNodes(variantPtr, i, variantPtr->getRefAllelePtr()->getSequenceString());
 				vertices.push_back(addVariantNode(variantNode));
 			}
 			size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();

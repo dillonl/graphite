@@ -14,11 +14,17 @@ namespace graphite
 		public:
 			typedef std::shared_ptr< SNPNode > SharedPtr;
 
-    		SNPNode(IVariant::SharedPtr variantPtr, uint32_t altIndex) :
-				IVariantNode(variantPtr, altIndex)
+		    SNPNode(IVariant::SharedPtr variantPtr, uint32_t altIndex, const std::string& referenceSequence) :
+			    IVariantNode(variantPtr, altIndex)
 			{
+				m_reference_sequence = referenceSequence;
 			}
 			~SNPNode() {}
+
+			std::string getReferenceSequence() { return m_reference_sequence; }
+
+		private:
+			std::string m_reference_sequence;
 
 		};
 	}// end namespace vg

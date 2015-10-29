@@ -5,6 +5,7 @@
 #include "core/region/Region.h"
 
 #include <boost/noncopyable.hpp>
+#include <memory>
 
 namespace graphite
 {

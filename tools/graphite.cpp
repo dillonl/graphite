@@ -9,12 +9,12 @@
 #include "adjudicator/graph/GraphManager.h"
 #include "adjudicator/graph/GSSWAdjudicator.h"
 #include "core/variant/VCFHeader.h"
+#include "core/alignment/SampleManager.hpp"
 
 #include <thread>
 
 #include <boost/filesystem.hpp>
 
-std::string gBamPath;
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
 void writeVariantListToFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
 {
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	}
 	auto fastaPath = params.getFastaPath();
 	auto vcfPaths = params.getInVCFPaths();
-	auto bamPath = params.getBAMPath();
+	auto bamPaths = params.getBAMPaths();
 	auto outputDirectory = params.getOutputDirectory();
 	auto regionPtr = params.getRegion();
 	auto swPercent = params.getPercent();
@@ -58,11 +58,13 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto graphSize = params.getGraphSize();
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
-	gBamPath = bamPath;
 
 	// make sure paths exist
 	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
-	validatePath(bamPath, "Invalid BAM path, please provide the correct path to the BAM file and rerun Graphite", true);
+	for (auto bamPath : bamPaths)
+	{
+		validatePath(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
+	}
 	for (auto vcfPath : vcfPaths)
 	{
 		validatePath(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
@@ -72,10 +74,29 @@ int main(int argc, char** argv)
 		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
 
+	graphite::VCFHeader::SharedPtr vcfHeaderPtr = std::make_shared< graphite::VCFHeader >();
+
+	for (auto bamPath : bamPaths)
+	{
+		vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
+	}
+
+
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
+	std::vector< graphite::Sample::SharedPtr > samplePtrs;
+	for (auto bamPath : bamPaths)
+	{
+		auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
+		samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
+	}
+	for (auto samplePtr : samplePtrs)
+	{
+		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
+	}
+
 	// load bam alignments
-	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(bamPath, regionPtr);
+	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr);
 	bamAlignmentManager->asyncLoadAlignments(); // begin the process of loading the alignments asynchronously
 
 	// load variants from vcf
@@ -84,6 +105,12 @@ int main(int argc, char** argv)
 
 	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+
+	for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
+	{
+		vcfHeaderPtr->registerSample(samplePtr);
+	}
+
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
@@ -112,8 +139,6 @@ int main(int argc, char** argv)
 
 	graphite::ThreadPool::Instance()->joinAll();
 
-	graphite::VCFHeader::SharedPtr vcfHeaderPtr = std::make_shared< graphite::VCFHeader >();
-	vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
 	if (outputDirectory.size() == 0)
 	{
 		auto variantListPtr = variantManagerPtr->getCompleteVariantList();

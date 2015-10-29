@@ -4,15 +4,17 @@
 #include "core/util/ThreadPool.hpp"
 
 #include <functional>
+#include <boost/filesystem.hpp>
+#include <unordered_set>
 
 namespace graphite
 {
-	BamAlignmentManager::BamAlignmentManager(const std::string& bamPath, Region::SharedPtr regionPtr) :
-		m_bam_path(bamPath),
+	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr) :
 		m_region_ptr(regionPtr),
+		m_sample_ptrs(samplePtrs),
 		m_loaded(false)
 	{
-	}
+    }
 
 	BamAlignmentManager::~BamAlignmentManager()
 	{
@@ -35,28 +37,19 @@ namespace graphite
 		return std::make_shared< AlignmentList >(alignmentPtrs);
 	}
 
-	position BamAlignmentManager::getLastPositionInBam()
-	{
-		BamTools::BamReader bamReader;
-		if (!bamReader.Open(this->m_bam_path))
-		{
-			throw "Unable to open bam file";
-		}
-
-		bamReader.LocateIndex();
-		int refID = bamReader.GetReferenceID(this->m_region_ptr->getReferenceID());
-		auto referenceData = bamReader.GetReferenceData();
-		return referenceData[refID].RefLength;
-	}
-
 	void BamAlignmentManager::asyncLoadAlignments()
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		if (this->m_loaded) { return; }
-		this->m_loading_thread_ptr = std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this);
+		std::unordered_set< std::string > usedPaths;
+		for (auto samplePtr : this->m_sample_ptrs)
+		{
+			if (usedPaths.find(samplePtr->getPath()) != usedPaths.end()) { continue; }
+			this->m_loading_thread_ptr = std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this, samplePtr->getPath());
+		}
 	}
 
-	void BamAlignmentManager::loadBam()
+	void BamAlignmentManager::loadBam(const std::string& bamPath)
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::unordered_map< std::string, bool > alignmentMap;
@@ -67,13 +60,13 @@ namespace graphite
 		position endPosition = startPosition + positionIncrement;
 		// the last position is needs to be calculated by the reader if we are loading the entire chromosome.
 		// Otherwise use the specified end position.
-		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? getLastPositionInBam() : this->m_region_ptr->getEndPosition();
+		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? BamAlignmentReader::GetLastPositionInBam(bamPath, this->m_region_ptr) : this->m_region_ptr->getEndPosition();
 
 		do
 		{
             std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 			auto regionPtr = std::make_shared< Region >(regionString);
-			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(this->m_bam_path);
+			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
 			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
 			auto functFuture = ThreadPool::Instance()->enqueue(funct);
 			futureAlignmentListPtrs.emplace_back(functFuture);
@@ -94,6 +87,8 @@ namespace graphite
 		}
 		this->m_loaded = true;
 	}
+
+	std::vector< Sample::SharedPtr > BamAlignmentManager::getSamplePtrs() { return m_sample_ptrs; }
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()
 	{

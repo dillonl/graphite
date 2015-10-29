@@ -14,6 +14,8 @@ namespace graphite
 	class VCFReader;
 	class Sequence;
 	class IVariant;
+	class IAlignment;
+	class Sample;
 	class IAllele : private boost::noncopyable, public std::enable_shared_from_this< IAllele >
 	{
 	public:
@@ -31,12 +33,12 @@ namespace graphite
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
 
-		virtual uint32_t getForwardCount() = 0;
-		virtual uint32_t getReverseCount() = 0;
+		virtual uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr) = 0;
+		virtual uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr) = 0;
 		virtual uint32_t getTotalCount() = 0;
 
-		virtual void incrementForwardCount() = 0;
-		virtual void incrementReverseCount() = 0;
+		virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) = 0;
+		virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) = 0;
 
 		void setVariantWPtr(std::weak_ptr< IVariant > variantWPtr) { m_variant_wptr = variantWPtr; }
 		std::weak_ptr< IVariant > getVariantWPtr() { return m_variant_wptr; }
@@ -51,7 +53,7 @@ namespace graphite
 
 	protected:
 
-			std::weak_ptr< IVariant > m_variant_wptr;
+		std::weak_ptr< IVariant > m_variant_wptr;
 
 	};
 }

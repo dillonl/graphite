@@ -11,7 +11,13 @@ void getAlignmentPtrsFromReader(const std::string& path, std::vector< graphite::
 
 void getAlignmentPtrsFromManager(const std::string& path, graphite::IAlignmentList::SharedPtr& alignmentListPtr, graphite::Region::SharedPtr regionPtr1, graphite::Region::SharedPtr regionPtr2)
 {
-	auto bamAlignmentManagerPtr = std::make_shared< graphite::BamAlignmentManager >(path, regionPtr1);
+	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
+	for (auto samplePtr : samplePtrs)
+	{
+		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
+	}
+
+	auto bamAlignmentManagerPtr = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr1);
 
 	bamAlignmentManagerPtr->asyncLoadAlignments();
 	bamAlignmentManagerPtr->waitForAlignmentsToLoad();

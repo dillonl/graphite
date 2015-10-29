@@ -4,10 +4,12 @@
 #include "core/sequence/SequenceManager.h"
 #include "IAllele.h"
 #include "AlleleMetaData.h"
+#include "core/alignment/IAlignment.h"
 
 namespace graphite
 {
 	class VCFFileReader;
+	class IAlignmentReader;
 	class Allele : public IAllele
 	{
 	public:
@@ -49,12 +51,60 @@ namespace graphite
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr)  override { this->m_allele_meta_data_ptr = alleleMetaDataPtr; }
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() override { return this->m_allele_meta_data_ptr; }
 
-		virtual uint32_t getForwardCount() override { return this->m_forward_count.load(); }
-		virtual uint32_t getReverseCount() override { return this->m_reverse_count.load(); }
-		virtual uint32_t getTotalCount() override { return this->getForwardCount() + this->getReverseCount(); }
+		virtual uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr) override
+		{
+			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
+			auto iter = m_alignment_sample_forward_count_map.find(samplePtr);
+			uint32_t totalCount = (iter == m_alignment_sample_forward_count_map.end()) ? 0 : iter->second;
+			return totalCount;
+		}
+		virtual uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr) override
+		{
+			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
+			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr);
+			uint32_t totalCount = (iter == m_alignment_sample_reverse_count_map.end()) ? 0 : iter->second;
+			return totalCount;
+		}
+		virtual uint32_t getTotalCount() override
+		{
+			uint32_t totalCount = 0;
+			for (auto iter : m_alignment_sample_forward_count_map)
+			{
+				totalCount += iter.second;
+			}
+			for (auto iter : m_alignment_sample_reverse_count_map)
+			{
+				totalCount += iter.second;
+			}
+			return totalCount;
+		}
 
-		virtual void incrementForwardCount() override { ++this->m_forward_count; }
-		virtual void incrementReverseCount() override { ++this->m_reverse_count; }
+		virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) override
+		{
+			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
+			auto samplePtr = alignmentPtr->getSample();
+			auto iter = m_alignment_sample_forward_count_map.find(samplePtr);
+			uint32_t count = 1;
+			if (iter != m_alignment_sample_forward_count_map.end())
+			{
+				count = iter->second + 1;
+			}
+			m_alignment_sample_forward_count_map.emplace(samplePtr, count);
+			/* ++this->m_forward_count; */
+		}
+		virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) override
+		{
+			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
+			auto samplePtr = alignmentPtr->getSample();
+			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr);
+			uint32_t count = 1;
+			if (iter != m_alignment_sample_reverse_count_map.end())
+			{
+				count = iter->second + 1;
+			}
+			m_alignment_sample_reverse_count_map.emplace(samplePtr, count);
+			/* ++this->m_reverse_count; */
+		}
 
 		uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) override
 		{
@@ -80,6 +130,9 @@ namespace graphite
 
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
+		std::mutex m_alignment_count_mutex;
+		std::unordered_map< std::shared_ptr< Sample >, uint32_t > m_alignment_sample_forward_count_map;
+		std::unordered_map< std::shared_ptr< Sample >, uint32_t > m_alignment_sample_reverse_count_map;
 
 	};
 }

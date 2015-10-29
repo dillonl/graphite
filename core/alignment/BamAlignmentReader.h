@@ -8,23 +8,28 @@
 #include "IAlignment.h"
 #include "IAlignmentList.h"
 #include "IAlignmentReader.h"
+#include "Sample.hpp"
+
 
 #include <boost/noncopyable.hpp>
 
 namespace graphite
 {
-	class BamAlignmentReader : private IAlignmentReader
+	class BamAlignmentReader : public IAlignmentReader
 	{
 	public:
         typedef std::shared_ptr< BamAlignmentReader > SharedPtr;
-        BamAlignmentReader(const std::string& filePath);
+        BamAlignmentReader(const std::string& bamPath);
 		~BamAlignmentReader();
 
         std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 
+		static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
+		static position GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr);
+
 	private:
-		std::string m_file_path;
         BamTools::BamReader m_bam_reader;
+		std::string m_bam_path;
 	};
 }
 

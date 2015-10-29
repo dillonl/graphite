@@ -61,12 +61,12 @@ namespace graphite
 	{
 	}
 
-	void VariantList::printToVCF(VCFHeader::SharedPtr vcfHeaderPtr, std::ostream& out)
+	void VariantList::printToVCF(IHeader::SharedPtr headerPtr, std::ostream& out)
 	{
-		out << vcfHeaderPtr->getHeader();
+		out << headerPtr->getHeader();
 		for(const auto variantPtr : this->m_variant_ptrs)
 		{
-			variantPtr->printVariant(out);
+			variantPtr->printVariant(out, headerPtr->getSamplePtrs());
 		}
 	}
 

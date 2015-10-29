@@ -97,7 +97,7 @@ namespace adjudicator
 		else // if this allele was successfully mapped,
 		{
 			auto countFunct = (alignmentPtr->isReverseStrand())? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
-			mappingPtr->addAlleleCountCallback(std::bind(countFunct, allelePtr));
+			mappingPtr->addAlleleCountCallback(std::bind(countFunct, allelePtr, alignmentPtr));
 			alignmentPtr->setMapping(mappingPtr);
 			mappingPtr->setMapped(true);
 		}

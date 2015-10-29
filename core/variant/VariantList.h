@@ -20,11 +20,11 @@ namespace graphite
 		bool getNextVariant(IVariant::SharedPtr& variantPtr) override;
 		size_t getCount() override;
 		void sort() override;
-		void printToVCF(VCFHeader::SharedPtr vcfHeader, std::ostream& out) override;
+		void printToVCF(IHeader::SharedPtr header, std::ostream& out) override;
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out, std::string& bamPath);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
-		void processOverlappingAlleles();
+		void processOverlappingAlleles() override;
 
 	protected:
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);

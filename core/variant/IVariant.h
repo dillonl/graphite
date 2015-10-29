@@ -13,6 +13,7 @@ namespace graphite
 {
 	class IAllele;
 	class IAlignment;
+	class Sample;
     class IVariant : private boost::noncopyable, public std::enable_shared_from_this< IVariant >
     {
         public:
@@ -33,7 +34,7 @@ namespace graphite
 			virtual void incrementUnmappedToMappedCount() = 0;
 			virtual void incrementMappedToUnmappedCount() = 0;
 			virtual void incrementRepositionedCount() = 0;
-			virtual void printVariant(std::ostream& out) = 0;
+			virtual void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) = 0;
     };
 }
 

@@ -10,6 +10,7 @@
 
 namespace graphite
 {
+	class Sample;
 	class IAlignmentManager : private boost::noncopyable
 	{
 	public:
@@ -20,6 +21,7 @@ namespace graphite
         virtual IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
 		virtual void releaseResources() = 0;
 		virtual void processMappingStatistics() = 0;
+		virtual std::vector< std::shared_ptr< Sample > > getSamplePtrs() = 0;
 	};
 }
 

@@ -1,6 +1,9 @@
 #ifndef GRAPHITE_IALIGNMENT_H
 #define GRAPHITE_IALIGNMENT_H
 
+#include "core/util/Types.h"
+#include "core/allele/IAllele.h"
+
 #include <boost/noncopyable.hpp>
 
 #include <memory>
@@ -9,18 +12,17 @@
 #include <vector>
 #include <string>
 
-#include "core/util/Types.h"
-
 namespace graphite
 {
 
 	class IMapping;
+	class Sample;
 	class IAlignment : private boost::noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IAlignment > SharedPtr;
 
-	    IAlignment() : m_mapped(false), m_score(0), m_mapping_mutex(new std::recursive_mutex()) {}
+	    IAlignment() : m_mapping_mutex(new std::recursive_mutex()) {}
 		virtual ~IAlignment() { delete this->m_mapping_mutex; }
 
 		virtual const char* getSequence() = 0;
@@ -38,52 +40,14 @@ namespace graphite
 			this->m_mapping_wptr = mappingPtr;
 		}
 		std::recursive_mutex* getMappingMutex() { return this->m_mapping_mutex; }
-
-		/*
-		 * the variantInformation is the variantID and the allele that was matched
-		 */
-		void setMappingInformation(uint32_t score, std::vector< std::tuple< uint32_t, std::string > >& variantInformation)
-		{
-			std::lock_guard< std::mutex > lock(this->m_mutex);
-			if (score < this->m_score)
-			{
-				return;
-			}
-			this->m_mapped = true;
-			this->m_score = score;
-			this->m_mapped_variants_information.clear();
-			for (const auto& variantInfo : variantInformation)
-			{
-				this->m_mapped_variants_information[std::get< 0 >(variantInfo)] = std::get< 1 >(variantInfo);
-			}
-		}
-
-		int32_t getVariantMappingScore(const uint32_t variantID)
-		{
-			std::lock_guard< std::mutex > lock(this->m_mutex);
-			auto variantIDIter = this->m_mapped_variants_information.find(variantID);
-			int32_t score = (variantIDIter == this->m_mapped_variants_information.end()) ? -1 : this->m_score;
-			return score;
-		}
-
-		std::string getVariantAllele(uint32_t variantID)
-		{
-			std::lock_guard< std::mutex > lock(this->m_mutex);
-			auto variantIDIter = this->m_mapped_variants_information.find(variantID);
-			std::string variantAllele = (variantIDIter == this->m_mapped_variants_information.end()) ? "" : variantIDIter->second;
-			return variantAllele;
-		}
-
-		void setMapped(bool mapped) { this->m_mapped = mapped; }
-		bool getMapped() { return this->m_mapped; }
+		const std::shared_ptr< Sample > getSample() { return m_sample_ptr; }
 
 	protected:
 		std::mutex m_mutex;
-		bool m_mapped;
-		uint32_t m_score;
 		std::unordered_map< uint32_t, std::string > m_mapped_variants_information;
 		std::weak_ptr< IMapping > m_mapping_wptr;
 		std::recursive_mutex* m_mapping_mutex;
+		std::shared_ptr< Sample > m_sample_ptr;
 	};
 }
 

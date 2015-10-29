@@ -18,7 +18,7 @@ namespace graphite
 		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
 		m_options_description_ptr->add_options()
 			("help,h","Print help message")
-			(",b", boost::program_options::value< std::string >()->required(), "Path to input BAM file")
+			(",b", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input BAM file[s], separate multiple files by space")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
 			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
@@ -81,9 +81,9 @@ namespace graphite
 		return m_variables_map["-v"].as< std::vector< std::string > >();
 	}
 
-	std::string Params::getBAMPath()
+	std::vector< std::string > Params::getBAMPaths()
 	{
-		return m_variables_map["-b"].as< std::string >();
+		return m_variables_map["-b"].as< std::vector< std::string > >();
 	}
 
 	std::string Params::getOutputDirectory()

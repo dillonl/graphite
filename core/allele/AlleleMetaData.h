@@ -3,6 +3,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <memory>
+
 namespace graphite
 {
 	class AlleleMetaData : private boost::noncopyable

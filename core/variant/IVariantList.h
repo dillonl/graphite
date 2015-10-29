@@ -5,7 +5,7 @@
 
 #include "core/region/Region.h"
 #include "IVariant.h"
-#include "VCFHeader.h"
+#include "IHeader.h"
 
 #include <vector>
 #include <algorithm>
@@ -30,7 +30,7 @@ namespace graphite
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
-		virtual void printToVCF(VCFHeader::SharedPtr vcfHeader, std::ostream& out) = 0;
+		virtual void printToVCF(IHeader::SharedPtr header, std::ostream& out) = 0;
 	};
 
 } // end namespace graphite

@@ -65,8 +65,8 @@ namespace adj_test
 			else { variantPtr = this->m_variant_list[this->m_index++]; return true; }
 		}
 
-		size_t getCount() { return this->m_variant_list.size(); }
-		void sort() {}
+		size_t getCount() override { return this->m_variant_list.size(); }
+		void sort() override {}
 		void printToVCF(std::ostream& out) {}
 
 	private:
@@ -77,7 +77,9 @@ namespace adj_test
 	class AlignmentTest : public IAlignment
 	{
 	public:
-		AlignmentTest(const std::string sequence, position pos) : m_sequence(sequence), m_position(pos) {}
+		AlignmentTest(const std::string sequence, position pos) : m_sequence(sequence), m_position(pos)
+		{
+		}
 		~AlignmentTest() {}
 
 		const char* getSequence() override { return this->m_sequence.c_str(); }
