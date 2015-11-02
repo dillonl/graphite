@@ -15,6 +15,7 @@
 #include "core/allele/Allele.h"
 #include "core/parser/VCFParser.hpp"
 #include "core/reference/Reference.h"
+#include "core/alignment/Sample.hpp"
 
 namespace graphite
 {
@@ -150,7 +151,7 @@ namespace graphite
 		std::string getGenotype();
 		std::string getInfoFieldsString();
 		/* uint32_t getTotalAlleleCount(); */
-		std::string getSampleCounts(std::vector< std::shared_ptr< Sample > > samplePtrs);
+		std::string getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs);
 
 		uint32_t m_max_prefix_match_length;
 		uint32_t m_max_suffix_match_length;
@@ -170,6 +171,36 @@ namespace graphite
 		std::atomic< uint32_t > m_unmapped_to_mapped_count;
 		std::atomic< uint32_t > m_mapped_to_unmapped_count;
 		std::atomic< uint32_t > m_repositioned_count;
+
+	private:
+
+		// a helper class for the getSampleCounts method
+		class VariantSampleContainer
+		{
+		public:
+		    VariantSampleContainer() :
+			    m_total_count(0),
+				m_forward_count(0),
+				m_reverse_count(0)
+			{
+			}
+
+			~VariantSampleContainer()
+			{
+			}
+
+			uint32_t getTotalCount() { return this->m_total_count; }
+			uint32_t getForwardCount() { return this->m_forward_count; }
+			uint32_t getReverseCount() { return this->m_reverse_count; }
+
+			uint32_t addToTotalCount(uint32_t value) { this->m_total_count += value; }
+			uint32_t addToForwardCount(uint32_t value) { this->m_forward_count += value; }
+			uint32_t addToReverseCount(uint32_t value) { this->m_reverse_count += value; }
+		private:
+			uint32_t m_total_count;
+			uint32_t m_forward_count;
+			uint32_t m_reverse_count;
+		};
 	};
 
 }

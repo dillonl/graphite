@@ -39,19 +39,18 @@ namespace graphite
 
 	void BamAlignmentManager::asyncLoadAlignments()
 	{
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		if (this->m_loaded) { return; }
 		std::unordered_set< std::string > usedPaths;
 		for (auto samplePtr : this->m_sample_ptrs)
 		{
 			if (usedPaths.find(samplePtr->getPath()) != usedPaths.end()) { continue; }
-			this->m_loading_thread_ptr = std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this, samplePtr->getPath());
+			usedPaths.emplace(samplePtr->getPath());
+			this->m_loading_thread_ptrs.emplace_back(std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this, samplePtr->getPath()));
 		}
 	}
 
-	void BamAlignmentManager::loadBam(const std::string& bamPath)
+	void BamAlignmentManager::loadBam(const std::string bamPath)
 	{
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::unordered_map< std::string, bool > alignmentMap;
 		std::vector< std::thread > bamLoadThreads;
 		uint32_t positionIncrement = 100000;
@@ -74,6 +73,7 @@ namespace graphite
 			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
 		} while (endPosition < bamLastPosition);// this->m_region_ptr->getEndPosition());
 		uint32_t count = 0;
+		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
 		{
 			alignmentFuturePtr->wait();
@@ -82,6 +82,7 @@ namespace graphite
 			{
 				if (alignmentMap.find(alignment->getID()) != alignmentMap.end()) { continue; } // make sure we don't add overlapping regions
 				alignmentMap[alignment->getID()] = true;
+
 				this->m_alignment_ptrs.emplace_back(alignment);
 			}
 		}
@@ -92,7 +93,16 @@ namespace graphite
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()
 	{
-		this->m_loading_thread_ptr->join();
+		for (auto threadPtr : this->m_loading_thread_ptrs)
+		{
+			threadPtr->join();
+		}
+		// sort the alignments since they could be from different bam files
+		std::sort(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(),
+				  [] (const IAlignment::SharedPtr& a, const IAlignment::SharedPtr& b)
+				  {
+					  return a->getPosition() < b->getPosition();
+				  });
 	}
 
 	void BamAlignmentManager::releaseResources()

@@ -1,6 +1,8 @@
 #include "Variant.h"
 #include "core/alignment/IAlignment.h"
 
+#include <unordered_set>
+
 namespace graphite
 {
 	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0)
@@ -161,23 +163,34 @@ namespace graphite
 
 	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs)
 	{
-		// out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\tDP=" << getTotalAlleleCount() << ";DP4=" << getAlleleCountString() << std::endl;
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << "\t" << getSampleCounts(samplePtrs) << std::endl;
+		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << getSampleCounts(samplePtrs) << std::endl;
 	}
 
-	std::string Variant::getSampleCounts(std::vector< std::shared_ptr< Sample > > samplePtrs)
+	std::string Variant::getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs)
 	{
 		std::string alleleCountString = "";
+		std::unordered_map< std::string, std::vector< VariantSampleContainer > > sampleNameToCounts; // counts are total, ( forward, reverse )
+
+		std::unordered_set< std::string > sampleNameSet;
 		for (auto samplePtr : samplePtrs)
 		{
-			std::string prefix = (alleleCountString.size() > 0) ? "\t" : "";
-			alleleCountString += prefix + std::to_string(this->m_ref_allele_ptr->getForwardCount(samplePtr)) + ",";
-			alleleCountString += std::to_string(this->m_ref_allele_ptr->getReverseCount(samplePtr));
-			for (auto altAllelePtr : getAltAllelePtrs())
+
+			if (sampleNameSet.find(samplePtr->getName()) == sampleNameSet.end())
 			{
-				alleleCountString += ",";
-				alleleCountString += std::to_string(altAllelePtr->getForwardCount(samplePtr)) + ",";
-				alleleCountString += std::to_string(altAllelePtr->getReverseCount(samplePtr));
+				sampleNameSet.emplace(samplePtr->getName());
+
+				uint32_t totalCount = 0;
+				std::string sampleString = "";
+				for (size_t i = 0; i < m_all_allele_ptrs.size(); ++i)
+				{
+					auto allelePtr = m_all_allele_ptrs[i];
+					uint32_t forwardCount = allelePtr->getForwardCount(samplePtr);
+					uint32_t reverseCount = allelePtr->getReverseCount(samplePtr);
+					std::string prefix = (i == 0) ? "" : ",";
+					sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
+					totalCount += (forwardCount + reverseCount);
+				}
+				alleleCountString += "\tDP=" + std::to_string(totalCount) + ";DP4=" + sampleString;
 			}
 		}
 		return alleleCountString;

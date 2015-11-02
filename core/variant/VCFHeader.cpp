@@ -1,4 +1,7 @@
 #include "VCFHeader.h"
+#include "core/alignment/Sample.hpp"
+
+#include <unordered_set>
 
 namespace graphite
 {
@@ -9,7 +12,6 @@ namespace graphite
 		m_header_lines.emplace_back("##INFO=<ID=TC,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">");
 		m_header_lines.emplace_back("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth including non-counted low quality reads\">");
 		m_header_lines.emplace_back("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">");
-		m_header_lines.emplace_back("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tSAMPLE");
 	}
 
 	VCFHeader::~VCFHeader() {}
@@ -26,6 +28,18 @@ namespace graphite
 		{
 			header += headerLine + "\n";
 		}
+		std::string sampleHeaderString;
+		std::unordered_set< std::string > sampleNames;
+		for (auto samplePtr : m_sample_ptrs)
+		{
+			auto iter = sampleNames.find(samplePtr->getName());
+			if (iter == sampleNames.end())
+			{
+				sampleHeaderString += "\t" + samplePtr->getName();
+				sampleNames.emplace(samplePtr->getName());
+			}
+		}
+		header += "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" + sampleHeaderString + "\n";
 		return header;
 	}
 

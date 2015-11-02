@@ -3,6 +3,8 @@
 #include "AlignmentList.h"
 #include "SampleManager.hpp"
 
+#include <unordered_set>
+
 namespace graphite
 {
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :

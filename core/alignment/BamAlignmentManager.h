@@ -23,7 +23,7 @@ namespace graphite
 
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 		void asyncLoadAlignments();
-		void loadBam(const std::string& bamPath);
+		void loadBam(const std::string bamPath);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		void processMappingStatistics() override;
@@ -34,7 +34,7 @@ namespace graphite
 		bool m_loaded;
 		std::string m_bam_path;
 		Region::SharedPtr m_region_ptr;
-		std::shared_ptr< std::thread > m_loading_thread_ptr;
+		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
         std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
 		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};

@@ -5,6 +5,7 @@
 #include "IAllele.h"
 #include "AlleleMetaData.h"
 #include "core/alignment/IAlignment.h"
+#include "core/alignment/Sample.hpp"
 
 namespace graphite
 {
@@ -15,24 +16,18 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< Allele > SharedPtr;
 	    Allele(Sequence::SharedPtr sequencePtr) :
-		    m_forward_count(0),
-			m_reverse_count(0),
 		    m_sequence_ptr(sequencePtr),
 			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
 		{
 		}
 
 	    Allele(const std::string& seqString) :
-		    m_forward_count(0),
-			m_reverse_count(0),
 			m_sequence_ptr(SequenceManager::Instance()->getSequence(seqString)),
 			m_allele_meta_data_ptr(std::make_shared< AlleleMetaData >(0, 0))
 		{
 		}
 
 	    Allele(const std::string& seqString, AlleleMetaData::SharedPtr alleleMetaDataPtr) :
-		    m_forward_count(0),
-			m_reverse_count(0),
 			m_sequence_ptr(SequenceManager::Instance()->getSequence(seqString)),
 			m_allele_meta_data_ptr(alleleMetaDataPtr)
 		{
@@ -54,16 +49,14 @@ namespace graphite
 		virtual uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto iter = m_alignment_sample_forward_count_map.find(samplePtr);
-			uint32_t totalCount = (iter == m_alignment_sample_forward_count_map.end()) ? 0 : iter->second;
-			return totalCount;
+			auto iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
+			return (iter == m_alignment_sample_forward_count_map.end()) ? 0 : iter->second;
 		}
 		virtual uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr);
-			uint32_t totalCount = (iter == m_alignment_sample_reverse_count_map.end()) ? 0 : iter->second;
-			return totalCount;
+			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName());
+			return (iter == m_alignment_sample_reverse_count_map.end()) ? 0 : iter->second;
 		}
 		virtual uint32_t getTotalCount() override
 		{
@@ -83,27 +76,32 @@ namespace graphite
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
 			auto samplePtr = alignmentPtr->getSample();
-			auto iter = m_alignment_sample_forward_count_map.find(samplePtr);
-			uint32_t count = 1;
-			if (iter != m_alignment_sample_forward_count_map.end())
+			auto iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
+			if (iter == m_alignment_sample_forward_count_map.end())
 			{
-				count = iter->second + 1;
+				m_alignment_sample_forward_count_map.emplace(samplePtr->getName(), 1);
+				iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
 			}
-			m_alignment_sample_forward_count_map.emplace(samplePtr, count);
-			/* ++this->m_forward_count; */
+			else
+			{
+				++iter->second;
+			}
+
 		}
 		virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
 			auto samplePtr = alignmentPtr->getSample();
-			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr);
-			uint32_t count = 1;
-			if (iter != m_alignment_sample_reverse_count_map.end())
+			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName());
+			if (iter == m_alignment_sample_reverse_count_map.end())
 			{
-				count = iter->second + 1;
+				m_alignment_sample_reverse_count_map.emplace(samplePtr->getName(), 1);
+				iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName());
 			}
-			m_alignment_sample_reverse_count_map.emplace(samplePtr, count);
-			/* ++this->m_reverse_count; */
+			else
+			{
+				++iter->second;
+			}
 		}
 
 		uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) override
@@ -125,14 +123,14 @@ namespace graphite
 	protected:
 		Allele() {}
 
-		std::atomic< uint32_t > m_forward_count; // since this needs to be accessed by several threads make it atomic
-		std::atomic< uint32_t > m_reverse_count; // since this needs to be accessed by several threads make it atomic
+		/* std::atomic< uint32_t > m_forward_count; // since this needs to be accessed by several threads make it atomic */
+		/* std::atomic< uint32_t > m_reverse_count; // since this needs to be accessed by several threads make it atomic */
 
 		Sequence::SharedPtr m_sequence_ptr;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
 		std::mutex m_alignment_count_mutex;
-		std::unordered_map< std::shared_ptr< Sample >, uint32_t > m_alignment_sample_forward_count_map;
-		std::unordered_map< std::shared_ptr< Sample >, uint32_t > m_alignment_sample_reverse_count_map;
+		std::unordered_map< std::string, uint32_t > m_alignment_sample_forward_count_map;
+		std::unordered_map< std::string, uint32_t > m_alignment_sample_reverse_count_map;
 
 	};
 }

@@ -81,7 +81,6 @@ int main(int argc, char** argv)
 		vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
 	}
 
-
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
