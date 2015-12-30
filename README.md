@@ -3,11 +3,17 @@
 Graphite
 ====
 
+### installing
 Graphite uses cmake. To build Graphite run:
 
-mkdir bin/
-cd bin
-cmake ../
+```
+git clone https://github.com/dillonl/graphite.git
+cd graphite/
+mkdir build
+cd build
+camke ..
+
+```
 
 To run Graphite's adjudication:
 
