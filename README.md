@@ -15,6 +15,8 @@ camke ..
 
 ```
 
+### running
+
 To run Graphite's adjudication:
 
 ./graphite
