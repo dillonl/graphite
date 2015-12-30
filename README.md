@@ -3,6 +3,10 @@
 Graphite
 ====
 
+### Requirements
+GCC 4.7 or later.  If you're using 4.4, you're a mouth breather - Dillion 
+
+
 ### installing
 Graphite uses cmake. To build Graphite run:
 
