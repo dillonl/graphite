@@ -4,7 +4,7 @@ Graphite
 ====
 
 ### Requirements
-GCC 4.7 or later.  If you're using 4.4, you're a mouth breather - Dillion 
+GCC 4.7 or later.  If you're using 4.4, you're a mouth breather - Dillon 
 
 
 ### Installing
@@ -15,7 +15,7 @@ git clone https://github.com/dillonl/graphite.git
 cd graphite/
 mkdir bin
 cd bin
-camke ..
+cmake ..
 
 ```
 
