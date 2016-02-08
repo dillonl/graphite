@@ -11,6 +11,8 @@ void getAlignmentPtrsFromReader(const std::string& path, std::vector< graphite::
 
 void getAlignmentPtrsFromManager(const std::string& path, graphite::IAlignmentList::SharedPtr& alignmentListPtr, graphite::Region::SharedPtr regionPtr1, graphite::Region::SharedPtr regionPtr2)
 {
+	//Add this back in once the bamalignmentmanager is working again
+	/*
 	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
 	for (auto samplePtr : samplePtrs)
 	{
@@ -24,6 +26,7 @@ void getAlignmentPtrsFromManager(const std::string& path, graphite::IAlignmentLi
 	bamAlignmentManagerPtr->releaseResources();
 
 	alignmentListPtr = bamAlignmentManagerPtr->getAlignmentsInRegion(regionPtr2);
+	*/
 }
 
 void compareAlignmentLists(graphite::IAlignmentList::SharedPtr alignmentListPtr1, graphite::IAlignmentList::SharedPtr alignmentListPtr2)

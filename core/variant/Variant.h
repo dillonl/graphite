@@ -193,9 +193,9 @@ namespace graphite
 			uint32_t getForwardCount() { return this->m_forward_count; }
 			uint32_t getReverseCount() { return this->m_reverse_count; }
 
-			uint32_t addToTotalCount(uint32_t value) { this->m_total_count += value; }
-			uint32_t addToForwardCount(uint32_t value) { this->m_forward_count += value; }
-			uint32_t addToReverseCount(uint32_t value) { this->m_reverse_count += value; }
+			void addToTotalCount(uint32_t value) { this->m_total_count += value; }
+			void addToForwardCount(uint32_t value) { this->m_forward_count += value; }
+			void addToReverseCount(uint32_t value) { this->m_reverse_count += value; }
 		private:
 			uint32_t m_total_count;
 			uint32_t m_forward_count;

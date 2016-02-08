@@ -3,6 +3,8 @@
 
 #include "IAlignmentManager.h"
 #include "core/region/Region.h"
+#include "core/variant/IVariantList.h"
+#include "core/variant/IVariantManager.h"
 #include "Sample.hpp"
 
 #include <mutex>
@@ -13,7 +15,6 @@
 
 namespace graphite
 {
-	class IAlignmentReader;
 	class BamAlignmentManager : public IAlignmentManager
 	{
 	public:
@@ -22,13 +23,14 @@ namespace graphite
 		~BamAlignmentManager();
 
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
-		void asyncLoadAlignments();
-		void loadBam(const std::string bamPath);
+		void asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
+		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		void processMappingStatistics() override;
 		std::vector< Sample::SharedPtr > getSamplePtrs() override;
 	private:
+		std::vector< Region::SharedPtr > getRegionsContainingVariantsWithPadding(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;

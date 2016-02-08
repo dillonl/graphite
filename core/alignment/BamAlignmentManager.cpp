@@ -37,7 +37,7 @@ namespace graphite
 		return std::make_shared< AlignmentList >(alignmentPtrs);
 	}
 
-	void BamAlignmentManager::asyncLoadAlignments()
+	void BamAlignmentManager::asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
 	{
 		if (this->m_loaded) { return; }
 		std::unordered_set< std::string > usedPaths;
@@ -45,11 +45,25 @@ namespace graphite
 		{
 			if (usedPaths.find(samplePtr->getPath()) != usedPaths.end()) { continue; }
 			usedPaths.emplace(samplePtr->getPath());
-			this->m_loading_thread_ptrs.emplace_back(std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this, samplePtr->getPath()));
+			this->m_loading_thread_ptrs.emplace_back(std::make_shared< std::thread >(&BamAlignmentManager::loadBam, this, samplePtr->getPath(), variantManagerPtr, variantPadding));
 		}
 	}
 
-	void BamAlignmentManager::loadBam(const std::string bamPath)
+	std::vector< Region::SharedPtr > BamAlignmentManager::getRegionsContainingVariantsWithPadding(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
+	{
+		std::vector< Region::SharedPtr > regionPtrs;
+		auto variantPtrs = variantManagerPtr->getVariantsInRegion(this->m_region_ptr);
+		IVariant::SharedPtr variantPtr;
+		std::vector< IVariant::SharedPtr > variantPtrs;
+		while (variantPtrs->getNextVariant(variantPtr))
+		{
+			variantPtrs.push_back(variantPtr);
+		}
+
+		return regionPtrs;
+	}
+
+	void BamAlignmentManager::loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
 	{
 		std::unordered_map< std::string, bool > alignmentMap;
 		std::vector< std::thread > bamLoadThreads;

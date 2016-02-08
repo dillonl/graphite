@@ -94,16 +94,15 @@ int main(int argc, char** argv)
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
 
-	// load bam alignments
-	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr);
-	bamAlignmentManager->asyncLoadAlignments(); // begin the process of loading the alignments asynchronously
-
 	// load variants from vcf
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
-	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+	// load bam alignments
+	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr);
+	bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
+	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 
 	for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
 	{
