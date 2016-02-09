@@ -55,12 +55,12 @@ namespace graphite
 	std::vector< Region::SharedPtr > BamAlignmentManager::getRegionsContainingVariantsWithPadding(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
 	{
 		std::vector< Region::SharedPtr > regionPtrs;
+
 		auto variantListPtr = variantManagerPtr->getVariantsInRegion(this->m_region_ptr);
 		IVariant::SharedPtr variantPtr;
 		IVariant::SharedPtr nextVariantPtr;
 		Region::SharedPtr regionPtr = nullptr;
 
-		position startPosition = ((variantPtr->getPosition() - (variantPadding * 2)) > 0) ? (variantPtr->getPosition() - (variantPadding * 2)) : 0;
 		position endPosition = 0;
 		while (variantListPtr->getNextVariant(variantPtr))
 		{
@@ -80,14 +80,13 @@ namespace graphite
 				regionPtr = nullptr;
 			}
 		}
-
 		return regionPtrs;
 	}
 
 	void BamAlignmentManager::loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
 	{
+		ThreadPool::Instance()->start();
 		auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
-		auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
 
 		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 		uint32_t positionIncrement = 100000;
@@ -99,17 +98,18 @@ namespace graphite
 			position currentPosition = startPosition;
 			do
 			{
+				auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
 				position endPosition = (lastRegionPosition < (currentPosition + positionIncrement - 1)) ? lastRegionPosition : (currentPosition + positionIncrement - 1);
 				auto tmpRegionPtr = std::make_shared< Region >(regionPtr->getReferenceID(), startPosition, endPosition);
 				auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, tmpRegionPtr);
 				auto future = ThreadPool::Instance()->enqueue(funct);
-				futureFunctions.emplace_back(future);
+				futureFunctions.push_back(future);
 				currentPosition = endPosition + 1;
 			}
 			while (currentPosition < lastRegionPosition);
 		}
+		std::cout << "finished threading" << std::endl;
 
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::unordered_set< std::string > alignmentSet;
 		while (!futureFunctions.empty())
 		{
@@ -120,10 +120,12 @@ namespace graphite
 				auto loadedAlignmentPtrs = futureFunct->get();
 				for (auto& alignment : loadedAlignmentPtrs)
 				{
-					if (alignmentSet.find(alignment->getID()) != alignmentSet.end()) { continue; } // make sure we don't add overlapping regions
-					alignmentSet.emplace(alignment->getID());
-
-					this->m_alignment_ptrs.emplace_back(alignment);
+					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+					{
+						alignmentSet.emplace(alignment->getID());
+						this->m_alignment_ptrs.emplace_back(alignment);
+						std::cout << "setting alignment" << std::endl;
+					}
 				}
 				continue;
 			}
@@ -133,45 +135,7 @@ namespace graphite
 			}
 			// futureFunct->wait();
 		}
-
-
-		/*
-		std::unordered_map< std::string, bool > alignmentMap;
-		std::vector< std::thread > bamLoadThreads;
-		uint32_t positionIncrement = 100000;
-		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureAlignmentListPtrs;
-		position startPosition = this->m_region_ptr->getStartPosition();
-		position endPosition = startPosition + positionIncrement;
-		// the last position is needs to be calculated by the reader if we are loading the entire chromosome.
-		// Otherwise use the specified end position.
-		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? BamAlignmentReader::GetLastPositionInBam(bamPath, this->m_region_ptr) : this->m_region_ptr->getEndPosition();
-
-		do
-		{
-            std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-			auto regionPtr = std::make_shared< Region >(regionString);
-			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
-			auto functFuture = ThreadPool::Instance()->enqueue(funct);
-			futureAlignmentListPtrs.emplace_back(functFuture);
-			startPosition = endPosition + 1;
-			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
-		} while (endPosition < bamLastPosition);// this->m_region_ptr->getEndPosition());
-		uint32_t count = 0;
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
-		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
-		{
-			alignmentFuturePtr->wait();
-			auto loadedAlignmentPtrs = alignmentFuturePtr->get();
-			for (auto& alignment : loadedAlignmentPtrs)
-			{
-				if (alignmentMap.find(alignment->getID()) != alignmentMap.end()) { continue; } // make sure we don't add overlapping regions
-				alignmentMap[alignment->getID()] = true;
-
-				this->m_alignment_ptrs.emplace_back(alignment);
-			}
-		}
-		*/
+		std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
 		this->m_loaded = true;
 	}
 

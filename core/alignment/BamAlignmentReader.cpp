@@ -18,6 +18,8 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr)
 	{
+		// static std::mutex lock;
+		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 		if (!this->m_bam_reader.Open(this->m_bam_path))
 		{
 			throw "Unable to open bam file";
@@ -30,23 +32,24 @@ namespace graphite
 
 		auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		size_t counter = 0;
-		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+
 		uint32_t count = 0;
-		while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
+		BamTools::BamAlignment bamAlignmentPtr2;
+		// while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
+		while(this->m_bam_reader.GetNextAlignment(bamAlignmentPtr2))
 		{
+			// std::lock_guard< std::mutex > guard(lock);
 			if (bamAlignmentPtr->RefID != refID) { break; }
-			// BamTools::SamReadGroup readGroup;
 			std::string sample;
 			bamAlignmentPtr->GetTag("RG", sample);
 
-			// SampleManager::GetSample(readGroup.Sample);
 			Sample::SharedPtr samplePtr = SampleManager::Instance()->getSamplePtr(sample);
 			if (samplePtr == nullptr)
 			{
 				throw "There was an error in the sample name for: " + sample;
 			}
-			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr, samplePtr));
-			bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+			// alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr2, samplePtr));
+			// bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		}
 		this->m_bam_reader.Close();
 		return alignmentPtrs;

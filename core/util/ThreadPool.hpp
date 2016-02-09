@@ -32,12 +32,15 @@ namespace graphite
 
 		void start()
 		{
+			if (this->m_stopped)
 			{
-				std::unique_lock<std::mutex> lock(m_tasks_mutex);
-				this->m_stopped = false;
-				this->m_workers.clear();
+				{
+					std::unique_lock<std::mutex> lock(m_tasks_mutex);
+					this->m_stopped = false;
+					this->m_workers.clear();
+				}
+				init();
 			}
-			init();
 		}
 
 		void stop()

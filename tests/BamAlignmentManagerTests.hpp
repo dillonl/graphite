@@ -6,27 +6,34 @@
 void getAlignmentPtrsFromReader(const std::string& path, std::vector< graphite::IAlignment::SharedPtr >& alignmentPtrs, graphite::Region::SharedPtr regionPtr)
 {
 	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
+	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
+	for (auto samplePtr : samplePtrs)
+	{
+		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
+	}
 	alignmentPtrs = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 }
 
 void getAlignmentPtrsFromManager(const std::string& path, graphite::IAlignmentList::SharedPtr& alignmentListPtr, graphite::Region::SharedPtr regionPtr1, graphite::Region::SharedPtr regionPtr2)
 {
 	//Add this back in once the bamalignmentmanager is working again
-	/*
 	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
 	for (auto samplePtr : samplePtrs)
 	{
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
+	std::string vcfPath = TEST_VCF_FILE;
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPath, regionPtr1);
+	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
+	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 
 	auto bamAlignmentManagerPtr = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr1);
 
-	bamAlignmentManagerPtr->asyncLoadAlignments();
+	bamAlignmentManagerPtr->asyncLoadAlignments(variantManagerPtr, 3000);
 	bamAlignmentManagerPtr->waitForAlignmentsToLoad();
 	bamAlignmentManagerPtr->releaseResources();
 
 	alignmentListPtr = bamAlignmentManagerPtr->getAlignmentsInRegion(regionPtr2);
-	*/
 }
 
 void compareAlignmentLists(graphite::IAlignmentList::SharedPtr alignmentListPtr1, graphite::IAlignmentList::SharedPtr alignmentListPtr2)
