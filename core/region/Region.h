@@ -20,6 +20,7 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< Region > SharedPtr;
 		Region(const std::string& regionString);
+		Region(const std::string& referenceID, position startPosition, position endPosition);
 		~Region();
 
 		std::string getRegionString() const { return m_region_string; }
