@@ -25,9 +25,10 @@ namespace graphite
 	}
 
 	Region::Region(const std::string& referenceID, position startPosition, position endPosition) :
-	    m_region_string(referenceID),
+	    m_reference_id(referenceID),
 		m_start_position(startPosition),
-		m_end_position(endPosition)
+		m_end_position(endPosition),
+		m_region_string(referenceID + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition))
 	{
 	}
 
