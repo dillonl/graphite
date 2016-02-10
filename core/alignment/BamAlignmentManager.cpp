@@ -143,7 +143,7 @@ namespace graphite
 			}
 			// futureFunct->wait();
 		}
-		// std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
+		std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
 		this->m_loaded = true;
 	}
 
