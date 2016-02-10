@@ -18,7 +18,7 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr)
 	{
-		static std::mutex lock;
+		// static std::mutex lock;
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 		if (!this->m_bam_reader.Open(this->m_bam_path))
 		{
@@ -29,7 +29,7 @@ namespace graphite
 		int refID = this->m_bam_reader.GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
-		lock.lock();
+		// lock.lock();
 		// std::cout << "bar region: " << refID << " " << regionPtr->getStartPosition() << " " << regionPtr->getEndPosition();
 
 
@@ -55,7 +55,7 @@ namespace graphite
 		this->m_bam_reader.Close();
 		// lock.lock();
 		// std::cout << " alignments: " << alignmentPtrs.size() << std::endl;
-		lock.unlock();
+		// lock.unlock();
 		return alignmentPtrs;
 	}
 
