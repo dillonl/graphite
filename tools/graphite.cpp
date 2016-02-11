@@ -39,7 +39,6 @@ void validatePath(const std::string& path, const std::string& errorMessage, bool
 int main(int argc, char** argv)
 {
 	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-	std::cout << "starting: " << milliseconds_since_epoch << std::endl;
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
 	if (params.showHelp() || !params.validateRequired())
@@ -115,7 +114,6 @@ int main(int argc, char** argv)
 	bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 	milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-	std::cout << "ending: " << milliseconds_since_epoch << std::endl;
 
 	// create an adjudicator for the graph
 	auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);

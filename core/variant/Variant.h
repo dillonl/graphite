@@ -60,9 +60,13 @@ namespace graphite
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
 
+<<<<<<< HEAD
 			variantPtr->m_line = std::string(vcfLine, vcfLine.size() - 1);
 			/* variantPtr->m_line.erase(std::remove(variantPtr->m_line.begin(), variantPtr->m_line.end(), '\n'), variantPtr->m_line.end()); */
 
+=======
+            variantPtr->m_line = std::string(vcfLine.c_str(), vcfLine.size() - 1);
+>>>>>>> 6157ddb61c1192ca1a3b14037b5254c800a11b0d
 
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
 			return variantPtr;
