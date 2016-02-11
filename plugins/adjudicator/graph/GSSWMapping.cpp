@@ -183,7 +183,7 @@ namespace adjudicator
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
 		std::string nodeTypesString = "";
 		std::string positions = "";
-		std::string alignmentString = this->m_alignment_ptr->getSequence();
+		std::string alignmentString = std::string(this->m_alignment_ptr->getSequence(), this->m_alignment_ptr->getLength());
 		std::string referenceString = "";
 		std::string tracebackString = "";
 		std::string separator = "||";
