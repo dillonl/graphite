@@ -155,7 +155,7 @@ namespace graphite
 		std::string infoFields = "";
 		for (auto infoField : this->m_info_fields)
 		{
-			std::string prefix = (infoFields.size() > 0) ? "\t" : "";
+			std::string prefix = (infoFields.size() > 0) ? ";" : "";
 			infoFields += prefix + infoField.first + "=" + infoField.second;
 		}
 		return (this->m_info_fields.size() > 0) ? infoFields : ".";
@@ -163,7 +163,8 @@ namespace graphite
 
 	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs)
 	{
-		out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << getSampleCounts(samplePtrs) << std::endl;
+		// out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << "\t" << getSampleCounts(samplePtrs) << std::endl;
+		out << this->m_line << "\t" << getSampleCounts(samplePtrs) << std::endl;
 	}
 
 	std::string Variant::getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs)

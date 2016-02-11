@@ -60,6 +60,10 @@ namespace graphite
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
 
+			variantPtr->m_line = vcfLine;
+			variantPtr->m_line.erase(std::remove(variantPtr->m_line.begin(), variantPtr->m_line.end(), '\n'), variantPtr->m_line.end());
+
+
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
 			return variantPtr;
 		}
@@ -179,6 +183,7 @@ namespace graphite
 		std::string m_filter;
 		std::string m_ref;
 		std::vector< std::string > m_alt;
+		std::string m_line;
 		IAllele::SharedPtr m_ref_allele_ptr;
 		std::vector< IAllele::SharedPtr > m_alt_allele_ptrs;
 		std::vector< IAllele::SharedPtr > m_all_allele_ptrs;
