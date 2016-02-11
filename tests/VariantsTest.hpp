@@ -160,7 +160,7 @@ namespace
 		auto referencePtr = std::make_shared< TestReference >();
 		referencePtr->setSequence(regionPtr, sequence);
 
-		const char* altVCF = "AATTCAGATTCAGGACCCCT"; // this matches the first variant line of the test_vcf_file
+		const char* refVCF = "AAATTCAGATTCAGGACCCCT"; // this matches the first variant line of the test_vcf_file
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
@@ -169,8 +169,8 @@ namespace
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		auto refAllele = variantPtr->getRefAllelePtr();
 		ASSERT_EQ(altAllelePtrs.size(), 1);
-		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF);
-		ASSERT_STREQ(refAllele->getSequence(),"A");
+		ASSERT_STREQ(refAllele->getSequence(), refVCF);
+		ASSERT_STREQ(altAllelePtrs[0]->getSequence(),"A");
 	}
 
 	TEST(VariantsTest, ParseVariantMultipleAltDupsTest)

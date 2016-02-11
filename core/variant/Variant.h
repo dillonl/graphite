@@ -47,7 +47,7 @@ namespace graphite
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
 
-            if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
+			if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
 			{
 				InfoFieldParser< std::string::iterator > infoParser;
 				std::map< std::string, std::string > infoFields;
@@ -55,7 +55,7 @@ namespace graphite
 				{
 					variantPtr->m_position -= 1;
 					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
-					variantPtr->m_ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])) + 1);
+					ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])) + 1);
 					alts[0] = std::string(referencePtr->getSequence() + offset, 1);
 				}
 			}
