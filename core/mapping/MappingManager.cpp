@@ -48,12 +48,10 @@ namespace graphite
 			for (auto& mappingPtr : this->m_mappings)
 			{
 				mappingPtr->incrementAlleleCounts();
-				/*
 				if (mappingPtr->getMapped())
 				{
 					mappingPtr->printMapping();
 				}
-				*/
 			}
 		}
 	}
