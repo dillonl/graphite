@@ -55,8 +55,8 @@ namespace graphite
 				{
 					variantPtr->m_position -= 1;
 					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
-					variantPtr->m_ref = std::string(referencePtr->getSequence() + offset, 1);
-					alts[0] = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])) + 1);
+					variantPtr->m_ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])) + 1);
+					alts[0] = std::string(referencePtr->getSequence() + offset, 1);
 				}
 			}
 
