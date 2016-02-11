@@ -15,23 +15,25 @@
 namespace graphite
 {
 
-	template<typename Iterator>
-	struct InfoFieldParser : boost::spirit::qi::grammar<Iterator, std::map< std::string, std::string >() >
+	namespace qi = boost::spirit::qi;
+
+	template <typename Iterator>
+	struct InfoFieldParser
+		: qi::grammar<Iterator, std::map<std::string, std::string>()>
 	{
-		InfoFieldParser() : InfoFieldParser::base_type(query)
+		InfoFieldParser()
+			: InfoFieldParser::base_type(query)
 			{
-				using namespace boost::spirit::qi;
-
-				query = pair >> *((qi::lit(';') | '&') >> pair);
-				pair = key >> -('=' >> value);
-				key = qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
-				value = +qi::char_("a-zA-Z_0-9");
+				query =  pair >> *((qi::lit(';')) >> pair);
+				pair  =  key >> -('=' >> value);
+				key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+				value = +(qi::char_(",a-zA-Z_0-9-"));
 			}
-
-		boost::spirit::qi::rule<Iterator, std::map< std::string, std::string >() > query;
-		boost::spirit::qi::rule<Iterator, std::pair< std::string, std::string >() > pair;
-		boost::spirit::qi::rule<Iterator, std::string() > key, value;
+		qi::rule<Iterator, std::map<std::string, std::string>()> query;
+		qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
+		qi::rule<Iterator, std::string()> key, value;
 	};
+
 
 } // end namespace graphite
 

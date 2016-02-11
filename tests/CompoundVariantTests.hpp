@@ -60,7 +60,7 @@ namespace
 		std::vector< IVariant::SharedPtr > variantPtrs;
 		for (auto& variantLine : variantLines)
 		{
-			variantPtrs.emplace_back(Variant::BuildVariant(variantLine, vcfParser));
+			variantPtrs.emplace_back(Variant::BuildVariant(variantLine, vcfParser, nullptr));
 		}
 		auto variantsListPtr = std::make_shared< VariantList >(variantPtrs);
 		variantsListPtr->sort();

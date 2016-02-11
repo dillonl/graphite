@@ -9,21 +9,21 @@
 
 namespace graphite
 {
-	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr) :
+	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr)
 	{
-		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath);
+		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 	}
 
-	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr) :
+	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr)
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
-			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath);
+			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr);
 			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 		}
 	}

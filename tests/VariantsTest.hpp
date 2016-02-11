@@ -2,6 +2,7 @@
 
 #include "TestConfig.h"
 
+#include "core/reference/IReference.h"
 #include "core/sequence/SequenceManager.h"
 #include "core/allele/Allele.h"
 #include "core/parser/VCFParser.hpp"
@@ -42,10 +43,32 @@ namespace
 		uint32_t m_total_allele_count;
 	};
 
+	class TestReference : public graphite::IReference
+	{
+	public:
+		TestReference(){}
+		~TestReference(){}
+
+		const char* getSequence() override { return m_sequence.c_str(); }
+		size_t getSequenceSize() override { return m_sequence.size();  }
+		void setSequence(graphite::Region::SharedPtr regionPtr, const std::string& sequence)
+		{
+			m_region = regionPtr;
+			m_sequence = sequence;
+		}
+
+	private:
+
+		std::string m_sequence;
+	};
+
     static std::string VCF_LINE_1 = "Y\t2655180\trs11575897\tG\tA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
 	static std::string VCF_LINE_2 = "Y\t2655180\trs11575897\tG\tA,TTA\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
 	static std::string VCF_LINE_3 = "20\t249590\tBI_GS_DEL1_B5_P2733_211\tC\t<CN0>\t100\tPASS\tSVTYPE=DEL;CIEND=-7,7;CIPOS=-7,7;END=250420;CS=DEL_union;MC=EM_DL_DEL10608605;AC=1;AF=0.00019968;NS=2504;AN=5008;EAS_AF=0.0;EUR_AF=0.0;AFR_AF=0.0;AMR_AF=0.0;SAS_AF=0.001\tGT\t0|0"; // is not the complete first line
 	static std::string VCF_LINE_4 = "20\t254691\t.\tG\tA\t100\tPASS\tAC=4;AF=0.000798722;AN=5008;NS=2504;DP=14874;EAS_AF=0;AMR_AF=0;AFR_AF=0.003;EUR_AF=0;SAS_AF=0;AA=G|||\tGT\t0|0\t0|0\t0|0\t0|0\t0|0";
+	static std::string VCF_LINE_5 = "1\t75148200\tWG:DEL:a3bcba65\tA\t<DEL>\t.\t.\tSVTYPE=DEL;SVLEN=-20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47"; // is not the complete first line
+
+
 
 	TEST(VariantsTest, ParseVariantChromTest)
 	{
@@ -54,7 +77,7 @@ namespace
 
         graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+        variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 		std::string chrom = variantPtr->getChrom();
 		EXPECT_STREQ(chrom.c_str(), chromVCF.c_str());
 		EXPECT_STRNE(chromVCF.c_str(), notChromVCF.c_str()); // make sure the chrom number and the not chrom number are not equal
@@ -69,7 +92,7 @@ namespace
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 	    uint32_t position = variantPtr->getPosition();
 		EXPECT_EQ(position, positionVCF);
@@ -84,7 +107,7 @@ namespace
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		std::string id = variantPtr->getID();
 		EXPECT_STREQ(id.c_str(), idVCF.c_str());
@@ -97,7 +120,7 @@ namespace
 	{
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		auto refAllele = variantPtr->getRefAllelePtr();
 		ASSERT_STREQ(refAllele->getSequence(),"G");
@@ -110,7 +133,7 @@ namespace
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_EQ(altAllelePtrs.size(), 1);
@@ -123,11 +146,31 @@ namespace
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser, nullptr);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF[0].c_str());
 		ASSERT_STREQ(altAllelePtrs[1]->getSequence(), altVCF[1].c_str());
+	}
+
+	TEST(VariantsTest, ParseSymbolicVariantAltTest)
+	{
+		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250);
+		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
+		auto referencePtr = std::make_shared< TestReference >();
+		referencePtr->setSequence(regionPtr, sequence);
+
+		const char* altVCF = "AATTCAGATTCAGGACCCCT"; // this matches the first variant line of the test_vcf_file
+
+		graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_5.c_str(), vcfParser, referencePtr);
+
+		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
+		auto refAllele = variantPtr->getRefAllelePtr();
+		ASSERT_EQ(altAllelePtrs.size(), 1);
+		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF);
+		ASSERT_STREQ(refAllele->getSequence(),"A");
 	}
 
 	TEST(VariantsTest, ParseVariantMultipleAltDupsTest)
@@ -136,7 +179,7 @@ namespace
 
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_2.c_str(), vcfParser, nullptr);
 
 		auto altAllelePtrs = variantPtr->getAltAllelePtrs();
 		ASSERT_STREQ(altAllelePtrs[0]->getSequence(), altVCF[0].c_str());
@@ -148,7 +191,7 @@ namespace
 	{
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		std::string qual = variantPtr->getQual();
 		ASSERT_STREQ(qual.c_str(),"34439.5");;
@@ -158,7 +201,7 @@ namespace
 	{
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		std::string filter = variantPtr->getFilter();
 		ASSERT_STREQ(filter.c_str(),"PASS");
@@ -180,7 +223,7 @@ namespace
 		infoMap["EAS_AF"] = "0.0451";
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), vcfParser, nullptr);
 
 		auto infoFields = variantPtr->getInfoFields();
 		for (auto infoFieldIter : infoMap)
@@ -195,7 +238,7 @@ namespace
 	{
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_3.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_3.c_str(), vcfParser, nullptr);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "C");
 		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "<CN0>");
@@ -205,7 +248,7 @@ namespace
 	{
 		graphite::VariantParser< const char* > vcfParser;
 		graphite::Variant::SharedPtr variantPtr;
-		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_4.c_str(), vcfParser);
+		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_4.c_str(), vcfParser, nullptr);
 
 		std::string qual = variantPtr->getQual();
 		ASSERT_STREQ(qual.c_str(),"100");

@@ -30,9 +30,9 @@ namespace graphite
 		typedef std::weak_ptr<VCFFileReader> WeakPtr;
 		~VCFFileReader();
 
-		inline static VCFFileReader::SharedPtr CreateVCFFileReader(const std::string& path)
+		inline static VCFFileReader::SharedPtr CreateVCFFileReader(const std::string& path, IReference::SharedPtr referencePtr)
 		{
-			auto vcfFileReaderPtr = std::shared_ptr< VCFFileReader >(new VCFFileReader(path));
+			auto vcfFileReaderPtr = std::shared_ptr< VCFFileReader >(new VCFFileReader(path, referencePtr));
 			return vcfFileReaderPtr;
 		}
 
@@ -41,7 +41,7 @@ namespace graphite
 		uint32_t getID() { return this->m_id; }
 		std::vector< IVariant::SharedPtr > getVariantsInRegion(Region::SharedPtr regionPtr);
 	protected:
-		VCFFileReader(const std::string& path);
+		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr);
 	private:
 
 		void Open();
@@ -54,6 +54,7 @@ namespace graphite
 		IFile::SharedPtr m_file_ptr;
 		VariantParser< const char* > m_vcf_parser;
 		uint32_t m_id;
+		IReference::SharedPtr m_reference_ptr;
 
 		std::mutex m_region_mutex;
 

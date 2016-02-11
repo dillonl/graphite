@@ -10,12 +10,16 @@
 #include <map>
 #include <unordered_map>
 #include <tuple>
+#include <stdlib.h>
 
 #include "IVariant.h"
 #include "core/allele/Allele.h"
 #include "core/parser/VCFParser.hpp"
+#include "core/parser/InfoFieldParser.hpp"
 #include "core/reference/Reference.h"
 #include "core/alignment/Sample.hpp"
+
+#include <boost/algorithm/string.hpp>
 
 namespace graphite
 {
@@ -32,7 +36,7 @@ namespace graphite
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser)
+		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser, IReference::SharedPtr referencePtr)
 		{
 			std::string fields;
 			auto variantPtr = std::make_shared< Variant >();
@@ -41,6 +45,17 @@ namespace graphite
 			if (!boost::spirit::qi::parse(vcfLine.c_str(), (vcfLine.c_str() + vcfLine.size()), parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
+			}
+
+            if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
+			{
+				InfoFieldParser< std::string::iterator > infoParser;
+				std::map< std::string, std::string > infoFields;
+				if (boost::spirit::qi::parse(fields.begin(), fields.end(), infoParser, infoFields))
+				{
+					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
+					alts[0] = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])));
+				}
 			}
 
 			variantPtr->setRefAndAltAlleles(ref, alts);

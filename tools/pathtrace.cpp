@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 	// load variants from vcf
-	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr, fastaReferencePtr);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
