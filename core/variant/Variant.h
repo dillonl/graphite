@@ -65,6 +65,7 @@ namespace graphite
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();
+			std::cout << variantPtr->getPosition() << "\t" << variantPtr->m_ref_allele_ptr->getSequence() << "\t" << variantPtr->m_alt_allele_ptrs[0]->getSequence() << std::endl;
 			return variantPtr;
 		}
 
