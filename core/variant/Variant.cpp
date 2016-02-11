@@ -88,13 +88,13 @@ namespace graphite
 	void Variant::setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts)
 	{
 		this->m_all_allele_ptrs.clear();
-		this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref.c_str()));
+		this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref));
 		this->m_all_allele_ptrs.reserve(alts.size() + 1);
 		this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
 		this->m_alt_allele_ptrs.clear();
 		for (const auto& alt : alts)
 		{
-			auto sequencePtr = SequenceManager::Instance()->getSequence(alt.c_str());
+			auto sequencePtr = SequenceManager::Instance()->getSequence(alt);
 			auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
 			this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
 			this->m_all_allele_ptrs.emplace_back(altAllelePtr);

@@ -97,6 +97,7 @@ namespace graphite
 		// a "compound variant" can be generated.
 		while (getNextVariant(nextVariant))
 		{
+			std::cout << "nv: " << nextVariant->getPosition() << " " << nextVariant->getRefAllelePtr()->getSequence() << " " << nextVariant->getAltAllelePtrs()[0]->getSequence() <<  std::endl;
 			if (variantEndPosition < nextVariant->getPosition() || strcmp(variantChrom.c_str(), nextVariant->getChrom().c_str()) != 0)
 			{
 				break;
