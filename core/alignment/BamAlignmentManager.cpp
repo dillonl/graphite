@@ -69,11 +69,10 @@ namespace graphite
 				position startPosition = ((variantPtr->getPosition() - (variantPadding * 2)) > 0) ? (variantPtr->getPosition() - (variantPadding * 2)) : 0;
 				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, (variantPtr->getPosition() + (variantPadding * 2)));
 			}
+			position endPosition = regionPtr->getEndPosition() + (variantPadding * 2);
 			// if this variant is within a reasonable range of the last variant (or is the first variant) then just add it's position to the region's end position and continue
-			if (regionPtr->getReferenceID().compare(variantPtr->getChrom()) == 0 && variantPtr->getPosition() <= regionPtr->getEndPosition() + (variantPadding * 2))
+			if (regionPtr->getReferenceID().compare(variantPtr->getChrom()) == 0 && variantPtr->getPosition() <= endPosition)
 			{
-				// position endPosition = variantPtr->getPosition() <= regionPtr->getEndPosition() + (variantPadding * 2);
-				position endPosition = regionPtr->getEndPosition() + (variantPadding * 2);
 				regionPtr->setEndPosition(endPosition);
 			}
 			else // otherwise add the region to the list of regions and set the regionPtr = to nullptr so it will get set on the next pass
@@ -91,6 +90,7 @@ namespace graphite
 		auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
 
 		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
+		/*
 		uint32_t positionIncrement = 100000;
 		for (auto regionPtr : regionPtrs)
 		{
@@ -103,11 +103,7 @@ namespace graphite
 			{
 				auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
 				position endPosition = (lastRegionPosition < (currentPosition + positionIncrement - 1)) ? lastRegionPosition : (currentPosition + positionIncrement - 1);
-				// std::cout << "lrp: " << lastRegionPosition << std::endl;
-				// std::cout << "cp: " << currentPosition << std::endl;
-				// std::cout << "ep: " << endPosition << std::endl;
 				auto tmpRegionPtr = std::make_shared< Region >(regionPtr->getReferenceID(), currentPosition, endPosition);
-				// std::cout << "bam region: " << tmpRegionPtr->getReferenceID() << " " << tmpRegionPtr->getStartPosition() << " " << tmpRegionPtr->getEndPosition() << std::endl;
 				auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, tmpRegionPtr);
 				auto future = ThreadPool::Instance()->enqueue(funct);
 				futureFunctions.push_back(future);
@@ -116,7 +112,19 @@ namespace graphite
 			while (currentPosition < lastRegionPosition);
 			// std::cout << "---" << std::endl;
 		}
+		*/
 		// std::cout << "finished threading" << std::endl;
+
+		for (auto regionPtr : regionPtrs)
+		{
+			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
+			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
+			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
+			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
+			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
+			auto future = ThreadPool::Instance()->enqueue(funct);
+			futureFunctions.push_back(future);
+		}
 
 		std::unordered_set< std::string > alignmentSet;
 		while (!futureFunctions.empty())
