@@ -35,6 +35,7 @@ namespace graphite
 			virtual void incrementMappedToUnmappedCount() = 0;
 			virtual void incrementRepositionedCount() = 0;
 			virtual void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) = 0;
+			virtual size_t getMaxAlleleSize() = 0;
     };
 }
 

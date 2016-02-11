@@ -5,7 +5,7 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -16,42 +16,13 @@ namespace graphite
 	}
 
 	Variant::Variant() :
-		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0)
+		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0)
 	{
 	}
 
 	Variant::~Variant()
 	{
 	}
-
-	/*
-	uint32_t Variant::getTotalAlleleCount()
-	{
-		uint32_t totalCount = 0;
-		totalCount += this->m_ref_allele_ptr->getForwardCount();
-		totalCount += this->m_ref_allele_ptr->getReverseCount();
-		for (auto allelePtr : getAltAllelePtrs())
-		{
-			totalCount += allelePtr->getForwardCount();
-			totalCount += allelePtr->getReverseCount();
-		}
-		return totalCount;
-	}
-
-	std::string Variant::getAlleleCountString()
-	{
-		std::string alleleCountString = "";
-		alleleCountString += std::to_string(this->m_ref_allele_ptr->getForwardCount()) + ",";
-		alleleCountString += std::to_string(this->m_ref_allele_ptr->getReverseCount());
-		for (auto altAllelePtr : getAltAllelePtrs())
-		{
-			alleleCountString += ",";
-			alleleCountString += std::to_string(altAllelePtr->getForwardCount()) + ",";
-			alleleCountString += std::to_string(altAllelePtr->getReverseCount());
-		}
-		return alleleCountString;
-	}
-	*/
 
 	std::string Variant::alleleString()
 	{
@@ -148,6 +119,14 @@ namespace graphite
 	std::string Variant::getGenotype()
 	{
 		return "";
+	}
+
+	void Variant::setMaxAlleleSize()
+	{
+		for (auto allelePtr : this->m_all_allele_ptrs)
+		{
+			if (this->m_max_allele_size < allelePtr->getLength()) { this->m_max_allele_size = allelePtr->getLength(); }
+		}
 	}
 
 	std::string Variant::getInfoFieldsString()

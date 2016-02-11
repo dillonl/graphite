@@ -62,6 +62,7 @@ namespace graphite
             variantPtr->m_line = std::string(vcfLine.c_str(), vcfLine.size() - 1);
 
 			setUnorderedMapKeyValue(fields, variantPtr->m_info_fields);
+			variantPtr->setMaxAlleleSize();
 			return variantPtr;
 		}
 
@@ -150,6 +151,7 @@ namespace graphite
 		std::unordered_map< std::string, std::string > getInfoFields() const { return m_info_fields; }
 		std::string getID() const { return m_id; }
 		std::string getRef() { return std::string(this->m_ref_allele_ptr->getSequence()); }
+		size_t getMaxAlleleSize() override { return this->m_max_allele_size; }
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
 		void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) override;
@@ -169,6 +171,7 @@ namespace graphite
 		/* uint32_t getTotalAlleleCount(); */
 		std::string getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs);
 
+		size_t m_max_allele_size;
 		uint32_t m_max_prefix_match_length;
 		uint32_t m_max_suffix_match_length;
 		std::unordered_map< IAllele::SharedPtr, uint32_t > m_allele_prefix_max_overlap_map;
@@ -190,6 +193,7 @@ namespace graphite
 		std::atomic< uint32_t > m_repositioned_count;
 
 	private:
+		void setMaxAlleleSize();
 
 		// a helper class for the getSampleCounts method
 		class VariantSampleContainer

@@ -64,22 +64,27 @@ namespace graphite
 		position endPosition = 0;
 		while (variantListPtr->getNextVariant(variantPtr))
 		{
-			if (regionPtr == nullptr)
+			position startPosition = ((variantPtr->getPosition() - (variantPadding * 2)) > 0) ? (variantPtr->getPosition() - (variantPadding * 2)) : 0;
+			endPosition = (variantPtr->getPosition() + variantPtr->getMaxAlleleSize() + (variantPadding * 2));
+			if (regionPtr == nullptr) // if this is the first time through
 			{
-				position startPosition = ((variantPtr->getPosition() - (variantPadding * 2)) > 0) ? (variantPtr->getPosition() - (variantPadding * 2)) : 0;
-				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, (variantPtr->getPosition() + (variantPadding * 2)));
+				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, endPosition);
 			}
-			position endPosition = regionPtr->getEndPosition() + (variantPadding * 2);
-			// if this variant is within a reasonable range of the last variant (or is the first variant) then just add it's position to the region's end position and continue
-			if (regionPtr->getReferenceID().compare(variantPtr->getChrom()) == 0 && variantPtr->getPosition() <= endPosition)
+
+			position regionEdgePosition = regionPtr->getEndPosition() + (variantPadding * 2);
+			if (regionPtr->getReferenceID().compare(variantPtr->getChrom()) == 0 && regionEdgePosition < variantPtr->getPosition())
 			{
-				regionPtr->setEndPosition(endPosition);
+				regionPtr->setEndPosition(endPosition); // set the end of the region variant_pos + max_allele_size + (padding * 2)
 			}
 			else // otherwise add the region to the list of regions and set the regionPtr = to nullptr so it will get set on the next pass
 			{
 				regionPtrs.push_back(regionPtr);
-				regionPtr = nullptr;
+				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, endPosition);
 			}
+		}
+		if (regionPtr != nullptr) // make sure to add the last region
+		{
+			regionPtrs.push_back(regionPtr);
 		}
 		return regionPtrs;
 	}
