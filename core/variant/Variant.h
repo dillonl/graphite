@@ -53,10 +53,11 @@ namespace graphite
 				std::map< std::string, std::string > infoFields;
 				if (boost::spirit::qi::parse(fields.begin(), fields.end(), infoParser, infoFields))
 				{
-					variantPtr->m_position -= 1;
+					/* variantPtr->m_position -= 1; */
 					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
-					ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])) + 1);
-					alts[0] = std::string(referencePtr->getSequence() + offset, 1);
+					ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])));
+					/* alts[0] = std::string(referencePtr->getSequence() + offset, 1); */
+					alts[0] = "";
 				}
 			}
 
