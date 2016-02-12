@@ -52,6 +52,8 @@ namespace adjudicator
 					// if (j == nc->cigar->length - 1) { suffixMatch = nc->cigar->elements[j].length; }
 					score += (adjudicatorPtr->getMatchValue() * nc->cigar->elements[j].length);
 					break;
+				case 'S':
+					std::cout << "softclipping" << std::endl;
 				case 'X':
 					score -= (adjudicatorPtr->getMisMatchValue() * nc->cigar->elements[j].length);
 					break;
