@@ -70,8 +70,6 @@ namespace adjudicator
 										const int8_t* nt_table,
 										const int8_t* score_matrix)
 		{
-			static std::mutex lock;
-			std::lock_guard< std::mutex > guard(lock);
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
 			n->ref_len = referenceLength;
 			n->ref_seq = (char*)referenceSeq;
@@ -80,11 +78,9 @@ namespace adjudicator
 			if (isReference)
 			{
 				this->m_next_id = (this->m_next_id % 2 == 0) ? this->m_next_id + 2 : this->m_next_id + 1;
-				std::cout << "ref: " << std::string(allelePtr->getSequence(), allelePtr->getLength()) << std::endl;
 			}
 			else
 			{
-				std::cout << "alt: " << std::string(allelePtr->getSequence(), allelePtr->getLength()) << std::endl;
 				this->m_next_id = (this->m_next_id % 2 != 0) ? this->m_next_id + 2 : this->m_next_id + 1;
 			}
 			n->id = this->m_next_id;

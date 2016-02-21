@@ -47,6 +47,7 @@ namespace graphite
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
 
+			/*
 			if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
 			{
 				InfoFieldParser< std::string::iterator > infoParser;
@@ -59,13 +60,14 @@ namespace graphite
 					alts[0] = std::string(referencePtr->getSequence() + offset, 1);
 				}
 			}
+			*/
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
             variantPtr->m_line = std::string(vcfLine.c_str(), vcfLine.size() - 1);
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();
-			std::cout << variantPtr->getPosition() << "\t" << variantPtr->m_ref_allele_ptr->getSequence() << "\t" << variantPtr->m_alt_allele_ptrs[0]->getSequence() << std::endl;
+			/* std::cout << variantPtr->getPosition() << "\t" << variantPtr->m_ref_allele_ptr->getSequence() << "\t" << variantPtr->m_alt_allele_ptrs[0]->getSequence() << std::endl; */
 			return variantPtr;
 		}
 
