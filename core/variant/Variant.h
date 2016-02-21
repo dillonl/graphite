@@ -70,14 +70,6 @@ namespace graphite
 			variantPtr->m_qual = vcfComponents[5];
 			variantPtr->m_filter = vcfComponents[6];
 
-			std::cout << "chrom: " << variantPtr->m_chrom << std::endl;
-			std::cout << "pos: " << variantPtr->m_position << std::endl;
-			std::cout << "id: " << variantPtr->m_id << std::endl;
-			std::cout << "ref: " << ref << std::endl;
-			std::cout << "alt: " << vcfComponents[4] << std::endl;
-			std::cout << "qual: " << variantPtr->m_qual << std::endl;
-			std::cout << "filter: " << variantPtr->m_filter << std::endl;
-
 
 			/*
 			if (!boost::spirit::qi::parse(vcfLine.c_str(), (vcfLine.c_str() + vcfLine.size()), parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
