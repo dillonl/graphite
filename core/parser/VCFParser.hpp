@@ -27,6 +27,7 @@ namespace graphite
 				using namespace boost::spirit;
 				using namespace boost::phoenix;
 
+				/*
 				std::string dnaMatchString = "actgnACTGN";
 				// auto altMatcher = (+qi::char_(dnaMatchString) % ',') | (+qi::graph % ',');
 				auto refMatcher = +qi::char_(dnaMatchString);
@@ -40,12 +41,6 @@ namespace graphite
 				qual = +qi::graph;
 				filter = +qi::graph;
 				info = +qi::graph;
-/*
-				info = pair >> *((qi::lit(';') | '&') >> pair);
-				pair = key >> -('=' >> value);
-				key = qi::char_("a-zA-Z_0-9\\./(),-") >> *qi::char_("a-zA-Z_0-9\\./(),-");
-				value = +qi::char_("a-zA-Z_0-9\\./(),-");
-*/
 				start %= chrom > tab > pos > tab > id > tab > ref > tab > alt > tab > qual > tab > filter > tab > info;
 
 				// names for error output
@@ -69,6 +64,7 @@ namespace graphite
 						// << _1 // prints the error line
 						<< std::endl
 						);
+				*/
 
 			}
 

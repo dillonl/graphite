@@ -20,6 +20,8 @@
 #include "core/alignment/Sample.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 namespace graphite
 {
@@ -42,10 +44,47 @@ namespace graphite
 			auto variantPtr = std::make_shared< Variant >();
 			std::string ref;
 			std::vector< std::string > alts;
+
+			std::vector< std::string > vcfComponents;
+			boost::split(vcfComponents, vcfLine, boost::is_any_of("\t"));
+			if (vcfComponents.size() < 7)
+			{
+				std::cout << "vcf line is incorrectly formated" << std::endl;
+			}
+
+			std::cout << vcfLine << std::endl;
+
+			variantPtr->m_chrom = vcfComponents[0];
+			variantPtr->m_position = stoul(vcfComponents[1]);
+			variantPtr->m_id = vcfComponents[2];
+			ref = vcfComponents[3];
+			if (vcfComponents[4].find(",") != std::string::npos)
+			{
+				boost::split(alts, vcfComponents[4], boost::is_any_of(","));
+			}
+			else
+			{
+				alts.push_back(vcfComponents[4]);
+			}
+
+			variantPtr->m_qual = vcfComponents[5];
+			variantPtr->m_filter = vcfComponents[6];
+
+			std::cout << "chrom: " << variantPtr->m_chrom << std::endl;
+			std::cout << "pos: " << variantPtr->m_position << std::endl;
+			std::cout << "id: " << variantPtr->m_id << std::endl;
+			std::cout << "ref: " << ref << std::endl;
+			std::cout << "alt: " << vcfComponents[4] << std::endl;
+			std::cout << "qual: " << variantPtr->m_qual << std::endl;
+			std::cout << "filter: " << variantPtr->m_filter << std::endl;
+
+
+			/*
 			if (!boost::spirit::qi::parse(vcfLine.c_str(), (vcfLine.c_str() + vcfLine.size()), parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
 			{
 				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
 			}
+			*/
 
 			/*
 			if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
