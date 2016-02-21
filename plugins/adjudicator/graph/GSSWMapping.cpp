@@ -52,6 +52,7 @@ namespace adjudicator
 					// if (j == nc->cigar->length - 1) { suffixMatch = nc->cigar->elements[j].length; }
 					score += (adjudicatorPtr->getMatchValue() * nc->cigar->elements[j].length);
 					break;
+				case 'S':
 				case 'X':
 					score -= (adjudicatorPtr->getMisMatchValue() * nc->cigar->elements[j].length);
 					break;
