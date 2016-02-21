@@ -52,8 +52,6 @@ namespace graphite
 				std::cout << "vcf line is incorrectly formated" << std::endl;
 			}
 
-			std::cout << vcfLine << std::endl;
-
 			variantPtr->m_chrom = vcfComponents[0];
 			variantPtr->m_position = stoul(vcfComponents[1]);
 			variantPtr->m_id = vcfComponents[2];
