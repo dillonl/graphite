@@ -145,8 +145,8 @@ namespace graphite
 				{
 					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
 					{
-						alignmentSet.emplace(alignment->getID());
-						this->m_alignment_ptrs.emplace_back(alignment);
+						alignmentSet.insert(alignment->getID());
+						this->m_alignment_ptrs.push_back(alignment);
 					}
 				}
 				// std::cout << "added: " << loadedAlignmentPtrs.size() << std::endl;
