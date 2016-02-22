@@ -141,14 +141,17 @@ namespace graphite
 			futureFunct->wait();
 		}
 
-		for (auto bamAlignmentReader : bamAlignmentReaders)
 		{
-			for (auto& alignment : bamAlignmentReader->getBamAlignments())
+			std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
+			for (auto bamAlignmentReader : bamAlignmentReaders)
 			{
-				if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+				for (auto& alignment : bamAlignmentReader->getBamAlignments())
 				{
-					alignmentSet.insert(alignment->getID());
-					this->m_alignment_ptrs.push_back(alignment);
+					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+					{
+						alignmentSet.insert(alignment->getID());
+						this->m_alignment_ptrs.push_back(alignment);
+					}
 				}
 			}
 		}

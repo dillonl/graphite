@@ -37,6 +37,7 @@ namespace graphite
 		std::string m_bam_path;
 		Region::SharedPtr m_region_ptr;
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
+		std::mutex m_alignment_ptrs_lock;
         std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
 		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};
