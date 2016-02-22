@@ -97,34 +97,15 @@ namespace graphite
 		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
 		// std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
-		/*
-		uint32_t positionIncrement = 100000;
-		for (auto regionPtr : regionPtrs)
-		{
-			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
-			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
-			position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
-			position startPosition = regionPtr->getStartPosition();
-			position currentPosition = startPosition;
-			do
-			{
-				auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-				position endPosition = (lastRegionPosition < (currentPosition + positionIncrement - 1)) ? lastRegionPosition : (currentPosition + positionIncrement - 1);
-				auto tmpRegionPtr = std::make_shared< Region >(regionPtr->getReferenceID(), currentPosition, endPosition);
-				auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, tmpRegionPtr);
-				auto future = ThreadPool::Instance()->enqueue(funct);
-				futureFunctions.push_back(future);
-				currentPosition = endPosition + 1;
-			}
-			while (currentPosition < lastRegionPosition);
-			// std::cout << "---" << std::endl;
-		}
-		*/
-		// std::cout << "finished threading" << std::endl;
+
 
 		std::vector< BamAlignmentReader::SharedPtr > bamAlignmentReaders;
+		std::unordered_set< std::string > regionStrings;
 		for (auto regionPtr : regionPtrs)
 		{
+			auto regionStringIter = regionStrings.find(regionPtr->getRegionString());
+			if (regionStringIter != regionStrings.end()) { continue; }
+			regionStrings.emplace(regionPtr->getRegionString());
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
 			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
