@@ -57,33 +57,27 @@ namespace graphite
 		std::vector< Region::SharedPtr > regionPtrs;
 
 		auto variantListPtr = variantManagerPtr->getVariantsInRegion(this->m_region_ptr);
+		std::vector< IVariant::SharedPtr > variantPtrs;
 		IVariant::SharedPtr variantPtr;
-		IVariant::SharedPtr nextVariantPtr;
-		Region::SharedPtr regionPtr = nullptr;
-
-		position endPosition = 0;
 		while (variantListPtr->getNextVariant(variantPtr))
 		{
-			position startPosition = ((variantPtr->getPosition() - (variantPadding * 2)) > 0) ? (variantPtr->getPosition() - (variantPadding * 2)) : 0;
-			endPosition = (variantPtr->getPosition() + variantPtr->getMaxAlleleSize() + (variantPadding * 2));
-			if (regionPtr == nullptr) // if this is the first time through
-			{
-				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, endPosition);
-			}
-
-			position regionEdgePosition = regionPtr->getEndPosition() + (variantPadding * 2);
-			if (regionPtr->getReferenceID().compare(variantPtr->getChrom()) == 0 && regionEdgePosition < variantPtr->getPosition())
-			{
-				regionPtr->setEndPosition(endPosition); // set the end of the region variant_pos + max_allele_size + (padding * 2)
-			}
-			else // otherwise add the region to the list of regions and set the regionPtr = to nullptr so it will get set on the next pass
-			{
-				regionPtrs.push_back(regionPtr);
-				regionPtr = std::make_shared< Region >(variantPtr->getChrom(), startPosition, endPosition);
-			}
+			variantPtrs.emplace_back(variantPtr);
 		}
-		if (regionPtr != nullptr) // make sure to add the last region
+
+		Region::SharedPtr regionPtr = nullptr;
+		for (auto i = 0; i < variantPtrs.size(); ++i)
 		{
+			// std::cout << "variant: " << i << std::endl;
+			position startPosition = ((variantPtrs[i]->getPosition() - (variantPadding * 2)) > 0) ? (variantPtrs[i]->getPosition() - (variantPadding * 2)) : 0;
+			position endPosition = (variantPtrs[i]->getPosition() + variantPtrs[i]->getMaxAlleleSize() + (variantPadding * 2));
+			auto j = i + 1;
+			while (j < (variantPtrs.size() - 1) && variantPtrs[j]->getPosition() < endPosition)
+			{
+				endPosition = (variantPtrs[j]->getPosition() + variantPtrs[j]->getMaxAlleleSize() + (variantPadding * 2));
+				++j;
+			}
+			i = j - 1;
+			regionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), startPosition, endPosition);
 			regionPtrs.push_back(regionPtr);
 		}
 		return regionPtrs;
@@ -103,9 +97,6 @@ namespace graphite
 		std::unordered_set< std::string > regionStrings;
 		for (auto regionPtr : regionPtrs)
 		{
-			auto regionStringIter = regionStrings.find(regionPtr->getRegionString());
-			if (regionStringIter != regionStrings.end()) { continue; }
-			regionStrings.emplace(regionPtr->getRegionString());
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
 			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
