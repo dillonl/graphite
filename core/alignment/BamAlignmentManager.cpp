@@ -94,9 +94,9 @@ namespace graphite
 		ThreadPool::Instance()->start();
 		auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
 
-		// std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
+		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
-		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
+		// std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 		/*
 		uint32_t positionIncrement = 100000;
 		for (auto regionPtr : regionPtrs)
@@ -136,6 +136,34 @@ namespace graphite
 		}
 
 		std::unordered_set< std::string > alignmentSet;
+		while (!futureFunctions.empty())
+		{
+			auto futureFunct = futureFunctions.front();
+			futureFunctions.pop_front();
+			if (futureFunct->wait_for(std::chrono::milliseconds(100)) == std::future_status::ready)
+			{
+				std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
+				auto loadedAlignmentPtrs = futureFunct->get();
+				for (auto& alignment : loadedAlignmentPtrs)
+				{
+					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+					{
+						alignmentSet.insert(alignment->getID());
+						this->m_alignment_ptrs.push_back(alignment);
+					}
+				}
+				// std::cout << "added: " << loadedAlignmentPtrs.size() << std::endl;
+				continue;
+			}
+			else
+			{
+				futureFunctions.emplace_back(futureFunct);
+			}
+			// futureFunct->wait();
+		}
+
+		/*
+		std::unordered_set< std::string > alignmentSet;
 		for (auto futureFunct : futureFunctions)
 		{
 			futureFunct->wait();
@@ -154,33 +182,6 @@ namespace graphite
 					}
 				}
 			}
-		}
-
-		/*
-		std::unordered_set< std::string > alignmentSet;
-		while (!futureFunctions.empty())
-		{
-			auto futureFunct = futureFunctions.front();
-			futureFunctions.pop_front();
-			if (futureFunct->wait_for(std::chrono::milliseconds(100)) == std::future_status::ready)
-			{
-				auto loadedAlignmentPtrs = futureFunct->get();
-				for (auto& alignment : loadedAlignmentPtrs)
-				{
-					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
-					{
-						alignmentSet.insert(alignment->getID());
-						this->m_alignment_ptrs.push_back(alignment);
-					}
-				}
-				// std::cout << "added: " << loadedAlignmentPtrs.size() << std::endl;
-				continue;
-			}
-			else
-			{
-				futureFunctions.emplace_back(futureFunct);
-			}
-			// futureFunct->wait();
 		}
 		*/
 		// std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
