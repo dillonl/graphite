@@ -27,6 +27,8 @@ namespace graphite
 		static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
 		static position GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr);
 
+		std::vector< IAlignment::SharedPtr > getBamAlignments() { return m_bam_alignments; }
+
 	private:
         BamTools::BamReader m_bam_reader;
 		std::string m_bam_path;

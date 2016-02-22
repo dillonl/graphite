@@ -139,8 +139,11 @@ namespace graphite
 		for (auto futureFunct : futureFunctions)
 		{
 			futureFunct->wait();
-			auto loadedAlignmentPtrs = futureFunct->get();
-			for (auto& alignment : loadedAlignmentPtrs)
+		}
+
+		for (auto bamAlignmentReader : bamAlignmentReaders)
+		{
+			for (auto& alignment : bamAlignmentReader->getBamAlignments())
 			{
 				if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
 				{
