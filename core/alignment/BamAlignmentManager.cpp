@@ -120,6 +120,7 @@ namespace graphite
 		*/
 		// std::cout << "finished threading" << std::endl;
 
+		std::vector< BamAlignmentReader::SharedPtr > bamAlignmentReaders;
 		for (auto regionPtr : regionPtrs)
 		{
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
@@ -129,6 +130,7 @@ namespace graphite
 			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
+			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
 		}
 
 		std::unordered_set< std::string > alignmentSet;
