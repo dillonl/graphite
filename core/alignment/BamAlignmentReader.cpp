@@ -50,13 +50,13 @@ namespace graphite
 			{
 				throw "There was an error in the sample name for: " + sample;
 			}
-			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
+			m_bam_alignments.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
 		}
 		this->m_bam_reader.Close();
 		// lock.lock();
 		// std::cout << " alignments: " << alignmentPtrs.size() << std::endl;
 		// lock.unlock();
-		return alignmentPtrs;
+		return m_bam_alignments;
 	}
 
 	std::vector< Sample::SharedPtr > BamAlignmentReader::GetBamReaderSamples(const std::string& bamPath)

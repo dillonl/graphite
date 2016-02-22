@@ -30,6 +30,7 @@ namespace graphite
 	private:
         BamTools::BamReader m_bam_reader;
 		std::string m_bam_path;
+		std::vector< IAlignment::SharedPtr > m_bam_alignments;
 	};
 }
 

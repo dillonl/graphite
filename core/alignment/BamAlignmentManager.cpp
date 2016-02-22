@@ -94,7 +94,9 @@ namespace graphite
 		ThreadPool::Instance()->start();
 		auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
 
-		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
+		// std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
+
+		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 		/*
 		uint32_t positionIncrement = 100000;
 		for (auto regionPtr : regionPtrs)
@@ -134,6 +136,22 @@ namespace graphite
 		}
 
 		std::unordered_set< std::string > alignmentSet;
+		for (auto futureFunct : futureFunctions)
+		{
+			futureFunct->wait();
+			auto loadedAlignmentPtrs = futureFunct->get();
+			for (auto& alignment : loadedAlignmentPtrs)
+			{
+				if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+				{
+					alignmentSet.insert(alignment->getID());
+					this->m_alignment_ptrs.push_back(alignment);
+				}
+			}
+		}
+
+		/*
+		std::unordered_set< std::string > alignmentSet;
 		while (!futureFunctions.empty())
 		{
 			auto futureFunct = futureFunctions.front();
@@ -158,6 +176,7 @@ namespace graphite
 			}
 			// futureFunct->wait();
 		}
+		*/
 		// std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
 		this->m_loaded = true;
 	}
