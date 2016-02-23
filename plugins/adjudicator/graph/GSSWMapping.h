@@ -19,7 +19,7 @@ namespace adjudicator
 		~GSSWMapping();
 
 		int getMappingScore() override;
-		MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr) override;
+		/* MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr) override; */
 		IAlignment::SharedPtr getAlignmentPtr() override;
 		std::vector< IAllele::SharedPtr > getAllelePtrs() override;
 		position getPosition() override { return m_position; }

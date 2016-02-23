@@ -75,6 +75,7 @@ namespace adjudicator
 		return mappingAlignmentInfoPtrs;
 	}
 
+	/*
 	MappingAlignmentInfo::SharedPtr GSSWMapping::getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
 	{
 		static std::mutex smutex;
@@ -87,16 +88,7 @@ namespace adjudicator
 		uint32_t length = 0;
 		uint32_t prefixMatch = 0;
 		uint32_t suffixMatch = 0;
-		/*
-		if (gsswNodeCigar->length < 0 || gsswNodeCigar->length > 1000)
-		{
-			std::cout << "----------------------" << std::endl;
-			std::cout << iter->second->position << std::endl;
-			gssw_print_graph_mapping(m_gssw_mapping_ptr.get());
-			std::cout << "length: " << gsswNodeCigar->length << std::endl;
-			std::cout << "----------------------" << std::endl;
-		}
-		*/
+
 		for (int j = 0; j < gsswNodeCigar->length; ++j)
 		{
 			switch (gsswNodeCigar->elements[j].type)
@@ -123,6 +115,7 @@ namespace adjudicator
 		auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >(allelePtr, score, length, prefixMatch, suffixMatch);
 		return  mappingAlignmentInfo;
 	}
+	*/
 
 	/*
 	MappingAlignment::SharedPtr GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)

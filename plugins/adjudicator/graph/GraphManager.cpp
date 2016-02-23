@@ -62,12 +62,21 @@ namespace adjudicator
 			this->m_gssw_graphs.emplace_back(gsswGraphPtr);
 		}
 
-		IAlignment::SharedPtr alignmentPtr;
-		while (alignmentListPtr->getNextAlignment(alignmentPtr))
+		auto funct = [&]()
 		{
-			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
-			MappingManager::Instance()->registerMapping(gsswMappingPtr);
-		}
+			std::vector< GSSWMapping::SharedPtr > mappingPtrs;
+			IAlignment::SharedPtr alignmentPtr;
+			while (alignmentListPtr->getNextAlignment(alignmentPtr))
+			{
+				auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+				mappingPtrs.emplace_back(gsswMappingPtr);
+			}
+			for (auto gsswMappingPtr : mappingPtrs)
+			{
+				MappingManager::Instance()->registerMapping(gsswMappingPtr);
+			}
+		};
+		ThreadPool::Instance()->enqueue(funct);
 	}
 
 }

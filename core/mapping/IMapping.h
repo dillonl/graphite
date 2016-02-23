@@ -24,7 +24,7 @@ namespace graphite
 		}
 		~IMapping() {}
 
-		virtual MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr) = 0;
+		/* virtual MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr) = 0; */
 		virtual int getMappingScore() = 0;
 		virtual IAlignment::SharedPtr getAlignmentPtr() = 0;
 		virtual std::vector< IAllele::SharedPtr > getAllelePtrs() = 0;
