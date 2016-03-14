@@ -38,7 +38,7 @@ namespace graphite
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser, IReference::SharedPtr referencePtr)
+		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize=3000)
 		{
 			std::string fields;
 			auto variantPtr = std::make_shared< Variant >();
@@ -97,6 +97,10 @@ namespace graphite
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();
+			if (maxAllowedAlleleSize < variantPtr->m_max_allele_size)
+			{
+				variantPtr->m_skip = true;
+			}
 			/* std::cout << variantPtr->getPosition() << "\t" << variantPtr->m_ref_allele_ptr->getSequence() << "\t" << variantPtr->m_alt_allele_ptrs[0]->getSequence() << std::endl; */
 			return variantPtr;
 		}
@@ -197,6 +201,8 @@ namespace graphite
 		void incrementUnmappedToMappedCount() override;
 		void incrementMappedToUnmappedCount() override;
 		void incrementRepositionedCount() override;
+		bool shouldSkip() override;
+
 
 	protected:
 		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
@@ -226,6 +232,8 @@ namespace graphite
 		std::atomic< uint32_t > m_unmapped_to_mapped_count;
 		std::atomic< uint32_t > m_mapped_to_unmapped_count;
 		std::atomic< uint32_t > m_repositioned_count;
+
+		bool m_skip;
 
 	private:
 		void setMaxAlleleSize();

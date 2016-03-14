@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 	}
 
 	// load variants from vcf
-	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr, fastaReferencePtr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr, fastaReferencePtr, graphSize);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory

@@ -23,7 +23,7 @@ void getAlignmentPtrsFromManager(const std::string& path, graphite::IAlignmentLi
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
 	std::string vcfPath = TEST_VCF_FILE;
-	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPath, regionPtr1, nullptr);
+	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPath, regionPtr1, nullptr, 3000);
 	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 

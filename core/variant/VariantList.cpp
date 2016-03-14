@@ -101,6 +101,9 @@ namespace graphite
 			{
 				break;
 			}
+
+			if (nextVariant->shouldSkip()) { continue; }
+
 			// this is a minor efficiency, even though this is a bit ugly
 			// it is more efficient to add the variant after checking that this
 			// is a compound variant because it is so rare

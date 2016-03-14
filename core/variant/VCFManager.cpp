@@ -9,21 +9,23 @@
 
 namespace graphite
 {
-	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr) :
+	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
-		m_region_ptr(regionPtr)
+		m_region_ptr(regionPtr),
+		m_max_allowed_allele_size(maxAllowedAlleleSize)
 	{
-		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr);
+		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, m_max_allowed_allele_size);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 	}
 
-	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr) :
+	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
-		m_region_ptr(regionPtr)
+		m_region_ptr(regionPtr),
+		m_max_allowed_allele_size(maxAllowedAlleleSize)
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
-			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr);
+			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, m_max_allowed_allele_size);
 			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 		}
 	}

@@ -5,7 +5,7 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0), m_skip(false)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -16,7 +16,7 @@ namespace graphite
 	}
 
 	Variant::Variant() :
-		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0)
+		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0), m_skip(false)
 	{
 	}
 
@@ -121,6 +121,8 @@ namespace graphite
 		return "";
 	}
 
+	bool Variant::shouldSkip() { return this->m_skip; }
+
 	void Variant::setMaxAlleleSize()
 	{
 		for (auto allelePtr : this->m_all_allele_ptrs)
@@ -167,10 +169,20 @@ namespace graphite
 					uint32_t forwardCount = allelePtr->getForwardCount(samplePtr);
 					uint32_t reverseCount = allelePtr->getReverseCount(samplePtr);
 					std::string prefix = (i == 0) ? "" : ",";
-					sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
+
+					if (m_skip)
+					{
+						sampleString += prefix + ".,.";
+					}
+					else
+					{
+						sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
+					}
+
 					totalCount += (forwardCount + reverseCount);
 				}
-				alleleCountString += "\tDP=" + std::to_string(totalCount) + ";DP4=" + sampleString;
+				std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
+				alleleCountString += "\tDP=" + totalCountString + ";DP4=" + sampleString;
 			}
 		}
 		return alleleCountString;

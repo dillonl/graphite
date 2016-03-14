@@ -19,9 +19,10 @@
 namespace graphite
 {
 
-	VCFFileReader::VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr) :
+	VCFFileReader::VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAlleleSize) :
 		m_path(path),
-		m_reference_ptr(referencePtr)
+		m_reference_ptr(referencePtr),
+		m_max_allowed_allele_size(maxAlleleSize)
 	{
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
@@ -104,7 +105,7 @@ namespace graphite
 				position linePosition = getPositionFromLine(line.c_str());
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_vcf_parser, this->m_reference_ptr));
+					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_vcf_parser, this->m_reference_ptr, m_max_allowed_allele_size));
 				}
 				if (regionPtr->getEndPosition() < linePosition) { break; } // if we have passed the end position of the region then stop looking for variants
 			}

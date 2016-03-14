@@ -48,8 +48,6 @@ namespace adjudicator
 				switch (nc->cigar->elements[j].type)
 				{
 				case 'M':
-					// if (j == 0) { prefixMatch = nc->cigar->elements[j].length; }
-					// if (j == nc->cigar->length - 1) { suffixMatch = nc->cigar->elements[j].length; }
 					score += (adjudicatorPtr->getMatchValue() * nc->cigar->elements[j].length);
 					break;
 				case 'S':

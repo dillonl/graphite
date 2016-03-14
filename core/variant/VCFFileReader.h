@@ -30,9 +30,9 @@ namespace graphite
 		typedef std::weak_ptr<VCFFileReader> WeakPtr;
 		~VCFFileReader();
 
-		inline static VCFFileReader::SharedPtr CreateVCFFileReader(const std::string& path, IReference::SharedPtr referencePtr)
+		inline static VCFFileReader::SharedPtr CreateVCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize)
 		{
-			auto vcfFileReaderPtr = std::shared_ptr< VCFFileReader >(new VCFFileReader(path, referencePtr));
+			auto vcfFileReaderPtr = std::shared_ptr< VCFFileReader >(new VCFFileReader(path, referencePtr, maxAllowedAlleleSize));
 			return vcfFileReaderPtr;
 		}
 
@@ -41,7 +41,7 @@ namespace graphite
 		uint32_t getID() { return this->m_id; }
 		std::vector< IVariant::SharedPtr > getVariantsInRegion(Region::SharedPtr regionPtr);
 	protected:
-		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr);
+		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
 	private:
 
 		void Open();
@@ -55,6 +55,7 @@ namespace graphite
 		VariantParser< const char* > m_vcf_parser;
 		uint32_t m_id;
 		IReference::SharedPtr m_reference_ptr;
+		uint32_t m_max_allowed_allele_size;
 
 		std::mutex m_region_mutex;
 

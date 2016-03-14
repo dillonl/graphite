@@ -49,6 +49,7 @@ namespace adjudicator
 
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
+			if (variantPtr->shouldSkip()) { continue; }
 			// if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
 			// auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
