@@ -68,7 +68,55 @@ namespace
 	static std::string VCF_LINE_4 = "20\t254691\t.\tG\tA\t100\tPASS\tAC=4;AF=0.000798722;AN=5008;NS=2504;DP=14874;EAS_AF=0;AMR_AF=0;AFR_AF=0.003;EUR_AF=0;SAS_AF=0;AA=G|||\tGT\t0|0\t0|0\t0|0\t0|0\t0|0";
 	static std::string VCF_LINE_5 = "1\t75148200\tWG:DEL:a3bcba65\tA\t<DEL>\t.\t.\tSVTYPE=DEL;SVLEN=-20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47"; // is not the complete first line
 
+	std::string getVariantLineRefOfSize(size_t refSize)
+	{
+		std::string vcfLine = "1\t75148200\tWG:DEL:a3bcba65\t";
 
+		vcfLine += std::string(refSize, 'T');
+
+		vcfLine += "\tA\t.\t.\tSVTYPE=DEL;SVLEN=-20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47"; // is not the complete first line
+		return vcfLine;
+	}
+
+	std::string getVariantLineAltOfSize(size_t altSize)
+	{
+		std::string vcfLine = "1\t75148200\tWG:DEL:a3bcba65\tA\t";
+
+		vcfLine += std::string(altSize, 'T');
+
+		vcfLine += "\t.\t.\tSVTYPE=DEL;SVLEN=-20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47"; // is not the complete first line
+		return vcfLine;
+	}
+
+	TEST(VariantsTest, TestShouldNotSkipSmallReference)
+	{
+		uint32_t alleleSizeThreshold = 3000;
+		std::string vcfLine = getVariantLineRefOfSize(alleleSizeThreshold);
+        graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+        variantPtr = graphite::Variant::BuildVariant(vcfLine.c_str(), vcfParser, nullptr);
+		EXPECT_FALSE(variantPtr->shouldSkip());
+	}
+
+	TEST(VariantsTest, TestShouldSkipLargeReference)
+	{
+		uint32_t alleleSizeThreshold = 3000;
+		std::string vcfLine = getVariantLineRefOfSize(alleleSizeThreshold + 1);
+        graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+        variantPtr = graphite::Variant::BuildVariant(vcfLine.c_str(), vcfParser, nullptr);
+		EXPECT_TRUE(variantPtr->shouldSkip());
+	}
+
+	TEST(VariantsTest, TestShouldSkipLargeAlternate)
+	{
+		uint32_t alleleSizeThreshold = 3000;
+		std::string vcfLine = getVariantLineAltOfSize(alleleSizeThreshold + 1);
+        graphite::VariantParser< const char* > vcfParser;
+		graphite::Variant::SharedPtr variantPtr;
+        variantPtr = graphite::Variant::BuildVariant(vcfLine.c_str(), vcfParser, nullptr, alleleSizeThreshold);
+		EXPECT_TRUE(variantPtr->shouldSkip());
+	}
 
 	TEST(VariantsTest, ParseVariantChromTest)
 	{

@@ -125,6 +125,7 @@ namespace graphite
 
 	void Variant::setMaxAlleleSize()
 	{
+		this->m_max_allele_size = this->m_ref_allele_ptr->getLength();
 		for (auto allelePtr : this->m_all_allele_ptrs)
 		{
 			if (this->m_max_allele_size < allelePtr->getLength()) { this->m_max_allele_size = allelePtr->getLength(); }
