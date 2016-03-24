@@ -15,7 +15,7 @@ namespace graphite
 		IAlignmentReader() {}
 		virtual ~IAlignmentReader() {}
 
-		virtual std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr) = 0;
+		virtual std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads) = 0;
 	};
 }
 

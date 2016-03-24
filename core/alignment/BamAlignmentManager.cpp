@@ -12,10 +12,11 @@
 
 namespace graphite
 {
-	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr) :
+	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, bool excludeDuplicateReads) :
 		m_region_ptr(regionPtr),
 		m_sample_ptrs(samplePtrs),
-		m_loaded(false)
+		m_loaded(false),
+        m_exclude_duplicate_reads(excludeDuplicateReads)
 	{
     }
 
@@ -101,7 +102,7 @@ namespace graphite
 			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
 			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
 			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
+			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);

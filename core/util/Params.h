@@ -25,6 +25,7 @@ namespace graphite
 		std::string getOutputDirectory();
 		std::string getFilePrefix();
 		Region::SharedPtr getRegion();
+        bool getExcludeDuplicates();
 		uint32_t getPercent();
 		uint32_t getThreadCount();
 		int getMatchValue();

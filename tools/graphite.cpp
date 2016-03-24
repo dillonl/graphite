@@ -57,8 +57,10 @@ int main(int argc, char** argv)
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
 	auto gapExtensionValue = params.getGapExtensionValue();
+	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
+
 
 	// make sure paths exist
 	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
@@ -101,7 +103,7 @@ int main(int argc, char** argv)
 
 	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 	// load bam alignments
-	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr);
+	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
 	bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 

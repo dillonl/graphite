@@ -28,6 +28,8 @@ namespace graphite
 			variantPtr = nullptr;
 			return false;
 		}
+
+        std::cout << "next variant: " << variantPtr->getPosition() << " " << variantPtr->shouldSkip() << std::endl;
 	}
 
 	size_t VariantList::getCount()
@@ -78,7 +80,8 @@ namespace graphite
 			m_next_variant_init = true;
 			getNextVariant(this->m_next_variant);
 		}
-		variant = this->m_next_variant; // set the variant to be returned
+        		
+        variant = this->m_next_variant; // set the variant to be returned
 		if (this->m_next_variant == NULL) { return false; } // if the variant is NULL then return false, this indicates we are past the region of interest
 
 		std::string referenceString = variant->getRefAllelePtr()->getSequenceString();
@@ -102,7 +105,8 @@ namespace graphite
 				break;
 			}
 
-			if (nextVariant->shouldSkip()) { continue; }
+            std::cout << "compound: " << nextVariant.get() << std::endl;
+			if (nextVariant->shouldSkip()) { std::cout << "compound skip: " << nextVariant->getPosition() << std::endl; break; }
 
 			// this is a minor efficiency, even though this is a bit ugly
 			// it is more efficient to add the variant after checking that this

@@ -101,7 +101,7 @@ namespace graphite
 			{
 				variantPtr->m_skip = true;
 			}
-			/* std::cout << variantPtr->getPosition() << "\t" << variantPtr->m_ref_allele_ptr->getSequence() << "\t" << variantPtr->m_alt_allele_ptrs[0]->getSequence() << std::endl; */
+			std::cout << variantPtr->m_chrom << "\t" << variantPtr->m_position << "\t" << variantPtr->m_id << "\t" << std::endl;
 			return variantPtr;
 		}
 

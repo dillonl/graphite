@@ -49,7 +49,8 @@ namespace adjudicator
 
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
-			if (variantPtr->shouldSkip()) { continue; }
+            std::cout << "graph variant: " << variantPtr->getPosition() << " " << variantPtr->shouldSkip() << std::endl;
+			if (variantPtr->shouldSkip()) { std::cout << "skipping in gssw: " << std::endl; continue; }
 			// if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
 			// auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);

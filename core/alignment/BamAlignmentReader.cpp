@@ -16,7 +16,7 @@ namespace graphite
 	{
 	}
 
-	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr)
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
 	{
 		// static std::mutex lock;
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
@@ -41,6 +41,7 @@ namespace graphite
 		// while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
 		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
 		{
+            if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
 			// if (bamAlignment.RefID != refID) { break; }
 			std::string sample;
 			bamAlignment.GetTag("RG", sample);

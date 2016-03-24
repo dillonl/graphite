@@ -20,6 +20,7 @@ namespace graphite
 			("help,h","Print help message")
 			(",b", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input BAM file[s], separate multiple files by space")
 			(",r", boost::program_options::value< std::string >()->required(), "Region information")
+			(",d", boost::program_options::bool_switch()->default_value(false), "Exclude Duplicate Reads")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
 			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
@@ -70,6 +71,12 @@ namespace graphite
 		}
 		return true;
 	}
+
+
+    bool Params::getExcludeDuplicates()
+    {
+        return m_variables_map["-d"].as< bool >();
+    }
 
 	std::string Params::getFastaPath()
 	{

@@ -19,7 +19,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignmentManager > SharedPtr;
-		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr);
+		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, bool excludeDuplicateReads = false);
 		~BamAlignmentManager();
 
 		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
@@ -34,6 +34,7 @@ namespace graphite
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;
+        bool m_exclude_duplicate_reads;
 		std::string m_bam_path;
 		Region::SharedPtr m_region_ptr;
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
