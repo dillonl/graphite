@@ -12,7 +12,8 @@ namespace graphite
 	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
-		m_max_allowed_allele_size(maxAllowedAlleleSize)
+		m_max_allowed_allele_size(maxAllowedAlleleSize),
+		m_reference_ptr(referencePtr)
 	{
 		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, m_max_allowed_allele_size);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
@@ -21,7 +22,8 @@ namespace graphite
 	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
-		m_max_allowed_allele_size(maxAllowedAlleleSize)
+		m_max_allowed_allele_size(maxAllowedAlleleSize),
+		m_reference_ptr(referencePtr)
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
@@ -61,14 +63,14 @@ namespace graphite
 			auto  vcfFuturePtr = vcfFutureVariantListPtrsMap[filePath];
 			vcfFuturePtr->wait();
 			auto vcfVariantPtrs = vcfFuturePtr->get();
-			auto tmpVCFVariantListPtr = std::make_shared< VariantList >(vcfVariantPtrs);
+			auto tmpVCFVariantListPtr = std::make_shared< VariantList >(vcfVariantPtrs, m_reference_ptr);
 			tmpVCFVariantListPtr->processOverlappingAlleles();
 			this->m_path_vcf_variant_list_ptrs_map.emplace(filePath, tmpVCFVariantListPtr);
 			variantPtrs.insert(variantPtrs.end(), vcfVariantPtrs.begin(), vcfVariantPtrs.end());
 		}
 
 		vcfFutureVariantListPtrsMap.clear();
-		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs);
+		this->m_variant_list_ptr = std::make_shared< VariantList >(variantPtrs, m_reference_ptr);
 		this->m_variant_list_ptr->sort();
 		this->m_variant_list_ptr->normalizeOverlappingVariants();
 		this->m_loaded_vcfs = true;

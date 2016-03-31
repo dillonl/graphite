@@ -4,6 +4,7 @@
 #include "IVariantList.h"
 #include "core/region/Region.h"
 #include "core/parser/VCFParser.hpp"
+#include "core/reference/IReference.h"
 #include "VCFHeader.h"
 
 #include <vector>
@@ -14,7 +15,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< VariantList > SharedPtr;
-		VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs);
+		VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs, IReference::SharedPtr referencePtr);
 		~VariantList();
 
 		bool getNextVariant(IVariant::SharedPtr& variantPtr) override;
@@ -35,6 +36,7 @@ namespace graphite
 		bool m_next_variant_init;
 		IVariant::SharedPtr m_next_variant;
 		VariantParser< const char* > m_vcf_parser;
+		IReference::SharedPtr m_reference_ptr;
 	};
 }
 

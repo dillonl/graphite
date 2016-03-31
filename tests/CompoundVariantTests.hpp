@@ -62,7 +62,7 @@ namespace
 		{
 			variantPtrs.emplace_back(Variant::BuildVariant(variantLine, vcfParser, nullptr));
 		}
-		auto variantsListPtr = std::make_shared< VariantList >(variantPtrs);
+		auto variantsListPtr = std::make_shared< VariantList >(variantPtrs, nullptr);
 		variantsListPtr->sort();
 		variantsListPtr->normalizeOverlappingVariants();
 

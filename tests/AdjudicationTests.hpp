@@ -112,8 +112,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -148,8 +148,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -184,8 +184,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -223,8 +223,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -263,8 +263,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -300,8 +300,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -338,8 +338,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -375,8 +375,8 @@ namespace adj_test
 		std::string dot = ".";
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -413,8 +413,8 @@ namespace adj_test
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		variantPtr->processOverlappingAlleles();
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -452,8 +452,8 @@ namespace adj_test
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		variantPtr->processOverlappingAlleles();
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;
@@ -499,9 +499,9 @@ namespace adj_test
 
 		std::vector< IVariant::SharedPtr > variant1Ptrs = { variant1Ptr };
 		std::vector< IVariant::SharedPtr > variant2Ptrs = { variant2Ptr };
-		auto variantList1Ptr = std::make_shared< VariantList >(variant1Ptrs);
-		auto variantList2Ptr = std::make_shared< VariantList >(variant2Ptrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantList1Ptr = std::make_shared< VariantList >(variant1Ptrs, referencePtr);
+		auto variantList2Ptr = std::make_shared< VariantList >(variant2Ptrs, referencePtr);
 
 		uint32_t percent = 50;
 		int match = 1;
@@ -538,8 +538,8 @@ namespace adj_test
 		auto variantPtr = std::make_shared< Variant >(pos, chrom, dot, dot, dot, refAllelePtr, altAllelePtrs);
 		variantPtr->processOverlappingAlleles();
 		std::vector< IVariant::SharedPtr > variantPtrs = { variantPtr };
-		auto variantListPtr = std::make_shared< VariantList >(variantPtrs);
 		auto referencePtr = std::make_shared< ReferenceTest >(regionPtr, seq.c_str());
+		auto variantListPtr = std::make_shared< VariantList >(variantPtrs, referencePtr);
 
 		uint32_t percent = 80;
 		int match = 1;

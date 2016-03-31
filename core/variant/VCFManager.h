@@ -44,6 +44,7 @@ namespace graphite
 		std::mutex m_loaded_mutex;
 		std::shared_ptr< std::thread > m_loading_thread_ptr;
 		uint32_t m_max_allowed_allele_size;
+		IReference::SharedPtr m_reference_ptr;
 	};
 }
 

@@ -4,10 +4,11 @@
 
 namespace graphite
 {
-	VariantList::VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs) :
+	VariantList::VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs, IReference::SharedPtr referencePtr) :
 		m_variant_ptrs(variantPtrs),
 		m_current_index(0),
-		m_next_variant_init(false)
+		m_next_variant_init(false),
+		m_reference_ptr(referencePtr)
 	{
 	}
 
@@ -80,7 +81,6 @@ namespace graphite
 			m_next_variant_init = true;
 			getNextVariant(this->m_next_variant);
 		}
-        		
         variant = this->m_next_variant; // set the variant to be returned
 		if (this->m_next_variant == NULL) { return false; } // if the variant is NULL then return false, this indicates we are past the region of interest
 
@@ -226,7 +226,7 @@ namespace graphite
 			});
 
 		auto variantPtrs = std::vector< IVariant::SharedPtr >(lowerBound, upperBound);
-		return std::make_shared< VariantList >(variantPtrs);
+		return std::make_shared< VariantList >(variantPtrs, m_reference_ptr);
 	}
 
 	void VariantList::processOverlappingAlleles()
