@@ -46,6 +46,7 @@ target_link_libraries(graphite
   fastahack_lib
   ${SCI_BOOST_LIBRARY}
   ${GSSW_LIB}
+  ${SCI_ZLIB_LIBRARY}
 )
 
 target_link_libraries(pathtrace
@@ -56,5 +57,6 @@ target_link_libraries(pathtrace
   fastahack_lib
   ${SCI_BOOST_LIBRARY}
   ${GSSW_LIB}
+  ${SCI_ZLIB_LIBRARY}
 )
 

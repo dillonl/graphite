@@ -42,4 +42,5 @@ target_link_libraries(graphite_tests
 	${GSSW_LIB}
 	ssw_lib
 	${SCI_BOOST_LIBRARY}
+    ${SCI_ZLIB_LIBRARY}
 )
