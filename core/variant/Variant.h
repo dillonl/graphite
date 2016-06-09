@@ -101,7 +101,6 @@ namespace graphite
 			{
 				variantPtr->m_skip = true;
 			}
-			std::cout << variantPtr->m_chrom << "\t" << variantPtr->m_position << "\t" << variantPtr->m_id << "\t" << std::endl;
 			return variantPtr;
 		}
 

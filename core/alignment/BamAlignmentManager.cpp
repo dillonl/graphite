@@ -1,5 +1,6 @@
 #include "BamAlignmentManager.h"
 #include "BamAlignmentReader.h"
+#include "SamtoolsAlignmentReader.h"
 #include "AlignmentList.h"
 #include "core/util/ThreadPool.hpp"
 
@@ -94,15 +95,15 @@ namespace graphite
 		// std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
 
-		std::vector< BamAlignmentReader::SharedPtr > bamAlignmentReaders;
+		std::vector< SamtoolsAlignmentReader::SharedPtr > bamAlignmentReaders;
 		std::unordered_set< std::string > regionStrings;
 		for (auto regionPtr : regionPtrs)
 		{
-			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
+			position bamLastPosition = SamtoolsAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
 			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
-			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
+			auto bamAlignmentReaderPtr = std::make_shared< SamtoolsAlignmentReader >(bamPath);
+			auto funct = std::bind(&SamtoolsAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
@@ -161,48 +162,6 @@ namespace graphite
 		this->m_loaded = true;
 	}
 
-	/*
-	void BamAlignmentManager::loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
-	{
-		std::unordered_map< std::string, bool > alignmentMap;
-		std::vector< std::thread > bamLoadThreads;
-		uint32_t positionIncrement = 100000;
-		std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureAlignmentListPtrs;
-		position startPosition = this->m_region_ptr->getStartPosition();
-		position endPosition = startPosition + positionIncrement;
-		// the last position is needs to be calculated by the reader if we are loading the entire chromosome.
-		// Otherwise use the specified end position.
-		position bamLastPosition = (this->m_region_ptr->getEndPosition() == MAX_POSITION) ? BamAlignmentReader::GetLastPositionInBam(bamPath, this->m_region_ptr) : this->m_region_ptr->getEndPosition();
-
-		do
-		{
-            std::string regionString = this->m_region_ptr->getReferenceID() + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
-			auto regionPtr = std::make_shared< Region >(regionString);
-			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr);
-			auto functFuture = ThreadPool::Instance()->enqueue(funct);
-			futureAlignmentListPtrs.emplace_back(functFuture);
-			startPosition = endPosition + 1;
-			endPosition = ((endPosition + positionIncrement) > this->m_region_ptr->getEndPosition()) ? this->m_region_ptr->getEndPosition() : endPosition + positionIncrement;
-		} while (endPosition < bamLastPosition);// this->m_region_ptr->getEndPosition());
-		uint32_t count = 0;
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
-		for (auto& alignmentFuturePtr : futureAlignmentListPtrs)
-		{
-			alignmentFuturePtr->wait();
-			auto loadedAlignmentPtrs = alignmentFuturePtr->get();
-			for (auto& alignment : loadedAlignmentPtrs)
-			{
-				if (alignmentMap.find(alignment->getID()) != alignmentMap.end()) { continue; } // make sure we don't add overlapping regions
-				alignmentMap[alignment->getID()] = true;
-
-				this->m_alignment_ptrs.emplace_back(alignment);
-			}
-		}
-		this->m_loaded = true;
-	}
-	*/
-
 	std::vector< Sample::SharedPtr > BamAlignmentManager::getSamplePtrs() { return m_sample_ptrs; }
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()
@@ -217,6 +176,11 @@ namespace graphite
 				  {
 					  return a->getPosition() < b->getPosition();
 				  });
+
+		for (auto alignmentPtr : this->m_alignment_ptrs)
+		{
+			std::cout << alignmentPtr->getPosition() << " " << alignmentPtr->getSequence() << std::endl;
+		}
 	}
 
 	void BamAlignmentManager::releaseResources()

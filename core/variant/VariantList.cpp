@@ -29,8 +29,6 @@ namespace graphite
 			variantPtr = nullptr;
 			return false;
 		}
-
-        std::cout << "next variant: " << variantPtr->getPosition() << " " << variantPtr->shouldSkip() << std::endl;
 	}
 
 	size_t VariantList::getCount()
@@ -105,8 +103,7 @@ namespace graphite
 				break;
 			}
 
-            std::cout << "compound: " << nextVariant.get() << std::endl;
-			if (nextVariant->shouldSkip()) { std::cout << "compound skip: " << nextVariant->getPosition() << std::endl; break; }
+			if (nextVariant->shouldSkip()) { break; }
 
 			// this is a minor efficiency, even though this is a bit ugly
 			// it is more efficient to add the variant after checking that this
@@ -123,7 +120,7 @@ namespace graphite
 			{
 				position referenceDelta = (nextVariantEndPosition - variantEndPosition);
 				referenceString += nextReferenceString.substr(nextReferenceString.size() - referenceDelta);
-				variantEndPosition = (compoundStartPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
+				variantEndPosition = (compoundStartPosition + referenceString.size() - 1); // subtract 1 because we are conuting starting with the position we are on
 			}
 			variants.push_back(nextVariant); // we will build a compound variant with all these variants
 			if (nextVariant->getPosition() < startPosition)

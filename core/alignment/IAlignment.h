@@ -32,6 +32,7 @@ namespace graphite
 		virtual const bool isFirstMate() { return false;}
 		virtual const bool isMapped() { return false; }
 		virtual const bool isReverseStrand() { return false; }
+		virtual const bool isDuplicate() { return false; }
 		virtual const uint16_t getOriginalMapQuality() { return 0; }
 		virtual std::weak_ptr< IMapping > getMapping() { return this->m_mapping_wptr; }
 		virtual void setMapping(std::shared_ptr< IMapping > mappingPtr)

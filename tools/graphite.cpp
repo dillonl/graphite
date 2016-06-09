@@ -1,4 +1,5 @@
 #include "core/alignment/BamAlignmentManager.h"
+#include "core/alignment/SamtoolsAlignmentReader.h"
 #include "core/alignment/BamAlignmentReader.h"
 #include "core/variant/VCFManager.h"
 #include "core/reference/FastaReference.h"
@@ -64,10 +65,13 @@ int main(int argc, char** argv)
 
 	// make sure paths exist
 	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
+	/*
+	// skip the bampath checking for now
 	for (auto bamPath : bamPaths)
 	{
 		validatePath(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
 	}
+	*/
 	for (auto vcfPath : vcfPaths)
 	{
 		validatePath(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
@@ -89,7 +93,7 @@ int main(int argc, char** argv)
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
 	{
-		auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
+		auto tmpSamplePtrs = graphite::SamtoolsAlignmentReader::GetBamReaderSamples(bamPath);
 		samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
 	}
 	for (auto samplePtr : samplePtrs)

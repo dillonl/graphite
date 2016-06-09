@@ -17,7 +17,7 @@ set(PATHTRACE_TOOLS_SOURCES
 )
 
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
-INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE})
+INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE}  ${HTSLIB_INCLUDE_DIR})
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -35,10 +35,9 @@ add_executable(pathtrace
   ${PATHTRACE_TOOLS_SOURCES}
 )
 
-MESSAGE("PLUGIN_LIBS: ${PLUGIN_LIBS}")
-
 # link libraries to executables
 target_link_libraries(graphite
+  ${HTSLIB_LIBRARY}
   BamTools
   BamTools-utils
   ${PLUGIN_LIBS}
@@ -47,6 +46,7 @@ target_link_libraries(graphite
   ${SCI_BOOST_LIBRARY}
   ${GSSW_LIB}
   ${SCI_ZLIB_LIBRARY}
+  ${SAMTOOLS_LIBRARIES}
 )
 
 target_link_libraries(pathtrace
@@ -59,4 +59,8 @@ target_link_libraries(pathtrace
   ${GSSW_LIB}
   ${SCI_ZLIB_LIBRARY}
 )
+
+add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+#add_dependencies(graphite ${HTSLIB_PROJECT})
+
 

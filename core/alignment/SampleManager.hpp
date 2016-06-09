@@ -24,7 +24,6 @@ namespace graphite
 		Sample::SharedPtr getSamplePtr(const std::string& readGroup)
 		{
 			auto iter = m_sample_ptrs_map.find(readGroup);
-			// std::cout << "fd: " << *iter << std::endl;
 			if (iter != m_sample_ptrs_map.end())
 			{
 				return iter->second;

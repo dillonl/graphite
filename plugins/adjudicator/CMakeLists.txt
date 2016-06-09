@@ -14,7 +14,7 @@ set(GRAPHITE_ADJUDICATOR_GRAPH_SOURCES
 include_directories(${CMAKE_SOURCE_DIR}/src/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/bamtools/src/)
 include_directories(${CMAKE_SOURCE_DIR}/externals/)
-include_directories(${SCI_BOOST_INCLUDE})
+include_directories(${SCI_BOOST_INCLUDE} ${HTSLIB_INCLUDE_DIR} ${SAMTOOLS_INCLUDES})
 
 #ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 

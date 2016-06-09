@@ -1,5 +1,4 @@
-
-INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE})
+INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE} ${HTSLIB_INCLUDE_DIR} ${SAMTOOLS_INCLUDES})
 
 #set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
@@ -7,6 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 set(GRAPHITE_UTIL_SOURCES
   util/Params.cpp
@@ -44,6 +44,7 @@ set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
   alignment/BamAlignmentReader.cpp
+  alignment/SamtoolsAlignmentReader.cpp
   )
 
 set(GRAPHITE_CORE_VARIANT_SOURCES
@@ -67,3 +68,5 @@ add_library(graphite_core
   )
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
+
+add_dependencies(graphite_core ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_SAMPLE_HPP
 #define GRAPHITE_SAMPLE_HPP
 
+#include <iostream>
 #include <string>
 #include <memory>
 

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+/*
 #include "FileTests.hpp"
 #include "VCFFileTests.hpp"
 #include "SequenceManagerTests.hpp"
@@ -12,6 +13,8 @@
 #include "AdjudicationTests.hpp"
 #include "AlleleTests.hpp"
 #include "plugins/TestIncludes.h"
+*/
+#include "S3FileTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)
 {

@@ -1,7 +1,7 @@
 # =================================
 # graphite - test
 #
-# text/CMakeLists.txt
+# test/CMakeLists.txt
 # =================================
 
 # set header and source files
@@ -9,13 +9,20 @@ set(GRAPHITE_TEST_SOURCES
   gtest_main.cpp
 )
 
+message("samtools: ${SAMTOOLS_INCLUDES}")
+
 # Where Google Test's .h files can be found.
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/externals
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR}
-  ${SCI_BOOST_INCLUDE})
+  ${SCI_BOOST_INCLUDE}
+  ${HTSLIB_INCLUDE_DIR}
+  ${SAMTOOLS_INCLUDES}
+ )
+
+
 
 set(Boost_USE_MULTITHREADED ON)
 
@@ -32,15 +39,19 @@ add_executable(graphite_tests
 )
 
 target_link_libraries(graphite_tests
+	${HTSLIB_LIBRARY}
 	gtest
 	BamTools
 	BamTools-utils
 	${VCFLIB_LIBRARIES}
-	${PLUGIN_LIBS}
-	${CORE_LIB}
 	fastahack_lib
 	${GSSW_LIB}
 	ssw_lib
 	${SCI_BOOST_LIBRARY}
     ${SCI_ZLIB_LIBRARY}
+	${CORE_LIB}
+	${PLUGIN_LIBS}
+	${SAMTOOLS_LIBRARIES}
 )
+
+add_dependencies(graphite_tests ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

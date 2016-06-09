@@ -1,3 +1,5 @@
+include(ExternalProject)
+
 ADD_SUBDIRECTORY(bamtools)
 ADD_SUBDIRECTORY(ssw)
 ADD_SUBDIRECTORY(gssw)
@@ -5,4 +7,6 @@ ADD_SUBDIRECTORY(fastahack)
 ADD_SUBDIRECTORY(zlib)
 ADD_SUBDIRECTORY(boost)
 ADD_SUBDIRECTORY(gtest)
+include(htslib.cmake)
+include(samtools.cmake)
 
