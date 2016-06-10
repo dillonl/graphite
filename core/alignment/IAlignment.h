@@ -43,6 +43,9 @@ namespace graphite
 		std::recursive_mutex* getMappingMutex() { return this->m_mapping_mutex; }
 		const std::shared_ptr< Sample > getSample() { return m_sample_ptr; }
 
+		virtual const void setSequence(char* seq, uint32_t len) = 0;
+		virtual const void removeSequence() = 0;
+
 	protected:
 		std::mutex m_mutex;
 		std::unordered_map< uint32_t, std::string > m_mapped_variants_information;

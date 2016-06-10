@@ -19,6 +19,7 @@ namespace graphite
 		~SamtoolsAlignmentReader();
 
         std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads = false) override;
+		void loadAlignmentSequencesInRegion(Region::SharedPtr regionPtr, std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > nameAlignmentPtrsMap);
 
 		static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
 		static position GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr);

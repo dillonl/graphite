@@ -33,6 +33,10 @@ namespace adjudicator
 
 
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();
+		if (alignmentPtr->getLength() <= 0 || alignmentPtr->getSequence() == nullptr)
+		{
+			std::cout << "no sequence: " << alignmentPtr->getPosition() << std::endl;
+		}
 		auto alignmentMappingMutexPtr = alignmentPtr->getMappingMutex(); // lock the alignmentMappingMutex so no one else can set the mapping ptr
 		std::lock_guard< std::recursive_mutex > lock(*alignmentMappingMutexPtr); // make sure the alignmentMapping isn't set during this
 

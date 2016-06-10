@@ -39,26 +39,27 @@ namespace graphite
 				m_original_map_quality(bamAlignment.MapQuality),
 				m_id(bamAlignment.Name + std::to_string(bamAlignment.IsFirstMate())),
 				m_length(bamAlignment.QueryBases.size()),
-				m_duplicate(bamAlignment.IsDuplicate())
+				m_duplicate(bamAlignment.IsDuplicate()),
+				m_sequence_counter(0)
 		{
 			m_sample_ptr = samplePtr;
 			m_sequence = new char[bamAlignment.QueryBases.size() + 1];
 			memcpy(m_sequence, bamAlignment.QueryBases.c_str(), bamAlignment.QueryBases.size() + 1); // the +1 is for the '\0' char
 		}
 
-	    BamAlignment(position pos, bool firstMate, bool isMapped, bool isReverseStrand, bool duplicate, uint16_t mapQuality, char* id, char* seq, uint32_t seqLen, std::shared_ptr< Sample > samplePtr) :
+	    BamAlignment(position pos, bool firstMate, bool isMapped, bool isReverseStrand, bool duplicate, uint16_t mapQuality, char* id, std::shared_ptr< Sample > samplePtr) :
 				m_position(pos),
 				m_first_mate(firstMate),
 				m_mapped(isMapped),
 				m_reverse_strand(isReverseStrand),
 				m_original_map_quality(mapQuality),
 				m_id(std::string(id) + std::to_string(firstMate)),
-				m_length(seqLen),
-				m_duplicate(duplicate)
+				m_duplicate(duplicate),
+				m_sequence_counter(0),
+				m_length(0),
+				m_sequence(nullptr)
 		{
 			m_sample_ptr = samplePtr;
-			m_sequence = new char[seqLen + 1];
-			memcpy(m_sequence, seq, seqLen + 1); // the +1 is for the '\0' char
 		}
 
 		virtual ~BamAlignment() { delete[] m_sequence; }
@@ -72,8 +73,30 @@ namespace graphite
 		const bool isReverseStrand() override { return m_reverse_strand; }
 		const bool isDuplicate() override { return m_duplicate; }
 		const uint16_t getOriginalMapQuality() override { return m_original_map_quality; }
+		const void setSequence(char* seq, uint32_t len) override
+		{
+			std::lock_guard< std::mutex > l(m_sequence_mutex);
+			m_sequence = seq;
+			m_length = len;
+			++m_sequence_counter;
+		}
+
+		const void removeSequence() override
+		{
+			std::lock_guard< std::mutex > l(m_sequence_mutex);
+			--m_sequence_counter;
+			if (m_sequence_counter <= 0)
+			{
+				free(m_sequence);
+				m_sequence_counter = 0;
+				m_length = 0;
+				/* std::cout << "sequence deleted" << std::endl; */
+			}
+		}
 
     private:
+		std::mutex m_sequence_mutex;
+		uint16_t m_sequence_counter;
 		char* m_sequence;
 		size_t m_length;
 		position m_position;

@@ -42,7 +42,6 @@ namespace adjudicator
 			{
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
-				std::cout << "loading region: " << alignmentListPtr->getCount() << std::endl;
 				if (alignmentListPtr->getCount() > 0)
 				{
 					auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
@@ -63,12 +62,15 @@ namespace adjudicator
 			this->m_gssw_graphs.emplace_back(gsswGraphPtr);
 		}
 
+		std::cout << "graph manager -- load sequences: " << startPosition << "-" << (startPosition+graphSize) << std::endl;
+		alignmentListPtr->loadAlignmentSequences();
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
 			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}
+		alignmentListPtr->unloadAlignmentSequences();
 	}
 
 }

@@ -38,6 +38,13 @@ namespace graphite
 		bool duplicate = (b->core.flag & BAM_FDUP);
 		uint16_t mapQuality = bam_get_qual(b);
 
+		Sample::SharedPtr samplePtr = SampleManager::Instance()->getSamplePtr(readGroup.substr(1)); // I'm not sure why I have to drop the first char
+		if (samplePtr == nullptr)
+		{
+			throw "There was an error in the sample name for: " + std::string(readGroup);
+		}
+
+		/*
 		int n=0;
 		char* qseq = (char*)malloc(b->core.l_qseq+1);
 		char* s   = bam1_seq(b);
@@ -47,17 +54,41 @@ namespace graphite
 			qseq[n] = bam_nt16_rev_table[v];
 		}
 		qseq[n] = 0;
-		Sample::SharedPtr samplePtr = SampleManager::Instance()->getSamplePtr(readGroup.substr(1)); // I'm not sure why I have to drop the first char
-		if (samplePtr == nullptr)
-		{
-			throw "There was an error in the sample name for: " + std::string(readGroup);
-		}
+		*/
 
-		auto bamAlignmentPtr = std::make_shared< BamAlignment >(pos, firstMate, isMapped, isReverseStrand, duplicate, mapQuality, name, qseq, b->core.l_qseq, samplePtr);
+		auto bamAlignmentPtr = std::make_shared< BamAlignment >(pos, firstMate, isMapped, isReverseStrand, duplicate, mapQuality, name, samplePtr);
+		// bamAlignmentPtr->setSequence(qseq, b->core.l_qseq);
 
 		std::vector< IAlignment::SharedPtr >* als = (std::vector< IAlignment::SharedPtr >*)data;
 		als->emplace_back(bamAlignmentPtr);
-		free(qseq);
+		return 0;
+	}
+
+	int readAlignmentSequences(const bam1_t* b, void* data)
+	{
+		std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > nameAlignmentPtrsMap = (*(std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > >*)data);
+		bool firstMate = (b->core.flag & BAM_FREAD1);
+		std::string name  = std::string(bam1_qname(b) + std::to_string(firstMate));
+
+		auto iter = nameAlignmentPtrsMap->find(name);
+		if (iter == nameAlignmentPtrsMap->end())
+		{
+			return 0;
+		}
+		IAlignment::SharedPtr alignmentPtr = iter->second;
+		int n=0;
+		char* qseq = (char*)malloc(b->core.l_qseq+1);
+		char* s   = bam1_seq(b);
+		for(n=0;n<(b->core.l_qseq);n++)
+		{
+			char v = bam1_seqi(s,n);
+			qseq[n] = bam_nt16_rev_table[v];
+		}
+		qseq[n] = 0;
+		alignmentPtr->setSequence(qseq, b->core.l_qseq);
+		// position pos = b->core.pos;
+		// std::cout << pos << " " << qseq << std::endl;
+		return 0;
 	}
 
 	typedef struct {
@@ -65,13 +96,6 @@ namespace graphite
 		samfile_t *in;
 	} tmpstruct_t;
 
-	// callback for bam_fetch()
-	static int fetch_func(const bam1_t *b, void *data)
-	{
-		bam_plbuf_t *buf = (bam_plbuf_t*)data;
-		bam_plbuf_push(b, buf);
-		return 0;
-	}
 	// callback for bam_plbuf_init()
 	static int pileup_func(uint32_t tid, uint32_t pos, int n, const bam_pileup1_t *pl, void *data)
 	{
@@ -98,7 +122,6 @@ namespace graphite
 		void* data = &alignmentPtrs;
 		bam_parse_region(tmp.in->header, regionPtr->getRegionString().c_str(), &ref, &tmp.beg, &tmp.end); // parse the region
 		buf = bam_plbuf_init(pileup_func, &tmp); // initialize pileup
-		// bam_fetch(tmp.in->x.bam, idx, ref, tmp.beg, tmp.end, buf, fetch_func);
 		bam_fetch(tmp.in->x.bam, idx, ref, tmp.beg, tmp.end, data, readAlignment);
 
 		bam_plbuf_push(0, buf); // finalize pileup
@@ -110,25 +133,25 @@ namespace graphite
 		return alignmentPtrs;
 	}
 
-	/*
-	std::vector< IAlignment::SharedPtr > SamtoolsAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
+	void SamtoolsAlignmentReader::loadAlignmentSequencesInRegion(Region::SharedPtr regionPtr, std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > nameAlignmentPtrsMap)
 	{
-		std::vector< IAlignment::SharedPtr > alignmentPtrs;
-
-		auto fp = bam_open(m_path.c_str(), "r");
-		bgzf_set_cache_size(fp, 8 * 1024 *1024);
+		int ref;
+		tmpstruct_t tmp;
+		tmp.beg = 0;
+		tmp.end = 0x7fffffff;
+		tmp.in = samopen(m_path.c_str(), "r", 0);
 		auto idx = bam_index_load(m_path.c_str());
 
+		bam_plbuf_t* buf;
+		void* data = &nameAlignmentPtrsMap;
+		bam_parse_region(tmp.in->header, regionPtr->getRegionString().c_str(), &ref, &tmp.beg, &tmp.end); // parse the region
+		buf = bam_plbuf_init(pileup_func, &tmp); // initialize pileup
+		bam_fetch(tmp.in->x.bam, idx, ref, tmp.beg, tmp.end, data, readAlignmentSequences);
 
-		void* data = &alignmentPtrs;
-		int refID = s_region_map[regionPtr->getReferenceID()];
-		bam_fetch(fp, idx, refID, regionPtr->getStartPosition(), regionPtr->getEndPosition(), data, readAlignment);
-
+		bam_plbuf_push(0, buf); // finalize pileup
 		bam_index_destroy(idx);
-		bam_close(fp);
-		return alignmentPtrs;
+		bam_plbuf_destroy(buf);
 	}
-	*/
 
 	std::vector< Sample::SharedPtr > SamtoolsAlignmentReader::GetBamReaderSamples(const std::string& path)
 	{

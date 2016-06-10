@@ -85,6 +85,8 @@ namespace adj_test
 		const char* getSequence() override { return this->m_sequence.c_str(); }
 		const size_t getLength() override { return this->m_sequence.size(); }
 		const position getPosition() override { return this->m_position; }
+		const void setSequence(char* seq, uint32_t len) override {}
+		const void removeSequence() override {}
 	private:
 		std::string m_sequence;
 		position m_position;

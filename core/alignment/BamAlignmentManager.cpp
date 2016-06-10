@@ -17,7 +17,8 @@ namespace graphite
 		m_region_ptr(regionPtr),
 		m_sample_ptrs(samplePtrs),
 		m_loaded(false),
-        m_exclude_duplicate_reads(excludeDuplicateReads)
+        m_exclude_duplicate_reads(excludeDuplicateReads),
+		m_name_alignment_ptr_map_ptr(std::make_shared< std::unordered_map< std::string, IAlignment::SharedPtr > >())
 	{
     }
 
@@ -39,7 +40,7 @@ namespace graphite
 
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 		alignmentPtrs.insert(alignmentPtrs.begin(), lowerBound, upperBound);
-		return std::make_shared< AlignmentList >(alignmentPtrs);
+		return std::make_shared< AlignmentList >(alignmentPtrs,m_name_alignment_ptr_map_ptr, regionPtr);
 	}
 
 	void BamAlignmentManager::asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
@@ -109,7 +110,8 @@ namespace graphite
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
 		}
 
-		std::unordered_set< std::string > alignmentSet;
+		// std::unordered_set< std::string > alignmentSet;
+		this->m_name_alignment_ptr_map_ptr->clear();
 		while (!futureFunctions.empty())
 		{
 			auto futureFunct = futureFunctions.front();
@@ -118,47 +120,21 @@ namespace graphite
 			{
 				std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
 				auto loadedAlignmentPtrs = futureFunct->get();
-				for (auto& alignment : loadedAlignmentPtrs)
+				for (auto& alignmentPtr : loadedAlignmentPtrs)
 				{
-					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
+					if (m_name_alignment_ptr_map_ptr->find(alignmentPtr->getID()) == m_name_alignment_ptr_map_ptr->end())
 					{
-						alignmentSet.insert(alignment->getID());
-						this->m_alignment_ptrs.push_back(alignment);
+						m_name_alignment_ptr_map_ptr->emplace(alignmentPtr->getID(), alignmentPtr);
+						this->m_alignment_ptrs.push_back(alignmentPtr);
 					}
 				}
-				// std::cout << "added: " << loadedAlignmentPtrs.size() << std::endl;
 				continue;
 			}
 			else
 			{
 				futureFunctions.emplace_back(futureFunct);
 			}
-			// futureFunct->wait();
 		}
-
-		/*
-		std::unordered_set< std::string > alignmentSet;
-		for (auto futureFunct : futureFunctions)
-		{
-			futureFunct->wait();
-		}
-
-		{
-			std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
-			for (auto bamAlignmentReader : bamAlignmentReaders)
-			{
-				for (auto& alignment : bamAlignmentReader->getBamAlignments())
-				{
-					if (alignmentSet.find(alignment->getID()) == alignmentSet.end())
-					{
-						alignmentSet.insert(alignment->getID());
-						this->m_alignment_ptrs.push_back(alignment);
-					}
-				}
-			}
-		}
-		*/
-		// std::cout << "finished loading alignments: " << this->m_alignment_ptrs.size() << std::endl;
 		this->m_loaded = true;
 	}
 
@@ -177,10 +153,16 @@ namespace graphite
 					  return a->getPosition() < b->getPosition();
 				  });
 
+
+
+		/*
+
+		  for testing only
 		for (auto alignmentPtr : this->m_alignment_ptrs)
 		{
 			std::cout << alignmentPtr->getPosition() << " " << alignmentPtr->getSequence() << std::endl;
 		}
+		*/
 	}
 
 	void BamAlignmentManager::releaseResources()

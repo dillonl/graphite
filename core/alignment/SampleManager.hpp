@@ -39,6 +39,11 @@ namespace graphite
 			}
 		}
 
+		std::unordered_map< std::string, Sample::SharedPtr > getSamplePtrs()
+		{
+			return this->m_sample_ptrs_map;
+		}
+
 	private:
 		std::unordered_map< std::string, Sample::SharedPtr > m_sample_ptrs_map;
 	};

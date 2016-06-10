@@ -50,7 +50,7 @@ namespace graphite
 				mappingPtr->incrementAlleleCounts();
 				if (mappingPtr->getMapped())
 				{
-					mappingPtr->printMapping();
+					// mappingPtr->printMapping();
 				}
 			}
 		}

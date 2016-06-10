@@ -40,6 +40,7 @@ namespace graphite
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
 		std::mutex m_alignment_ptrs_lock;
         std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
+		std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > m_name_alignment_ptr_map_ptr;
 		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};
 }
