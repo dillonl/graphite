@@ -25,7 +25,7 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 
-#set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
+set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
 #create binary
 add_executable(graphite
@@ -47,6 +47,8 @@ target_link_libraries(graphite
   ${GSSW_LIB}
   ${SCI_ZLIB_LIBRARY}
   ${SAMTOOLS_LIBRARIES}
+  curl
+  crypto
 )
 
 target_link_libraries(pathtrace
@@ -58,6 +60,8 @@ target_link_libraries(pathtrace
   ${SCI_BOOST_LIBRARY}
   ${GSSW_LIB}
   ${SCI_ZLIB_LIBRARY}
+  curl
+  crypto
 )
 
 add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

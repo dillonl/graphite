@@ -110,6 +110,7 @@ int main(int argc, char** argv)
 	auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
 	bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 	bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
+	std::cout << "finished reading alignments" << std::endl;
 
 	for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
 	{

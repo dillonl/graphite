@@ -44,7 +44,6 @@ namespace graphite
 			throw "There was an error in the sample name for: " + std::string(readGroup);
 		}
 
-		/*
 		int n=0;
 		char* qseq = (char*)malloc(b->core.l_qseq+1);
 		char* s   = bam1_seq(b);
@@ -54,10 +53,9 @@ namespace graphite
 			qseq[n] = bam_nt16_rev_table[v];
 		}
 		qseq[n] = 0;
-		*/
 
 		auto bamAlignmentPtr = std::make_shared< BamAlignment >(pos, firstMate, isMapped, isReverseStrand, duplicate, mapQuality, name, samplePtr);
-		// bamAlignmentPtr->setSequence(qseq, b->core.l_qseq);
+		bamAlignmentPtr->setSequence(qseq, b->core.l_qseq);
 
 		std::vector< IAlignment::SharedPtr >* als = (std::vector< IAlignment::SharedPtr >*)data;
 		als->emplace_back(bamAlignmentPtr);
@@ -109,27 +107,27 @@ namespace graphite
 	{
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 
-		// auto fp = bam_open(m_path.c_str(), "r");
-		// auto idx = bam_index_load(m_path.c_str());
 		int ref;
-		tmpstruct_t tmp;
-		tmp.beg = 0;
-		tmp.end = 0x7fffffff;
-		tmp.in = samopen(m_path.c_str(), "r", 0);
+		int beg = 0;
+		int end  = 0x7fffffff;
+
+		static std::mutex l;
+		std::lock_guard< std::mutex > lo(l);
+		auto fp = samopen(m_path.c_str(), "r", 0);
+
 		auto idx = bam_index_load(m_path.c_str());
 
 		bam_plbuf_t* buf;
 		void* data = &alignmentPtrs;
-		bam_parse_region(tmp.in->header, regionPtr->getRegionString().c_str(), &ref, &tmp.beg, &tmp.end); // parse the region
+		bam_parse_region(fp->header, regionPtr->getRegionString().c_str(), &ref, &beg, &end); // parse the region
 		buf = bam_plbuf_init(pileup_func, &tmp); // initialize pileup
-		bam_fetch(tmp.in->x.bam, idx, ref, tmp.beg, tmp.end, data, readAlignment);
+		bam_fetch(fp->x.bam, idx, ref, beg, end, data, readAlignment);
 
 		bam_plbuf_push(0, buf); // finalize pileup
 		bam_index_destroy(idx);
 		bam_plbuf_destroy(buf);
+		samclose(fp);
 
-		// bam_index_destroy(idx);
-		// bam_close(fp);
 		return alignmentPtrs;
 	}
 

@@ -90,7 +90,7 @@ namespace graphite
 				free(m_sequence);
 				m_sequence_counter = 0;
 				m_length = 0;
-				/* std::cout << "sequence deleted" << std::endl; */
+				std::cout << "sequence deleted" << std::endl;
 			}
 		}
 

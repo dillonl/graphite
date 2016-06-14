@@ -30,7 +30,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
-#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 
 
 #create binary
@@ -52,6 +52,8 @@ target_link_libraries(graphite_tests
 	${CORE_LIB}
 	${PLUGIN_LIBS}
 	${SAMTOOLS_LIBRARIES}
+	curl
+	crypto
 )
 
 add_dependencies(graphite_tests ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

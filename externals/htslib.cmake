@@ -23,9 +23,9 @@ ExternalProject_Add(HTSLIB_PROJECT
     GIT_REPOSITORY "https://github.com/samtools/htslib.git"
     GIT_TAG 11661a57306a048528d0a223c86c62bcdc20eb18
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_COMMAND} lib-static
-    INSTALL_COMMAND "${HTSLIB_INSTALL}"
+    CONFIGURE_COMMAND autoconf
+    BUILD_COMMAND  ./configure --enable-libcurl 
+    INSTALL_COMMAND  ${MAKE_COMMAND}
     LOG_DOWNLOAD 0
 	LOG_UPDATE 0
     LOG_CONFIGURE 0
@@ -33,6 +33,8 @@ ExternalProject_Add(HTSLIB_PROJECT
     LOG_TEST 0
     LOG_INSTALL 0
 )
+
+#target_link_libraries (htslib curl crypto)
 
 #include_directories(${HTSLIB_DIR}/src/HTSLIB_PROJECT/)
 
