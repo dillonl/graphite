@@ -58,6 +58,7 @@ namespace graphite
 			auto readerPtr = std::make_shared< SamtoolsAlignmentReader >(samplePtr->getPath());
 			readerPtr->loadAlignmentSequencesInRegion(this->m_region_ptr, m_name_alignment_ptr_map_ptr);
 		}
+		std::cout << "Loaded: " << m_alignment_ptrs.size() << " alignments" << std::endl;
 		/*
 		for (auto alignmentPtr : this->m_alignment_ptrs)
 		{
@@ -70,7 +71,6 @@ namespace graphite
 	{
 		for (auto alignmentPtr : this->m_alignment_ptrs)
 		{
-			std::cout << "---removing---" << std::endl;
 			alignmentPtr->removeSequence();
 		}
 	}

@@ -45,6 +45,7 @@ namespace graphite
 
 		virtual const void setSequence(char* seq, uint32_t len) = 0;
 		virtual const void removeSequence() = 0;
+		virtual const void incrementReferenceCount() = 0;
 
 	protected:
 		std::mutex m_mutex;

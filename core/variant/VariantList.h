@@ -21,7 +21,7 @@ namespace graphite
 		bool getNextVariant(IVariant::SharedPtr& variantPtr) override;
 		size_t getCount() override;
 		void sort() override;
-		void printToVCF(IHeader::SharedPtr header, std::ostream& out) override;
+		void printToVCF(IHeader::SharedPtr header, bool printHeader, std::ostream& out) override;
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out, std::string& bamPath);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);

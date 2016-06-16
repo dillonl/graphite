@@ -73,12 +73,17 @@ namespace graphite
 		const bool isReverseStrand() override { return m_reverse_strand; }
 		const bool isDuplicate() override { return m_duplicate; }
 		const uint16_t getOriginalMapQuality() override { return m_original_map_quality; }
+
+		const void incrementReferenceCount()
+		{
+			std::lock_guard< std::mutex > l(m_sequence_mutex);
+			++m_sequence_counter;
+		}
 		const void setSequence(char* seq, uint32_t len) override
 		{
 			std::lock_guard< std::mutex > l(m_sequence_mutex);
 			m_sequence = seq;
 			m_length = len;
-			++m_sequence_counter;
 		}
 
 		const void removeSequence() override
@@ -87,10 +92,8 @@ namespace graphite
 			--m_sequence_counter;
 			if (m_sequence_counter <= 0)
 			{
-				free(m_sequence);
 				m_sequence_counter = 0;
 				m_length = 0;
-				std::cout << "sequence deleted" << std::endl;
 			}
 		}
 

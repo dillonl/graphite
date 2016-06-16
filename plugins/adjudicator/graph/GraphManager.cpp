@@ -32,6 +32,8 @@ namespace adjudicator
 		position startPosition = regionPtr->getStartPosition();
 		position endPosition = regionPtr->getEndPosition();
 		position currentPosition = startPosition;
+		// std::vector< std::function< void() > > functs;
+		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
 
 		while (currentPosition < endPosition)
 		{
@@ -44,13 +46,38 @@ namespace adjudicator
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
 				if (alignmentListPtr->getCount() > 0)
 				{
-					auto funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
-					ThreadPool::Instance()->enqueue(funct);
+					std::function< void() >  funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
+					auto future = ThreadPool::Instance()->enqueue(funct);
+					futureFunctions.push_back(future);
+					/*
+					functs.emplace_back(funct);
+					auto alignmentPtrs =  alignmentListPtr->getAlignmentPtrs();
+					for (auto alignmentPtr : alignmentPtrs)
+					{
+						alignmentPtr->incrementReferenceCount();
+					}
+					*/
 				}
 			}
 			currentPosition += graphSize - overlap;
 		}
-		ThreadPool::Instance()->joinAll();
+		/*
+		for (auto& funct : functs)
+		{
+			auto future = ThreadPool::Instance()->enqueue(funct);
+			// futureFunctions.push_back(future);
+		}
+		*/
+		while (!futureFunctions.empty())
+		{
+			auto futureFunct = futureFunctions.front();
+			futureFunctions.pop_front();
+			if (futureFunct->wait_for(std::chrono::milliseconds(100)) != std::future_status::ready)
+			{
+				futureFunctions.emplace_back(futureFunct);
+			}
+		}
+		// ThreadPool::Instance()->joinAll();
 	}
 
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize)
@@ -63,14 +90,12 @@ namespace adjudicator
 		}
 
 		// std::cout << "graph manager -- load sequences: " << startPosition << "-" << (startPosition+graphSize) << std::endl;
-		// alignmentListPtr->loadAlignmentSequences();
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
 			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}
-		// alignmentListPtr->unloadAlignmentSequences();
 	}
 
 }

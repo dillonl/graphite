@@ -71,6 +71,7 @@ namespace graphite
 		auto iter = nameAlignmentPtrsMap->find(name);
 		if (iter == nameAlignmentPtrsMap->end())
 		{
+			std::cout << "ALIGNMENT NOT FOUND!!" << std::endl;
 			return 0;
 		}
 		IAlignment::SharedPtr alignmentPtr = iter->second;
@@ -105,34 +106,41 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > SamtoolsAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
 	{
+		static std::mutex l;
+		std::lock_guard< std::mutex > lo(l);
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 
 		int ref;
-		int beg = 0;
-		int end  = 0x7fffffff;
+		tmpstruct_t tmp;
+		tmp.beg = 0;
+		tmp.end = 0x7fffffff;
 
-		static std::mutex l;
-		std::lock_guard< std::mutex > lo(l);
-		auto fp = samopen(m_path.c_str(), "r", 0);
+		tmp.in = samopen(m_path.c_str(), "r", 0);
+		// auto fp = samopen(m_path.c_str(), "r", 0);
 
 		auto idx = bam_index_load(m_path.c_str());
 
 		bam_plbuf_t* buf;
 		void* data = &alignmentPtrs;
-		bam_parse_region(fp->header, regionPtr->getRegionString().c_str(), &ref, &beg, &end); // parse the region
+		bam_parse_region(tmp.in->header, regionPtr->getRegionString().c_str(), &ref, &tmp.beg, &tmp.end); // parse the region
+		// bam_parse_region(fp->header, regionPtr->getRegionString().c_str(), &ref, &beg, &end); // parse the region
 		buf = bam_plbuf_init(pileup_func, &tmp); // initialize pileup
-		bam_fetch(fp->x.bam, idx, ref, beg, end, data, readAlignment);
+		bam_fetch(tmp.in->x.bam, idx, ref, tmp.beg, tmp.end, data, readAlignment);
+		// bam_fetch(fp->x.bam, idx, ref, beg, end, data, readAlignment);
 
 		bam_plbuf_push(0, buf); // finalize pileup
 		bam_index_destroy(idx);
 		bam_plbuf_destroy(buf);
-		samclose(fp);
+		samclose(tmp.in);
+		// samclose(fp);
 
 		return alignmentPtrs;
 	}
 
 	void SamtoolsAlignmentReader::loadAlignmentSequencesInRegion(Region::SharedPtr regionPtr, std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > nameAlignmentPtrsMap)
 	{
+		static std::mutex l2;
+		std::lock_guard< std::mutex > lo(l2);
 		int ref;
 		tmpstruct_t tmp;
 		tmp.beg = 0;

@@ -19,7 +19,7 @@ namespace graphite
 		m_options_description_ptr->add_options()
 			("help,h","Print help message")
 			(",b", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input BAM file[s], separate multiple files by space")
-			(",r", boost::program_options::value< std::string >()->required(), "Region information")
+			(",r", boost::program_options::value< std::string >()->default_value(""), "Region information")
 			(",d", boost::program_options::bool_switch()->default_value(false), "Exclude Duplicate Reads")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
 			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
@@ -106,7 +106,14 @@ namespace graphite
 	Region::SharedPtr Params::getRegion()
 	{
 		auto regionString = m_variables_map["-r"].as< std::string >();
-		return std::make_shared< Region >(regionString);
+		if (regionString.size() == 0)
+		{
+			return nullptr;
+		}
+		else
+		{
+			return std::make_shared< Region >(regionString);
+		}
 	}
 
 	uint32_t Params::getPercent()

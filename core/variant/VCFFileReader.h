@@ -40,9 +40,14 @@ namespace graphite
 
 		uint32_t getID() { return this->m_id; }
 		std::vector< IVariant::SharedPtr > getVariantsInRegion(Region::SharedPtr regionPtr);
+
+		static std::vector< Region::SharedPtr > GetAllRegionsInVCF(const std::string& vcfPath);
+
+		VCFFileReader(const std::string& path);
 	protected:
 		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
 	private:
+
 
 		void Open();
         void readHeader();

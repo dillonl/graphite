@@ -1,5 +1,6 @@
 #include "core/file/ASCIIFileReader.h"
 #include "core/file/ASCIIGZFileReader.h"
+#include "core/region/Region.h"
 #include "VariantList.h"
 #include "VCFFileReader.h"
 #include "Variant.h"
@@ -27,6 +28,13 @@ namespace graphite
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
 		++s_vcf_id;
+		setFileReader(m_path);
+		Open();
+	}
+
+	VCFFileReader::VCFFileReader(const std::string& path) :
+		m_path(path)
+	{
 		setFileReader(m_path);
 		Open();
 	}
@@ -73,6 +81,25 @@ namespace graphite
 		while (m_file_ptr->getNextLine(line) && strncmp(line.c_str(), headerEnd.c_str(), headerEnd.size()) != 0)
 		{
 		}
+	}
+
+	std::vector< Region::SharedPtr > VCFFileReader::GetAllRegionsInVCF(const std::string& vcfPath)
+	{
+		std::vector< Region::SharedPtr > regionPtrs;
+		std::string line;
+		std::string currentRegion = "";
+		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+		while (vcfFileReaderPtr->m_file_ptr->getNextLine(line))
+		{
+			auto region = line.substr(0, line.find("\t"));
+			if (currentRegion.compare(region) != 0)
+			{
+				auto regionPtr = std::make_shared< Region >(region);
+				regionPtrs.emplace_back(regionPtr);
+				currentRegion = region;
+			}
+		}
+		return regionPtrs;
 	}
 
 	position VCFFileReader::getPositionFromLine(const char* line)

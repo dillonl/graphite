@@ -20,6 +20,7 @@ namespace graphite
 		bool getNextAlignment(IAlignment::SharedPtr& alignmentPtr) override;
 		void loadAlignmentSequences() override;
 		void unloadAlignmentSequences() override;
+		std::vector< IAlignment::SharedPtr > getAlignmentPtrs() override { return this->m_alignment_ptrs; }
 	private:
 		Region::SharedPtr m_region;
 		std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
