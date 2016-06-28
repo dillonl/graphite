@@ -44,19 +44,31 @@ namespace adjudicator
 			{
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
-				if (alignmentListPtr->getCount() > 0)
+				auto alignmentPtrsCount = alignmentListPtr->getCount();
+				if (alignmentPtrsCount > 0)
 				{
-					std::function< void() >  funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
-					auto future = ThreadPool::Instance()->enqueue(funct);
-					futureFunctions.push_back(future);
-					/*
-					functs.emplace_back(funct);
-					auto alignmentPtrs =  alignmentListPtr->getAlignmentPtrs();
-					for (auto alignmentPtr : alignmentPtrs)
+					if (alignmentPtrsCount > 15000)
 					{
-						alignmentPtr->incrementReferenceCount();
+						IVariant::SharedPtr variantPtr;
+						while (variantsListPtr->getNextVariant(variantPtr))
+						{
+							variantPtr->setSkip(true);
+						}
 					}
-					*/
+					else
+					{
+						std::function< void() >  funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alignmentListPtr, currentPosition, graphSize);
+						auto future = ThreadPool::Instance()->enqueue(funct);
+						futureFunctions.push_back(future);
+						/*
+						  functs.emplace_back(funct);
+						  auto alignmentPtrs =  alignmentListPtr->getAlignmentPtrs();
+						  for (auto alignmentPtr : alignmentPtrs)
+						  {
+						  alignmentPtr->incrementReferenceCount();
+						  }
+						*/
+					}
 				}
 			}
 			currentPosition += graphSize - overlap;
