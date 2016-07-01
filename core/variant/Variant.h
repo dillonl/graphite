@@ -177,6 +177,8 @@ namespace graphite
 			return true;
 		}
 
+		void setSkip(bool skip) override { m_skip = skip; }
+
 		void setFilter(std::string filter) { this->m_filter = filter; }
 		/* std::string getAlleleCountString(); */
 		std::string alleleString();
