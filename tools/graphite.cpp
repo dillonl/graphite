@@ -95,13 +95,11 @@ int main(int argc, char** argv)
 		regionPtrs.emplace_back(paramRegionPtr);
 	}
 
-	/*
 	// skip the bampath checking for now
 	for (auto bamPath : bamPaths)
 	{
-	validatePath(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
+		validatePath(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
 	}
-	*/
 
 	for (auto vcfPath : vcfPaths)
 	{
@@ -122,7 +120,8 @@ int main(int argc, char** argv)
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
 	{
-		auto tmpSamplePtrs = graphite::SamtoolsAlignmentReader::GetBamReaderSamples(bamPath);
+		// auto tmpSamplePtrs = graphite::SamtoolsAlignmentReader::GetBamReaderSamples(bamPath);
+		auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
 		samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
 	}
 	for (auto samplePtr : samplePtrs)

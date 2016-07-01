@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_SAMTOOLSALIGNMENTREADER_HPP
 #define GRAPHITE_SAMTOOLSALIGNMENTREADER_HPP
 
+/*
 #include "core/region/Region.h"
 #include "IAlignment.h"
 #include "IAlignmentList.h"
@@ -34,5 +35,6 @@ namespace graphite
 		std::string m_path;
 	};
 }
+*/
 
 #endif //GRAPHITE_SAMTOOLSALIGNMENTREADER_HPP

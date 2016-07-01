@@ -96,22 +96,27 @@ namespace graphite
 		// std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
 
-		std::vector< SamtoolsAlignmentReader::SharedPtr > bamAlignmentReaders;
+		// std::vector< SamtoolsAlignmentReader::SharedPtr > bamAlignmentReaders;
+		std::vector< BamAlignmentReader::SharedPtr > bamAlignmentReaders;
 		std::unordered_set< std::string > regionStrings;
 		for (auto regionPtr : regionPtrs)
 		{
-			position bamLastPosition = SamtoolsAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
-			// std::cout << "end position: " << regionPtr->getReferenceID() << " " << regionPtr->getStartPosition() <<  " " << regionPtr->getEndPosition() << std::endl;
-			// position lastRegionPosition = (bamLastPosition < regionPtr->getEndPosition()) ? bamLastPosition : regionPtr->getEndPosition();
-			auto bamAlignmentReaderPtr = std::make_shared< SamtoolsAlignmentReader >(bamPath);
-			auto funct = std::bind(&SamtoolsAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
+			// position bamLastPosition = SamtoolsAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
+			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
+			// auto bamAlignmentReaderPtr = std::make_shared< SamtoolsAlignmentReader >(bamPath);
+			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
+			// auto funct = std::bind(&SamtoolsAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
+			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
 		}
 
 		// std::unordered_set< std::string > alignmentSet;
-		this->m_name_alignment_ptr_map_ptr->clear();
+		{
+			std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
+			this->m_name_alignment_ptr_map_ptr->clear();
+		}
 		while (!futureFunctions.empty())
 		{
 			auto futureFunct = futureFunctions.front();

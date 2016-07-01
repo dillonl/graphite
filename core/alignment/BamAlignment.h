@@ -47,6 +47,7 @@ namespace graphite
 			memcpy(m_sequence, bamAlignment.QueryBases.c_str(), bamAlignment.QueryBases.size() + 1); // the +1 is for the '\0' char
 		}
 
+				/*
 	    BamAlignment(position pos, bool firstMate, bool isMapped, bool isReverseStrand, bool duplicate, uint16_t mapQuality, char* id, std::shared_ptr< Sample > samplePtr) :
 				m_position(pos),
 				m_first_mate(firstMate),
@@ -61,7 +62,7 @@ namespace graphite
 		{
 			m_sample_ptr = samplePtr;
 		}
-
+				*/
 		virtual ~BamAlignment() { delete[] m_sequence; }
 
 		const char* getSequence() override { return m_sequence; }

@@ -7,6 +7,6 @@ ADD_SUBDIRECTORY(fastahack)
 ADD_SUBDIRECTORY(zlib)
 ADD_SUBDIRECTORY(boost)
 ADD_SUBDIRECTORY(gtest)
-include(htslib.cmake)
-include(samtools.cmake)
+#include(htslib.cmake)
+#include(samtools.cmake)
 

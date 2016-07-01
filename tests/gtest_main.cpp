@@ -14,7 +14,7 @@
 #include "AlleleTests.hpp"
 #include "plugins/TestIncludes.h"
 */
-#include "S3FileTests.hpp"
+// #include "S3FileTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)
 {

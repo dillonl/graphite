@@ -93,7 +93,7 @@ namespace graphite
 			*/
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
-            variantPtr->m_line = std::string(vcfLine.c_str(), vcfLine.size() - 1);
+			variantPtr->m_line = std::string(vcfLine.c_str());
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();

@@ -5,6 +5,8 @@
 #include <string>
 #include <memory>
 
+#include <boost/noncopyable.hpp>
+
 namespace graphite
 {
 	class Sample : private boost::noncopyable

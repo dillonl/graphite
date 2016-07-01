@@ -56,4 +56,4 @@ target_link_libraries(graphite_tests
 	crypto
 )
 
-add_dependencies(graphite_tests ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+#add_dependencies(graphite_tests ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

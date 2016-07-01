@@ -69,4 +69,4 @@ add_library(graphite_core
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
 
-add_dependencies(graphite_core ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+#add_dependencies(graphite_core ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})

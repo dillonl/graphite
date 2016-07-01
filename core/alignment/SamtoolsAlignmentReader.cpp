@@ -7,6 +7,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+/*
+
 #include "bam.h"
 #include "sam.h"
 
@@ -216,7 +218,6 @@ namespace graphite
 		std::lock_guard< std::mutex > lock(s_region_last_positions_lock);
 		if (s_region_last_positions.size() > 0) { return; }
 		auto fp = bam_open(path.c_str(), "r");
-		/* bgzf_set_cache_size(fp, 8 * 1024 *1024); */
 		bam_hdr_t* header = bam_header_read(fp);
 		auto idx = bam_index_load(path.c_str());
 
@@ -231,3 +232,5 @@ namespace graphite
 		bam_close(fp);
 	}
 }
+
+*/

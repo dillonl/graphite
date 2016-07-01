@@ -64,7 +64,6 @@ target_link_libraries(pathtrace
   crypto
 )
 
-add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
-#add_dependencies(graphite ${HTSLIB_PROJECT})
+#add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
 
 

@@ -1,6 +1,7 @@
 #include "AlignmentList.h"
 #include "SampleManager.hpp"
 #include "SamtoolsAlignmentReader.h"
+#include "BamAlignmentReader.h"
 
 namespace graphite
 {
@@ -52,13 +53,16 @@ namespace graphite
 
 	void AlignmentList::loadAlignmentSequences()
 	{
+		/*
 		for (auto& iter : SampleManager::Instance()->getSamplePtrs())
 		{
 			auto samplePtr = iter.second;
-			auto readerPtr = std::make_shared< SamtoolsAlignmentReader >(samplePtr->getPath());
+			// auto readerPtr = std::make_shared< SamtoolsAlignmentReader >(samplePtr->getPath());
+			auto readerPtr = std::make_shared< BamAlignmentReader >(samplePtr->getPath());
 			readerPtr->loadAlignmentSequencesInRegion(this->m_region_ptr, m_name_alignment_ptr_map_ptr);
 		}
 		std::cout << "Loaded: " << m_alignment_ptrs.size() << " alignments" << std::endl;
+		*/
 		/*
 		for (auto alignmentPtr : this->m_alignment_ptrs)
 		{
