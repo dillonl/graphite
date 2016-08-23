@@ -1,4 +1,9 @@
-INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE} ${HTSLIB_INCLUDE_DIR} ${SAMTOOLS_INCLUDES})
+INCLUDE_DIRECTORIES(
+	${SCI_BOOST_INCLUDE}
+	${HTSLIB_INCLUDE_DIR}
+	${SAMTOOLS_INCLUDES}
+	${TABIX_INCLUDE}
+)
 
 set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
@@ -69,4 +74,4 @@ add_library(graphite_core
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
 
-#add_dependencies(graphite_core ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+add_dependencies(graphite_core ${TABIX_PROJECT})

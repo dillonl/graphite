@@ -7,6 +7,7 @@ ADD_SUBDIRECTORY(fastahack)
 ADD_SUBDIRECTORY(zlib)
 ADD_SUBDIRECTORY(boost)
 ADD_SUBDIRECTORY(gtest)
+include(tabix.cmake)
 #include(htslib.cmake)
 #include(samtools.cmake)
 

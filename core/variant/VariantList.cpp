@@ -2,6 +2,10 @@
 #include "Variant.h"
 #include "core/allele/EquivalentAllele.h"
 
+#include "bgzf.h"
+#include "tabix.h"
+#include "knetfile.h"
+
 namespace graphite
 {
 	VariantList::VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs, IReference::SharedPtr referencePtr) :
@@ -72,6 +76,20 @@ namespace graphite
 		{
 			variantPtr->printVariant(out, headerPtr->getSamplePtrs());
 		}
+	}
+
+	void VariantList::printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out)
+	{
+		BGZF* fp = bgzf_dopen(out, "w");
+		if (printHeader)
+		{
+			bgzf_write(fp, headerPtr->getHeader().c_str(), headerPtr->getHeader().size());
+		}
+		for(const auto variantPtr : this->m_variant_ptrs)
+		{
+			bgzf_write(fp, variantPtr->getVariantLine(headerPtr->getSamplePtrs()).c_str(), variantPtr->getVariantLine(headerPtr->getSamplePtrs()).size());
+		}
+		bgzf_close(fp);
 	}
 
 	bool VariantList::getNextCompoundVariant(IVariant::SharedPtr& variant)

@@ -22,7 +22,7 @@ namespace graphite
 			(",r", boost::program_options::value< std::string >()->default_value(""), "Region information")
 			(",d", boost::program_options::bool_switch()->default_value(false), "Exclude Duplicate Reads")
 			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
-			(",o", boost::program_options::value< std::string >()->default_value(""), "Path to output directory [optional - if not provided then prints to std::cout]")
+			(",o", boost::program_options::value< std::string >()->required(), "Path to output directory")
 			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
 			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")
 			(",m", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Match Value [optional - default is 1]")

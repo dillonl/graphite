@@ -21,9 +21,11 @@ namespace graphite
 
 		void addHeaderLine(const std::string& headerLine) override;
 		std::string getHeader() override;
+		void registerReferencePath(const std::string& referencePath);
 		void registerSample(std::shared_ptr< Sample > samplePtr) override;
 		std::vector< std::shared_ptr< Sample > > getSamplePtrs() override { return m_sample_ptrs; }
 	private:
+		std::string m_reference_path;
 		std::vector< std::string > m_header_lines;
 	    std::vector< std::shared_ptr< Sample > > m_sample_ptrs;
 	};

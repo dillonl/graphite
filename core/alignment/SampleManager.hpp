@@ -23,6 +23,7 @@ namespace graphite
 
 		Sample::SharedPtr getSamplePtr(const std::string& readGroup)
 		{
+			std::lock_guard< std::mutex > lock(this->m_sample_ptrs_lock);
 			auto iter = m_sample_ptrs_map.find(readGroup);
 			if (iter != m_sample_ptrs_map.end())
 			{
@@ -33,18 +34,17 @@ namespace graphite
 
 		void addSamplePtr(Sample::SharedPtr samplePtr)
 		{
+			std::lock_guard< std::mutex > lock(this->m_sample_ptrs_lock);
 			if (m_sample_ptrs_map.find(samplePtr->getReadgroup()) == m_sample_ptrs_map.end())
 			{
 				m_sample_ptrs_map.emplace(samplePtr->getReadgroup(), samplePtr);
 			}
 		}
 
-		std::unordered_map< std::string, Sample::SharedPtr > getSamplePtrs()
-		{
-			return this->m_sample_ptrs_map;
-		}
-
 	private:
+		SampleManager() {}
+		~SampleManager() {}
+		std::mutex m_sample_ptrs_lock;
 		std::unordered_map< std::string, Sample::SharedPtr > m_sample_ptrs_map;
 	};
 }

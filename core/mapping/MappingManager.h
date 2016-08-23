@@ -28,6 +28,9 @@ namespace graphite
 		MappingManager();
 		~MappingManager();
 
+		void adjudicateMappings(IAdjudicator::SharedPtr adjudicatorPtr);
+		void incrementVariantCounts();
+
 		static MappingManager* s_instance;
 		std::mutex m_alignment_mapping_map_mutex;
 		std::unordered_map< IAlignment::SharedPtr, IMapping::SharedPtr > m_alignment_mapping_map;

@@ -195,6 +195,7 @@ namespace graphite
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
 		void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) override;
+		std::string getVariantLine(std::vector< std::shared_ptr< Sample > > samplePtrs) override;
 		void processOverlappingAlleles() override;
 
 		uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;

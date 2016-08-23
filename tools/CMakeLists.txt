@@ -17,7 +17,7 @@ set(PATHTRACE_TOOLS_SOURCES
 )
 
 ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
-INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE}  ${HTSLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE}  ${HTSLIB_INCLUDE_DIR} ${TABIX_INCLUDE})
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -38,6 +38,7 @@ add_executable(pathtrace
 # link libraries to executables
 target_link_libraries(graphite
   ${HTSLIB_LIBRARY}
+  ${TABIX_LIB}
   BamTools
   BamTools-utils
   ${PLUGIN_LIBS}
@@ -52,6 +53,7 @@ target_link_libraries(graphite
 )
 
 target_link_libraries(pathtrace
+  ${TABIX_LIB}
   BamTools
   BamTools-utils
   ${PLUGIN_LIBS}
@@ -62,8 +64,11 @@ target_link_libraries(pathtrace
   ${SCI_ZLIB_LIBRARY}
   curl
   crypto
+  ${TABIX_LIB}
 )
 
+add_dependencies(graphite ${TABIX_PROJECT})
+add_dependencies(pathtrace ${TABIX_PROJECT})
 #add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
 
 

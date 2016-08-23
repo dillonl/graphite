@@ -6,7 +6,9 @@ Graphite
 Graphite uses cmake. To build Graphite run:
 
 mkdir bin/
+
 cd bin
+
 cmake ../
 
 To run Graphite's adjudication:

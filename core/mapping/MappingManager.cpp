@@ -34,25 +34,45 @@ namespace graphite
 
 	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
+		adjudicateMappings(adjudicatorPtr);
+		incrementVariantCounts();
+	}
+
+	void MappingManager::adjudicateMappings(IAdjudicator::SharedPtr adjudicatorPtr)
+	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
+		std::deque< std::shared_ptr< std::future< void > > > futureFuncts;
+		for (auto& mappingPtr : this->m_mappings)
 		{
-			std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
-			for (auto& mappingPtr : this->m_mappings)
-			{
-				auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, mappingPtr);
-				ThreadPool::Instance()->enqueue(funct);
-			}
+			auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, mappingPtr);
+			futureFuncts.push_back(ThreadPool::Instance()->enqueue(funct));
 		}
-		ThreadPool::Instance()->joinAll();
+		while (!futureFuncts.empty())
 		{
-			std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
-			for (auto& mappingPtr : this->m_mappings)
+			futureFuncts.front()->wait();
+			futureFuncts.pop_front();
+		}
+	}
+
+	void MappingManager::incrementVariantCounts()
+	{
+		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
+		std::deque< std::shared_ptr< std::future< void > > > futureFuncts;
+		for (auto& mappingPtr : this->m_mappings)
+		{
+			auto funct = std::bind(&IMapping::incrementAlleleCounts, mappingPtr);
+			futureFuncts.push_back(ThreadPool::Instance()->enqueue(funct));
+			/*
+			if (mappingPtr->getMapped())
 			{
-				mappingPtr->incrementAlleleCounts();
-				if (mappingPtr->getMapped())
-				{
-					// mappingPtr->printMapping();
-				}
+				mappingPtr->printMapping();
 			}
+			*/
+		}
+		while (!futureFuncts.empty())
+		{
+			futureFuncts.front()->wait();
+			futureFuncts.pop_front();
 		}
 	}
 

@@ -7,6 +7,8 @@
 #include "core/reference/IReference.h"
 #include "VCFHeader.h"
 
+#include <zlib.h>
+
 #include <vector>
 
 namespace graphite
@@ -24,6 +26,7 @@ namespace graphite
 		void printToVCF(IHeader::SharedPtr header, bool printHeader, std::ostream& out) override;
 		void normalizeOverlappingVariants();
 		void printHeader(std::ostream& out, std::string& bamPath);
+		void printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
 		void processOverlappingAlleles() override;
 

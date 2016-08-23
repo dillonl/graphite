@@ -44,6 +44,8 @@ namespace graphite
 		static std::vector< Region::SharedPtr > GetAllRegionsInVCF(const std::string& vcfPath);
 
 		VCFFileReader(const std::string& path);
+		VCFHeader::SharedPtr getVCFHeader() { return this->m_vcf_header; }
+
 	protected:
 		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
 	private:
@@ -54,6 +56,7 @@ namespace graphite
 		position getPositionFromLine(const char* line);
 		void setFileReader(const std::string& path);
 
+		VCFHeader::SharedPtr m_vcf_header;
 		std::string m_path;
 		VCFFileReader::WeakPtr m_this_wk_ptr;
 		IFile::SharedPtr m_file_ptr;

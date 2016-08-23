@@ -25,6 +25,7 @@ namespace graphite
 		m_reference_ptr(referencePtr),
 		m_max_allowed_allele_size(maxAlleleSize)
 	{
+		m_vcf_header = std::make_shared< VCFHeader >();
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
 		++s_vcf_id;
@@ -35,6 +36,7 @@ namespace graphite
 	VCFFileReader::VCFFileReader(const std::string& path) :
 		m_path(path)
 	{
+		m_vcf_header = std::make_shared< VCFHeader >();
 		setFileReader(m_path);
 		Open();
 	}
@@ -69,17 +71,15 @@ namespace graphite
 	}
 
 	/*
-	 * Later we might create a VCFHeader class
-	 * but currently there is no need so for now
-	 * this function just advances the pointer
-	 * past the header.
+	 * Set the reader's vcfheader with this file's vcf header.
 	 */
 	void VCFFileReader::readHeader()
 	{
 		std::string line;
 		std::string headerEnd = "#CHROM";
-		while (m_file_ptr->getNextLine(line) && strncmp(line.c_str(), headerEnd.c_str(), headerEnd.size()) != 0)
+		while (m_file_ptr->getNextLine(line) && line.size() > 0 && line.c_str()[0] == '#')
 		{
+			this->m_vcf_header->addHeaderLine(line);
 		}
 	}
 

@@ -145,8 +145,12 @@ namespace graphite
 
 	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs)
 	{
-		// out << this->m_chrom << "\t" << getPosition() << "\t.\t" << this->m_ref_allele_ptr->getSequence() << "\t" << alleleString() << "\t0\t.\t" << getInfoFieldsString() << "\t" << getSampleCounts(samplePtrs) << std::endl;
 		out << this->m_line << "\t" << getSampleCounts(samplePtrs) << std::endl;
+	}
+
+	std::string Variant::getVariantLine(std::vector< std::shared_ptr< Sample > > samplePtrs)
+	{
+		return this->m_line + std::string("\t") + getSampleCounts(samplePtrs) + std::string("\n");
 	}
 
 	std::string Variant::getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs)

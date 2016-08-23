@@ -32,13 +32,13 @@ namespace graphite
 		IVariantList::SharedPtr getCompleteVariantList() override;
 		void releaseResources() override;
 		void printToVCF(VCFHeader::SharedPtr vcfHeader, bool printHeader, std::ostream& out);
-		std::unordered_map< std::string, VariantList::SharedPtr > getVCFPathsAndVariantListsMap();
+		std::unordered_map< VCFFileReader::SharedPtr, VariantList::SharedPtr > getVCFReadersAndVariantListsMap();
 	private:
 		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them
 
 		VariantList::SharedPtr m_variant_list_ptr;
 		std::vector< VCFFileReader::SharedPtr > m_vcf_file_reader_ptrs;
-		std::unordered_map< std::string, VariantList::SharedPtr > m_path_vcf_variant_list_ptrs_map; // these are the original vcf variant lists. They are used to reconstruct the original vcf file output
+		std::unordered_map< VCFFileReader::SharedPtr, VariantList::SharedPtr > m_path_vcf_variant_list_ptrs_map; // these are the original vcf variant lists. They are used to reconstruct the original vcf file output
 		Region::SharedPtr m_region_ptr;
 		std::atomic< bool > m_loaded_vcfs;
 		std::mutex m_loaded_mutex;

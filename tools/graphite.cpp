@@ -19,23 +19,16 @@
 
 #include <boost/filesystem.hpp>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "tabix.h"
+#include "bgzf.h"
+
+#include <zlib.h>
+
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
-void writeVariantListToFile(std::string path, bool writeHeader, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
-{
-	std::ofstream outVCF;
-	if (writeHeader)
-	{
-		outVCF.open(path, std::ios::out | std::ios::trunc);
-	}
-	else
-	{
-		outVCF.open(path, std::ios::out | std::ios::app);
-	}
-
-	variantListPtr->printToVCF(vcfHeaderPtr, writeHeader, outVCF);
-	outVCF.close();
-}
-
 void validatePath(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
 {
 	if (!boost::filesystem::exists(path))
@@ -47,9 +40,43 @@ void validatePath(const std::string& path, const std::string& errorMessage, bool
 	}
 }
 
+void writeVariantListToFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
+{
+	bool fileExists = boost::filesystem::exists(path);
+	std::ofstream outVCF;
+	if (!fileExists)
+	{
+		outVCF.open(path, std::ios::out | std::ios::trunc);
+	}
+	else
+	{
+		outVCF.open(path, std::ios::out | std::ios::app);
+	}
+
+	variantListPtr->printToVCF(vcfHeaderPtr, !fileExists, outVCF);
+	outVCF.close();
+}
+
+void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
+{
+	int fd = 0;
+
+
+	if (boost::filesystem::exists(path))
+	{
+		fd = open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0666);
+		variantListPtr->printToCompressedVCF(vcfHeaderPtr, false, fd);
+	}
+	else
+	{
+		fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+		variantListPtr->printToCompressedVCF(vcfHeaderPtr, true, fd);
+	}
+}
+
 int main(int argc, char** argv)
 {
-	std::vector< std::string > inclusionList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"};
+	// std::vector< std::string > inclusionList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"};
 	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
@@ -110,12 +137,14 @@ int main(int argc, char** argv)
 		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
 
+	/*
 	graphite::VCFHeader::SharedPtr vcfHeaderPtr = std::make_shared< graphite::VCFHeader >();
 
 	for (auto bamPath : bamPaths)
 	{
 		vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
 	}
+	*/
 
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
@@ -138,7 +167,7 @@ int main(int argc, char** argv)
 
 		boost::filesystem::path vcfFSPath(vcfPath);
 		boost::filesystem::path outputDirectoryPath(outputDirectory);
-		boost::filesystem::path extension(".vcf");
+		boost::filesystem::path extension(".gz");
 		boost::filesystem::path outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfFSPath.stem().string() + extension.string());
 		uint32_t counter = 1;
 		while (boost::filesystem::exists(outputVCFPath.string()))
@@ -149,14 +178,19 @@ int main(int argc, char** argv)
 		vcfoutPaths[vcfPath] = outputVCFPath.string();
 	}
 
+	std::unordered_set< std::string > outputPaths;
+	bool firstTime = true;
+
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
 		auto regionPtr = regionPtrs[regionCount];
+		/*
 		if (std::find(inclusionList.begin(), inclusionList.end(), regionPtr->getReferenceID()) == inclusionList.end())
 		{
 			std::cout << "skipping: " << regionPtr->getRegionString() << std::endl;
 			continue;
 		}
+		*/
 		std::cout << "processing: " << regionPtr->getRegionString() << std::endl;
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
@@ -172,11 +206,6 @@ int main(int argc, char** argv)
 		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 		std::cout << "finished reading alignments" << std::endl;
 
-		for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
-		{
-			vcfHeaderPtr->registerSample(samplePtr);
-		}
-
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
@@ -184,61 +213,62 @@ int main(int argc, char** argv)
 
 		// create an adjudicator for the graph
 		auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
+
 		// the gsswGraphManager adjudicates on the variantManager's variants
 		auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
 
-		if (outputDirectory.size() == 0)
+		std::deque< std::shared_ptr< std::future< void > > > variantManagerFutureFunctions;
+		for (auto& iter : variantManagerPtr->getVCFReadersAndVariantListsMap())
 		{
-			variantManagerPtr->getCompleteVariantList()->processOverlappingAlleles();
+			auto futureFunct = graphite::ThreadPool::Instance()->enqueue(std::bind(&graphite::IVariantList::processOverlappingAlleles, iter.second));
+			variantManagerFutureFunctions.push_back(futureFunct);
 		}
-		else
+		while (!variantManagerFutureFunctions.empty())
 		{
-			for (auto& iter : variantManagerPtr->getVCFPathsAndVariantListsMap())
-			{
-				graphite::ThreadPool::Instance()->enqueue(std::bind(&graphite::IVariantList::processOverlappingAlleles, iter.second));
-			}
+			variantManagerFutureFunctions.front()->wait();
+			variantManagerFutureFunctions.pop_front();
 		}
-		graphite::ThreadPool::Instance()->joinAll();
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 
-		// get the complete variants list out of the variantListManager. The graphManager has adjudicated these variants.
-		graphite::ThreadPool::Instance()->joinAll();
-
-		if (outputDirectory.size() == 0)
+		std::vector< std::shared_ptr< std::thread > > fileWriters;
+		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFReadersAndVariantListsMap();
+		std::deque< std::shared_ptr< std::future< void > > > vcfWriterFutureFunctions;
+		for (auto& iter : vcfPathsAndVariantListPtrsMap)
 		{
-			auto variantListPtr = variantManagerPtr->getCompleteVariantList();
-			variantListPtr->printToVCF(vcfHeaderPtr, (regionCount == 0), std::cout);
-		}
-		else
-		{
-			std::vector< std::shared_ptr< std::thread > > fileWriters;
-			auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFPathsAndVariantListsMap();
-			for (auto& iter : vcfPathsAndVariantListPtrsMap)
+			auto vcfReaderPtr = iter.first;
+			auto vcfPath = vcfReaderPtr->getFilePath();
+			std::string currentVCFOutPath = vcfoutPaths[vcfPath];
+			auto variantListPtr = iter.second;
+			auto vcfHeaderPtr = vcfReaderPtr->getVCFHeader();
+			for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
 			{
-				boost::filesystem::path vcfPath(iter.first);
-				std::string currentVCFOutPath = vcfoutPaths[iter.first];
-				auto variantListPtr = iter.second;
-				/*
-				boost::filesystem::path outputDirectoryPath(outputDirectory);
-				boost::filesystem::path extension(".vcf");
-				boost::filesystem::path outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + extension.string());
-				uint32_t counter = 1;
-				while (boost::filesystem::exists(outputVCFPath.string()))
-				{
-					boost::filesystem::path countPath("_" + std::to_string(counter++));
-					outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfPath.stem().string() + countPath.string() + extension.string());
-				}
-				*/
-				// auto funct = std::bind(&writeVariantListToFile, outputVCFPath.string(), (regionCount == 0), vcfHeaderPtr, variantListPtr);
-				auto funct = std::bind(&writeVariantListToFile, currentVCFOutPath, (regionCount == 0), vcfHeaderPtr, variantListPtr);
-				auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
+				vcfHeaderPtr->registerSample(samplePtr);
 			}
-
-			graphite::ThreadPool::Instance()->joinAll();
+			if (firstTime)
+			{
+				outputPaths.emplace(currentVCFOutPath);
+			}
+			auto funct = std::bind(&writeVariantListToCompressedFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
+			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
+			vcfWriterFutureFunctions.push_back(functFuture);
 		}
+
+		while (!vcfWriterFutureFunctions.empty())
+		{
+			vcfWriterFutureFunctions.front()->wait();
+			vcfWriterFutureFunctions.pop_front();
+		}
+
 		graphite::MappingManager::Instance()->clearRegisteredMappings();
+		firstTime = false;
+	}
+
+	for (auto& outputPath : outputPaths)
+	{
+		ti_conf_t* conf = &ti_conf_vcf;
+		ti_index_build(outputPath.c_str(), conf);
 	}
 	return 0;
 }
