@@ -3,12 +3,12 @@
 
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
+#include "core/util/Noncopyable.hpp"
 
-#include <boost/noncopyable.hpp>
 
 namespace graphite
 {
-	class IPath : boost::noncopyable
+	class IPath : Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IPath > SharedPtr;

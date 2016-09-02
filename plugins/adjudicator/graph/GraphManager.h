@@ -11,13 +11,11 @@
 #include <memory>
 #include <mutex>
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
 namespace adjudicator
 {
-	class GraphManager : private boost::noncopyable
+	class GraphManager : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< GraphManager > SharedPtr;

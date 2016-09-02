@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_INFOFIELDPARSER_H
 #define GRAPHITE_INFOFIELDPARSER_H
 
+/*
 #include "core/util/Types.h"
 
 #include <string>
@@ -37,4 +38,5 @@ namespace graphite
 
 } // end namespace graphite
 
+*/
 #endif //GRAPHITE_INFOFIELDPARSER_H

@@ -3,14 +3,13 @@
 
 #include "Sequence.h"
 
-#include <boost/noncopyable.hpp>
 #include <unordered_map>
 #include <cstring>
 #include <mutex>
 
 namespace graphite
 {
-	class SequenceManager : private boost::noncopyable
+	class SequenceManager : private Noncopyable
 	{
 	public:
 		static SequenceManager* Instance();

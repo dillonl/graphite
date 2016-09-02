@@ -4,7 +4,7 @@
 #include "IReference.h"
 
 #include "core/region/Region.h"
-#include "fastahack/Fasta.h"
+#include "Fasta.h"
 
 #include <map>
 #include <memory>
@@ -25,7 +25,7 @@ namespace graphite
 
 		std::string m_fasta_path;
 		std::string m_sequence;
-		std::shared_ptr< fastahack::FastaReference > m_fasta_reference;
+		std::shared_ptr< ::FastaReference > m_fasta_reference;
 
 	};
 } // end namespace graphite

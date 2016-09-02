@@ -2,14 +2,14 @@
 #define GRAPHITE_GENOTYPERALLELE_H
 
 #include "core/alignment/IAlignment.h"
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
-
-#include <boost/noncopyable.hpp>
+#include <list>
 
 namespace graphite
 {
-	class GenotyperAllele : private boost::noncopyable
+	class GenotyperAllele : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< GenotyperAllele > SharedPtr;

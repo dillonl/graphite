@@ -4,8 +4,7 @@
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
 #include "core/path/IPath.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -13,7 +12,7 @@
 
 namespace graphite
 {
-	class PathManager : private boost::noncopyable
+	class PathManager : private Noncopyable
 	{
 	public:
 		static PathManager* Instance();

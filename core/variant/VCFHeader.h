@@ -7,8 +7,6 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
 	class IAlignmentReader;

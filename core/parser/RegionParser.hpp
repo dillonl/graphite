@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_REGIONPARSER_H
 #define GRAPHITE_REGIONPARSER_H
 
+/*
 #include "core/util/Types.h"
 
 #include <string>
@@ -56,4 +57,5 @@ namespace graphite
 
 } // end namespace graphite
 
+*/
 #endif //GRAPHITE_REGIONPARSER_H

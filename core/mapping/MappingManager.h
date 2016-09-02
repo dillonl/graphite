@@ -7,11 +7,9 @@
 #include <unordered_map>
 #include <mutex>
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
-	class MappingManager : private boost::noncopyable
+	class MappingManager : private Noncopyable
 	{
 	public:
 		static MappingManager* Instance();

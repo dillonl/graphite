@@ -5,8 +5,7 @@
 #include "core/variant/IVariantList.h"
 #include "core/variant/IVariant.h"
 #include "core/graph/INode.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <list>
 #include <string>
@@ -14,7 +13,7 @@
 
 namespace graphite
 {
-	class IGraph : private boost::noncopyable
+	class IGraph : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IGraph> SharedPtr;

@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_CHROMPARSER_H
 #define GRAPHITE_CHROMPARSER_H
 
+/*
 #include "core/util/Types.h"
 
 #include <string>
@@ -53,4 +54,5 @@ namespace graphite
 
 } // end namespace graphite
 
+*/
 #endif //GRAPHITE_CHROMPARSER_H

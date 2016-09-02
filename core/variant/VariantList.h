@@ -3,7 +3,6 @@
 
 #include "IVariantList.h"
 #include "core/region/Region.h"
-#include "core/parser/VCFParser.hpp"
 #include "core/reference/IReference.h"
 #include "VCFHeader.h"
 
@@ -38,7 +37,6 @@ namespace graphite
 		std::vector< IVariant::SharedPtr > m_variant_ptrs;
 		bool m_next_variant_init;
 		IVariant::SharedPtr m_next_variant;
-		VariantParser< const char* > m_vcf_parser;
 		IReference::SharedPtr m_reference_ptr;
 	};
 }

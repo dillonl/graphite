@@ -11,8 +11,6 @@
 #include "Sample.hpp"
 
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
 	class BamAlignmentReader : public IAlignmentReader

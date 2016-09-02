@@ -5,11 +5,11 @@
 #include <string>
 #include <memory>
 
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
-	class Sample : private boost::noncopyable
+	class Sample : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< Sample > SharedPtr;

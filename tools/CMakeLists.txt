@@ -12,12 +12,18 @@ set(GRAPHITE_TOOLS_SOURCES
 )
 
 # set header and source files
-set(PATHTRACE_TOOLS_SOURCES
-	pathtrace.cpp
-)
+#set(PATHTRACE_TOOLS_SOURCES
+#	pathtrace.cpp
+#)
 
-ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
-INCLUDE_DIRECTORIES(${SCI_BOOST_INCLUDE}  ${HTSLIB_INCLUDE_DIR} ${TABIX_INCLUDE})
+INCLUDE_DIRECTORIES(
+  ${HTSLIB_INCLUDE_DIR}
+  ${TABIX_INCLUDE}
+  ${FASTAHACK_INCLUDE}
+  ${ZLIB_INCLUDE_1}
+  ${ZLIB_INCLUDE_2}
+  ${CXXOPTS_INCLUDE}
+)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -31,44 +37,57 @@ set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 add_executable(graphite
   ${GRAPHITE_TOOLS_SOURCES}
 )
-add_executable(pathtrace
-  ${PATHTRACE_TOOLS_SOURCES}
-)
+#add_executable(pathtrace
+#  ${PATHTRACE_TOOLS_SOURCES}
+#)
 
 # link libraries to executables
 target_link_libraries(graphite
+  ${ZLIB_LIB}
+  ${BAMTOOLS_LIB}
+  ${BAMTOOLS_UTIL_LIB}
+  ${ZLIB_LIB}
+  ${FASTAHACK_LIB}
   ${HTSLIB_LIBRARY}
   ${TABIX_LIB}
-  BamTools
-  BamTools-utils
   ${PLUGIN_LIBS}
   ${CORE_LIB}
-  fastahack_lib
-  ${SCI_BOOST_LIBRARY}
+  ${FASTAHACK_LIB}
+  ${ZLIB_LIB}
+  ${ZLIB_LIB}
   ${GSSW_LIB}
   ${SCI_ZLIB_LIBRARY}
   ${SAMTOOLS_LIBRARIES}
+  ${FASTAHACK_LIB}
+  ${BAMTOOLS_LIB}
+  ${BAMTOOLS_UTIL_LIB}
+  ${ZLIB_LIB}
   curl
   crypto
 )
 
-target_link_libraries(pathtrace
-  ${TABIX_LIB}
-  BamTools
-  BamTools-utils
-  ${PLUGIN_LIBS}
-  ${CORE_LIB}
-  fastahack_lib
-  ${SCI_BOOST_LIBRARY}
-  ${GSSW_LIB}
-  ${SCI_ZLIB_LIBRARY}
-  curl
-  crypto
-  ${TABIX_LIB}
-)
+#target_link_libraries(pathtrace
+#  ${ZLIB_LIB}
+#  ${BAMTOOLS_LIB}
+#  ${BAMTOOLS_UTIL_LIB}
+#  ${ZLIB_LIB}
+#  ${FASTAHACK_LIB}
+#  ${TABIX_LIB}
+#  ${PLUGIN_LIBS}
+#  ${CORE_LIB}
+#  ${FASTAHACK_LIB}
+#  ${GSSW_LIB}
+#  ${SCI_ZLIB_LIBRARY}
+#  curl
+#  crypto
+#  ${TABIX_LIB}
+#  ${FASTAHACK_LIB}
+#  ${BAMTOOLS_LIB}
+#  ${BAMTOOLS_UTIL_LIB}
+#  ${ZLIB_LIB}
+#)
 
-add_dependencies(graphite ${TABIX_PROJECT})
-add_dependencies(pathtrace ${TABIX_PROJECT})
-#add_dependencies(graphite ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+add_dependencies(graphite ${GRAPHITE_EXTERNAL_PROJECT})
+#add_dependencies(pathtrace ${GRAPHITE_EXTERNAL_PROJECT})
 
 

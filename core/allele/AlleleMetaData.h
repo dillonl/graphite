@@ -1,13 +1,13 @@
 #ifndef GRAPHITE_ALLELEMETADATA_H
 #define GRAPHITE_ALLELEMETADATA_H
 
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
 
 namespace graphite
 {
-	class AlleleMetaData : private boost::noncopyable
+	class AlleleMetaData : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< AlleleMetaData > SharedPtr;

@@ -2,9 +2,8 @@
 #define GRAPHITE_IALIGNMENT_H
 
 #include "core/util/Types.h"
+#include "core/util/Noncopyable.hpp"
 #include "core/allele/IAllele.h"
-
-#include <boost/noncopyable.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -17,7 +16,7 @@ namespace graphite
 
 	class IMapping;
 	class Sample;
-	class IAlignment : private boost::noncopyable
+	class IAlignment : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IAlignment > SharedPtr;

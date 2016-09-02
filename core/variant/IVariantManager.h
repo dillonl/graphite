@@ -3,14 +3,13 @@
 
 #include "IVariantList.h"
 #include "core/region/Region.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
 
 namespace graphite
 {
-	class IVariantManager : boost::noncopyable
+	class IVariantManager : Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IVariantManager > SharedPtr;

@@ -2,7 +2,6 @@
 #include "GSSWGraph.h"
 #include "core/variant/VariantList.h"
 #include "core/allele/EquivalentAllele.h"
-#include "core/path/Path.h"
 #include "core/mapping/MappingManager.h"
 #include "AlignmentReporter.h"
 #include "GSSWMapping.h"

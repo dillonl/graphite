@@ -2,8 +2,7 @@
 #define GRAPHITE_IALLELE_H
 
 #include "AlleleMetaData.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <atomic>
 #include <unordered_map>
@@ -16,7 +15,7 @@ namespace graphite
 	class IVariant;
 	class IAlignment;
 	class Sample;
-	class IAllele : private boost::noncopyable, public std::enable_shared_from_this< IAllele >
+	class IAllele : private Noncopyable, public std::enable_shared_from_this< IAllele >
 	{
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;

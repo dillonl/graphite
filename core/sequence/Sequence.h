@@ -1,16 +1,16 @@
 #ifndef GRAPHITE_SEQUENCE_H
 #define GRAPHITE_SEQUENCE_H
 
-#include <boost/noncopyable.hpp>
-
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
 
+#include "core/util/Noncopyable.hpp"
+
 namespace graphite
 {
-	class Sequence : private boost::noncopyable
+	class Sequence : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< Sequence > SharedPtr;

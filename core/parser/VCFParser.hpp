@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_VCFPARSER_H
 #define GRAPHITE_VCFPARSER_H
 
+/*
 #include <string>
 #include <vector>
 #include <map>
@@ -27,44 +28,6 @@ namespace graphite
 				using namespace boost::spirit;
 				using namespace boost::phoenix;
 
-				/*
-				std::string dnaMatchString = "actgnACTGN";
-				// auto altMatcher = (+qi::char_(dnaMatchString) % ',') | (+qi::graph % ',');
-				auto refMatcher = +qi::char_(dnaMatchString);
-				auto altMatcher = (+qi::char_(dnaMatchString) >> *(',' >> +qi::char_(dnaMatchString))) | (+qi::graph % ',');
-				tab = qi::lit('\t');
-				chrom %= +qi::graph;
-				pos %= qi::uint_;
-				id %= +qi::graph;
-				ref %= refMatcher;
-				alt %= altMatcher;
-				qual = +qi::graph;
-				filter = +qi::graph;
-				info = +qi::graph;
-				start %= chrom > tab > pos > tab > id > tab > ref > tab > alt > tab > qual > tab > filter > tab > info;
-
-				// names for error output
-				tab.name("TAB");
-				chrom.name("CHROM");
-				pos.name("POS");
-				id.name("ID");
-				ref.name("REF");
-				alt.name("ALT");
-				qual.name("QUAL");
-				filter.name("FILTER");
-				info.name("INFO");
-
-				qi::on_error<qi::fail>
-					(
-						start
-						, std::cout
-						<< boost::phoenix::val("Error! Column ")
-						// << _4                               // what failed?
-						<< boost::phoenix::val(" is incorrectly formatted: \"")
-						// << _1 // prints the error line
-						<< std::endl
-						);
-				*/
 
 			}
 
@@ -84,4 +47,5 @@ namespace graphite
 
 } // end namespace graphite
 
+*/
 #endif //GRAPHITE_VCFPARSER_H

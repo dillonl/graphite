@@ -9,14 +9,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-
 namespace graphite
 {
 
@@ -104,9 +96,30 @@ namespace graphite
 
 	position VCFFileReader::getPositionFromLine(const char* line)
 	{
+		const char* tmpLine = line;
+		size_t posSize = 0;
+		while (*tmpLine != '\n')
+		{
+			if (*tmpLine == '\t')
+			{
+				break;
+			}
+			++tmpLine;
+		}
+		char* endPtr;
+		auto pos = strtol(tmpLine, &endPtr, 10);
+		return pos;
+		/*
 		const char* posStart = static_cast<const char*>(memchr(line, '\t', 100)) + 1;
 		const char* posEnd = static_cast<const char*>(memchr(posStart, '\t', 100));
 
+		while (posStart != posEnd)
+		{
+
+		}
+		*/
+
+		/*
 		position pos;
 		bool r = boost::spirit::qi::phrase_parse(
 			posStart,
@@ -117,6 +130,7 @@ namespace graphite
 			boost::spirit::ascii::space
 			);
 		return pos;
+		*/
 	}
 
 	std::vector< IVariant::SharedPtr > VCFFileReader::getVariantsInRegion(Region::SharedPtr regionPtr)
@@ -132,7 +146,7 @@ namespace graphite
 				position linePosition = getPositionFromLine(line.c_str());
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_vcf_parser, this->m_reference_ptr, m_max_allowed_allele_size));
+					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr, m_max_allowed_allele_size));
 				}
 				if (regionPtr->getEndPosition() < linePosition) { break; } // if we have passed the end position of the region then stop looking for variants
 			}

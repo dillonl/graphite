@@ -5,12 +5,12 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
 	class Sample;
-	class IHeader : private boost::noncopyable
+	class IHeader : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IHeader > SharedPtr;

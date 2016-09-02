@@ -1,9 +1,9 @@
 #ifndef GRAPHITE_INODE_H
 #define GRAPHITE_INODE_H
 
-#include <boost/noncopyable.hpp>
-
 #include "core/util/Types.h"
+#include "core/util/Noncopyable.hpp"
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -11,7 +11,7 @@
 namespace graphite
 {
 
-	class INode : private boost::noncopyable
+	class INode : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr<INode> SharedPtr;

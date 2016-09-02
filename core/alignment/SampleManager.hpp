@@ -2,13 +2,13 @@
 #define GRAPHITE_SAMPLE_MANAGER_HPP
 
 #include "Sample.hpp"
+#include "core/util/Noncopyable.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <unordered_map>
 
 namespace graphite
 {
-	class SampleManager : private boost::noncopyable
+	class SampleManager : private Noncopyable
 	{
 	public:
 		static SampleManager* Instance()

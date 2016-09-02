@@ -37,6 +37,7 @@ class Path : IPath
 		std::shared_ptr< gssw_graph_mapping > m_graph_mapping_ptr;
 		uint32_t m_sw_percentage;
 		size_t m_hash;
+		std::hash< IAllele* > m_hasher;
 	};
 }
 

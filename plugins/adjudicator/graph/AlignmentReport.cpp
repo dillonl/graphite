@@ -1,8 +1,6 @@
 #include "AlignmentReport.h"
 #include "core/genotyper/GenotyperAllele.hpp"
 
-#include <boost/algorithm/string/join.hpp>
-
 #include <map>
 
 namespace graphite

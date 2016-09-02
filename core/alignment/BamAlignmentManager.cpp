@@ -5,7 +5,6 @@
 #include "core/util/ThreadPool.hpp"
 
 #include <functional>
-#include <boost/filesystem.hpp>
 #include <unordered_set>
 #include <algorithm>
 #include <deque>

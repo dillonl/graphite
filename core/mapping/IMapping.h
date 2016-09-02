@@ -4,15 +4,14 @@
 #include "core/alignment/IAlignment.h"
 #include "core/allele/IAllele.h"
 #include "core/mapping/MappingAlignmentInfo.h"
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
-	class IMapping : private boost::noncopyable
+	class IMapping : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IMapping > SharedPtr;

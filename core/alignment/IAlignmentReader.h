@@ -3,13 +3,13 @@
 
 #include "IAlignmentList.h"
 #include "core/region/Region.h"
+#include "core/util/Noncopyable.hpp"
 
-#include <boost/noncopyable.hpp>
 #include <memory>
 
 namespace graphite
 {
-	class IAlignmentReader : private boost::noncopyable
+	class IAlignmentReader : private Noncopyable
 	{
 	public:
 		IAlignmentReader() {}

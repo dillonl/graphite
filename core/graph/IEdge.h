@@ -1,16 +1,15 @@
 #ifndef GRAPHITE_IEDGE_H
 #define GRAPHITE_IEDGE_H
 
-#include <boost/noncopyable.hpp>
-
 #include <list>
 #include <memory>
 
 #include "INode.h"
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
-	class IEdge : boost::noncopyable
+	class IEdge : Noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IEdge> SharedPtr;

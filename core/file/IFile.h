@@ -1,18 +1,19 @@
 #ifndef GRAPHITE_IFILE_H
 #define GRAPHITE_IFILE_H
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <memory>
 
+#include "core/util/Noncopyable.hpp"
+
 namespace graphite
 {
-	class IFile : private boost::noncopyable
+	class IFile : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IFile> SharedPtr;
 	    IFile(const std::string& path)
-			: m_file_path(path), m_opened(false), m_file_size(0)
+			: m_file_path(path), m_opened(false)//, m_file_size(0)
 		{
 		}
 		virtual ~IFile(){}
@@ -38,7 +39,7 @@ namespace graphite
 
 		std::string m_file_path;
 		bool m_opened;
-		size_t m_file_size;
+		/* size_t m_file_size; */
 	};
 } // end namespace graphite
 

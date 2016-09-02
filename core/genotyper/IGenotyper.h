@@ -2,17 +2,16 @@
 #define GRAPHITE_GENOTYPER_H
 
 #include "IGenotyperVariant.h"
+#include "core/util/Noncopyable.hpp"
 
 #include <mutex>
 #include <memory>
 #include <iostream>
 #include <fstream>
 
-#include <boost/noncopyable.hpp>
-
 namespace graphite
 {
-	class IGenotyper : private boost::noncopyable
+	class IGenotyper : private Noncopyable
 	{
 	public:
 		static IGenotyper* Instance()

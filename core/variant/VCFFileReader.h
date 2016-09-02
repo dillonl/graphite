@@ -4,15 +4,11 @@
 #include "core/variant/IVariantList.h"
 #include "core/file/IFile.h"
 
-#include "core/parser/VCFParser.hpp"
-#include "core/parser/ChromParser.hpp"
 #include "core/region/Region.h"
 #include "core/util/SharedCreator.hpp"
+#include "core/util/Noncopyable.hpp"
 
 #include "Variant.h"
-
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 
 #include <list>
 #include <tuple>
@@ -23,7 +19,7 @@
 
 namespace graphite
 {
-	class VCFFileReader : private boost::noncopyable
+	class VCFFileReader : private Noncopyable
 	{
     public:
 		typedef std::shared_ptr<VCFFileReader> SharedPtr;
@@ -60,7 +56,6 @@ namespace graphite
 		std::string m_path;
 		VCFFileReader::WeakPtr m_this_wk_ptr;
 		IFile::SharedPtr m_file_ptr;
-		VariantParser< const char* > m_vcf_parser;
 		uint32_t m_id;
 		IReference::SharedPtr m_reference_ptr;
 		uint32_t m_max_allowed_allele_size;

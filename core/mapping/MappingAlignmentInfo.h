@@ -4,13 +4,12 @@
 #include "core/alignment/IAlignment.h"
 
 #include "externals/gssw/gssw.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
 	class IAdjudicator;
-	class MappingAlignmentInfo : private boost::noncopyable
+	class MappingAlignmentInfo : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< MappingAlignmentInfo > SharedPtr;

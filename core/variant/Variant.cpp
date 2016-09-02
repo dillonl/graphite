@@ -2,6 +2,7 @@
 #include "core/alignment/IAlignment.h"
 
 #include <unordered_set>
+#include <sstream>
 
 namespace graphite
 {

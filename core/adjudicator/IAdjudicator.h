@@ -2,10 +2,11 @@
 #define GRAPHITE_IADJUDICATOR_H
 
 #include "core/mapping/IMapping.h"
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
-	class IAdjudicator : private boost::noncopyable, public std::enable_shared_from_this< IAdjudicator >
+	class IAdjudicator : private Noncopyable, public std::enable_shared_from_this< IAdjudicator >
 	{
 	public:
 		typedef std::shared_ptr< IAdjudicator > SharedPtr;

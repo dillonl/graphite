@@ -1,8 +1,6 @@
 #ifndef GRAPHITE_IREFERENCE_H
 #define GRAPHITE_IREFERENCE_H
 
-#include <boost/noncopyable.hpp>
-
 #include <stdint.h>
 #include <memory>
 
@@ -12,7 +10,7 @@
 namespace graphite
 {
 
-	class IReference : private boost::noncopyable
+	class IReference : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr<IReference> SharedPtr;

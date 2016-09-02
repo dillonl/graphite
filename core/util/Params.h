@@ -2,12 +2,14 @@
 #define GRAPHITE_PARAMS_H
 
 #include "core/region/Region.h"
-#include <boost/noncopyable.hpp>
-#include <boost/program_options.hpp>
+#include "core/util/Noncopyable.hpp"
+
+#include <cxxopts.hpp>
+#include <vector>
 
 namespace graphite
 {
-	class Params : private boost::noncopyable
+	class Params : private Noncopyable
 	{
 	public:
 		Params();
@@ -34,8 +36,11 @@ namespace graphite
 		int getGapExtensionValue();
 		uint32_t getGraphSize();
 	private:
-		std::shared_ptr< boost::program_options::options_description > m_options_description_ptr;
-		boost::program_options::variables_map m_variables_map;
+		cxxopts::Options m_options;
+
+		std::vector< std::string > m_bam_paths;
+		/* std::shared_ptr< boost::program_options::options_description > m_options_description_ptr; */
+		/* boost::program_options::variables_map m_variables_map; */
 	};
 }
 

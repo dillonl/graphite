@@ -11,23 +11,30 @@
 #include <unordered_map>
 #include <tuple>
 #include <stdlib.h>
+#include <algorithm>
 
 #include "IVariant.h"
 #include "core/allele/Allele.h"
+/*
 #include "core/parser/VCFParser.hpp"
 #include "core/parser/InfoFieldParser.hpp"
+*/
 #include "core/reference/Reference.h"
 #include "core/alignment/Sample.hpp"
+#include "core/util/Utility.h"
 
+/*
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+*/
 
 namespace graphite
 {
 
 	class IAlignment;
 	class IAlignmentReader;
+
 	class Variant : public IVariant
 	{
 	public:
@@ -38,7 +45,7 @@ namespace graphite
 		Variant();
 		~Variant();
 
-		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, VariantParser< const char* >& parser, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize=3000)
+		inline static Variant::SharedPtr BuildVariant(const std::string& vcfLine, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize=3000)
 		{
 			std::string fields;
 			auto variantPtr = std::make_shared< Variant >();
@@ -46,7 +53,10 @@ namespace graphite
 			std::vector< std::string > alts;
 
 			std::vector< std::string > vcfComponents;
-			boost::split(vcfComponents, vcfLine, boost::is_any_of("\t"));
+
+			/* boost::split(vcfComponents, vcfLine, boost::is_any_of("\t")); */
+			split(vcfLine, '\t', vcfComponents);
+
 			if (vcfComponents.size() < 7)
 			{
 				std::cout << "vcf line is incorrectly formated" << std::endl;
@@ -58,7 +68,8 @@ namespace graphite
 			ref = vcfComponents[3];
 			if (vcfComponents[4].find(",") != std::string::npos)
 			{
-				boost::split(alts, vcfComponents[4], boost::is_any_of(","));
+				/* boost::split(alts, vcfComponents[4], boost::is_any_of(",")); */
+				split(vcfComponents[4], '\t', alts);
 			}
 			else
 			{

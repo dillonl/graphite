@@ -6,7 +6,8 @@
 #include <map>
 
 #include <iostream>   // for std::cout
-#include <boost/iostreams/device/mapped_file.hpp> // for mmap
+/* #include <boost/iostreams/device/mapped_file.hpp> // for mmap */
+#include <fstream>
 
 #include "IFile.h"
 
@@ -34,16 +35,19 @@ namespace graphite
 
 		inline bool getNextLine(std::string& line) override
 		{
-			if (!this->m_opened || this->m_current_position >= this->m_end_position) { return false; }
+			return (this->m_opened && std::getline(*this->m_file, line));
+			/*
 			const char* char_line = static_cast< const char* >(memchr(this->m_current_position, '\n', (this->m_end_file_ptr - this->m_current_position)));
 			size_t lineSize = (char_line - this->m_current_position);
 			line = std::string(this->m_current_position, lineSize); // subtract off the \n char
 			this->m_current_position += lineSize + 1;
 			return true;
+			*/
 		}
 
 	protected:
-		std::shared_ptr< boost::iostreams::mapped_file > m_file;
+		/* std::shared_ptr< boost::iostreams::mapped_file > m_file; */
+		std::shared_ptr< std::ifstream > m_file;
 		const char* m_start_position;
 		const char* m_end_position;
 		const char* m_current_position;

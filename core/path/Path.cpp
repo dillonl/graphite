@@ -1,6 +1,5 @@
 #include "Path.h"
-
-#include <boost/functional/hash.hpp>
+#include <functional>
 
 namespace graphite
 {
@@ -53,7 +52,15 @@ namespace graphite
 
 	void Path::computeAndSetHash()
 	{
-		this->m_hash = boost::hash_range(m_allele_ptrs.begin(), m_allele_ptrs.end());
+		// this->m_hash = boost::hash_range(m_allele_ptrs.begin(), m_allele_ptrs.end());
+		// std::hash< std::vector< IAllele::SharedPtr > >
+		size_t seed = 0;
+		for (auto allelePtr : this->m_allele_ptrs)
+		{
+			seed ^= m_hasher(allelePtr.get()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+			// hash_combine(seed, allelePtr)
+		}
+		m_hash = seed;
 	}
 
 	void Path::setGSSWGraphMapping(std::shared_ptr< gssw_graph_mapping > graphMappingPtr)

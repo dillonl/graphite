@@ -3,8 +3,7 @@
 
 #include "core/util/Types.h"
 #include "core/allele/IAllele.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <vector>
 #include <memory>
@@ -14,7 +13,7 @@ namespace graphite
 	class IAllele;
 	class IAlignment;
 	class Sample;
-    class IVariant : private boost::noncopyable, public std::enable_shared_from_this< IVariant >
+    class IVariant : private Noncopyable, public std::enable_shared_from_this< IVariant >
     {
         public:
 		    typedef std::shared_ptr<IVariant> SharedPtr;

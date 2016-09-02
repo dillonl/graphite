@@ -1,9 +1,8 @@
 #ifndef GRAPHITE_IVARIANTLIST_H
 #define GRAPHITE_IVARIANTLIST_H
 
-#include <boost/noncopyable.hpp>
-
 #include "core/region/Region.h"
+#include "core/util/Noncopyable.hpp"
 #include "IVariant.h"
 #include "IHeader.h"
 
@@ -19,7 +18,7 @@ namespace graphite
 	 * framework for a variant reader. This will allow flexibility
 	 * for all file types and implementations.
 	 */
-	class IVariantList : private boost::noncopyable
+	class IVariantList : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IVariantList > SharedPtr;

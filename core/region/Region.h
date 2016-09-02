@@ -1,13 +1,13 @@
 #ifndef GRAPHITE_REGION_H
 #define GRAPHITE_REGION_H
 
-#include <boost/noncopyable.hpp>
-
 #include <string>
 #include <memory>
 
 #include "core/util/Types.h"
-#include "core/parser/RegionParser.hpp"
+#include "core/util/Noncopyable.hpp"
+
+/* #include "core/parser/RegionParser.hpp" */
 
 namespace graphite
 {
@@ -15,7 +15,7 @@ namespace graphite
 	/*
 	 * This class represents a reference id, start position and an end position.
 	 */
-	class Region : private boost::noncopyable
+	class Region : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< Region > SharedPtr;
@@ -43,7 +43,7 @@ namespace graphite
 		position m_start_position;
 		position m_end_position;
 
-		RegionParser< const char* > m_region_parser;
+		/* RegionParser< const char* > m_region_parser; */
 	};
 
 }

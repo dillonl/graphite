@@ -1,5 +1,6 @@
 #include "FastaReference.h"
 
+
 namespace graphite
 {
 
@@ -7,7 +8,7 @@ namespace graphite
 		m_fasta_path(path),
 		IReference()
 	{
-		m_fasta_reference = std::make_shared< fastahack::FastaReference >();
+		m_fasta_reference = std::make_shared< ::FastaReference >();
 		m_fasta_reference->open(this->m_fasta_path);
 		setSequence(region);
 	}
@@ -18,7 +19,7 @@ namespace graphite
 
 	void FastaReference::setSequence(Region::SharedPtr region)
 	{
-		this->m_region = region;
+		this->m_region = std::make_shared< Region >(region->getRegionString());
 
 		std::string seqName = this->m_region->getReferenceID();
 		if (this->m_region->getStartPosition() == 0 || this->m_region->getEndPosition() == 0)

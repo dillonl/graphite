@@ -9,22 +9,21 @@ set(GRAPHITE_TEST_SOURCES
   gtest_main.cpp
 )
 
-message("samtools: ${SAMTOOLS_INCLUDES}")
-
 # Where Google Test's .h files can be found.
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/externals
   ${gtest_SOURCE_DIR}/include
   ${gtest_SOURCE_DIR}
-  ${SCI_BOOST_INCLUDE}
   ${HTSLIB_INCLUDE_DIR}
   ${SAMTOOLS_INCLUDES}
+  ${FASTAHACK_INCLUDE}
+  ${ZLIB_INCLUDE_1}
+  ${ZLIB_INCLUDE_2}
+  ${CXXOPTS_INCLUDE}
  )
 
 
-
-set(Boost_USE_MULTITHREADED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
@@ -39,21 +38,25 @@ add_executable(graphite_tests
 )
 
 target_link_libraries(graphite_tests
+    ${ZLIB_LIB}
+    ${FASTAHACK_LIB}
 	${HTSLIB_LIBRARY}
 	gtest
-	BamTools
-	BamTools-utils
+	${BAMTOOLS_LIB}
+	${BAMTOOLS_UTIL_LIB}
+	${ZLIB_LIB}
 	${VCFLIB_LIBRARIES}
-	fastahack_lib
 	${GSSW_LIB}
 	ssw_lib
-	${SCI_BOOST_LIBRARY}
     ${SCI_ZLIB_LIBRARY}
 	${CORE_LIB}
+	${FASTAHACK_LIB}
 	${PLUGIN_LIBS}
 	${SAMTOOLS_LIBRARIES}
 	curl
 	crypto
+	${FASTAHACK_LIB}
+	${ZLIB_LIB}
 )
 
-#add_dependencies(graphite_tests ${SAMTOOLS_PROJECT} ${HTSLIB_PROJECT})
+add_dependencies(graphite_tests ${GRAPHITE_EXTERNAL_PROJECT})

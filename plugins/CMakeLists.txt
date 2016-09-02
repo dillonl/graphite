@@ -1,3 +1,2 @@
-ADD_SUBDIRECTORY(pathtrace)
+#ADD_SUBDIRECTORY(pathtrace)
 ADD_SUBDIRECTORY(adjudicator)
-#ADD_SUBDIRECTORY(gssw)

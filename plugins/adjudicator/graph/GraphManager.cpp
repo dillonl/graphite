@@ -11,7 +11,7 @@
 #include <queue>
 
 
-#include <boost/bind.hpp>
+#include <functional>
 
 namespace graphite
 {

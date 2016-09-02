@@ -1,13 +1,15 @@
 #ifndef GRAPHITE_FASTAWRITER_H
 #define GRAPHITE_FASTAWRITER_H
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <memory>
+#include <ostream>
+
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
-	class FastaWriter : boost::noncopyable
+	class FastaWriter : Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< FastaWriter > SharedPtr;

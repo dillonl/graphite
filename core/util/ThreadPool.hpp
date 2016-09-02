@@ -10,12 +10,13 @@
 #include <future>
 #include <functional>
 #include <stdexcept>
-#include <boost/bind.hpp>
+
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
 
-    class ThreadPool : private boost::noncopyable
+    class ThreadPool : private Noncopyable
     {
 	public:
 		static ThreadPool* Instance()

@@ -16,8 +16,7 @@
 
 #include <thread>
 #include <unordered_set>
-
-#include <boost/filesystem.hpp>
+#include <fstream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,10 +27,15 @@
 
 #include <zlib.h>
 
+inline bool file_exists (const std::string& name)
+{
+	ifstream f(name.c_str());
+	return f.good();
+}
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
 void validatePath(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
 {
-	if (!boost::filesystem::exists(path))
+	if (!file_exists(path))
 	{
 		std::cout << errorMessage << std::endl;
 		if (exitOnFailure) {
@@ -42,7 +46,7 @@ void validatePath(const std::string& path, const std::string& errorMessage, bool
 
 void writeVariantListToFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
 {
-	bool fileExists = boost::filesystem::exists(path);
+	bool fileExists = file_exists(path);
 	std::ofstream outVCF;
 	if (!fileExists)
 	{
@@ -62,7 +66,7 @@ void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::Sha
 	int fd = 0;
 
 
-	if (boost::filesystem::exists(path))
+	if (file_exists(path))
 	{
 		fd = open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0666);
 		variantListPtr->printToCompressedVCF(vcfHeaderPtr, false, fd);
@@ -76,7 +80,6 @@ void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::Sha
 
 int main(int argc, char** argv)
 {
-	// std::vector< std::string > inclusionList = {"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"};
 	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
@@ -85,9 +88,9 @@ int main(int argc, char** argv)
 		params.printHelp();
 		exit(0);
 	}
+	auto bamPaths = params.getBAMPaths();
 	auto fastaPath = params.getFastaPath();
 	auto vcfPaths = params.getInVCFPaths();
-	auto bamPaths = params.getBAMPaths();
 	auto outputDirectory = params.getOutputDirectory();
 	auto paramRegionPtr = params.getRegion();
 	auto swPercent = params.getPercent();
@@ -98,6 +101,10 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
+
+	std::cout << paramRegionPtr->getRegionString() << std::endl;
+	std::cout << paramRegionPtr->getReferenceID() << " " << paramRegionPtr->getStartPosition() << " " << paramRegionPtr->getEndPosition() << std::endl;
+
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	std::vector< graphite::Region::SharedPtr > regionPtrs;
@@ -132,7 +139,7 @@ int main(int argc, char** argv)
 	{
 		validatePath(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
 	}
-	if (outputDirectory.size() > 0)
+	if (outputDirectory.size() == 0)
 	{
 		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
@@ -164,18 +171,16 @@ int main(int argc, char** argv)
 	std::unordered_map< std::string, std::string > vcfoutPaths;
 	for (auto vcfPath : vcfPaths)
 	{
-
-		boost::filesystem::path vcfFSPath(vcfPath);
-		boost::filesystem::path outputDirectoryPath(outputDirectory);
-		boost::filesystem::path extension(".gz");
-		boost::filesystem::path outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfFSPath.stem().string() + extension.string());
+		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
+		std::string filePath = vcfoutPaths[vcfPath] = outputDirectory + "/" + path;
 		uint32_t counter = 1;
-		while (boost::filesystem::exists(outputVCFPath.string()))
+		while (file_exists(filePath))
 		{
-			boost::filesystem::path countPath("_" + std::to_string(counter++));
-			outputVCFPath = outputDirectoryPath / boost::filesystem::path(vcfFSPath.stem().string() + countPath.string() + extension.string());
+			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
+			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
+			filePath = outputDirectory + "/" + fileNameWithoutExtension + "_" + std::to_string(counter) + extension;
 		}
-		vcfoutPaths[vcfPath] = outputVCFPath.string();
+		vcfoutPaths[vcfPath] = filePath;
 	}
 
 	std::unordered_set< std::string > outputPaths;
@@ -184,13 +189,6 @@ int main(int argc, char** argv)
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
 		auto regionPtr = regionPtrs[regionCount];
-		/*
-		if (std::find(inclusionList.begin(), inclusionList.end(), regionPtr->getReferenceID()) == inclusionList.end())
-		{
-			std::cout << "skipping: " << regionPtr->getRegionString() << std::endl;
-			continue;
-		}
-		*/
 		std::cout << "processing: " << regionPtr->getRegionString() << std::endl;
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
@@ -250,7 +248,8 @@ int main(int argc, char** argv)
 			{
 				outputPaths.emplace(currentVCFOutPath);
 			}
-			auto funct = std::bind(&writeVariantListToCompressedFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
+			// auto funct = std::bind(&writeVariantListToCompressedFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
+			auto funct = std::bind(&writeVariantListToFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
 			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
 			vcfWriterFutureFunctions.push_back(functFuture);
 		}

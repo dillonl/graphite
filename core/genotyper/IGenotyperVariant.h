@@ -3,13 +3,12 @@
 
 #include <memory>
 
-#include <boost/noncopyable.hpp>
-
 #include "GenotyperAllele.hpp"
+#include "core/util/Noncopyable.hpp"
 
 namespace graphite
 {
-	class IGenotyperVariant : private boost::noncopyable
+	class IGenotyperVariant : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IGenotyperVariant > SharedPtr;

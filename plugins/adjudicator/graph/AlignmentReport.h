@@ -4,16 +4,17 @@
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
 #include "core/alignment/IAlignment.h"
+#include "core/util/Noncopyable.hpp"
+
 #include "gssw/gssw.h"
 
-#include <boost/noncopyable.hpp>
 #include <memory>
 
 namespace graphite
 {
 namespace adjudicator
 {
-	class AlignmentReport : private boost::noncopyable
+	class AlignmentReport : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< AlignmentReport > SharedPtr;

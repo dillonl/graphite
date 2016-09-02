@@ -1,10 +1,13 @@
 #include "Params.h"
+#include "Utility.h"
 
 #include <thread>
+#include <iostream>
 
 namespace graphite
 {
-	Params::Params()
+	Params::Params() :
+		m_options("Graphite", "VCF Allele Adjudicator")
 	{
 
 	}
@@ -15,6 +18,23 @@ namespace graphite
 
 	void Params::parseGSSW(int argc, char** argv)
 	{
+		this->m_options.add_options()
+			("h,help","Print help message")
+			("d,exclude_duplicates", "Exclude Duplicate Reads")
+			("v,vcf", "Path to input VCF file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
+			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
+			("r,region", "Region information", cxxopts::value< std::string >()->default_value(""))
+			("o,output_directory", "Path to output directory", cxxopts::value< std::string >())
+			("f,fasta", "Path to input FASTA file", cxxopts::value< std::string >())
+			("p,percent_match", "Smith-Waterman Percent [optional - default is 90]", cxxopts::value< uint32_t >()->default_value("90"))
+			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
+			("s,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
+			("a,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
+			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
+			("g,graph_size", "The size of the graph [optional - default is 3000]", cxxopts::value< uint32_t >()->default_value("3000"))
+			("t,number_threads", "Thread count [optional - default is number of cores x 2]", cxxopts::value< uint32_t >()->default_value(std::to_string(std::thread::hardware_concurrency() * 2)));
+		this->m_options.parse(argc, argv);
+		/*
 		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
 		m_options_description_ptr->add_options()
 			("help,h","Print help message")
@@ -33,10 +53,12 @@ namespace graphite
 			(",t", boost::program_options::value< uint32_t >()->default_value(std::thread::hardware_concurrency() * 2), "Thread count [optional - default is number of cores x 2]");
 		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
 		boost::program_options::store(parseCommandLine, m_variables_map);
+		*/
 	}
 
 	void Params::parsePathTrace(int argc, char** argv)
 	{
+		/*
 		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
 		m_options_description_ptr->add_options()
 			("help,h","Print help message")
@@ -46,109 +68,124 @@ namespace graphite
 		    (",p", boost::program_options::value< std::string >()->default_value(""), "Prefix to output files [optional - default is stdout]");
 		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
 		boost::program_options::store(parseCommandLine, m_variables_map);
+		*/
 	}
 
 	bool Params::showHelp()
 	{
-		return (m_variables_map.count("help") > 0);
+		return m_options.count("h");
 	}
 
 	void Params::printHelp()
 	{
-		std::cout << *m_options_description_ptr << std::endl;
+		std::cout << this->m_options.help() << std::endl;
 	}
 
 	bool Params::validateRequired()
 	{
-		try
+		std::vector< std::string > errorMessages;
+		if (!m_options.count("v"))
 		{
-			boost::program_options::notify(m_variables_map);
+			errorMessages.emplace_back("vcf path(s) required");
 		}
-		catch (boost::program_options::required_option& e)
+		if (!m_options.count("b"))
 		{
-			std::cout << "ERROR " << e.what() << std::endl << std::endl;
+			errorMessages.emplace_back("bam path(s) required");
+		}
+		if (!m_options.count("f"))
+		{
+			errorMessages.emplace_back("fasta path required");
+		}
+		if (errorMessages.size() > 0)
+		{
+			std::cout << "There was a problem parsing commands" << std::endl;
+			for (auto message : errorMessages)
+			{
+				std::cout << message << std::endl;
+			}
 			return false;
 		}
-		return true;
+		else
+		{
+			return true;
+		}
 	}
 
 
     bool Params::getExcludeDuplicates()
     {
-        return m_variables_map["-d"].as< bool >();
+        return m_options.count("d") > 0;
     }
 
 	std::string Params::getFastaPath()
 	{
-		return m_variables_map["-f"].as< std::string >();
+		return m_options["f"].as< std::string >();
 	}
 
 	std::vector< std::string > Params::getInVCFPaths()
 	{
-		return m_variables_map["-v"].as< std::vector< std::string > >();
+		return m_options["v"].as< std::vector< std::string > >();
 	}
 
 	std::vector< std::string > Params::getBAMPaths()
 	{
-		return m_variables_map["-b"].as< std::vector< std::string > >();
+		return m_options["b"].as< std::vector< std::string > >();
 	}
 
 	std::string Params::getOutputDirectory()
 	{
-		return m_variables_map["-o"].as< std::string >();
+		return m_options["o"].as< std::string >();
 	}
 
 	std::string Params::getFilePrefix()
 	{
-		return m_variables_map["-p"].as< std::string >();
+		// return m_variables_map["-p"].as< std::string >();
+		return "";
 	}
 
 	Region::SharedPtr Params::getRegion()
 	{
-		auto regionString = m_variables_map["-r"].as< std::string >();
-		if (regionString.size() == 0)
+
+		if (m_options.count("r"))
 		{
-			return nullptr;
+			return std::make_shared< Region >(m_options["r"].as< std::string >());
 		}
-		else
-		{
-			return std::make_shared< Region >(regionString);
-		}
+		return nullptr;
 	}
 
 	uint32_t Params::getPercent()
 	{
-		return m_variables_map["-p"].as< uint32_t >();
+		return m_options["p"].as< uint32_t >();
 	}
 
 	uint32_t Params::getThreadCount()
 	{
-		return m_variables_map["-t"].as< uint32_t >();
+		return m_options["t"].as< uint32_t >();
 	}
 
 	uint32_t Params::getGraphSize()
 	{
-		return m_variables_map["-g"].as< uint32_t >();
+		return m_options["g"].as< uint32_t >();
 	}
 
 	int Params::getMatchValue()
 	{
-		return m_variables_map["-m"].as< uint32_t >();
+		return m_options["m"].as< uint32_t >();
 	}
 
 	int Params::getMisMatchValue()
 	{
-		return m_variables_map["-s"].as< uint32_t >();
+		return m_options["s"].as< uint32_t >();
 	}
 
 	int Params::getGapOpenValue()
 	{
-		return m_variables_map["-a"].as< uint32_t >();
+		return m_options["a"].as< uint32_t >();
 	}
 
 	int Params::getGapExtensionValue()
 	{
-		return m_variables_map["-e"].as< uint32_t >();
+		return m_options["e"].as< uint32_t >();
 	}
 
 }

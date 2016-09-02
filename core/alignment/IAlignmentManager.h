@@ -3,15 +3,14 @@
 
 #include "IAlignmentList.h"
 #include "core/region/Region.h"
-
-#include <boost/noncopyable.hpp>
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
 
 namespace graphite
 {
 	class Sample;
-	class IAlignmentManager : private boost::noncopyable
+	class IAlignmentManager : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< IAlignmentManager > SharedPtr;

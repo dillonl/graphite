@@ -1,8 +1,12 @@
 INCLUDE_DIRECTORIES(
+    ${FASTAHACK_INCLUDE}
 	${SCI_BOOST_INCLUDE}
 	${HTSLIB_INCLUDE_DIR}
 	${SAMTOOLS_INCLUDES}
 	${TABIX_INCLUDE}
+	${ZLIB_INCLUDE_1}
+	${ZLIB_INCLUDE_2}
+	${CXXOPTS_INCLUDE}
 )
 
 set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
@@ -15,6 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 set(GRAPHITE_UTIL_SOURCES
   util/Params.cpp
+  util/Utility.cpp
   )
 
 set(GRAPHITE_SEQUENCE_SOURCES
@@ -60,7 +65,7 @@ set(GRAPHITE_CORE_VARIANT_SOURCES
   variant/VCFHeader.cpp
   )
 
-add_library(graphite_core
+add_library(graphite_core STATIC
   ${GRAPHITE_UTIL_SOURCES}
   ${GRAPHITE_SEQUENCE_SOURCES}
   ${GRAPHITE_FILE_SOURCES}
@@ -74,4 +79,4 @@ add_library(graphite_core
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
 
-add_dependencies(graphite_core ${TABIX_PROJECT})
+add_dependencies(graphite_core ${TABIX_PROJECT} ${FASTAHACK_PROJECT})

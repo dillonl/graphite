@@ -3,15 +3,15 @@
 
 #include "AlignmentReport.h"
 
-#include <boost/noncopyable.hpp>
 #include <memory>
 #include <mutex>
+#include <list>
 
 namespace graphite
 {
 namespace adjudicator
 {
-	class AlignmentReporter : boost::noncopyable
+	class AlignmentReporter : Noncopyable
 	{
 	public:
 		static AlignmentReporter* Instance();
