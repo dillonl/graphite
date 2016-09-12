@@ -82,6 +82,12 @@ namespace graphite
 			regionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), startPosition, endPosition);
 			regionPtrs.push_back(regionPtr);
 		}
+		/*
+		for (auto regionPtr : regionPtrs)
+		{
+			std::cout << regionPtr->getRegionString() << std::endl;
+		}
+		*/
 		return regionPtrs;
 	}
 
