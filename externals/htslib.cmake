@@ -1,43 +1,35 @@
-if (CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-    # when using the makefile generator, use the special variable $(MAKE) to invoke make
-    # this enables the jobserver to work correctly
-    set(MAKE_COMMAND "$(MAKE)")
-else()
-	# invoke make explicitly
-	# in this case, we assume the parent build system is running in parallel already so no -j flag is added
-	find_program(MAKE_COMMAND NAMES make gmake)
-endif()
-
-if (INSTALL_DEPENDENCIES)
-    set(HTSLIB_INSTALL ${MAKE_COMMAND} install prefix=${CMAKE_INSTALL_PREFIX})
-else()
-	set(HTSLIB_INSTALL "")
-endif()
-
 # build htslib
-#set(htslib_PREFIX ${CMAKE_BINARY_DIR}/contrib/htslib)
 SET(HTSLIB_DIR ${CMAKE_BINARY_DIR}/externals/htslib CACHE INTERNAL "htslib project directory")
-SET(HTSLIB_PROJECT htslib CACHE INTERNAL "htslib project name")
-ExternalProject_Add(HTSLIB_PROJECT
+SET(HTSLIB_PROJECT htslib_project CACHE INTERNAL "htslib project name")
+ExternalProject_Add(${HTSLIB_PROJECT}
+	DEPENDS ${ZLIB_PROJECT}
     PREFIX ${HTSLIB_DIR}
     GIT_REPOSITORY "https://github.com/samtools/htslib.git"
     GIT_TAG 11661a57306a048528d0a223c86c62bcdc20eb18
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND autoconf
-    BUILD_COMMAND  ./configure --enable-libcurl 
-    INSTALL_COMMAND  ${MAKE_COMMAND}
+	UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND  "make"
+    INSTALL_COMMAND  ""
     LOG_DOWNLOAD 0
 	LOG_UPDATE 0
     LOG_CONFIGURE 0
     LOG_BUILD 0
     LOG_TEST 0
     LOG_INSTALL 0
+	CMAKE_CACHE_ARGS
+        -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
 )
 
 #target_link_libraries (htslib curl crypto)
 
 #include_directories(${HTSLIB_DIR}/src/HTSLIB_PROJECT/)
 
-SET(HTSLIB_INCLUDE_DIR ${HTSLIB_DIR}/src/HTSLIB_PROJECT/ CACHE INTERNAL "htslib include")
-SET(HTSLIB_LIBRARY ${HTSLIB_DIR}/src/HTSLIB_PROJECT/libhts.a CACHE INTERNAL "htslib Library")
+ExternalProject_Get_Property(${HTSLIB_PROJECT} INSTALL_DIR)
+ExternalProject_Get_Property(${HTSLIB_PROJECT} SOURCE_DIR)
+ExternalProject_Get_Property(${HTSLIB_PROJECT} BINARY_DIR)
+
+SET(HTSLIB_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "htslib include")
+SET(HTSLIB_LIB ${SOURCE_DIR}/libhts.a CACHE INTERNAL "htslib Library")
 

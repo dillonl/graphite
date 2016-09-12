@@ -42,6 +42,14 @@ namespace graphite
 		// this->m_end_position = this->m_end_file_ptr;
 	}
 
+	void ASCIIFileReader::setFilePosition(uint64_t seekPosition)
+	{
+		if (this->m_opened)
+		{
+			this->m_file->seekg(seekPosition, std::ifstream::beg);
+		}
+	}
+
 	void ASCIIFileReader::Close()
 	{
 		if (this->m_opened)

@@ -7,9 +7,9 @@ namespace graphite
 {
 	VCFHeader::VCFHeader()
 	{
-		m_header_lines.emplace_back("##fileformat=VCFv4.2");
-		m_header_lines.emplace_back("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">");
-		m_header_lines.emplace_back("##INFO=<ID=DP4,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">");
+		// m_header_lines.emplace_back("##fileformat=VCFv4.2");
+		// m_header_lines.emplace_back("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth\">");
+		// m_header_lines.emplace_back("##INFO=<ID=DP4,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles; 2) reverse ref; 3) forward non-ref; 4) reverse non-ref alleles, used in variant calling.\">");
 	}
 
 	VCFHeader::~VCFHeader() {}

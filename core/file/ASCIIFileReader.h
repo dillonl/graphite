@@ -45,6 +45,8 @@ namespace graphite
 			*/
 		}
 
+		void setFilePosition(uint64_t pos) override;
+
 	protected:
 		/* std::shared_ptr< boost::iostreams::mapped_file > m_file; */
 		std::shared_ptr< std::ifstream > m_file;

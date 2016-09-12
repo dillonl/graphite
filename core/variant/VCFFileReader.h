@@ -45,12 +45,12 @@ namespace graphite
 	protected:
 		VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
 	private:
-
-
 		void Open();
         void readHeader();
-		position getPositionFromLine(const char* line);
+		static position getPositionFromLine(const char* line);
 		void setFileReader(const std::string& path);
+		uint64_t findRegionStartPosition(Region::SharedPtr regionPtr);
+		uint64_t getPositionFromFile(uint64_t seekPosition, uint64_t endSeekPosition, std::shared_ptr< std::atomic< bool > > posFound, Region::SharedPtr regionPtr, std::string path);
 
 		VCFHeader::SharedPtr m_vcf_header;
 		std::string m_path;

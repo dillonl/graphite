@@ -1,5 +1,6 @@
 #include "core/file/ASCIIFileReader.h"
 #include "core/file/ASCIIGZFileReader.h"
+#include "core/util/ThreadPool.hpp"
 #include "core/region/Region.h"
 #include "VariantList.h"
 #include "VCFFileReader.h"
@@ -8,6 +9,10 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <deque>
+#include <future>
+#include <atomic>
+#include <memory>
 
 namespace graphite
 {
@@ -109,28 +114,6 @@ namespace graphite
 		char* endPtr;
 		auto pos = strtol(tmpLine, &endPtr, 10);
 		return pos;
-		/*
-		const char* posStart = static_cast<const char*>(memchr(line, '\t', 100)) + 1;
-		const char* posEnd = static_cast<const char*>(memchr(posStart, '\t', 100));
-
-		while (posStart != posEnd)
-		{
-
-		}
-		*/
-
-		/*
-		position pos;
-		bool r = boost::spirit::qi::phrase_parse(
-			posStart,
-			posEnd,
-			(
-				boost::spirit::qi::uint_[boost::phoenix::ref(pos) = boost::spirit::qi::_1]
-			),
-			boost::spirit::ascii::space
-			);
-		return pos;
-		*/
 	}
 
 	std::vector< IVariant::SharedPtr > VCFFileReader::getVariantsInRegion(Region::SharedPtr regionPtr)
@@ -139,6 +122,8 @@ namespace graphite
 		std::string regionReferenceIDWithTab = regionPtr->getReferenceID() + "\t";
 		std::string line;
 		uint32_t count = 0;
+		bool wasInRegion = false;
+		// this->m_file_ptr->setFilePosition(findRegionStartPosition(regionPtr));
 		while (this->m_file_ptr->getNextLine(line))
 		{
 			if (memcmp(regionReferenceIDWithTab.c_str(), line.c_str(), regionReferenceIDWithTab.size()) == 0) // if we are in the correct reference (chrom)
@@ -147,11 +132,127 @@ namespace graphite
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
 					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr, m_max_allowed_allele_size));
+					wasInRegion = true;
+					continue;
 				}
 				if (regionPtr->getEndPosition() < linePosition) { break; } // if we have passed the end position of the region then stop looking for variants
 			}
+			if (wasInRegion)
+			{
+				break;
+			}
 		}
 		return variantPtrs;
+	}
+
+	uint64_t VCFFileReader::findRegionStartPosition(Region::SharedPtr regionPtr)
+	{
+		std::ifstream in(this->m_path, std::ifstream::ate | std::ifstream::binary);
+		auto fileSize = in.tellg();
+		in.close();
+		std::deque< std::shared_ptr< std::future< uint64_t > > > futureFunctions;
+		std::shared_ptr< std::atomic< bool > > posFound = std::make_shared< std::atomic< bool > >(false);
+		uint32_t numThreads = 20;
+		uint32_t partSize = fileSize / numThreads;
+		uint64_t seekPosition = 0;
+		std::cout << "partition size: " << partSize << std::endl;
+		for (auto i = 0; i < numThreads; ++i)
+		{
+			std::cout << "starting thread: " << i << " at seek position: " << seekPosition << std::endl;
+			auto funct = std::bind(&VCFFileReader::getPositionFromFile, this, seekPosition, seekPosition + partSize, posFound, regionPtr, this->m_path);
+			auto future = ThreadPool::Instance()->enqueue(funct);
+			futureFunctions.push_back(future);
+			seekPosition += partSize;
+		}
+		uint64_t pos = 0;
+		while (!futureFunctions.empty())
+		{
+			auto futureFunct = futureFunctions.front();
+			futureFunctions.pop_front();
+			if (futureFunct->wait_for(std::chrono::milliseconds(100)) == std::future_status::ready)
+			{
+				auto tmpPos = futureFunct->get();
+				if (tmpPos > 0)
+				{
+					pos = tmpPos;
+					break;
+				}
+			}
+			else
+			{
+				futureFunctions.emplace_back(futureFunct);
+			}
+		}
+
+		return pos;
+	}
+
+	uint64_t VCFFileReader::getPositionFromFile(uint64_t seekPosition, uint64_t endSeekPosition, std::shared_ptr< std::atomic< bool > > posFound, Region::SharedPtr regionPtr, std::string path)
+	{
+		static std::mutex l;
+
+		std::ifstream f;
+		f.open(path.c_str(), std::ifstream::in);
+
+		f.seekg(endSeekPosition, std::ifstream::beg);
+		std::string line;
+
+		bool newChrom = false;
+
+		if (seekPosition > 0)
+		{
+			// rewind by one line
+			while (f.unget() && f.peek() != '\n')
+			{
+				std::lock_guard< std::mutex > lock(l);
+				char tmp = f.peek();
+				std::cout << tmp << std::endl;
+			}
+		}
+
+		std::getline(f, line); // fastforward to the eol
+		endSeekPosition = f.tellg();
+		f.seekg(seekPosition, std::ifstream::beg);
+
+		std::string regionReferenceIDWithTab = regionPtr->getReferenceID() + "\t";
+		position startPosition = regionPtr->getStartPosition();
+		uint64_t returnFilePos = 0;
+		uint64_t tmpFilePos = f.tellg();
+		std::getline(f, line); // get the partial line
+		uint64_t counter = 0;
+		while (std::getline(f, line) && f.tellg() < endSeekPosition)
+		{
+			{
+				std::lock_guard< std::mutex > lock(l);
+				std::cout << line << std::endl;
+			}
+			if (line.size() > 0 && line[0] == '#') { continue; }
+			if (counter++ % 10 == 0 && posFound->load()) { break; } // another thread located the position before this thread
+			if (memcmp(regionReferenceIDWithTab.c_str(), line.c_str(), regionReferenceIDWithTab.size()) == 0) // if we are in the correct reference (chrom)
+			{
+				auto currentPosition = VCFFileReader::getPositionFromLine(line.c_str());
+				if (currentPosition >= startPosition)
+				{
+					returnFilePos = tmpFilePos;
+					f.seekg(returnFilePos, std::ifstream::beg);
+					std::getline(f, line); // get the partial line
+					{
+						std::lock_guard< std::mutex > lock(l);
+						std::cout << "found position: " << currentPosition << " " << returnFilePos << std::endl;
+						std::cout << "found line: " << line << std::endl;
+					}
+					*posFound = true;
+					break;
+				}
+			}
+			tmpFilePos = f.tellg();
+		}
+		f.close();
+		{
+			std::lock_guard< std::mutex > lock(l);
+			std::cout << "finished: " << returnFilePos << std::endl;
+		}
+		return returnFilePos;
 	}
 
 } // end namespace graphite

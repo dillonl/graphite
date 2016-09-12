@@ -23,7 +23,7 @@ namespace graphite
 			("d,exclude_duplicates", "Exclude Duplicate Reads")
 			("v,vcf", "Path to input VCF file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
-			("r,region", "Region information", cxxopts::value< std::string >()->default_value(""))
+			("r,region", "Region information", cxxopts::value< std::string >())
 			("o,output_directory", "Path to output directory", cxxopts::value< std::string >())
 			("f,fasta", "Path to input FASTA file", cxxopts::value< std::string >())
 			("p,percent_match", "Smith-Waterman Percent [optional - default is 90]", cxxopts::value< uint32_t >()->default_value("90"))
@@ -145,7 +145,6 @@ namespace graphite
 
 	Region::SharedPtr Params::getRegion()
 	{
-
 		if (m_options.count("r"))
 		{
 			return std::make_shared< Region >(m_options["r"].as< std::string >());

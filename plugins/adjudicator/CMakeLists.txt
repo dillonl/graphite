@@ -19,7 +19,7 @@ include_directories(${SCI_BOOST_INCLUDE} ${HTSLIB_INCLUDE_DIR} ${SAMTOOLS_INCLUD
 #ADD_DEFINITIONS(-DBOOST_FALLTHROUGH)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 add_library(graphite_adjudicator_lib ${GRAPHITE_ADJUDICATOR_GRAPH_SOURCES})
 

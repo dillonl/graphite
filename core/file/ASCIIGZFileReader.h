@@ -36,6 +36,8 @@ namespace graphite
 			return false;
 		}
 
+		void setFilePosition(uint64_t pos) override {};
+
 	private:
 		std::shared_ptr< std::iostream > m_iostream_ptr;
 		std::shared_ptr< std::ifstream > m_ifstream_ptr;

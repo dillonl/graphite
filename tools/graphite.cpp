@@ -17,6 +17,7 @@
 #include <thread>
 #include <unordered_set>
 #include <fstream>
+#include <stdio.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -30,7 +31,7 @@
 inline bool file_exists (const std::string& name)
 {
 	ifstream f(name.c_str());
-	return f.good();
+	return f;
 }
 // void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
 void validatePath(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
@@ -102,9 +103,6 @@ int main(int argc, char** argv)
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
 
-	std::cout << paramRegionPtr->getRegionString() << std::endl;
-	std::cout << paramRegionPtr->getReferenceID() << " " << paramRegionPtr->getStartPosition() << " " << paramRegionPtr->getEndPosition() << std::endl;
-
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
 	std::vector< graphite::Region::SharedPtr > regionPtrs;
@@ -144,15 +142,6 @@ int main(int argc, char** argv)
 		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
 
-	/*
-	graphite::VCFHeader::SharedPtr vcfHeaderPtr = std::make_shared< graphite::VCFHeader >();
-
-	for (auto bamPath : bamPaths)
-	{
-		vcfHeaderPtr->addHeaderLine("##samplefile=" + bamPath);
-	}
-	*/
-
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
 	{
@@ -174,12 +163,14 @@ int main(int argc, char** argv)
 		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
 		std::string filePath = vcfoutPaths[vcfPath] = outputDirectory + "/" + path;
 		uint32_t counter = 1;
-		while (file_exists(filePath))
+		while (file_exists(filePath + ".gz"))
 		{
 			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
 			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
-			filePath = outputDirectory + "/" + fileNameWithoutExtension + "_" + std::to_string(counter) + extension;
+			filePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
+			++counter;
 		}
+		filePath += ".tmp";
 		vcfoutPaths[vcfPath] = filePath;
 	}
 
@@ -189,7 +180,6 @@ int main(int argc, char** argv)
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
 		auto regionPtr = regionPtrs[regionCount];
-		std::cout << "processing: " << regionPtr->getRegionString() << std::endl;
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
@@ -198,11 +188,13 @@ int main(int argc, char** argv)
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
+		// std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
 		// load bam alignments
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
 		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-		std::cout << "finished reading alignments" << std::endl;
+
+		// std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
@@ -266,8 +258,44 @@ int main(int argc, char** argv)
 
 	for (auto& outputPath : outputPaths)
 	{
+		std::string tmpOutputPath = outputPath.substr(0, outputPath.find_last_of(".")); // remove the .tmp
+		std::string extension = tmpOutputPath.substr(tmpOutputPath.find_last_of(".") + 1); // get the extension
+		if (extension.compare("gz") == 0) // if it's a gz extension then remove it
+		{
+			tmpOutputPath = outputPath.substr(0, tmpOutputPath.find_last_of("."));
+			extension = tmpOutputPath.substr(tmpOutputPath.find_last_of(".") + 1);
+		}
+		std::string destOutputPath = tmpOutputPath += ".gz";
+		int fp;
+		BGZF* f_dst;
+		void* buffer;
+		long start = 0;
+		long end = -1;
+		int c;
+		int is_forced = 0;
+		int WINDOW_SIZE = 64 * 1024;
+		fp = open(outputPath.c_str(), O_RDONLY);
+		f_dst = bgzf_open(destOutputPath.c_str(), "w");
+		buffer = malloc(WINDOW_SIZE);
+		while ((c = read(fp, buffer, WINDOW_SIZE)) > 0)
+		{
+			if (bgzf_write(f_dst, buffer, c) < 0)
+			{
+				std::cout << "an error occurred while compressing" << std::endl;
+				exit(0);
+			}
+		}
+		free(buffer);
+		close(fp);
+
+		bgzf_close(f_dst);
+
 		ti_conf_t* conf = &ti_conf_vcf;
-		ti_index_build(outputPath.c_str(), conf);
+		ti_index_build(destOutputPath.c_str(), conf);
+		std::string indexPath = destOutputPath + ".tbi";
+		std::string tmpIndexPath = destOutputPath.substr(0, outputPath.find_last_of(".")) + ".tbi"; // rename tbi
+		rename(indexPath.c_str(), tmpIndexPath.c_str());
+		remove(outputPath.c_str());
 	}
 	return 0;
 }
