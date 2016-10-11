@@ -22,25 +22,20 @@ namespace graphite
 		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, bool excludeDuplicateReads = false);
 		~BamAlignmentManager();
 
-		IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr) override;
 		void asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
-		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		void processMappingStatistics() override;
 		std::vector< Sample::SharedPtr > getSamplePtrs() override;
 	private:
-		std::vector< Region::SharedPtr > getRegionsContainingVariantsWithPadding(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
+		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;
         bool m_exclude_duplicate_reads;
 		std::string m_bam_path;
-		Region::SharedPtr m_region_ptr;
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
 		std::mutex m_alignment_ptrs_lock;
-        std::vector< IAlignment::SharedPtr > m_alignment_ptrs;
-		std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > m_name_alignment_ptr_map_ptr;
 		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};
 }

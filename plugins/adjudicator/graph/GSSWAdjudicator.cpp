@@ -44,7 +44,8 @@ namespace adjudicator
 
 		// std::cout << "mapping id: " <<  mappingPtr->m_id << std::endl;
 		// std::cout << "swPercent: " << swPercent << std::endl;
-		if (swPercent < this->m_sw_percent) //if the percentage isn't high enough to increment the count
+		// if (swPercent < this->m_sw_percent) //if the percentage isn't high enough to increment the count
+		if (swPercent < 70)
 		{
 			return;
 		}
@@ -91,16 +92,21 @@ namespace adjudicator
 		auto alleleMappingScorePercent = ((mappingAlignmentInfoPtr->getSWScore() / (double)(mappingAlignmentInfoPtr->getLength() * this->m_match_value)) * 100);
 
 		if ((variantPtr == nullptr) || // if this allele doesn't belong to a variant in the VCF (if it's a reference node at a non variant site)
-			(alleleMappingScorePercent < this->m_sw_percent) || // if the mapping score for this allele is too low then do not count it
-			((checkAlleleSuffix && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getPrefixMatch()) || // check that the alignment maps to unique areas of the allele
-			 (checkAllelePrefix && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getSuffixMatch())))
+			// (alleleMappingScorePercent < this->m_sw_percent) || // if the mapping score for this allele is too low then do not count it
+			(alleleMappingScorePercent < 70)) // if the mapping score for this allele is too low then do not count it
 		{
 			return;
 		}
 		else // if this allele was successfully mapped,
 		{
-			auto countFunct = (alignmentPtr->isReverseStrand())? &IAllele::incrementReverseCount : &IAllele::incrementForwardCount;
-			mappingPtr->addAlleleCountCallback(std::bind(countFunct, allelePtr, alignmentPtr));
+			if ((checkAlleleSuffix && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getPrefixMatch()) ||(checkAllelePrefix && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getSuffixMatch()))  // check that the alignment maps to unique areas of the allele
+			{
+				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, AlleleCountType::AmbiguousPercent));
+			}
+			else
+			{
+				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, scoreToAlleleCountType(alleleMappingScorePercent)));
+			}
 			alignmentPtr->setMapping(mappingPtr);
 			mappingPtr->setMapped(true);
 		}

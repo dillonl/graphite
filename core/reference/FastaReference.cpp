@@ -19,7 +19,8 @@ namespace graphite
 
 	void FastaReference::setSequence(Region::SharedPtr region)
 	{
-		this->m_region = std::make_shared< Region >(region->getRegionString());
+		// this->m_region = std::make_shared< Region >(region->getRegionString());
+		this->m_region = std::make_shared< Region >(region->getReferenceID());
 
 		std::string seqName = this->m_region->getReferenceID();
 		if (this->m_region->getStartPosition() == 0 || this->m_region->getEndPosition() == 0)

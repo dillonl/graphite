@@ -32,4 +32,3 @@ ExternalProject_Get_Property(${HTSLIB_PROJECT} BINARY_DIR)
 
 SET(HTSLIB_INCLUDE_DIR ${SOURCE_DIR} CACHE INTERNAL "htslib include")
 SET(HTSLIB_LIB ${SOURCE_DIR}/libhts.a CACHE INTERNAL "htslib Library")
-

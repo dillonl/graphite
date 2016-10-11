@@ -1,6 +1,8 @@
-#include "core/alignment/BamAlignmentManager.h"
-#include "core/alignment/SamtoolsAlignmentReader.h"
-#include "core/alignment/BamAlignmentReader.h"
+#include "core/alignment/AlignmentManager.hpp"
+#include "core/alignment/HTSLibAlignmentReader.h"
+#include "core/alignment/HTSLibAlignmentManager.h"
+// #include "core/alignment/BamAlignmentManager.h"
+// #include "core/alignment/BamAlignmentReader.h"
 #include "core/variant/VCFManager.h"
 #include "core/variant/VCFFileReader.h"
 #include "core/reference/FastaReference.h"
@@ -13,6 +15,8 @@
 #include "core/variant/VCFHeader.h"
 #include "core/alignment/SampleManager.hpp"
 #include "core/region/Region.h"
+#include "core/file/BGZFFileWriter.h"
+#include "core/file/ASCIIFileWriter.h"
 
 #include <thread>
 #include <unordered_set>
@@ -22,9 +26,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#include "tabix.h"
-#include "bgzf.h"
 
 #include <zlib.h>
 
@@ -81,6 +82,7 @@ void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::Sha
 
 int main(int argc, char** argv)
 {
+	// graphite::AlignmentManager< HTSLibAlignmentReader > tmp;
 	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
@@ -102,6 +104,7 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
+	graphite::FileType fileType = graphite::FileType::ASCII;
 
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
@@ -145,8 +148,8 @@ int main(int argc, char** argv)
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
 	{
-		// auto tmpSamplePtrs = graphite::SamtoolsAlignmentReader::GetBamReaderSamples(bamPath);
-		auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
+		// auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
+		auto tmpSamplePtrs = graphite::HTSLibAlignmentReader::GetBamReaderSamples(bamPath);
 		samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
 	}
 	for (auto samplePtr : samplePtrs)
@@ -154,24 +157,36 @@ int main(int argc, char** argv)
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
 
+	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::HTSLibAlignmentReader > >(bamPaths, threadCount);
+
 	// make sure paths exist
 	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
 
-	std::unordered_map< std::string, std::string > vcfoutPaths;
+	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
 	for (auto vcfPath : vcfPaths)
 	{
 		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
-		std::string filePath = vcfoutPaths[vcfPath] = outputDirectory + "/" + path;
+		std::string filePath = outputDirectory + "/" + path;
 		uint32_t counter = 1;
-		while (file_exists(filePath + ".gz"))
+		while (file_exists(filePath))
 		{
 			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
 			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
 			filePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
 			++counter;
 		}
-		filePath += ".tmp";
-		vcfoutPaths[vcfPath] = filePath;
+		// filePath += ".tmp";
+		graphite::IFileWriter::SharedPtr fileWriterPtr;
+		if (fileType == graphite::FileType::BGZF)
+		{
+			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(filePath);
+		}
+		else
+		{
+			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(filePath);
+		}
+		fileWriterPtr->open();
+		vcfoutPaths[vcfPath] = fileWriterPtr;
 	}
 
 	std::unordered_set< std::string > outputPaths;
@@ -179,6 +194,7 @@ int main(int argc, char** argv)
 
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
+
 		auto regionPtr = regionPtrs[regionCount];
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
@@ -188,25 +204,18 @@ int main(int argc, char** argv)
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-		// std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
-		// load bam alignments
-		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
-		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
-		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
+		std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
 
-		// std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
+		// load bam alignments
+		auto alignmentManager = std::make_shared< graphite::HTSLibAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
+		alignmentManager->loadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
+		// auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
+		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
+		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
+		std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
-		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
-
-		milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-
-		// create an adjudicator for the graph
-		auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
-
-		// the gsswGraphManager adjudicates on the variantManager's variants
-		auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
+		// bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 		std::deque< std::shared_ptr< std::future< void > > > variantManagerFutureFunctions;
 		for (auto& iter : variantManagerPtr->getVCFReadersAndVariantListsMap())
@@ -220,7 +229,18 @@ int main(int argc, char** argv)
 			variantManagerFutureFunctions.pop_front();
 		}
 
+		milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+
+		// create an adjudicator for the graph
+		auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
+
+		// the gsswGraphManager adjudicates on the variantManager's variants
+		// auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
+		auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
+		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
+
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
+		graphite::MappingManager::Instance()->clearRegisteredMappings();
 
 		std::vector< std::shared_ptr< std::thread > > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFReadersAndVariantListsMap();
@@ -229,10 +249,14 @@ int main(int argc, char** argv)
 		{
 			auto vcfReaderPtr = iter.first;
 			auto vcfPath = vcfReaderPtr->getFilePath();
-			std::string currentVCFOutPath = vcfoutPaths[vcfPath];
+			graphite::IFileWriter::SharedPtr fileWriter = vcfoutPaths[vcfPath];
+			std::string currentVCFOutPath = fileWriter->getFilePath();
 			auto variantListPtr = iter.second;
 			auto vcfHeaderPtr = vcfReaderPtr->getVCFHeader();
-			for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
+
+            // for (auto samplePtr : bamAlignmentManager->getSamplePtrs())
+			// for (auto samplePtr : alignmentManager->getSamplePtrs())
+			for (auto samplePtr : samplePtrs)
 			{
 				vcfHeaderPtr->registerSample(samplePtr);
 			}
@@ -240,8 +264,7 @@ int main(int argc, char** argv)
 			{
 				outputPaths.emplace(currentVCFOutPath);
 			}
-			// auto funct = std::bind(&writeVariantListToCompressedFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
-			auto funct = std::bind(&writeVariantListToFile, currentVCFOutPath, vcfHeaderPtr, variantListPtr);
+			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr);
 			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
 			vcfWriterFutureFunctions.push_back(functFuture);
 		}
@@ -252,50 +275,15 @@ int main(int argc, char** argv)
 			vcfWriterFutureFunctions.pop_front();
 		}
 
-		graphite::MappingManager::Instance()->clearRegisteredMappings();
+		graphite::SequenceManager::Instance()->clearSequences();
 		firstTime = false;
 	}
 
-	for (auto& outputPath : outputPaths)
+	for (auto& iter : vcfoutPaths)
 	{
-		std::string tmpOutputPath = outputPath.substr(0, outputPath.find_last_of(".")); // remove the .tmp
-		std::string extension = tmpOutputPath.substr(tmpOutputPath.find_last_of(".") + 1); // get the extension
-		if (extension.compare("gz") == 0) // if it's a gz extension then remove it
-		{
-			tmpOutputPath = outputPath.substr(0, tmpOutputPath.find_last_of("."));
-			extension = tmpOutputPath.substr(tmpOutputPath.find_last_of(".") + 1);
-		}
-		std::string destOutputPath = tmpOutputPath += ".gz";
-		int fp;
-		BGZF* f_dst;
-		void* buffer;
-		long start = 0;
-		long end = -1;
-		int c;
-		int is_forced = 0;
-		int WINDOW_SIZE = 64 * 1024;
-		fp = open(outputPath.c_str(), O_RDONLY);
-		f_dst = bgzf_open(destOutputPath.c_str(), "w");
-		buffer = malloc(WINDOW_SIZE);
-		while ((c = read(fp, buffer, WINDOW_SIZE)) > 0)
-		{
-			if (bgzf_write(f_dst, buffer, c) < 0)
-			{
-				std::cout << "an error occurred while compressing" << std::endl;
-				exit(0);
-			}
-		}
-		free(buffer);
-		close(fp);
-
-		bgzf_close(f_dst);
-
-		ti_conf_t* conf = &ti_conf_vcf;
-		ti_index_build(destOutputPath.c_str(), conf);
-		std::string indexPath = destOutputPath + ".tbi";
-		std::string tmpIndexPath = destOutputPath.substr(0, outputPath.find_last_of(".")) + ".tbi"; // rename tbi
-		rename(indexPath.c_str(), tmpIndexPath.c_str());
-		remove(outputPath.c_str());
+		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
+		fileWriter->close();
 	}
+
 	return 0;
 }

@@ -20,6 +20,9 @@ namespace graphite
         BamAlignmentReader(const std::string& bamPath);
 		~BamAlignmentReader();
 
+		void open() override;
+		void close() override;
+
         std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads = false) override;
 
 		static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
@@ -28,6 +31,8 @@ namespace graphite
 	private:
         BamTools::BamReader m_bam_reader;
 		std::string m_bam_path;
+		bool m_is_open;
+		std::mutex m_lock;
 	};
 }
 

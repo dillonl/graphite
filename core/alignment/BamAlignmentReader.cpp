@@ -8,7 +8,8 @@
 namespace graphite
 {
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :
-		m_bam_path(bamPath)
+		m_bam_path(bamPath),
+		m_is_open(false)
 	{
 	}
 
@@ -16,16 +17,36 @@ namespace graphite
 	{
 	}
 
-	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
+	void BamAlignmentReader::open()
 	{
-		static std::mutex lock;
-		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+		std::lock_guard< std::mutex > l(m_lock);
+		if (m_is_open) { return; }
+		m_is_open = true;
 		if (!this->m_bam_reader.Open(this->m_bam_path))
 		{
 			throw "Unable to open bam file";
 		}
-
 		this->m_bam_reader.LocateIndex();
+	}
+
+	void BamAlignmentReader::close()
+	{
+		std::lock_guard< std::mutex > l(m_lock);
+		if (!m_is_open) { return; }
+		m_is_open = false;
+		this->m_bam_reader.Close();
+	}
+
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
+	{
+		std::lock_guard< std::mutex > l(m_lock);
+		if (!m_is_open)
+		{
+			std::cout << "Bam file not opened" << std::endl;
+			exit(0);
+		}
+		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+
 		int refID = this->m_bam_reader.GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
@@ -58,7 +79,7 @@ namespace graphite
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
 		}
-		this->m_bam_reader.Close();
+
 		// lock.lock();
 		// std::cout << " alignments: " << alignmentPtrs.size() << std::endl;
 		// lock.unlock();

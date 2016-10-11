@@ -11,6 +11,7 @@ set(GRAPHITE_TEST_SOURCES
 
 # Where Google Test's .h files can be found.
 include_directories(
+  ${BAMTOOLS_INCLUDE}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/externals
   ${gtest_SOURCE_DIR}/include
@@ -40,7 +41,7 @@ add_executable(graphite_tests
 target_link_libraries(graphite_tests
     ${ZLIB_LIB}
     ${FASTAHACK_LIB}
-	${HTSLIB_LIBRARY}
+	${HTSLIB_LIB}
 	gtest
 	${BAMTOOLS_LIB}
 	${BAMTOOLS_UTIL_LIB}

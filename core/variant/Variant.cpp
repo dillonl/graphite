@@ -167,28 +167,34 @@ namespace graphite
 			{
 				sampleNameSet.emplace(samplePtr->getName());
 
-				uint32_t totalCount = 0;
-				std::string sampleString = "";
-				for (size_t i = 0; i < m_all_allele_ptrs.size(); ++i)
+				alleleCountString += "\t";
+				for (auto alleleCountType : AllAlleleCountTypes)
 				{
-					auto allelePtr = m_all_allele_ptrs[i];
-					uint32_t forwardCount = allelePtr->getForwardCount(samplePtr);
-					uint32_t reverseCount = allelePtr->getReverseCount(samplePtr);
-					std::string prefix = (i == 0) ? "" : ",";
-
-					if (m_skip)
+					// std::cout << AlleleCountTypeToString(alleleCountType) << ": " << m_all_allele_ptrs.size() << std::endl;
+					std::string alleleTypeCountString = AlleleCountTypeToString(alleleCountType);
+					uint32_t totalCount = 0;
+					std::string sampleString = "";
+					for (size_t i = 0; i < m_all_allele_ptrs.size(); ++i)
 					{
-						sampleString += prefix + ".,.";
-					}
-					else
-					{
-						sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
-					}
+						auto allelePtr = m_all_allele_ptrs[i];
+						uint32_t forwardCount = allelePtr->getForwardCount(samplePtr, alleleCountType);
+						uint32_t reverseCount = allelePtr->getReverseCount(samplePtr, alleleCountType);
+						std::string prefix = (i == 0) ? "" : ",";
 
-					totalCount += (forwardCount + reverseCount);
+						if (m_skip)
+						{
+							sampleString += prefix + ".,.";
+						}
+						else
+						{
+							sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
+						}
+
+						totalCount += (forwardCount + reverseCount);
+					}
+					std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
+					alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
 				}
-				std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
-				alleleCountString += "\tDP=" + totalCountString + ";DP4=" + sampleString;
 			}
 		}
 		return alleleCountString;

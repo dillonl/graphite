@@ -34,7 +34,7 @@ namespace graphite
 
 	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
-		adjudicateMappings(adjudicatorPtr);
+		// adjudicateMappings(adjudicatorPtr);
 		incrementVariantCounts();
 	}
 
@@ -44,6 +44,7 @@ namespace graphite
 		std::deque< std::shared_ptr< std::future< void > > > futureFuncts;
 		for (auto& mappingPtr : this->m_mappings)
 		{
+			// std::cout << "mapping" << std::endl;
 			auto funct = std::bind(&IAdjudicator::adjudicateMapping, adjudicatorPtr, mappingPtr);
 			futureFuncts.push_back(ThreadPool::Instance()->enqueue(funct));
 		}

@@ -1,7 +1,7 @@
 #include "Params.h"
 #include "Utility.h"
 
-#include <string>
+#include <string.h>
 #include <thread>
 #include <iostream>
 

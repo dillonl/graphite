@@ -36,6 +36,8 @@ namespace adjudicator
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
 		int32_t getMatchValue() { return m_match; }
 		IAllele::SharedPtr getAllelePtrFromNodeID(uint32_t id);
+		size_t getTotalGraphLength() { return m_total_graph_length; }
+		std::string getSkipped() { return (m_skipped) ? "skipped" : "not skipped"; }
 	protected:
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr);
 		gssw_node* addReference(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices);
@@ -56,11 +58,16 @@ namespace adjudicator
         std::list< IGenotyperVariant > m_genotype_variants;
 		std::map< uint32_t, IVariant::SharedPtr > m_variants_map;
 
+		size_t m_total_graph_length;
+		bool m_skipped;
+
 	private:
 		void graphConstructed();
 		IVariantList::SharedPtr m_variant_list_ptr;
 		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
 		std::unordered_map< uint32_t, IAllele::SharedPtr > m_node_id_to_allele_ptrs;
+
+		std::mutex m_traceback_lock;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,

@@ -27,46 +27,53 @@ namespace graphite
 		void addAllele(IAllele::SharedPtr allelePtr) { this->m_allele_ptrs.emplace_back(allelePtr); }
 		std::vector< IAllele::SharedPtr > getAllAlleles() { return this->m_allele_ptrs; }
 
-		inline uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr) override
+		inline uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getForwardCount(samplePtr);
+				count += allelePtr->getForwardCount(samplePtr, alleleCountType);
 			}
 			return count;
 		}
-		inline uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr) override
+		inline uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getReverseCount(samplePtr);
+				count += allelePtr->getReverseCount(samplePtr, alleleCountType);
 			}
 			return count;
 		}
-		inline uint32_t getTotalCount() override
+		inline uint32_t getTotalCount(AlleleCountType alleleCountType) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getTotalCount();
+				count += allelePtr->getTotalCount(alleleCountType);
 			}
 			return count;
 		}
 
-		inline void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) override
+		inline void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementForwardCount(alignmentPtr);
+				allelePtr->incrementForwardCount(alignmentPtr, alleleCountType);
 			}
 		}
-		inline void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) override
+		inline void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementReverseCount(alignmentPtr);
+				allelePtr->incrementReverseCount(alignmentPtr, alleleCountType);
+			}
+		}
+		inline void incrementCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		{
+			for (auto& allelePtr : this->m_allele_ptrs)
+			{
+				allelePtr->incrementCount(alignmentPtr, alleleCountType);
 			}
 		}
 

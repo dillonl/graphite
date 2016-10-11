@@ -1,117 +1,103 @@
-#ifndef GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
-#define GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
+#ifndef GRAPHITE_TESTS_HTSLIBALIGNMENTREADER_HPP
+#define GRAPHITE_TESTS_HTSLIBALIGNMENTREADER_HPP
 
-#include "core/alignment/AlignmentList.h"
+#include <stdexcept>
+
+#include "core/alignment/HTSLibAlignmentReader.h"
 #include "core/alignment/SampleManager.hpp"
-#include "core/alignment/BamAlignmentReader.h"
-#include "core/region/Region.h"
 #include "config/TestConfig.h"
 
-graphite::BamAlignmentReader::SharedPtr getBamAlignmentReader(const std::string& path)
+// #include "core/alignment/BamAlignmentReader.h"
+
+graphite::HTSLibAlignmentReader::SharedPtr getAlignmentReader(const std::string& path)
 {
-	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	bamAlignmentReaderPtr->open();
-	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
+	auto alignmentReaderPtr = std::make_shared< graphite::HTSLibAlignmentReader >(path);
+	auto samplePtrs = graphite::HTSLibAlignmentReader::GetBamReaderSamples(path);
 	for (auto samplePtr : samplePtrs)
 	{
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
-	return bamAlignmentReaderPtr;
+	return alignmentReaderPtr;
 }
 
-/*
-TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
+TEST(HTSLibAlignmentReaderTest, GetSamples)
 {
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
-	std::string regionString = "20";
-	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
-	bamAlignmentReaderPtr->close();
-	ASSERT_EQ(alignmentsList.size(), 5940);
+	auto samplePtrs = graphite::HTSLibAlignmentReader::GetBamReaderSamples(TEST_BAM_FILE);;
+	ASSERT_EQ(samplePtrs.size(), 1);
+	ASSERT_STREQ(samplePtrs[0]->getName().c_str(), "NA12878");
+	ASSERT_STREQ(samplePtrs[0]->getReadgroup().c_str(), "SRR622461");
+	ASSERT_STREQ(samplePtrs[0]->getPath().c_str(), TEST_BAM_FILE);
 }
-*/
 
-/*
-TEST(BamAlignmentReaderTests, TestLoadAlignmentRegionNormalized)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 {
-	std::string path = TEST_BAM_FILE;
-	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	std::string regionString = "chr20";
-	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
-
-	ASSERT_EQ(alignmentsList.size(), 5940);
-}
-*/
-
-/*
-TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
-{
-	// std::string path = TEST_BAM_FILE;
-	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "20:1-100";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	alignmentReaderPtr->close();
 	ASSERT_EQ(alignmentsList.size(), 0);
 }
-*/
 
-TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
 {
 	// std::string path = TEST_BAM_FILE;
 	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
-	bamAlignmentReaderPtr->open();
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "20:1-10000000";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
-	bamAlignmentReaderPtr->close();
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	alignmentReaderPtr->close();
 	ASSERT_EQ(alignmentsList.size(), 1988);
 }
 
-/*
-TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRegion)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRegion)
 {
 	// std::string path = TEST_BAM_FILE;
 	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "1:10316100-10318900";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 0);
 }
 
-TEST(BamAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentAtMiddleRegionWithPositions)
 {
 	// std::string path = TEST_BAM_FILE;
 	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "1:10000000-20000000";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 1979);
 }
 
-TEST(BamAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentAtEndRegionWithPositions)
 {
 	// std::string path = TEST_BAM_FILE;
 	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "1:100000000-600000000";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 7499);
 }
 
-TEST(BamAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
+TEST(HTSLibAlignmentReaderTests, TestLoadAlignmentOneHundredThousand)
 {
 	// std::string path = TEST_BAM_FILE;
 	// auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
-	auto bamAlignmentReaderPtr = getBamAlignmentReader(TEST_BAM_FILE);
+	auto alignmentReaderPtr = getAlignmentReader(TEST_BAM_FILE);
+	alignmentReaderPtr->open();
 	std::string regionString = "1:12308541-12408541";
 	auto regionPtr = std::make_shared< graphite::Region >(regionString);
-	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+	auto alignmentsList = alignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 1977);
 }
 
@@ -144,4 +130,5 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentGetsAlignmentsInRegions)
 }
 */
 
-#endif //GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
+
+#endif

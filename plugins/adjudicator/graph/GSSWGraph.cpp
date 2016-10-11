@@ -22,8 +22,9 @@ namespace adjudicator
 		m_gap_extension(gapExtensionValue),
 		m_variant_list_ptr(variantListPtr),
 		m_start_position(startPosition),
-		m_graph_size(graphSize)
-
+		m_graph_size(graphSize),
+		m_total_graph_length(0),
+		m_skipped(false)
 	{
 		this->m_nt_table = gssw_create_nt_table();
 		this->m_mat = gssw_create_score_matrix(this->m_match, this->m_mismatch);
@@ -50,7 +51,11 @@ namespace adjudicator
 
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
-			if (variantPtr->shouldSkip()) { continue; }
+			if (variantPtr->shouldSkip())
+			{
+				m_skipped = true;
+				continue;
+			}
 			// if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
 			// auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
@@ -61,6 +66,7 @@ namespace adjudicator
 				auto referenceNode = addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
+				m_total_graph_length += referenceSize;
 			}
 
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
@@ -91,6 +97,7 @@ namespace adjudicator
 
 	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr)
 	{
+		size_t tmpLength = 0;
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 	    std::vector< gssw_node* > vertices;
 		for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
@@ -99,9 +106,11 @@ namespace adjudicator
 			auto altAlleleNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getSequencePtr()->getLength(), altAllelePtr, false, this->m_nt_table, this->m_mat);
 			gssw_graph_add_node(this->m_graph_ptr, altAlleleNode);
 			vertices.emplace_back(altAlleleNode);
+			if (altAllelePtr->getSequencePtr()->getLength() > tmpLength) { tmpLength = altAllelePtr->getSequencePtr()->getLength(); }
 		}
 
 		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getLength(), variantPtr->getRefAllelePtr(), true, this->m_nt_table, this->m_mat);
+		if (variantPtr->getRefAllelePtr()->getSequencePtr()->getLength() > tmpLength) { tmpLength = variantPtr->getRefAllelePtr()->getSequencePtr()->getLength(); }
 
 		gssw_graph_add_node(this->m_graph_ptr, variantReferenceNode);
 		vertices.push_back(variantReferenceNode);
@@ -117,7 +126,11 @@ namespace adjudicator
 
 	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
 	{
-		gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+		{
+			std::lock_guard< std::mutex > lock(m_traceback_lock);
+			gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(), m_nt_table, m_mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+
+		}
 		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr, alignmentPtr->getSequence(), alignmentPtr->getLength(),m_match,m_mismatch,m_gap_open,m_gap_extension);
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)

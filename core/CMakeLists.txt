@@ -1,4 +1,5 @@
 INCLUDE_DIRECTORIES(
+    ${BAMTOOLS_INCLUDE}
     ${FASTAHACK_INCLUDE}
 	${SCI_BOOST_INCLUDE}
 	${HTSLIB_INCLUDE_DIR}
@@ -9,7 +10,7 @@ INCLUDE_DIRECTORIES(
 	${CXXOPTS_INCLUDE}
 )
 
-#set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
+set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
@@ -27,6 +28,8 @@ set(GRAPHITE_SEQUENCE_SOURCES
   )
 
 set(GRAPHITE_FILE_SOURCES
+  file/BGZFFileWriter.cpp
+  file/ASCIIFileWriter.cpp
   file/ASCIIFileReader.cpp
   file/ASCIIGZFileReader.cpp
   )
@@ -55,6 +58,9 @@ set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/BamAlignmentManager.cpp
   alignment/BamAlignmentReader.cpp
   alignment/SamtoolsAlignmentReader.cpp
+  alignment/HTSLibAlignment.cpp
+  alignment/HTSLibAlignmentReader.cpp
+  alignment/HTSLibAlignmentManager.cpp
   )
 
 set(GRAPHITE_CORE_VARIANT_SOURCES
@@ -79,4 +85,4 @@ add_library(graphite_core STATIC
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
 
-add_dependencies(graphite_core ${TABIX_PROJECT} ${FASTAHACK_PROJECT})
+add_dependencies(graphite_core ${TABIX_PROJECT} ${FASTAHACK_PROJECT} ${HTSLIB_PROJECT})

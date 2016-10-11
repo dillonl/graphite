@@ -1,6 +1,7 @@
 #include "VariantList.h"
 #include "Variant.h"
 #include "core/allele/EquivalentAllele.h"
+#include "core/file/BGZFFileWriter.h"
 
 #include "bgzf.h"
 #include "tabix.h"
@@ -235,7 +236,6 @@ namespace graphite
 		position startPosition = regionPtr->getStartPosition();
 		position endPosition = regionPtr->getEndPosition();
 
-
 		auto lowerBound = std::lower_bound(this->m_variant_ptrs.begin(), this->m_variant_ptrs.end(), nullptr, [startPosition](const IVariant::SharedPtr& variantPtr, const IVariant::SharedPtr& ignore) {
 				return startPosition > variantPtr->getPosition();
 			});
@@ -252,6 +252,20 @@ namespace graphite
 		for (auto variantPtr : this->m_variant_ptrs)
 		{
 			variantPtr->processOverlappingAlleles();
+		}
+	}
+
+	void VariantList::writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr)
+	{
+		if (headerPtr != nullptr)
+		{
+			auto headerStr = headerPtr->getHeader();
+			fileWriter->write(headerStr.c_str(), headerStr.size());
+		}
+		for(const auto variantPtr : this->m_variant_ptrs)
+		{
+			auto line = variantPtr->getVariantLine(headerPtr->getSamplePtrs());
+			fileWriter->write(line.c_str(), line.size());
 		}
 	}
 }

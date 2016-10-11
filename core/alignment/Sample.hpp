@@ -23,7 +23,6 @@ namespace graphite
 		std::string getName() { return m_sample_name; }
 		std::string getReadgroup() { return m_sample_readgroup; }
 		std::string getPath() { return m_sample_path; }
-		std::string getFoo() { return ""; }
 
 	private:
 		std::string m_sample_name;

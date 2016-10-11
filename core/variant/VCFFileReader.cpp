@@ -124,6 +124,7 @@ namespace graphite
 		uint32_t count = 0;
 		bool wasInRegion = false;
 		// this->m_file_ptr->setFilePosition(findRegionStartPosition(regionPtr));
+		// std::cout << "region not yet found" << std::endl;
 		while (this->m_file_ptr->getNextLine(line))
 		{
 			if (memcmp(regionReferenceIDWithTab.c_str(), line.c_str(), regionReferenceIDWithTab.size()) == 0) // if we are in the correct reference (chrom)
@@ -155,7 +156,6 @@ namespace graphite
 		uint32_t numThreads = 20;
 		uint32_t partSize = fileSize / numThreads;
 		uint64_t seekPosition = 0;
-		std::cout << "partition size: " << partSize << std::endl;
 		for (auto i = 0; i < numThreads; ++i)
 		{
 			std::cout << "starting thread: " << i << " at seek position: " << seekPosition << std::endl;

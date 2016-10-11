@@ -4,23 +4,26 @@
 #include <iostream>
 #include <fstream>
 
-#include "IFile.h"
+#include "IFileWriter.h"
 
 namespace graphite
 {
-	class ASCIIFileWriter : public IFile
+	class ASCIIFileWriter : public IFileWriter
 	{
 	public:
 		typedef std::shared_ptr< ASCIIFileWriter > SharedPtr;
 		ASCIIFileWriter(const std::string& path);
 		~ASCIIFileWriter() override;
 
-		void Write(const char* output, const size_t size);
-		virtual void Open() override;
-		void Close() override;
+		bool open() override;
+		void close() override;
+		bool write(const char* data, size_t dataLength) override;
+		std::string getFilePath() override { return m_file_path; }
 
 	private:
 		std::ofstream m_out_stream;
+		std::string m_file_path;
+		bool m_opened;
 	};
 }
 #endif //GRAPHITE_ASCIIFILEWRITER

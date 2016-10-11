@@ -78,37 +78,79 @@ namespace graphite
 
 			variantPtr->m_qual = vcfComponents[5];
 			variantPtr->m_filter = vcfComponents[6];
+			fields = vcfComponents[7];
 
-
-			/*
-			if (!boost::spirit::qi::parse(vcfLine.c_str(), (vcfLine.c_str() + vcfLine.size()), parser, variantPtr->m_chrom, variantPtr->m_position, variantPtr->m_id, ref, alts, variantPtr->m_qual, variantPtr->m_filter, fields))
+			std::unordered_map< std::string, std::string > infoFields;
+			setUnorderedMapKeyValue(fields, infoFields);
+			/* static std::mutex mutLock; */
+			/* std::lock_guard< std::mutex > lock(mutLock); */
+			bool skipSequence = false;
+			if (alts.size() == 1 &&  referencePtr != nullptr)
 			{
-				throw "An invalid line in the VCF caused an exception. Please correct the input and try again";
-			}
-			*/
-
-			/*
-			if (alts.size() == 1 && alts[0].compare("<DEL>") == 0 && referencePtr != nullptr)
-			{
-				InfoFieldParser< std::string::iterator > infoParser;
-				std::map< std::string, std::string > infoFields;
-				if (boost::spirit::qi::parse(fields.begin(), fields.end(), infoParser, infoFields))
+				if (alts[0].compare("<DEL>") == 0)
 				{
+					int endPosition = stoi(infoFields["END"]);
+					const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
+					size_t alleleSize = endPosition - variantPtr->m_position;
+					ref = std::string(reference, alleleSize);
+
+					alts.clear();
+					alts.emplace_back("");
+				}
+				else if (alts[0].compare("<DEP>") == 0)
+				{
+					try
+					{
+						int svLength = stoi(infoFields["SVLEN"]);
+
+						const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
+						size_t alleleSize = svLength / 2;
+						size_t offset =  referencePtr->getRegion()->getStartPosition() - variantPtr->m_position;
+						ref = std::string(reference, alleleSize);
+
+						alts.clear();
+						alts.emplace_back(ref + ref);
+					}
+					catch (int e)
+					{
+					}
+					/* std::transform(refSequence.begin(), refSequence.end(),refSequence.begin(), ::toupper); */
+
+				}
+				else if (alts[0].compare("<INS>") == 0)
+				{
+					std::string altSequence = infoFields["SEQ"];
+					std::transform(altSequence.begin(), altSequence.end(),altSequence.begin(), ::toupper);
+					alts.clear();
+					alts.emplace_back(altSequence);
+					skipSequence = true;
+
+				}
+				else if (alts[0].compare("<INV>") == 0)
+				{
+					/* InfoFieldParser< std::string::iterator > infoParser; */
+					/* std::map< std::string, std::string > infoFields; */
 					//variantPtr->m_position -= 1;
 					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
-					ref = std::string(referencePtr->getSequence() + offset, abs(std::stoi(infoFields["SVLEN"])));
-					// alts[0] = std::string(referencePtr->getSequence() + offset, 1);
-					alts[0] = "";
+					auto svLen = abs(std::stoi(infoFields["SVLEN"])) - ref.size();
+					/* std::cout << svLen << std::endl; */
+					std::string altSequence = std::string(referencePtr->getSequence() + offset, svLen);
+					std::reverse(altSequence.begin(), altSequence.end());
+					/* std::cout << altSequence << std::endl; */
+					alts.clear();
+					alts.emplace_back(altSequence);
+					/* position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition(); */
+
+					ref = std::string(referencePtr->getSequence() + offset, svLen);
 				}
 			}
-			*/
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
 			variantPtr->m_line = std::string(vcfLine.c_str());
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();
-			if (maxAllowedAlleleSize < variantPtr->m_max_allele_size)
+			if (maxAllowedAlleleSize < variantPtr->m_max_allele_size && !skipSequence)
 			{
 				variantPtr->m_skip = true;
 			}
