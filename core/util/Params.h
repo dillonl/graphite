@@ -4,6 +4,7 @@
 #include "core/region/Region.h"
 #include "core/util/Noncopyable.hpp"
 
+#include <cstring>
 #include <cxxopts.hpp>
 #include <vector>
 
