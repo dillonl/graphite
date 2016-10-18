@@ -44,6 +44,7 @@ add_executable(graphite
 
 # link libraries to executables
 target_link_libraries(graphite
+  ${CURL_LIBRARIES}
   ${ZLIB_LIB}
   ${BAMTOOLS_LIB}
   ${BAMTOOLS_UTIL_LIB}
@@ -64,8 +65,7 @@ target_link_libraries(graphite
   ${BAMTOOLS_LIB}
   ${BAMTOOLS_UTIL_LIB}
   ${ZLIB_LIB}
-  curl
-  crypto
+  ${CURL_LIBRARIES}
 )
 
 #target_link_libraries(pathtrace
