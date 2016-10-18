@@ -1,16 +1,39 @@
-[![Build Status](https://travis-ci.org/dillonl/graphite.svg?branch=master)](https://travis-ci.org/dillonl/graphite)
+Graphite - Graph-based adjudication 
+========================================
 
-Graphite
-====
+Overview
+========================================
+Graphite is a variant adjudication tool that aids in confirming or rejecting the presence of candidate alleles by constructing a graph using reference as well as alternate alleles.
 
-Graphite uses cmake. To build Graphite run:
+Output
+========================================
+Graphite annotates existing VCFs by appending allele "counts" to the VCF that represents the number of reads supporting the reference/alternate alleles.
 
+Installation
+========================================
+Building and installing Graphite is made simple with [CMAKE](https://cmake.org/). Additionally, Graphite takes advantage of the new and improved C11 C++ compiler.
+
+To build graphite, use the following commands (from the base Graphite directory):
+
+```Shell
 mkdir bin/
-
 cd bin
-
 cmake ../
+make
+sudo make install
+```
 
-To run Graphite's adjudication:
+Usage
+========================================
+Graphite takes in VCF(s), BAM file(s) and the FASTA file used to align the BAM(s). A variant graph representation is generated based on the reference and VCF variants. The reads from each sample within the BAM file(s) are then remapped to variant regions of the graph.
 
-./graphite
+Graphite uses a modified Smith-Waterman algorithm for the read mapping. This read mapping sensitivity can be adjusted by modifying the match value, mismatch penalty, gap open penalty, gap extension penalty and Smith-Waterman percent match.
+
+For a complete list of 
+
+./graphite -h
+
+License
+========================================
+`Graphite` is freely available under the MIT [license](https://opensource.org/licenses/MIT).
+
