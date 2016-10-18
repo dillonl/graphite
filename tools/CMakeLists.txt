@@ -47,9 +47,10 @@ target_link_libraries(graphite
   ${ZLIB_LIB}
   ${BAMTOOLS_LIB}
   ${BAMTOOLS_UTIL_LIB}
-  ${ZLIB_LIB}
   ${FASTAHACK_LIB}
+  ${ZLIB_LIB}
   ${HTSLIB_LIB}
+  ${ZLIB_LIB}
   ${TABIX_LIB}
   ${PLUGIN_LIBS}
   ${CORE_LIB}
