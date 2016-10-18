@@ -34,7 +34,7 @@ namespace graphite
 
 	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
-		// adjudicateMappings(adjudicatorPtr);
+		adjudicateMappings(adjudicatorPtr);
 		incrementVariantCounts();
 	}
 

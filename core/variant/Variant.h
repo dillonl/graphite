@@ -97,7 +97,7 @@ namespace graphite
 					alts.clear();
 					alts.emplace_back("");
 				}
-				else if (alts[0].compare("<DEP>") == 0)
+				else if (alts[0].compare("<DUP>") == 0)
 				{
 					try
 					{

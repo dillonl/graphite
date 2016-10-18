@@ -204,7 +204,7 @@ int main(int argc, char** argv)
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-		std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
+		// std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
 
 		// load bam alignments
 		auto alignmentManager = std::make_shared< graphite::HTSLibAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 		// auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
 		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-		std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
+		// std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		// bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources

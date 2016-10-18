@@ -41,6 +41,11 @@ namespace graphite
 			}
 		}
 
+		uint32_t getSampleCount()
+		{
+			return m_sample_ptrs_map.size();
+		}
+
 	private:
 		SampleManager() {}
 		~SampleManager() {}

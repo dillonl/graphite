@@ -74,9 +74,10 @@ namespace graphite
 	{
 		std::string line;
 		std::string headerEnd = "#CHROM";
-		while (m_file_ptr->getNextLine(line) && line.size() > 0 && line.c_str()[0] == '#')
+		while (m_file_ptr->getNextLine(line) && line.size() > 0)
 		{
 			this->m_vcf_header->addHeaderLine(line);
+			if (strncmp(headerEnd.c_str(), line.c_str(), headerEnd.size()) == 0) { break; }
 		}
 	}
 
@@ -158,7 +159,7 @@ namespace graphite
 		uint64_t seekPosition = 0;
 		for (auto i = 0; i < numThreads; ++i)
 		{
-			std::cout << "starting thread: " << i << " at seek position: " << seekPosition << std::endl;
+			// std::cout << "starting thread: " << i << " at seek position: " << seekPosition << std::endl;
 			auto funct = std::bind(&VCFFileReader::getPositionFromFile, this, seekPosition, seekPosition + partSize, posFound, regionPtr, this->m_path);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
@@ -206,7 +207,7 @@ namespace graphite
 			{
 				std::lock_guard< std::mutex > lock(l);
 				char tmp = f.peek();
-				std::cout << tmp << std::endl;
+				// std::cout << tmp << std::endl;
 			}
 		}
 
@@ -224,7 +225,7 @@ namespace graphite
 		{
 			{
 				std::lock_guard< std::mutex > lock(l);
-				std::cout << line << std::endl;
+				// std::cout << line << std::endl;
 			}
 			if (line.size() > 0 && line[0] == '#') { continue; }
 			if (counter++ % 10 == 0 && posFound->load()) { break; } // another thread located the position before this thread
@@ -238,8 +239,8 @@ namespace graphite
 					std::getline(f, line); // get the partial line
 					{
 						std::lock_guard< std::mutex > lock(l);
-						std::cout << "found position: " << currentPosition << " " << returnFilePos << std::endl;
-						std::cout << "found line: " << line << std::endl;
+						// std::cout << "found position: " << currentPosition << " " << returnFilePos << std::endl;
+						// std::cout << "found line: " << line << std::endl;
 					}
 					*posFound = true;
 					break;
@@ -250,7 +251,7 @@ namespace graphite
 		f.close();
 		{
 			std::lock_guard< std::mutex > lock(l);
-			std::cout << "finished: " << returnFilePos << std::endl;
+			// std::cout << "finished: " << returnFilePos << std::endl;
 		}
 		return returnFilePos;
 	}

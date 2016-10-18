@@ -4,6 +4,7 @@
 #include "core/genotyper/IGenotyper.h"
 #include "core/variant/VariantList.h"
 #include "core/mapping/MappingManager.h"
+#include "core/alignment/SampleManager.hpp"
 #include "GSSWMapping.h"
 
 #include "core/alignment/BamAlignmentManager.h"
@@ -32,35 +33,43 @@ namespace adjudicator
 		position startPosition = regionPtr->getStartPosition();
 		position endPosition = regionPtr->getEndPosition();
 		position currentPosition = startPosition;
-		// std::vector< std::function< void() > > functs;
 		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
-
-		// std::cout << "asdf 1" << std::endl;
 
 		while (currentPosition < endPosition)
 		{
-			// std::cout << "asdf 2 " << currentPosition << std::endl;
 			auto endGraphPosition = (currentPosition + graphSize > endPosition) ? endPosition : (currentPosition + graphSize);
 			auto graphRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition) + "-" + std::to_string(endGraphPosition)));
 			auto variantsListPtr = this->m_variant_manager_ptr->getVariantsInRegion(graphRegion);
-			// std::cout << "asdf 3 " << currentPosition << std::endl;
 			if (variantsListPtr->getCount() > 0) // if we have variants, then process them
 			{
-				// std::cout << "asdf 4 " << currentPosition << std::endl;
 				auto alignmentRegion = std::make_shared< Region >(std::string(referenceID + ":" + std::to_string(currentPosition + alignmentPadding) + "-" + std::to_string(endGraphPosition - alignmentPadding)));
 				auto alignmentListPtr = this->m_alignment_manager_ptr->getAlignmentsInRegion(alignmentRegion);
 				auto alignmentPtrsCount = alignmentListPtr->getCount();
 
 				if (alignmentPtrsCount > 0)
 				{
-					// if (alignmentPtrsCount > 15000)
-					if (false)
+					uint32_t cutoff = ((((endGraphPosition - alignmentPadding) - (currentPosition + alignmentPadding)) / 100) * 60) * SampleManager::Instance()->getSampleCount();
+					if (alignmentPtrsCount > cutoff)
 					{
+						std::vector< IAlignment::SharedPtr > alignmentPtrs;
+						IAlignment::SharedPtr alignmentPtr;
+						while (alignmentListPtr->getNextAlignment(alignmentPtr))
+						{
+							alignmentPtrs.emplace_back(alignmentPtr);
+						}
+						std::random_shuffle(alignmentPtrs.begin(), alignmentPtrs.end());
+						alignmentPtrs.resize(cutoff);
+						auto alp = std::make_shared< AlignmentList >(alignmentPtrs);
+						std::function< void() >  funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alp, currentPosition, graphSize);
+						auto future = ThreadPool::Instance()->enqueue(funct);
+						futureFunctions.push_back(future);
+						/*
 						IVariant::SharedPtr variantPtr;
 						while (variantsListPtr->getNextVariant(variantPtr))
 						{
 							variantPtr->setSkip(true);
 						}
+						*/
 					}
 					else
 					{
@@ -91,45 +100,23 @@ namespace adjudicator
 		gsswGraphPtr->constructGraph();
 		{
 			std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
-			std::cout << "graph size: " << gsswGraphPtr->getSkipped() << " " << gsswGraphPtr->getTotalGraphLength() << std::endl;
 			this->m_gssw_graphs.emplace_back(gsswGraphPtr);
 		}
 
-		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
-		// std::shared_ptr< std::vector< IAlignment::SharedPtr > > alignmentPtrs = std::make_shared< std::vector< IAlignment::SharedPtr > >();
-		std::vector< IAlignment::SharedPtr > alignmentPtrs;
+
+
 		IAlignment::SharedPtr alignmentPtr;
-		auto totalAlignmentCount = alignmentListPtr->getCount();
-		std::cout << "starting, total alignments: " << totalAlignmentCount << std::endl;
-		uint32_t count = 0;
-		bool alignmentExists = true;
-		while (alignmentExists)
+		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
-			alignmentExists = alignmentListPtr->getNextAlignment(alignmentPtr);
-			if (alignmentExists) { alignmentPtrs.push_back(alignmentPtr); }
-			if ((count > 0 && (count % 700) == 0) || !alignmentExists)
-			{
-				std::function< void() >  funct = std::bind(&GraphManager::adjudicateList, this, alignmentPtrs, gsswGraphPtr);
-				auto future = ThreadPool::Instance()->enqueue(funct);
-				futureFunctions.push_back(future);
-				alignmentPtrs.clear();
-			}
-			++count;
+			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}
-		while (!futureFunctions.empty())
-		{
-			auto futureFunct = futureFunctions.front();
-			futureFunctions.pop_front();
-			futureFunct->wait();
-		}
-		std::cout << "I'm out, total alignments: " << totalAlignmentCount << std::endl;
 	}
 
 	void GraphManager::adjudicateList(std::vector< IAlignment::SharedPtr > alignmentPtrs, GSSWGraph::SharedPtr graphPtr)
 	{
 		// static std::mutex l;
 		// std::lock_guard< std::mutex > lock(l);
-		std::cout << "starting alignments: " << alignmentPtrs.size() << std::endl;
 		for (auto alignmentPtr : alignmentPtrs)
 		{
 			auto tracebackItem = graphPtr->traceBackAlignment(alignmentPtr);
@@ -137,7 +124,6 @@ namespace adjudicator
 			m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr);
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}
-		std::cout << "ending alignments: " << alignmentPtrs.size() << std::endl;
 	}
 
 }
