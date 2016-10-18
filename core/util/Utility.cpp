@@ -1,6 +1,6 @@
 #include "Utility.h"
 
-#include <regex>
+// #include <regex>
 #include <string>
 #include <iostream>
 
@@ -24,6 +24,8 @@ namespace graphite
 		}
 	}
 
+
+	/*
 	void split2(const std::string& s, std::vector< std::string >& v)
 	{
 		std::regex re("\\s+");
@@ -35,4 +37,5 @@ namespace graphite
 			v.emplace_back(it->str());
 		}
 	}
+	*/
 }

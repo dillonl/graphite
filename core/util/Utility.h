@@ -7,7 +7,7 @@
 namespace graphite
 {
 	void split(const std::string& s, char c, std::vector< std::string >& v);
-	void split2(const std::string& s, std::vector< std::string >& v);
+	/* void split2(const std::string& s, std::vector< std::string >& v); */
 }
 
 #endif //GRAPHITE_CORE_UTIL_UTILITY_H
