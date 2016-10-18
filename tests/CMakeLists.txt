@@ -41,10 +41,12 @@ add_executable(graphite_tests
 target_link_libraries(graphite_tests
     ${ZLIB_LIB}
     ${FASTAHACK_LIB}
+	${CURL_LIBRARIES}
 	${HTSLIB_LIB}
 	gtest
 	${BAMTOOLS_LIB}
 	${BAMTOOLS_UTIL_LIB}
+	${CURL_LIBRARIES}
 	${ZLIB_LIB}
 	${VCFLIB_LIBRARIES}
 	${GSSW_LIB}
@@ -54,8 +56,6 @@ target_link_libraries(graphite_tests
 	${FASTAHACK_LIB}
 	${PLUGIN_LIBS}
 	${SAMTOOLS_LIBRARIES}
-	curl
-	crypto
 	${FASTAHACK_LIB}
 	${ZLIB_LIB}
 )
