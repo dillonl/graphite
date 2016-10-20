@@ -13,7 +13,7 @@ Installation
 ========================================
 Building and installing Graphite is made simple with [CMAKE](https://cmake.org/). Additionally, Graphite takes advantage of the new and improved C11 C++ compiler.
 
-To build graphite, use the following commands (from the base Graphite directory):
+To build Graphite, use the following commands (from the base Graphite directory):
 
 ```Shell
 mkdir bin/
@@ -29,10 +29,10 @@ Graphite takes in VCF(s), BAM file(s) and the FASTA file used to align the BAM(s
 
 Graphite uses a modified Smith-Waterman algorithm for the read mapping. This read mapping sensitivity can be adjusted by modifying the match value, mismatch penalty, gap open penalty, gap extension penalty and Smith-Waterman percent match.
 
-For a complete list of 
-
+Use help for a complete list of Graphite's parameters and usage:
+```Shell
 ./graphite -h
-
+```
 License
 ========================================
 `Graphite` is freely available under the MIT [license](https://opensource.org/licenses/MIT).
