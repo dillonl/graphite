@@ -12,6 +12,7 @@ namespace graphite
 {
 namespace adjudicator
 {
+	uint32_t GSSWAdjudicator::s_adj_count = 0;
 	GSSWAdjudicator::GSSWAdjudicator(uint32_t swPercent, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue) :
 		m_sw_percent(swPercent),
 		m_match_value(matchValue),
@@ -27,8 +28,11 @@ namespace adjudicator
 
 	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr)
 	{
-		// static std::mutex s_lock;
-		// std::lock_guard< std::mutex > sGuard(s_lock);
+		static std::mutex s_lock;
+		{
+			std::lock_guard< std::mutex > sGuard(s_lock);
+			++s_adj_count;
+		}
 
 
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();

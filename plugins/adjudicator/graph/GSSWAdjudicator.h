@@ -21,6 +21,9 @@ namespace adjudicator
 		int getMisMatchValue() override;
 		int getGapOpenValue() override;
 		int getGapExtensionValue() override;
+
+		static uint32_t s_adj_count;
+
 	private:
 		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix);
 

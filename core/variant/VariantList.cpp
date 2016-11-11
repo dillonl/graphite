@@ -255,9 +255,9 @@ namespace graphite
 		}
 	}
 
-	void VariantList::writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr)
+	void VariantList::writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr, bool printHeader)
 	{
-		if (headerPtr != nullptr)
+		if (printHeader)
 		{
 			auto headerStr = headerPtr->getHeader();
 			fileWriter->write(headerStr.c_str(), headerStr.size());

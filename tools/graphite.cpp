@@ -264,7 +264,7 @@ int main(int argc, char** argv)
 			{
 				outputPaths.emplace(currentVCFOutPath);
 			}
-			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr);
+			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr, firstTime);
 			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
 			vcfWriterFutureFunctions.push_back(functFuture);
 		}
@@ -284,6 +284,9 @@ int main(int argc, char** argv)
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}
+
+	graphite::adjudicator::GSSWAdjudicator* adj_p;
+	std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
 
 	return 0;
 }

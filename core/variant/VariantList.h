@@ -29,7 +29,7 @@ namespace graphite
 		void printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out);
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
 		void processOverlappingAlleles() override;
-		void writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr);
+		void writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr, bool printHeader);
 
 	protected:
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);
