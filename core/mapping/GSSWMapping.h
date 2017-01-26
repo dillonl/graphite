@@ -4,7 +4,7 @@
 #include "core/mapping/IMapping.h"
 #include "core/adjudicator/IAdjudicator.h"
 
-#include "gssw/gssw.h"
+#include "gssw.h"
 
 namespace graphite
 {

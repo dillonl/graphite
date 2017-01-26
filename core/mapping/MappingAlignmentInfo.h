@@ -3,7 +3,7 @@
 
 #include "core/alignment/IAlignment.h"
 
-#include "externals/gssw/gssw.h"
+//#include "gssw.h"
 #include "core/util/Noncopyable.hpp"
 
 namespace graphite

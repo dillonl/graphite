@@ -3,7 +3,7 @@
 
 #include "IPath.h"
 
-#include "gssw/gssw.h"
+#include "gssw.h"
 
 #include <vector>
 #include <memory>

@@ -6,7 +6,7 @@
 #include "core/alignment/IAlignment.h"
 #include "core/util/Noncopyable.hpp"
 
-#include "gssw/gssw.h"
+#include "gssw.h"
 
 #include <memory>
 

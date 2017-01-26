@@ -11,6 +11,7 @@ set(GRAPHITE_TEST_SOURCES
 
 # Where Google Test's .h files can be found.
 include_directories(
+  ${GSSW_INCLUDE}
   ${ZLIB_INCLUDE}
   ${BAMTOOLS_INCLUDE}
   ${CMAKE_SOURCE_DIR}

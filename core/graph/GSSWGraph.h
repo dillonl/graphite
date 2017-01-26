@@ -5,7 +5,7 @@
 #include <deque>
 #include <map>
 
-#include "gssw/gssw.h"
+#include "gssw.h"
 
 #include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"

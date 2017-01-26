@@ -1,7 +1,7 @@
 #ifndef GRAPHITE_GSSWTESTS_HPP
 #define GRAPHITE_GSSWTESTS_HPP
 
-#include "gssw/gssw.h"
+#include "gssw.h"
 
 #include <functional>
 
