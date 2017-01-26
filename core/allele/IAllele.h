@@ -34,8 +34,8 @@ namespace graphite
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
 
-		virtual uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) = 0;
-		virtual uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) = 0;
+		virtual uint32_t getForwardCount(const std::string& sampleName, AlleleCountType alleleCountType) = 0;
+		virtual uint32_t getReverseCount(const std::string& sampleName, AlleleCountType alleleCountType) = 0;
 		virtual uint32_t getTotalCount(AlleleCountType alleleCountType) = 0;
 
 		/* virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) = 0; */

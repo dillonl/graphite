@@ -11,17 +11,15 @@ set(GRAPHITE_TEST_SOURCES
 
 # Where Google Test's .h files can be found.
 include_directories(
+  ${ZLIB_INCLUDE}
   ${BAMTOOLS_INCLUDE}
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/externals
-  ${gtest_SOURCE_DIR}/include
-  ${gtest_SOURCE_DIR}
-  ${HTSLIB_INCLUDE_DIR}
-  ${SAMTOOLS_INCLUDES}
+  ${CMAKE_SOURCE_DIR}/core/util
+  ${GTEST_SOURCE_DIR}/include
+  ${GTEST_SOURCE_DIR}
   ${FASTAHACK_INCLUDE}
-  ${ZLIB_INCLUDE_1}
-  ${ZLIB_INCLUDE_2}
-  ${CXXOPTS_INCLUDE}
+  ${SCI_BOOST_INCLUDE}
  )
 
 
@@ -39,25 +37,9 @@ add_executable(graphite_tests
 )
 
 target_link_libraries(graphite_tests
-    ${ZLIB_LIB}
-    ${FASTAHACK_LIB}
-	${CURL_LIBRARIES}
-	${HTSLIB_LIB}
-	gtest
-	${BAMTOOLS_LIB}
-	${BAMTOOLS_UTIL_LIB}
-	${CURL_LIBRARIES}
-	${ZLIB_LIB}
-	${VCFLIB_LIBRARIES}
-	${GSSW_LIB}
-	ssw_lib
-    ${SCI_ZLIB_LIBRARY}
-	${CORE_LIB}
-	${FASTAHACK_LIB}
-	${PLUGIN_LIBS}
-	${SAMTOOLS_LIBRARIES}
-	${FASTAHACK_LIB}
-	${ZLIB_LIB}
+  ${CORE_LIB}
+  ${GRAPHITE_ADJUDICATOR}
+  ${GTEST_LIB}
 )
 
 add_dependencies(graphite_tests ${GRAPHITE_EXTERNAL_PROJECT})

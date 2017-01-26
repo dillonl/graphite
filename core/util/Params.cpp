@@ -7,6 +7,7 @@
 
 namespace graphite
 {
+
 	Params::Params() :
 		m_options("Graphite", "VCF Allele Adjudicator")
 	{
@@ -35,41 +36,11 @@ namespace graphite
 			("g,graph_size", "The size of the graph [optional - default is 3000]", cxxopts::value< uint32_t >()->default_value("3000"))
 			("t,number_threads", "Thread count [optional - default is number of cores x 2]", cxxopts::value< uint32_t >()->default_value(std::to_string(std::thread::hardware_concurrency() * 2)));
 		this->m_options.parse(argc, argv);
-		/*
-		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
-		m_options_description_ptr->add_options()
-			("help,h","Print help message")
-			(",b", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input BAM file[s], separate multiple files by space")
-			(",r", boost::program_options::value< std::string >()->default_value(""), "Region information")
-			(",d", boost::program_options::bool_switch()->default_value(false), "Exclude Duplicate Reads")
-			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file[s], separate multiple files by space")
-			(",o", boost::program_options::value< std::string >()->required(), "Path to output directory")
-			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
-			(",p", boost::program_options::value< uint32_t >()->default_value(90), "Smith-Waterman Percent [optional - default is 90]")
-			(",m", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Match Value [optional - default is 1]")
-			(",s", boost::program_options::value< uint32_t >()->default_value(4), "Smith-Waterman MisMatch Value [optional - default is 4]")
-			(",a", boost::program_options::value< uint32_t >()->default_value(6), "Smith-Waterman Gap Open Value [optional - default is 6]")
-			(",e", boost::program_options::value< uint32_t >()->default_value(1), "Smith-Waterman Gap Extension Value [optional - default is 1]")
-			(",g", boost::program_options::value< uint32_t >()->default_value(3000), "The size of the graph [optional - default is 3000]")
-			(",t", boost::program_options::value< uint32_t >()->default_value(std::thread::hardware_concurrency() * 2), "Thread count [optional - default is number of cores x 2]");
-		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
-		boost::program_options::store(parseCommandLine, m_variables_map);
-		*/
 	}
 
 	void Params::parsePathTrace(int argc, char** argv)
 	{
-		/*
-		m_options_description_ptr = std::make_shared< boost::program_options::options_description >("options");
-		m_options_description_ptr->add_options()
-			("help,h","Print help message")
-			(",r", boost::program_options::value< std::string >()->required(), "Region information")
-			(",v", boost::program_options::value< std::vector< std::string > >()->required()->multitoken(), "Path to input VCF file")
-			(",f", boost::program_options::value< std::string >()->required(), "Path to input FASTA file")
-		    (",p", boost::program_options::value< std::string >()->default_value(""), "Prefix to output files [optional - default is stdout]");
-		auto parseCommandLine = boost::program_options::parse_command_line(argc, argv, *m_options_description_ptr);
-		boost::program_options::store(parseCommandLine, m_variables_map);
-		*/
+
 	}
 
 	bool Params::showHelp()

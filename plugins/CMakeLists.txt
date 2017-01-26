@@ -1,2 +1,0 @@
-#ADD_SUBDIRECTORY(pathtrace)
-ADD_SUBDIRECTORY(adjudicator)

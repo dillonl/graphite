@@ -17,12 +17,11 @@
 namespace graphite
 {
 
-	VCFFileReader::VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t maxAlleleSize) :
+	VCFFileReader::VCFFileReader(const std::string& path, const std::vector< Sample::SharedPtr >& samplePtrs, IReference::SharedPtr referencePtr, uint32_t maxAlleleSize) :
 		m_path(path),
 		m_reference_ptr(referencePtr),
 		m_max_allowed_allele_size(maxAlleleSize)
 	{
-		m_vcf_header = std::make_shared< VCFHeader >();
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
 		++s_vcf_id;
@@ -30,10 +29,9 @@ namespace graphite
 		Open();
 	}
 
-	VCFFileReader::VCFFileReader(const std::string& path) :
+	VCFFileReader::VCFFileReader(const std::string& path, const std::vector< Sample::SharedPtr >& samplePtrs) :
 		m_path(path)
 	{
-		m_vcf_header = std::make_shared< VCFHeader >();
 		setFileReader(m_path);
 		Open();
 	}
@@ -74,19 +72,24 @@ namespace graphite
 	{
 		std::string line;
 		std::string headerEnd = "#CHROM";
+		std::vector< std::string > vcfHeaderLines;
 		while (m_file_ptr->getNextLine(line) && line.size() > 0)
 		{
-			this->m_vcf_header->addHeaderLine(line);
-			if (strncmp(headerEnd.c_str(), line.c_str(), headerEnd.size()) == 0) { break; }
+            std::string upperLine = line;
+            std::transform(upperLine.begin(), upperLine.end(),upperLine.begin(), ::toupper);
+			vcfHeaderLines.emplace_back(line);
+			if (strncmp(headerEnd.c_str(), upperLine.c_str(), headerEnd.size()) == 0) { break; }
 		}
+		m_vcf_header = std::make_shared< VCFHeader >(vcfHeaderLines);
 	}
 
 	std::vector< Region::SharedPtr > VCFFileReader::GetAllRegionsInVCF(const std::string& vcfPath)
 	{
 		std::vector< Region::SharedPtr > regionPtrs;
+		std::vector< Sample::SharedPtr > samplePtrs;
 		std::string line;
 		std::string currentRegion = "";
-		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath, samplePtrs); // samplePtrs can be empty since they are not used here
 		while (vcfFileReaderPtr->m_file_ptr->getNextLine(line))
 		{
 			auto region = line.substr(0, line.find("\t"));

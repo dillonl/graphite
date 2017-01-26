@@ -26,7 +26,7 @@ namespace graphite
 
 
 	/*
-	void split2(const std::string& s, std::vector< std::string >& v)
+	void split(const std::string& s, std::vector< std::string >& v)
 	{
 		std::regex re("\\s+");
 		std::sregex_token_iterator it(s.begin(), s.end(), re, -1);

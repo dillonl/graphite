@@ -1,8 +1,6 @@
 #include "core/alignment/AlignmentManager.hpp"
-#include "core/alignment/HTSLibAlignmentReader.h"
-#include "core/alignment/HTSLibAlignmentManager.h"
-// #include "core/alignment/BamAlignmentManager.h"
-// #include "core/alignment/BamAlignmentReader.h"
+#include "core/alignment/BamAlignmentManager.h"
+#include "core/alignment/BamAlignmentReader.h"
 #include "core/variant/VCFManager.h"
 #include "core/variant/VCFFileReader.h"
 #include "core/reference/FastaReference.h"
@@ -10,8 +8,8 @@
 #include "core/variant/VCFHeader.h"
 #include "core/util/Params.h"
 #include "core/util/ThreadPool.hpp"
-#include "adjudicator/graph/GraphManager.h"
-#include "adjudicator/graph/GSSWAdjudicator.h"
+#include "core/graph/GraphManager.h"
+#include "core/adjudicator/GSSWAdjudicator.h"
 #include "core/variant/VCFHeader.h"
 #include "core/alignment/SampleManager.hpp"
 #include "core/region/Region.h"
@@ -44,23 +42,6 @@ void validatePath(const std::string& path, const std::string& errorMessage, bool
 			exit(EXIT_FAILURE);
 		}
 	}
-}
-
-void writeVariantListToFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
-{
-	bool fileExists = file_exists(path);
-	std::ofstream outVCF;
-	if (!fileExists)
-	{
-		outVCF.open(path, std::ios::out | std::ios::trunc);
-	}
-	else
-	{
-		outVCF.open(path, std::ios::out | std::ios::app);
-	}
-
-	variantListPtr->printToVCF(vcfHeaderPtr, !fileExists, outVCF);
-	outVCF.close();
 }
 
 void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
@@ -148,8 +129,7 @@ int main(int argc, char** argv)
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
 	{
-		// auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
-		auto tmpSamplePtrs = graphite::HTSLibAlignmentReader::GetBamReaderSamples(bamPath);
+		auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
 		samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
 	}
 	for (auto samplePtr : samplePtrs)
@@ -157,7 +137,7 @@ int main(int argc, char** argv)
 		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
 	}
 
-	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::HTSLibAlignmentReader > >(bamPaths, threadCount);
+	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount);
 
 	// make sure paths exist
 	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
@@ -194,28 +174,24 @@ int main(int argc, char** argv)
 
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
-
 		auto regionPtr = regionPtrs[regionCount];
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 		// load variants from vcf
-		auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr, fastaReferencePtr, graphSize);
+		auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, samplePtrs, regionPtr, fastaReferencePtr, graphSize);
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 		// std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
 
 		// load bam alignments
-		auto alignmentManager = std::make_shared< graphite::HTSLibAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
-		alignmentManager->loadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
-		// auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, excludeDuplicates);
-		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
-		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-		// std::cout << "loaded alignments region: " << regionPtr->getRegionString() << std::endl;
+		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
+		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
+		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
-		// bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
+		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 		std::deque< std::shared_ptr< std::future< void > > > variantManagerFutureFunctions;
 		for (auto& iter : variantManagerPtr->getVCFReadersAndVariantListsMap())
@@ -232,11 +208,11 @@ int main(int argc, char** argv)
 		milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
 		// create an adjudicator for the graph
-		auto gsswAdjudicator = std::make_shared< graphite::adjudicator::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
+		auto gsswAdjudicator = std::make_shared< graphite::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 
 		// the gsswGraphManager adjudicates on the variantManager's variants
-		// auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		auto gsswGraphManager = std::make_shared< graphite::adjudicator::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
+		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
+		// auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), graphSize, 1000, 100);
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
@@ -258,13 +234,13 @@ int main(int argc, char** argv)
 			// for (auto samplePtr : alignmentManager->getSamplePtrs())
 			for (auto samplePtr : samplePtrs)
 			{
-				vcfHeaderPtr->registerSample(samplePtr);
+				vcfHeaderPtr->registerActiveSample(samplePtr);
 			}
 			if (firstTime)
 			{
 				outputPaths.emplace(currentVCFOutPath);
 			}
-			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr);
+			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr, firstTime);
 			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
 			vcfWriterFutureFunctions.push_back(functFuture);
 		}
@@ -284,6 +260,9 @@ int main(int argc, char** argv)
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}
+
+	graphite::GSSWAdjudicator* adj_p;
+	std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
 
 	return 0;
 }

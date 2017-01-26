@@ -9,9 +9,9 @@
 #include "core/adjudicator/IAdjudicator.h"
 #include "core/mapping/MappingManager.h"
 
-#include "plugins/adjudicator/graph/GSSWGraph.h"
-#include "plugins/adjudicator/graph/GSSWAdjudicator.h"
-#include "plugins/adjudicator/graph/GSSWMapping.h"
+#include "core/graph/GSSWGraph.h"
+#include "core/adjudicator/GSSWAdjudicator.h"
+#include "core/mapping/GSSWMapping.h"
 
 
 #include <vector>
@@ -21,7 +21,6 @@ namespace
 namespace adj_test
 {
 	using namespace graphite;
-	using namespace graphite::adjudicator;
 
 	TEST(AlleleTest, overlappingPrefixCountZero)
 	{

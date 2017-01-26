@@ -9,7 +9,15 @@ namespace graphite
 {
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath) :
 		m_bam_path(bamPath),
-		m_is_open(false)
+		m_is_open(false),
+		m_alignment_reader_manager_ptr(nullptr)
+	{
+	}
+
+	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath, AlignmentReaderManager< BamAlignmentReader >* alignmentReaderManagerPtr) :
+	    m_bam_path(bamPath),
+		m_is_open(false),
+		m_alignment_reader_manager_ptr(alignmentReaderManagerPtr)
 	{
 	}
 
@@ -39,7 +47,9 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
 	{
-		std::lock_guard< std::mutex > l(m_lock);
+		// std::lock_guard< std::mutex > l(m_lock);
+		// static int alignmentID = 0;
+		// std::cout << "opened: " << alignmentID << std::endl;
 		if (!m_is_open)
 		{
 			std::cout << "Bam file not opened" << std::endl;
@@ -50,13 +60,6 @@ namespace graphite
 		int refID = this->m_bam_reader.GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
-		// lock.lock();
-		/*
-		{
-			std::lock_guard< std::mutex > l(lock);
-			std::cout << "bam region: " << regionPtr->getRegionString() << std::endl;
-		}
-		*/
 
 
 		// auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
@@ -64,7 +67,6 @@ namespace graphite
 
 		uint32_t count = 0;
 		BamTools::BamAlignment bamAlignment;
-		// while(this->m_bam_reader.GetNextAlignment(*bamAlignmentPtr))
 		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
 		{
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
@@ -79,10 +81,10 @@ namespace graphite
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
 		}
-
-		// lock.lock();
-		// std::cout << " alignments: " << alignmentPtrs.size() << std::endl;
-		// lock.unlock();
+		if (m_alignment_reader_manager_ptr != nullptr)
+		{
+			m_alignment_reader_manager_ptr->checkinReader(this->shared_from_this());
+		}
 		return alignmentPtrs;
 	}
 

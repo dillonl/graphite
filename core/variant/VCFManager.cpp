@@ -9,25 +9,27 @@
 
 namespace graphite
 {
-	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
+	VCFManager::VCFManager(const std::string& vcfPath, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
 		m_max_allowed_allele_size(maxAllowedAlleleSize),
-		m_reference_ptr(referencePtr)
+		m_reference_ptr(referencePtr),
+		m_sample_ptrs(samplePtrs)
 	{
-		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, m_max_allowed_allele_size);
+		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, samplePtrs, referencePtr, m_max_allowed_allele_size);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 	}
 
-	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
+	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
 		m_max_allowed_allele_size(maxAllowedAlleleSize),
-		m_reference_ptr(referencePtr)
+		m_reference_ptr(referencePtr),
+		m_sample_ptrs(samplePtrs)
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
-			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, m_max_allowed_allele_size);
+			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, samplePtrs, referencePtr, m_max_allowed_allele_size);
 			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 		}
 	}
@@ -94,11 +96,6 @@ namespace graphite
 	IVariantList::SharedPtr VCFManager::getCompleteVariantList()
 	{
 		return this->m_variant_list_ptr;
-	}
-
-	void VCFManager::printToVCF(VCFHeader::SharedPtr vcfHeaderPtr, bool printHeader, std::ostream& out)
-	{
-		this->m_variant_list_ptr->printToVCF(vcfHeaderPtr, printHeader, out);
 	}
 
 	void VCFManager::releaseResources()

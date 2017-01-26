@@ -20,6 +20,15 @@ namespace graphite
 		m_region_ptr = regionPtr;
     }
 
+	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads) :
+		m_sample_ptrs(samplePtrs),
+		m_loaded(false),
+        m_exclude_duplicate_reads(excludeDuplicateReads),
+		m_alignment_reader_manager(alignmentReaderManagerPtr)
+	{
+		m_region_ptr = regionPtr;
+    }
+
 	BamAlignmentManager::~BamAlignmentManager()
 	{
 	}
@@ -52,10 +61,12 @@ namespace graphite
 		for (auto regionPtr : regionPtrs)
 		{
 			// position bamLastPosition = SamtoolsAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
+			auto bamAlignmentReaderPtr = m_alignment_reader_manager->getReader(bamPath);
+			// std::cout << "Using bam reader: " << bamAlignmentReaderPtr->getReaderID() << std::endl;
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 			// auto bamAlignmentReaderPtr = std::make_shared< SamtoolsAlignmentReader >(bamPath);
-			auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			bamAlignmentReaderPtr->open();
+			// auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
+			// bamAlignmentReaderPtr->open();
 			// auto funct = std::bind(&SamtoolsAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
@@ -76,6 +87,7 @@ namespace graphite
 			{
 				std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
 				auto loadedAlignmentPtrs = futureFunct->get();
+				// std::cout << "alignments size: " << loadedAlignmentPtrs.size() << std::endl;
 				for (auto& alignmentPtr : loadedAlignmentPtrs)
 				{
 					if (m_name_alignment_ptr_map_ptr->find(alignmentPtr->getID()) == m_name_alignment_ptr_map_ptr->end())
