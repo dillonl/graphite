@@ -1,7 +1,7 @@
 #include "Variant.h"
 #include "core/alignment/IAlignment.h"
 
-#include <unordered_set>
+#include <unordered_map>
 #include <sstream>
 
 namespace graphite
@@ -144,16 +144,129 @@ namespace graphite
 		return (this->m_info_fields.size() > 0) ? infoFields : ".";
 	}
 
-	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs)
+	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs, std::unordered_set< std::string > sampleNames)
 	{
-		out << this->m_line << "\t" << getSampleCounts(samplePtrs) << std::endl;
+		// out << this->m_line << "\t" << getSampleCounts("") << std::endl;
 	}
 
-	std::string Variant::getVariantLine(std::vector< std::shared_ptr< Sample > > samplePtrs)
+	std::string Variant::getVariantLine(IHeader::SharedPtr headerPtr)
 	{
-		return this->m_line + std::string("\t") + getSampleCounts(samplePtrs) + std::string("\n");
+		std::vector< std::string > lineSplit;
+		split(this->m_line, '\t', lineSplit);
+		std::string line = "";
+
+		std::string samplePadding = ".";
+		bool samplePaddingSet = false;
+		for (auto i = lineSplit.size(); i < 9 + headerPtr->getColumnNames().size(); ++i) // add blank sample columns
+		{
+			lineSplit.emplace_back("");
+
+			if (!samplePaddingSet)
+			{
+				samplePaddingSet = true;
+				auto formatIdx = headerPtr->getColumnPosition("FORMAT");
+				auto formatField = lineSplit[formatIdx];
+				auto numFields = std::count(formatField.begin(), formatField.end(), ":");
+				for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
+			}
+		}
+
+	    auto formatColumnIdx = headerPtr->getColumnPosition("FORMAT");
+		uint32_t i = 0;
+		for (i = 0; i < 9; ++i)
+		{
+			line += (i == 0) ? "" : "\t";
+			if (i == formatColumnIdx)
+			{
+				if (lineSplit[i].empty())
+				{
+					line += ":";
+				}
+				line += getFormatString();
+			}
+			else
+			{
+				line += lineSplit[i];
+			}
+		}
+
+		for (; i < headerPtr->getColumnNames().size(); ++i)
+		{
+			auto columnName = headerPtr->getColumnNames()[i];
+			line += "\t";
+			if (lineSplit[i].empty())
+			{
+				line += samplePadding + ":";
+			}
+			else
+			{
+				line += lineSplit[i] + ":";
+			}
+			auto sampleCounts = (headerPtr->isActiveSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
+			line += sampleCounts;
+		}
+		return line + "\n";
 	}
 
+	std::string Variant::getFormatString()
+	{
+		std::string formatString = "";
+		for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
+		{
+			auto alleleCountType = AllAlleleCountTypes[i];
+			std::string suffix = (i < AllAlleleCountTypes.size() - 1) ? ":" : "";
+			std::string alleleTypeCountString = AlleleCountTypeToShortString(alleleCountType);
+			formatString += "DP_" + alleleTypeCountString + ":DP4_" + alleleTypeCountString + suffix;
+		}
+		return formatString;
+	}
+
+	std::string Variant::getBlankSampleCounts()
+	{
+		std::string alleleCountString = (AllAlleleCountTypes.size() > 0) ? "." :  "";
+	    for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
+		{
+			alleleCountString += ":.";
+		}
+		return alleleCountString;
+	}
+
+	std::string Variant::getSampleCounts(const std::string& sampleName)
+	{
+		std::string alleleCountString = "";
+		for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
+		{
+			auto alleleCountType = AllAlleleCountTypes[i];
+			std::string suffix = (i < AllAlleleCountTypes.size() - 1) ? ":" : "";
+			std::string alleleTypeCountString = AlleleCountTypeToString(alleleCountType);
+			uint32_t totalCount = 0;
+			std::string sampleString = "";
+			for (size_t j = 0; j < m_all_allele_ptrs.size(); ++j)
+			{
+				auto allelePtr = m_all_allele_ptrs[j];
+				uint32_t forwardCount = allelePtr->getForwardCount(sampleName, alleleCountType);
+				uint32_t reverseCount = allelePtr->getReverseCount(sampleName, alleleCountType);
+				std::string prefix = (j == 0) ? "" : ",";
+
+				if (m_skip)
+				{
+					sampleString += prefix + ".,.";
+				}
+				else
+				{
+					sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
+				}
+
+				totalCount += (forwardCount + reverseCount);
+			}
+			std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
+			// alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
+			alleleCountString += totalCountString + ":" + sampleString + suffix;
+		}
+		return alleleCountString;
+	}
+
+	/*
 	std::string Variant::getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs)
 	{
 		std::string alleleCountString = "";
@@ -162,23 +275,23 @@ namespace graphite
 		std::unordered_set< std::string > sampleNameSet;
 		for (auto samplePtr : samplePtrs)
 		{
-
 			if (sampleNameSet.find(samplePtr->getName()) == sampleNameSet.end())
 			{
 				sampleNameSet.emplace(samplePtr->getName());
 
-				alleleCountString += "\t";
-				for (auto alleleCountType : AllAlleleCountTypes)
+				// for (auto alleleCountType : AllAlleleCountTypes)
+				for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
 				{
-					// std::cout << AlleleCountTypeToString(alleleCountType) << ": " << m_all_allele_ptrs.size() << std::endl;
+					auto alleleCountType = AllAlleleCountTypes[i];
+					std::string suffix = (i < AllAlleleCountTypes.size() - 1) ? ":" : "";
 					std::string alleleTypeCountString = AlleleCountTypeToString(alleleCountType);
 					uint32_t totalCount = 0;
 					std::string sampleString = "";
 					for (size_t i = 0; i < m_all_allele_ptrs.size(); ++i)
 					{
 						auto allelePtr = m_all_allele_ptrs[i];
-						uint32_t forwardCount = allelePtr->getForwardCount(samplePtr, alleleCountType);
-						uint32_t reverseCount = allelePtr->getReverseCount(samplePtr, alleleCountType);
+						uint32_t forwardCount = allelePtr->getForwardCount(sampleName, alleleCountType);
+						uint32_t reverseCount = allelePtr->getReverseCount(sampleName, alleleCountType);
 						std::string prefix = (i == 0) ? "" : ",";
 
 						if (m_skip)
@@ -193,11 +306,13 @@ namespace graphite
 						totalCount += (forwardCount + reverseCount);
 					}
 					std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
-					alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
+					// alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
+					alleleCountString += totalCountString + ":" + sampleString + suffix;
 				}
 			}
 		}
 		return alleleCountString;
 	}
+	*/
 
 }

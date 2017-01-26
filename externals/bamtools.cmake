@@ -32,16 +32,17 @@ SET(BAMTOOLS_PROJECT bamtools_project CACHE INTERNAL "bamtools project name")
 SET(BAMTOOLS_DIR ${CMAKE_BINARY_DIR}/externals/bamtools CACHE INTERNAL "bamtools project directory")
 SET(BAMTOOLS_LIB)
 ExternalProject_Add(${BAMTOOLS_PROJECT}
-	GIT_REPOSITORY https://github.com/pezmaster31/bamtools.git
-	GIT_TAG 2d7685d2aeedd11c46ad3bd67886d9ed65c30f3e #lock in the commit id so we don't this doesn't break in the future
+	GIT_REPOSITORY https://github.com/dillonl/bamtools.git
+	GIT_TAG 45129fa9035847f54baa2c1750d4d3f526793e82 #lock in the commit id so we don't this doesn't break in the future
+	DEPENDS ${ZLIB_PROJECT}
 	INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
+	UPDATE_COMMAND ""
 	PREFIX ${BAMTOOLS_DIR}
     CMAKE_CACHE_ARGS
         -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
         -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
-	CMAKE_ARGS
-		-DCMAKE_BUILD_TYPE=Debug
+		-DZLIB_LIBRARY_PATH:PATH=${ZLIB_LIBRARY_PATH}
+		-DZLIB_INCLUDE:PATH=${ZLIB_INCLUDE}
 )
 
 ExternalProject_Get_Property(${BAMTOOLS_PROJECT} INSTALL_DIR)

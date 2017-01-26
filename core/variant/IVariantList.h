@@ -3,6 +3,7 @@
 
 #include "core/region/Region.h"
 #include "core/util/Noncopyable.hpp"
+#include "core/alignment/Sample.hpp"
 #include "IVariant.h"
 #include "IHeader.h"
 
@@ -29,7 +30,6 @@ namespace graphite
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
-		virtual void printToVCF(IHeader::SharedPtr header, bool printHeader, std::ostream& out) = 0;
 	};
 
 } // end namespace graphite

@@ -27,21 +27,21 @@ namespace graphite
 		void addAllele(IAllele::SharedPtr allelePtr) { this->m_allele_ptrs.emplace_back(allelePtr); }
 		std::vector< IAllele::SharedPtr > getAllAlleles() { return this->m_allele_ptrs; }
 
-		inline uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
+		inline uint32_t getForwardCount(const std::string& sampleName, AlleleCountType alleleCountType) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getForwardCount(samplePtr, alleleCountType);
+				count += allelePtr->getForwardCount(sampleName, alleleCountType);
 			}
 			return count;
 		}
-		inline uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
+		inline uint32_t getReverseCount(const std::string& sampleName, AlleleCountType alleleCountType) override
 		{
 			uint32_t count = 0;
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				count += allelePtr->getReverseCount(samplePtr, alleleCountType);
+				count += allelePtr->getReverseCount(sampleName, alleleCountType);
 			}
 			return count;
 		}

@@ -1,11 +1,11 @@
 #ifndef GRAPHITE_PARAMS_H
 #define GRAPHITE_PARAMS_H
 
+#include "Noncopyable.hpp"
 #include "core/region/Region.h"
-#include "core/util/Noncopyable.hpp"
+#include <cxxopts.hpp>
 
 #include <cstring>
-#include <cxxopts.hpp>
 #include <vector>
 
 namespace graphite
@@ -40,8 +40,6 @@ namespace graphite
 		cxxopts::Options m_options;
 
 		std::vector< std::string > m_bam_paths;
-		/* std::shared_ptr< boost::program_options::options_description > m_options_description_ptr; */
-		/* boost::program_options::variables_map m_variables_map; */
 	};
 }
 

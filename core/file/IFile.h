@@ -3,8 +3,11 @@
 
 #include <string>
 #include <memory>
+#include <fstream>
 
 #include "core/util/Noncopyable.hpp"
+
+/* #include <boost/filesystem.hpp> */
 
 namespace graphite
 {
@@ -25,17 +28,11 @@ namespace graphite
 		virtual void setFilePosition(uint64_t pos) = 0;
 
 	protected:
-		inline bool fileExists(const std::string& name)
+		inline bool fileExists(const std::string& filename)
 		{
-		    if (FILE *file = fopen(name.c_str(), "r"))
-			{
-				fclose(file);
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			/* return boost::filesystem::exists(name); */
+			std::ifstream ifile(filename.c_str());
+			return (bool)ifile;
 		}
 
 		std::string m_file_path;

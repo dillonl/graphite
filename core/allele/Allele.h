@@ -46,16 +46,16 @@ namespace graphite
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr)  override { this->m_allele_meta_data_ptr = alleleMetaDataPtr; }
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() override { return this->m_allele_meta_data_ptr; }
 
-		virtual uint32_t getForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
+		virtual uint32_t getForwardCount(const std::string& sampleName, AlleleCountType alleleCountType) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
+			auto iter = m_alignment_sample_forward_count_map.find(sampleName);
 			return (iter == m_alignment_sample_forward_count_map.end()) ? 0 : iter->second->getScoreCount(alleleCountType);
 		}
-		virtual uint32_t getReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
+		virtual uint32_t getReverseCount(const std::string& sampleName, AlleleCountType alleleCountType) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName());
+			auto iter = m_alignment_sample_reverse_count_map.find(sampleName);
 			return (iter == m_alignment_sample_reverse_count_map.end()) ? 0 : iter->second->getScoreCount(alleleCountType);
 		}
 		virtual uint32_t getTotalCount(AlleleCountType alleleCountType) override
@@ -147,8 +147,8 @@ namespace graphite
 			typedef std::shared_ptr< ScoreCounter > SharedPtr;
 			ScoreCounter()
 			{
-				m_score_map[AlleleCountType::NONE] = 0;
-				m_score_map[AlleleCountType::AmbiguousPercent] = 0;
+				m_score_map[AlleleCountType::Ambiguous] = 0;
+				m_score_map[AlleleCountType::LowPercent] = 0;
 				m_score_map[AlleleCountType::SeventyPercent] = 0;
 				m_score_map[AlleleCountType::EightyPercent] = 0;
 				m_score_map[AlleleCountType::NinteyPercent] = 0;

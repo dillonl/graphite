@@ -17,10 +17,13 @@ namespace graphite
 		IHeader() {}
 		virtual ~IHeader() {}
 
-		virtual void addHeaderLine(const std::string& headerLine) = 0;
 		virtual std::string getHeader() = 0;
-		virtual void registerSample(std::shared_ptr< Sample > samplePtr) = 0;
-		virtual std::vector< std::shared_ptr< Sample > > getSamplePtrs() = 0;
+		virtual void registerActiveSample(std::shared_ptr< Sample > samplePtr) = 0;
+		virtual std::vector< std::string > getSampleNames() = 0;
+		virtual int32_t getColumnPosition(const std::string& columnTitle) = 0;
+		virtual std::vector< std::string > getColumnNames() = 0;
+		virtual void setColumn(const std::string& column) = 0;
+		virtual bool isActiveSampleColumnName(const std::string& headerName) = 0;
 	private:
 	};
 }

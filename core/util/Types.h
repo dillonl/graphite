@@ -10,8 +10,8 @@ namespace graphite
 {
 	typedef uint32_t position;
 	static position MAX_POSITION = std::numeric_limits< position >::max();
-	enum class AlleleCountType { NONE = 0,  NinteyFivePercent = 1, NinteyPercent = 2, EightyPercent = 3, SeventyPercent = 4, AmbiguousPercent = 5 };
-	static const std::vector< AlleleCountType > AllAlleleCountTypes = { AlleleCountType::NONE,  AlleleCountType::NinteyFivePercent, AlleleCountType::NinteyPercent, AlleleCountType::EightyPercent, AlleleCountType::SeventyPercent, AlleleCountType::AmbiguousPercent };
+	enum class AlleleCountType { NinteyFivePercent = 0, NinteyPercent = 1, EightyPercent = 2, SeventyPercent = 3, LowPercent = 4, Ambiguous = 5 };
+	static const std::vector< AlleleCountType > AllAlleleCountTypes = { AlleleCountType::NinteyFivePercent, AlleleCountType::NinteyPercent, AlleleCountType::EightyPercent, AlleleCountType::SeventyPercent, AlleleCountType::LowPercent, AlleleCountType::Ambiguous };
 	struct AlleleCountTypeHash
 	{
 		    template <typename T>
@@ -32,10 +32,32 @@ namespace graphite
 			return "EightyPercent";
 		case AlleleCountType::SeventyPercent:
 			return "SeventyPercent";
-		case AlleleCountType::AmbiguousPercent:
-			return "AmbiguousPercent";
+		case AlleleCountType::LowPercent:
+			return "LowPercent";
+		case AlleleCountType::Ambiguous:
+			return "Ambiguous";
 		}
 		return "NONE";
+	}
+
+	static std::string AlleleCountTypeToShortString(AlleleCountType alleleCountType)
+	{
+		switch (alleleCountType)
+		{
+		case AlleleCountType::NinteyFivePercent:
+			return "NFP";
+		case AlleleCountType::NinteyPercent:
+			return "NP";
+		case AlleleCountType::EightyPercent:
+			return "EP";
+		case AlleleCountType::SeventyPercent:
+			return "SP";
+		case AlleleCountType::LowPercent:
+			return "LP";
+		case AlleleCountType::Ambiguous:
+			return "AP";
+		}
+		return "AP";
 	}
 
 	static AlleleCountType scoreToAlleleCountType(uint32_t score)
@@ -56,7 +78,7 @@ namespace graphite
 		{
 			return AlleleCountType::SeventyPercent;
 		}
-		return AlleleCountType::NONE;
+		return AlleleCountType::LowPercent;
 	}
 }
 

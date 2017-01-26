@@ -15,10 +15,6 @@
 
 #include "IVariant.h"
 #include "core/allele/Allele.h"
-/*
-#include "core/parser/VCFParser.hpp"
-#include "core/parser/InfoFieldParser.hpp"
-*/
 #include "core/reference/Reference.h"
 #include "core/alignment/Sample.hpp"
 #include "core/util/Utility.h"
@@ -89,13 +85,25 @@ namespace graphite
 			{
 				if (alts[0].compare("<DEL>") == 0)
 				{
-					int endPosition = stoi(infoFields["END"]);
-					const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
-					size_t alleleSize = endPosition - variantPtr->m_position;
-					ref = std::string(reference, alleleSize);
+					/* int endPosition = stoi(infoFields["END"]); */
+					int svLength = stoi(infoFields["SVLEN"]);
+					int endPosition = variantPtr->m_position + svLength;
+					if (variantPtr->m_position < svLength)
+					{
+						skipSequence = true;
+					}
+					else
+					{
+						variantPtr->m_position = variantPtr->m_position - 1;
+						const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
+						/* size_t alleleSize = endPosition - variantPtr->m_position; */
+						/* size_t alleleSize = svLength; */
+						ref = std::string(reference, svLength);
 
-					alts.clear();
-					alts.emplace_back("");
+						alts.clear();
+						std::string altString(1, reference[0]);
+						alts.emplace_back(altString);
+					}
 				}
 				else if (alts[0].compare("<DUP>") == 0)
 				{
@@ -247,8 +255,8 @@ namespace graphite
 		size_t getMaxAlleleSize() override { return this->m_max_allele_size; }
 		IAllele::SharedPtr getRefAllelePtr() override { return this->m_ref_allele_ptr; }
 		std::vector< IAllele::SharedPtr > getAltAllelePtrs() override { return m_alt_allele_ptrs; }
-		void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs) override;
-		std::string getVariantLine(std::vector< std::shared_ptr< Sample > > samplePtrs) override;
+		void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs, std::unordered_set< std::string > sampleNames) override;
+		std::string getVariantLine(IHeader::SharedPtr headerPtr) override;
 		void processOverlappingAlleles() override;
 
 		uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) override;
@@ -265,7 +273,8 @@ namespace graphite
 		std::string getGenotype();
 		std::string getInfoFieldsString();
 		/* uint32_t getTotalAlleleCount(); */
-		std::string getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs);
+		std::string getSampleCounts(const std::string& sampleName);
+		/* std::string getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs); */
 
 		size_t m_max_allele_size;
 		uint32_t m_max_prefix_match_length;
@@ -291,6 +300,8 @@ namespace graphite
 		bool m_skip;
 
 	private:
+		std::string getFormatString();
+		std::string getBlankSampleCounts();
 		void setMaxAlleleSize();
 
 		// a helper class for the getSampleCounts method

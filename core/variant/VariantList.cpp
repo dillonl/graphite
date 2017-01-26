@@ -7,6 +7,8 @@
 #include "tabix.h"
 #include "knetfile.h"
 
+#include <unordered_set>
+
 namespace graphite
 {
 	VariantList::VariantList(const std::vector< IVariant::SharedPtr >& variantPtrs, IReference::SharedPtr referencePtr) :
@@ -67,17 +69,24 @@ namespace graphite
 	{
 	}
 
-	void VariantList::printToVCF(IHeader::SharedPtr headerPtr, bool printHeader, std::ostream& out)
+	/*
+	void VariantList::printToVCF(IHeader::SharedPtr headerPtr, bool printHeader, std::vector< Sample::SharedPtr > samplePtrs, std::ostream& out)
 	{
 		if (printHeader)
 		{
 			out << headerPtr->getHeader();
 		}
+		std::unordered_set< std::string > sampleNames;
+		for (auto samplePtr : samplePtrs)
+		{
+			sampleNames.emplace(samplePtr->getName());
+		}
 		for(const auto variantPtr : this->m_variant_ptrs)
 		{
-			variantPtr->printVariant(out, headerPtr->getSamplePtrs());
+			variantPtr->printVariant(out, headerPtr->getSamplePtrs(), sampleNames);
 		}
 	}
+	*/
 
 	void VariantList::printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out)
 	{
@@ -88,7 +97,7 @@ namespace graphite
 		}
 		for(const auto variantPtr : this->m_variant_ptrs)
 		{
-			bgzf_write(fp, variantPtr->getVariantLine(headerPtr->getSamplePtrs()).c_str(), variantPtr->getVariantLine(headerPtr->getSamplePtrs()).size());
+			bgzf_write(fp, variantPtr->getVariantLine(headerPtr).c_str(), variantPtr->getVariantLine(headerPtr).size());
 		}
 		bgzf_close(fp);
 	}
@@ -264,7 +273,7 @@ namespace graphite
 		}
 		for(const auto variantPtr : this->m_variant_ptrs)
 		{
-			auto line = variantPtr->getVariantLine(headerPtr->getSamplePtrs());
+			auto line = variantPtr->getVariantLine(headerPtr);
 			fileWriter->write(line.c_str(), line.size());
 		}
 	}

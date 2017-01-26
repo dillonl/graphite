@@ -7,12 +7,7 @@
 #include <iostream>
 #include <fstream>
 
-/*
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/seek.hpp>
-*/
-/* #include <boost/iostreams/positioning.hpp> */
+#include <gzstream.h>
 namespace graphite
 {
 	class ASCIIGZFileReader : public IFile
@@ -28,12 +23,9 @@ namespace graphite
 
 		inline bool getNextLine(std::string& line) override
 		{
-			/*
 			if (!this->m_opened) { return false; }
 			auto value = (bool)std::getline(*this->m_in_stream_ptr, line);
 			return value;
-			*/
-			return false;
 		}
 
 		void setFilePosition(uint64_t pos) override {};
@@ -41,6 +33,7 @@ namespace graphite
 	private:
 		std::shared_ptr< std::iostream > m_iostream_ptr;
 		std::shared_ptr< std::ifstream > m_ifstream_ptr;
+		std::shared_ptr< igzstream > m_in_stream_ptr;
 		/* std::shared_ptr< boost::iostreams::filtering_istream > m_in_stream_ptr; */
 	};
 }
