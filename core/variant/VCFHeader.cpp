@@ -43,16 +43,38 @@ namespace graphite
 
 	void VCFHeader::setColumns(const std::string& headerString)
 	{
+		std::vector< std::string > requiredColumns = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"};
+
 		m_columns.clear();
 		std::vector< std::string > headerSplit;
 		split(headerString, '\t', headerSplit);
-		for (auto i = 0; i < headerSplit.size(); ++i)
+		bool invalidHeader = false;
+		uint32_t i = 0;
+		for (; i < requiredColumns.size(); ++i)
+		{
+			if (headerSplit.size() < i || strcmp(headerSplit[i].c_str(), requiredColumns[i].c_str()) != 0)
+			{
+				invalidHeader = true;
+				break;
+			}
+			setColumn(headerSplit[i]);
+		}
+		if (invalidHeader || (headerSplit.size() >= 9 && strcmp(headerSplit[8].c_str(), "FORMAT") != 0)) // check for the FORMAT column if it exists
+		{
+			throw std::runtime_error("Invalid VCF Header: " + headerString);
+		}
+		if (headerSplit.size() == 8)
+		{
+			setColumn("FORMAT");
+		}
+		else
 		{
 			setColumn(headerSplit[i]);
-			if (i >= 9)
-			{
-				m_sample_names.emplace_back(headerSplit[i]);
-			}
+		}
+		++i; // increament i to skip FORMAT if there is one
+		for (; i < headerSplit.size(); ++i)
+		{
+			m_sample_names.emplace_back(headerSplit[i]);
 		}
 	}
 

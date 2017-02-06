@@ -19,12 +19,6 @@
 #include "core/alignment/Sample.hpp"
 #include "core/util/Utility.h"
 
-/*
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-*/
-
 namespace graphite
 {
 
@@ -50,7 +44,6 @@ namespace graphite
 
 			std::vector< std::string > vcfComponents;
 
-			/* boost::split(vcfComponents, vcfLine, boost::is_any_of("\t")); */
 			split(vcfLine, '\t', vcfComponents);
 
 			if (vcfComponents.size() < 7)
@@ -62,15 +55,15 @@ namespace graphite
 			variantPtr->m_position = stoul(vcfComponents[1]);
 			variantPtr->m_id = vcfComponents[2];
 			ref = vcfComponents[3];
-			if (vcfComponents[4].find(",") != std::string::npos)
-			{
+			/* if (vcfComponents[4].find(",") != std::string::npos) */
+			/* { */
 				/* boost::split(alts, vcfComponents[4], boost::is_any_of(",")); */
-				split(vcfComponents[4], '\t', alts);
-			}
-			else
-			{
-				alts.push_back(vcfComponents[4]);
-			}
+				/* split(vcfComponents[4], '\t', alts); */
+			/* } */
+			/* else */
+			/* { */
+			alts.push_back(vcfComponents[4]);
+			/* } */
 
 			variantPtr->m_qual = vcfComponents[5];
 			variantPtr->m_filter = vcfComponents[6];
@@ -78,79 +71,91 @@ namespace graphite
 
 			std::unordered_map< std::string, std::string > infoFields;
 			setUnorderedMapKeyValue(fields, infoFields);
-			/* static std::mutex mutLock; */
-			/* std::lock_guard< std::mutex > lock(mutLock); */
-			bool skipSequence = false;
-			if (alts.size() == 1 &&  referencePtr != nullptr)
+			bool skipSequence = true;
+			if (alts.size() == 1 && referencePtr != nullptr && alts[0].find("<") != std::string::npos)
 			{
-				if (alts[0].compare("<DEL>") == 0)
+				int svLength = -1;
+				if (infoFields.find("SVLEN") != infoFields.end())
 				{
-					/* int endPosition = stoi(infoFields["END"]); */
-					int svLength = stoi(infoFields["SVLEN"]);
-					int endPosition = variantPtr->m_position + svLength;
-					if (variantPtr->m_position < svLength)
+					svLength = stoi(infoFields["SVLEN"]);
+				}
+				else if (infoFields.find("END") != infoFields.end())
+				{
+					svLength = stoi(infoFields["END"]) - variantPtr->m_position;
+				}
+				else if (infoFields.find("SEQ") != infoFields.end())
+				{
+					svLength = infoFields["SEQ"].size();
+				}
+				if (svLength < 0)
+				{
+					throw std::runtime_error("Symbolic allele does not have length");
+				}
+				if (svLength < maxAllowedAlleleSize)
+				{
+					if (alts[0].compare("<DEL>") == 0)
 					{
-						skipSequence = true;
+						int endPosition = variantPtr->m_position + svLength;
+						if (variantPtr->m_position < endPosition && svLength <= maxAllowedAlleleSize )
+						{
+							variantPtr->m_position = variantPtr->m_position - 1;
+							const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
+							ref = std::string(reference, svLength);
+							alts.clear();
+							std::string altString(1, reference[0]);
+							alts.emplace_back(altString);
+							skipSequence = false;
+						}
 					}
-					else
+					else if (alts[0].compare("<DUP>") == 0)
 					{
-						variantPtr->m_position = variantPtr->m_position - 1;
-						const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
-						/* size_t alleleSize = endPosition - variantPtr->m_position; */
-						/* size_t alleleSize = svLength; */
-						ref = std::string(reference, svLength);
+						try
+						{
+							if (svLength < maxAllowedAlleleSize)
+							{
+								const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
+								size_t alleleSize = svLength / 2;
+								size_t offset =  referencePtr->getRegion()->getStartPosition() - variantPtr->m_position;
+								ref = std::string(reference, alleleSize);
 
+								alts.clear();
+								alts.emplace_back(ref + ref);
+								skipSequence = false;
+							}
+						}
+						catch (int e)
+						{
+						}
+					}
+					else if (alts[0].compare("<INS>") == 0)
+					{
+						if (infoFields.find("SEQ") != infoFields.end() && (infoFields["SEQ"].size() < maxAllowedAlleleSize))
+						{
+							std::string altSequence = infoFields["SEQ"];
+							std::transform(altSequence.begin(), altSequence.end(),altSequence.begin(), ::toupper);
+							alts.clear();
+							alts.emplace_back(altSequence);
+							skipSequence = false;
+						}
+
+					}
+					else if (alts[0].compare("<INV>") == 0)
+					{
+						position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
+						/* auto svLen = abs(std::stoi(infoFields["SVLEN"])) - ref.size(); */
+						std::string altSequence = std::string(referencePtr->getSequence() + offset, svLength);
+						std::reverse(altSequence.begin(), altSequence.end());
 						alts.clear();
-						std::string altString(1, reference[0]);
-						alts.emplace_back(altString);
+						alts.emplace_back(altSequence);
+						ref = std::string(referencePtr->getSequence() + offset, svLength);
+						skipSequence = false;
 					}
 				}
-				else if (alts[0].compare("<DUP>") == 0)
-				{
-					try
-					{
-						int svLength = stoi(infoFields["SVLEN"]);
+			}
 
-						const char* reference = referencePtr->getSequence() + (variantPtr->m_position - referencePtr->getRegion()->getStartPosition());
-						size_t alleleSize = svLength / 2;
-						size_t offset =  referencePtr->getRegion()->getStartPosition() - variantPtr->m_position;
-						ref = std::string(reference, alleleSize);
-
-						alts.clear();
-						alts.emplace_back(ref + ref);
-					}
-					catch (int e)
-					{
-					}
-					/* std::transform(refSequence.begin(), refSequence.end(),refSequence.begin(), ::toupper); */
-
-				}
-				else if (alts[0].compare("<INS>") == 0)
-				{
-					std::string altSequence = infoFields["SEQ"];
-					std::transform(altSequence.begin(), altSequence.end(),altSequence.begin(), ::toupper);
-					alts.clear();
-					alts.emplace_back(altSequence);
-					skipSequence = true;
-
-				}
-				else if (alts[0].compare("<INV>") == 0)
-				{
-					/* InfoFieldParser< std::string::iterator > infoParser; */
-					/* std::map< std::string, std::string > infoFields; */
-					//variantPtr->m_position -= 1;
-					position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition();
-					auto svLen = abs(std::stoi(infoFields["SVLEN"])) - ref.size();
-					/* std::cout << svLen << std::endl; */
-					std::string altSequence = std::string(referencePtr->getSequence() + offset, svLen);
-					std::reverse(altSequence.begin(), altSequence.end());
-					/* std::cout << altSequence << std::endl; */
-					alts.clear();
-					alts.emplace_back(altSequence);
-					/* position offset = variantPtr->m_position - referencePtr->getRegion()->getStartPosition(); */
-
-					ref = std::string(referencePtr->getSequence() + offset, svLen);
-				}
+			if (!variantPtr->m_skip && alts[0].size() > 100000)
+			{
+				std::cout << alts[0].size() << " " << vcfLine << std::endl;
 			}
 
 			variantPtr->setRefAndAltAlleles(ref, alts);
@@ -158,7 +163,7 @@ namespace graphite
 
 			/* setUnorderedMapKeyValue(fields, variantPtr->m_info_fields); */
 			variantPtr->setMaxAlleleSize();
-			if (maxAllowedAlleleSize < variantPtr->m_max_allele_size && !skipSequence)
+			if (skipSequence || maxAllowedAlleleSize < variantPtr->m_max_allele_size)
 			{
 				variantPtr->m_skip = true;
 			}

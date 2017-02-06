@@ -29,10 +29,10 @@ namespace graphite
 		static std::mutex s_lock;
 		// std::cout << "comment out this lock" << std::endl;
 		// std::lock_guard< std::mutex > sGuard(s_lock);
-		{
-			std::lock_guard< std::mutex > sGuard(s_lock);
-			++s_adj_count;
-		}
+		// {
+			// std::lock_guard< std::mutex > sGuard(s_lock);
+			// ++s_adj_count;
+		// }
 
 
 		auto alignmentPtr = mappingPtr->getAlignmentPtr();

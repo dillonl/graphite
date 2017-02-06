@@ -183,12 +183,12 @@ int main(int argc, char** argv)
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-		// std::cout << "loaded vcf region: " << regionPtr->getRegionString() << std::endl;
 
 		// load bam alignments
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
 		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
+
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
@@ -261,8 +261,8 @@ int main(int argc, char** argv)
 		fileWriter->close();
 	}
 
-	graphite::GSSWAdjudicator* adj_p;
-	std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
+	// graphite::GSSWAdjudicator* adj_p;
+	// std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
 
 	return 0;
 }
