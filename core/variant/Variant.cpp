@@ -157,7 +157,6 @@ namespace graphite
 
 		std::string samplePadding = ".";
 		bool samplePaddingSet = false;
-		std::cout << "1" << std::endl;
 		for (auto i = lineSplit.size(); i < 9 + headerPtr->getColumnNames().size(); ++i) // add blank sample columns
 		{
 			lineSplit.emplace_back("");
@@ -171,7 +170,6 @@ namespace graphite
 				for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
 			}
 		}
-		std::cout << "2" << std::endl;
 
 	    auto formatColumnIdx = headerPtr->getColumnPosition("FORMAT");
 		uint32_t i = 0;
@@ -191,7 +189,6 @@ namespace graphite
 				line += lineSplit[i];
 			}
 		}
-		std::cout << "3" << std::endl;
 
 		for (; i < headerPtr->getColumnNames().size(); ++i)
 		{
