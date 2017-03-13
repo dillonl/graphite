@@ -1,5 +1,4 @@
 #include "GSSWGraph.h"
-#include "core/genotyper/IGenotyper.h"
 #include "core/alignment/AlignmentReporter.h"
 
 #include <mutex>
@@ -7,7 +6,6 @@
 #include <fstream>
 #include <map>
 #include <algorithm>
-
 
 namespace graphite
 {
@@ -22,7 +20,8 @@ namespace graphite
 		m_start_position(startPosition),
 		m_graph_size(graphSize),
 		m_total_graph_length(0),
-		m_skipped(false)
+		m_skipped(false),
+		m_next_id(0)
 	{
 		this->m_nt_table = gssw_create_nt_table();
 		this->m_mat = gssw_create_score_matrix(this->m_match, this->m_mismatch);
@@ -38,6 +37,7 @@ namespace graphite
 
 	void GSSWGraph::constructGraph()
 	{
+		std::vector< std::vector< std::string > > pathsComponents;
 		position startPosition = this->m_start_position;
 		position endPosition = this->m_start_position + this->m_graph_size;
 		size_t graphStartOffset = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
@@ -54,35 +54,59 @@ namespace graphite
 				m_skipped = true;
 				continue;
 			}
-			// if (!variantPtr->processSV(this->m_reference_ptr)) { continue; }
-			// auto genotyperVariantPtr = IGenotyper::Instance()->generateVariant(variantPtr->getPosition());
 			referenceSize = variantPtr->getPosition() - (startPosition + referenceOffset);
 			if (referenceSize > 0)
 			{
+				std::vector< std::string > pathComponents;
 				std::string referenceSequenceString = std::string(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
 				auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
-				auto referenceNode = addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
+				auto referenceNode = addReferenceVertex((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices, pathComponents);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 				m_total_graph_length += referenceSize;
+				pathsComponents.emplace_back(pathComponents);
 			}
 
-			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
+			std::vector< std::string > pathComponents;
+			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr, pathComponents);
 			referenceOffset += referenceSize + variantPtr->getRefAllelePtr()->getLength();
+			pathsComponents.emplace_back(pathComponents);
 		}
 
+		std::vector< std::string > pathComponents;
 		position currentEndPosition = (this->m_reference_ptr->getRegion()->getEndPosition() > endPosition) ? endPosition : this->m_reference_ptr->getRegion()->getEndPosition();
 		referenceSize = currentEndPosition - (startPosition + referenceOffset);
 		if (referenceSize > 0)
 		{
 			std::string referenceSequenceString = std::string(this->m_reference_ptr->getSequence() + graphStartOffset + referenceOffset, referenceSize);
 			auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
-			addReference((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices);
+			addReferenceVertex((startPosition + referenceOffset), referenceAllelePtr, altAndRefVertices, pathComponents);
 		}
 	}
 
-	gssw_node* GSSWGraph::addReference(position position, IAllele::SharedPtr referenceAllelePtr, std::vector< gssw_node* > altAndRefVertices)
+	void GSSWGraph::generatePaths(std::vector< std::vector< std::string > >& pathsComponents, std::vector< std::string >& paths, uint32_t depth, std::string current)
 	{
+		if (depth > pathsComponents.size() - 1)
+		{
+			paths.emplace_back(current);
+			return;
+		}
+		for (auto i = 0; i < pathsComponents[depth].size(); ++i)
+		{
+			generatePaths(pathsComponents, paths, depth + 1, current + pathsComponents[depth][i]);
+		}
+	}
+
+	std::vector< std::string > GSSWGraph::getGraphPaths()
+	{
+		return m_sequence_paths;
+	}
+
+	gssw_node* GSSWGraph::addReferenceVertex(position position, IAllele::SharedPtr referenceAllelePtr, std::vector< gssw_node* > altAndRefVertices, std::vector< std::string >& pathComponents)
+	{
+		auto alleleSequence = std::string(referenceAllelePtr->getSequence(), referenceAllelePtr->getLength());
+		std::transform(alleleSequence.begin(), alleleSequence.end(), alleleSequence.begin(), tolower);
+		pathComponents.emplace_back(alleleSequence);
 		this->m_reference_fragments.emplace_back(referenceAllelePtr);
 		auto referenceNodePtr = gssw_node_create_alt(position, referenceAllelePtr->getSequence(), referenceAllelePtr->getLength(), referenceAllelePtr, true, this->m_nt_table, this->m_mat);
 		gssw_graph_add_node(this->m_graph_ptr, referenceNodePtr);
@@ -93,20 +117,25 @@ namespace graphite
 		return referenceNodePtr;
 	}
 
-	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr)
+	std::vector< gssw_node* > GSSWGraph::addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr, std::vector< std::string >& pathComponents)
 	{
 		size_t tmpLength = 0;
 		size_t referenceOffset = variantPtr->getPosition() - this->m_reference_ptr->getRegion()->getStartPosition();
 	    std::vector< gssw_node* > vertices;
 		for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
 		{
-
+			std::string alleleSequence = std::string(altAllelePtr->getSequence(), altAllelePtr->getSequencePtr()->getLength());
+			std::transform(alleleSequence.begin(), alleleSequence.end(), alleleSequence.begin(), toupper);
+			pathComponents.emplace_back(alleleSequence);
 			auto altAlleleNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getSequencePtr()->getLength(), altAllelePtr, false, this->m_nt_table, this->m_mat);
 			gssw_graph_add_node(this->m_graph_ptr, altAlleleNode);
 			vertices.emplace_back(altAlleleNode);
 			if (altAllelePtr->getSequencePtr()->getLength() > tmpLength) { tmpLength = altAllelePtr->getSequencePtr()->getLength(); }
 		}
 
+		std::string alleleSequence = std::string(variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getLength());
+		std::transform(alleleSequence.begin(), alleleSequence.end(), alleleSequence.begin(), tolower);
+		pathComponents.emplace_back(alleleSequence);
 		gssw_node* variantReferenceNode = gssw_node_create_alt(variantPtr->getPosition(), variantPtr->getRefAllelePtr()->getSequence(), variantPtr->getRefAllelePtr()->getLength(), variantPtr->getRefAllelePtr(), true, this->m_nt_table, this->m_mat);
 		if (variantPtr->getRefAllelePtr()->getSequencePtr()->getLength() > tmpLength) { tmpLength = variantPtr->getRefAllelePtr()->getSequencePtr()->getLength(); }
 
@@ -170,4 +199,5 @@ namespace graphite
 			return nullptr;
 		}
 	}
+
 }

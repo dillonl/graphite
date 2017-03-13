@@ -69,25 +69,6 @@ namespace graphite
 	{
 	}
 
-	/*
-	void VariantList::printToVCF(IHeader::SharedPtr headerPtr, bool printHeader, std::vector< Sample::SharedPtr > samplePtrs, std::ostream& out)
-	{
-		if (printHeader)
-		{
-			out << headerPtr->getHeader();
-		}
-		std::unordered_set< std::string > sampleNames;
-		for (auto samplePtr : samplePtrs)
-		{
-			sampleNames.emplace(samplePtr->getName());
-		}
-		for(const auto variantPtr : this->m_variant_ptrs)
-		{
-			variantPtr->printVariant(out, headerPtr->getSamplePtrs(), sampleNames);
-		}
-	}
-	*/
-
 	void VariantList::printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out)
 	{
 		BGZF* fp = bgzf_dopen(out, "w");

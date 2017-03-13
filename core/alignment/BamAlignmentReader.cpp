@@ -47,9 +47,6 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
 	{
-		// std::lock_guard< std::mutex > l(m_lock);
-		// static int alignmentID = 0;
-		// std::cout << "opened: " << alignmentID << std::endl;
 		if (!m_is_open)
 		{
 			std::cout << "Bam file not opened" << std::endl;
@@ -62,7 +59,6 @@ namespace graphite
 		this->m_bam_reader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 
 
-		// auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
 		size_t counter = 0;
 
 		uint32_t count = 0;
@@ -70,7 +66,6 @@ namespace graphite
 		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
 		{
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
-			// if (bamAlignment.RefID != refID) { break; }
 			std::string sample;
 			bamAlignment.GetTag("RG", sample);
 

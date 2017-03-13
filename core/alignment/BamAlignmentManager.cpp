@@ -1,6 +1,5 @@
 #include "BamAlignmentManager.h"
 #include "BamAlignmentReader.h"
-#include "SamtoolsAlignmentReader.h"
 #include "AlignmentList.h"
 #include "core/util/ThreadPool.hpp"
 
@@ -52,29 +51,18 @@ namespace graphite
 
 		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
-		// std::vector< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
-
-
-		// std::vector< SamtoolsAlignmentReader::SharedPtr > bamAlignmentReaders;
 		std::vector< BamAlignmentReader::SharedPtr > bamAlignmentReaders;
 		std::unordered_set< std::string > regionStrings;
 		for (auto regionPtr : regionPtrs)
 		{
-			// position bamLastPosition = SamtoolsAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 			auto bamAlignmentReaderPtr = m_alignment_reader_manager->getReader(bamPath);
-			// std::cout << "Using bam reader: " << bamAlignmentReaderPtr->getReaderID() << std::endl;
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
-			// auto bamAlignmentReaderPtr = std::make_shared< SamtoolsAlignmentReader >(bamPath);
-			// auto bamAlignmentReaderPtr = std::make_shared< BamAlignmentReader >(bamPath);
-			// bamAlignmentReaderPtr->open();
-			// auto funct = std::bind(&SamtoolsAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
 		}
 
-		// std::unordered_set< std::string > alignmentSet;
 		{
 			std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
 			this->m_name_alignment_ptr_map_ptr->clear();
@@ -87,7 +75,6 @@ namespace graphite
 			{
 				std::lock_guard< std::mutex > lockGuard(m_alignment_ptrs_lock);
 				auto loadedAlignmentPtrs = futureFunct->get();
-				// std::cout << "alignments size: " << loadedAlignmentPtrs.size() << std::endl;
 				for (auto& alignmentPtr : loadedAlignmentPtrs)
 				{
 					if (m_name_alignment_ptr_map_ptr->find(alignmentPtr->getID()) == m_name_alignment_ptr_map_ptr->end())
@@ -114,23 +101,11 @@ namespace graphite
 		{
 			threadPtr->join();
 		}
-		// sort the alignments since they could be from different bam files
 		std::sort(this->m_alignment_ptrs.begin(), this->m_alignment_ptrs.end(),
 				  [] (const IAlignment::SharedPtr& a, const IAlignment::SharedPtr& b)
 				  {
 					  return a->getPosition() < b->getPosition();
 				  });
-
-
-
-		/*
-
-		  for testing only
-		for (auto alignmentPtr : this->m_alignment_ptrs)
-		{
-			std::cout << alignmentPtr->getPosition() << " " << alignmentPtr->getSequence() << std::endl;
-		}
-		*/
 	}
 
 	void BamAlignmentManager::releaseResources()

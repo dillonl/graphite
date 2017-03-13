@@ -58,12 +58,13 @@ namespace graphite
 			Region::SharedPtr regionPtr = nullptr;
 			for (auto i = 0; i < variantPtrs.size(); ++i)
 			{
+				uint32_t maxAlleleSize = 3000;
 				position startPosition = ((variantPtrs[i]->getPosition() - (variantPadding * 2)) > 0) ? (variantPtrs[i]->getPosition() - (variantPadding * 2)) : 0;
-				position endPosition = (variantPtrs[i]->getPosition() + variantPtrs[i]->getMaxAlleleSize() + (variantPadding * 2));
+				position endPosition = (variantPtrs[i]->getPosition() + maxAlleleSize + (variantPadding * 2));
 				auto j = i + 1;
 				while (j < (variantPtrs.size() - 1) && variantPtrs[j]->getPosition() < endPosition)
 				{
-					endPosition = (variantPtrs[j]->getPosition() + variantPtrs[j]->getMaxAlleleSize() + (variantPadding * 2));
+					endPosition = (variantPtrs[j]->getPosition() + maxAlleleSize + (variantPadding * 2));
 					++j;
 				}
 				i = j - 1;

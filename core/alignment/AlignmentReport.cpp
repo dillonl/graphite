@@ -1,5 +1,4 @@
 #include "AlignmentReport.h"
-#include "core/genotyper/GenotyperAllele.hpp"
 
 #include <map>
 
@@ -59,7 +58,6 @@ namespace graphite
 				startPosition = nc->node->position;
 				referenceStartPosition = startPosition - this->m_reference_ptr->getRegion()->getStartPosition();
 			}
-			auto nodeVariantType = static_cast< GenotyperAllele::Type >((long)nc->node->data);
 
 			cigarString +=  separator;
 
@@ -83,7 +81,6 @@ namespace graphite
 				tracebackString += separator;
 			}
 
-			nodeTracebackString += std::string(GenotyperAllele::TypeToString(nodeVariantType)) + separator;
 			nodeOffset += nc->node->len - 1;
 			refOffset += nc->node->ref_len;
 		}

@@ -1,12 +1,14 @@
 #include "Variant.h"
 #include "core/alignment/IAlignment.h"
+#include "core/util/Utility.h"
 
 #include <unordered_map>
 #include <sstream>
+#include <regex>
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0), m_skip(false)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_skip(false)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -17,12 +19,201 @@ namespace graphite
 	}
 
 	Variant::Variant() :
-		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_max_allele_size(0), m_skip(false)
+		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_skip(false)
 	{
 	}
 
 	Variant::~Variant()
 	{
+	}
+
+	Variant::SharedPtr Variant::BuildVariant(const std::string& vcfLine, IReference::SharedPtr referencePtr)
+	{
+		std::string fields;
+		auto variantPtr = std::make_shared< Variant >();
+		std::string ref;
+		std::string alts;
+		std::vector< std::string > vcfComponents;
+
+		split(vcfLine, '\t', vcfComponents);
+
+		if (vcfComponents.size() < 7)
+		{
+			std::cout << "vcf line is incorrectly formated" << std::endl;
+		}
+
+		variantPtr->m_chrom = vcfComponents[0];
+		variantPtr->m_position = stoul(vcfComponents[1]);
+		variantPtr->m_id = vcfComponents[2];
+		ref = vcfComponents[3];
+		alts = vcfComponents[4];
+
+		variantPtr->m_qual = vcfComponents[5];
+		variantPtr->m_filter = vcfComponents[6];
+		fields = vcfComponents[7];
+
+
+		variantPtr->m_info_fields.clear();
+		variantPtr->setUnorderedMapKeyValue(fields);
+		variantPtr->setAlleles(referencePtr, ref, alts);
+
+		variantPtr->m_line = std::string(vcfLine.c_str());
+		return variantPtr;
+	}
+
+	void Variant::setUnorderedMapKeyValue(const std::string& rawString)
+	{
+		m_info_fields.clear();
+		std::vector< std::string > infoFieldKeyValueSplit;
+		split(rawString, ';', infoFieldKeyValueSplit);
+		for (const auto& infoField : infoFieldKeyValueSplit)
+		{
+			std::vector< std::string > infoFieldSplit;
+			split(infoField, '=', infoFieldSplit);
+			if (infoFieldSplit.size() == 2)
+			{
+				m_info_fields[infoFieldSplit[0]] = infoFieldSplit[1];
+			}
+		}
+	}
+
+	int getSVLengthFromInfo(std::unordered_map< std::string, std::string >& infoFields, position pos)
+	{
+		int svLength = 0;
+		if (infoFields.find("SVLEN") != infoFields.end())
+		{
+			svLength = stoi(infoFields["SVLEN"]);
+		}
+		else if (infoFields.find("END") != infoFields.end())
+		{
+			svLength = stoi(infoFields["END"]) - pos;
+		}
+		else if (infoFields.find("SEQ") != infoFields.end())
+		{
+			svLength = infoFields["SEQ"].size();
+		}
+		if (svLength < 0) { svLength = svLength * -1; }
+		return svLength;
+	}
+
+	std::string getInsertionSequenceFromInfo(std::unordered_map< std::string, std::string >& infoFields)
+	{
+		auto seqIter = infoFields.find("SEQ");
+		if (seqIter == infoFields.end())
+		{
+			return "";
+		}
+		else
+		{
+			return seqIter->second;
+		}
+	}
+
+	bool isStandardAlt(const std::string& alt)
+	{
+		std::regex reg("^[ATCG,]*$");
+		return std::regex_match(alt, reg);
+	}
+
+	bool isSymbolicAlt(const std::string& alt)
+	{
+		std::regex reg("<([^>]+)>");
+		return std::regex_match(alt, reg);
+	}
+
+	void Variant::setAsDeletion(Reference::SharedPtr referencePtr, int svLength)
+	{
+		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
+		std::string ref = std::string(reference, svLength + 1);
+		std::string altString(1, reference[0]);
+		std::vector< std::string > alts;
+		alts.emplace_back(altString);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsDuplication(Reference::SharedPtr referencePtr, int svLength)
+	{
+		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
+		std::string ref = std::string(reference, svLength + 1);
+		std::string alt = ref + std::string(reference + 1, svLength);
+		std::vector< std::string > alts;
+		alts.emplace_back(alt);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsInversion(Reference::SharedPtr referencePtr, int svLength)
+	{
+		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
+		std::string ref = std::string(reference, svLength + 1);
+		std::string alt = std::string(reference + 1, svLength);
+		std::reverse(alt.begin(), alt.end());
+		std::vector< std::string > alts;
+		alts.emplace_back(alt);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsInsertion(const std::string& ref, const std::string& alt)
+	{
+		std::vector< std::string > alts;
+		alts.emplace_back(alt);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsStandardAlt(const std::string& ref, const std::string& alt)
+	{
+		std::vector< std::string > alts;
+		if (alt.find(",") != std::string::npos)
+		{
+			split(alt, ',', alts);
+		}
+		else
+		{
+			alts.emplace_back(alt);
+		}
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAlleles(Reference::SharedPtr referencePtr, const std::string& vcfReferenceString, const std::string& alt)
+	{
+		bool shouldSkip = true;
+		int svLength = getSVLengthFromInfo(m_info_fields, m_position);
+		if (isStandardAlt(alt))
+		{
+			setAsStandardAlt(vcfReferenceString, alt);
+			shouldSkip = false;
+		}
+		else if (isSymbolicAlt(alt) && svLength > 0)
+		{
+			if (alt.compare("<DEL>") == 0)
+			{
+				setAsDeletion(referencePtr, svLength);
+				shouldSkip = false;
+			}
+			else if (alt.compare("<DUP>") == 0)
+			{
+				setAsDuplication(referencePtr, svLength);
+				shouldSkip = false;
+			}
+			else if (alt.compare("<INV>") == 0)
+			{
+				setAsInversion(referencePtr, svLength);
+				shouldSkip = false;
+			}
+			else if (alt.compare("<INS>") == 0)
+			{
+				std::string insertionSequence  = getInsertionSequenceFromInfo(m_info_fields);
+				if (insertionSequence.size() > 0)
+				{
+					setAsInsertion(vcfReferenceString, insertionSequence);
+					shouldSkip = false;
+				}
+
+			}
+		}
+		if (shouldSkip)
+		{
+			setSkip(true);
+		}
 	}
 
 	std::string Variant::alleleString()
@@ -88,17 +279,22 @@ namespace graphite
 
 	void Variant::setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts)
 	{
+		int id = 0;
 		this->m_all_allele_ptrs.clear();
 		this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref));
+		this->m_ref_allele_ptr->setID(id);
 		this->m_all_allele_ptrs.reserve(alts.size() + 1);
 		this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
 		this->m_alt_allele_ptrs.clear();
+		id += 1;
 		for (const auto& alt : alts)
 		{
 			auto sequencePtr = SequenceManager::Instance()->getSequence(alt);
 			auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
+			altAllelePtr->setID(id);
 			this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
 			this->m_all_allele_ptrs.emplace_back(altAllelePtr);
+			id += 2;
 		}
 	}
 
@@ -124,13 +320,12 @@ namespace graphite
 
 	bool Variant::shouldSkip() { return this->m_skip; }
 
-	void Variant::setMaxAlleleSize()
+	void Variant::setSkip(bool skip)
 	{
-		this->m_max_allele_size = this->m_ref_allele_ptr->getLength();
-		for (auto allelePtr : this->m_all_allele_ptrs)
-		{
-			if (this->m_max_allele_size < allelePtr->getLength()) { this->m_max_allele_size = allelePtr->getLength(); }
-		}
+		m_skip = skip;
+		std::string ref = "";
+		std::vector< std::string > alts;
+		setRefAndAltAlleles(ref, alts);
 	}
 
 	std::string Variant::getInfoFieldsString()
@@ -175,12 +370,12 @@ namespace graphite
 		uint32_t i = 0;
 		for (i = 0; i < 9; ++i)
 		{
-			line += (i == 0) ? "" : "\t";
+			line += (i > 0) ? "\t" : "";
 			if (i == formatColumnIdx)
 			{
 				if (lineSplit.size() >= i && !lineSplit[i].empty())
 				{
-					line += ":";
+					line += lineSplit[i] + ":";
 				}
 				line += getFormatString();
 			}
@@ -196,13 +391,13 @@ namespace graphite
 			line += "\t";
 			if (lineSplit[i].empty())
 			{
-				line += samplePadding + ":";
+				line += (samplePadding.size() > 0) ? samplePadding + ":" : "";
 			}
 			else
 			{
 				line += lineSplit[i] + ":";
 			}
-			auto sampleCounts = (headerPtr->isActiveSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
+			auto sampleCounts = (headerPtr->isNewSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
 			line += sampleCounts;
 		}
 		return line + "\n";

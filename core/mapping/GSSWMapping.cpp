@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <thread>
+#include <string>
 
 namespace graphite
 {
@@ -36,11 +37,6 @@ namespace graphite
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
-			int x = 0;
-			if (this->m_gssw_mapping_ptr->cigar.length > 1)
-			{
-				x = 1;
-			}
 			int32_t score = 0;
 			uint32_t length = 0;
 			uint32_t prefixMatch = 0;
@@ -75,63 +71,6 @@ namespace graphite
 		}
 		return mappingAlignmentInfoPtrs;
 	}
-
-	/*
-	MappingAlignmentInfo::SharedPtr GSSWMapping::getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, std::shared_ptr< IAdjudicator > adjudicatorPtr)
-	{
-		static std::mutex smutex;
-		std::lock_guard< std::mutex > guard(smutex);
-		// see above message
-		auto iter = m_allele_gssw_nodes_map.find(allelePtr.get());
-		if (iter == m_allele_gssw_nodes_map.end() || iter->second->cigar == NULL) { return nullptr; }
-		auto gsswNodeCigar = iter->second->cigar;
-		int32_t score = 0;
-		uint32_t length = 0;
-		uint32_t prefixMatch = 0;
-		uint32_t suffixMatch = 0;
-
-		for (int j = 0; j < gsswNodeCigar->length; ++j)
-		{
-			switch (gsswNodeCigar->elements[j].type)
-			{
-			case 'M':
-				if (j == 0) { prefixMatch = gsswNodeCigar->elements[j].length; }
-				if (j == gsswNodeCigar->length - 1) { suffixMatch = gsswNodeCigar->elements[j].length; }
-				score += (adjudicatorPtr->getMatchValue() * gsswNodeCigar->elements[j].length);
-				break;
-			case 'X':
-				score -= (adjudicatorPtr->getMisMatchValue() * gsswNodeCigar->elements[j].length);
-				break;
-			case 'I': // I and D are treated the same
-			case 'D':
-				score -= adjudicatorPtr->getGapOpenValue();
-				score -= (adjudicatorPtr->getGapExtensionValue() * (gsswNodeCigar->elements[j].length -1));
-				break;
-			default:
-				break;
-			}
-			length += gsswNodeCigar->elements[j].length;
-		}
-		score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
-		auto mappingAlignmentInfo = std::make_shared< MappingAlignmentInfo >(allelePtr, score, length, prefixMatch, suffixMatch);
-		return  mappingAlignmentInfo;
-	}
-	*/
-
-	/*
-	MappingAlignment::SharedPtr GSSWMapping::getGSSWAlignmentPtrFromAllelePtr(IAllele::SharedPtr allelePtr)
-	{
-		auto iter = m_allele_mappingalignment_map.find(allelePtr);
-		if (iter != m_allele_mappingalignment_map.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-	*/
 
 	int GSSWMapping::getMappingScore()
 	{
@@ -245,6 +184,7 @@ namespace graphite
 		std::string tmpAlignmentString;
 		std::string tmpTracebackString;
 		std::string tmpReferenceString;
+		std::string nodeIDString;
 		size_t alignmentOffset = 0;
 		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
@@ -297,6 +237,7 @@ namespace graphite
 				startPosition = nc->node->position;
 			}
 			std::string nodeTypeString = (nc->node->id % 2 == 0) ? "R" : "V";
+			nodeIDString += std::to_string(nc->node->id) + "||";
 
 			cigarString +=  separator;
 			tmpAlignmentString += separator;
@@ -344,6 +285,7 @@ namespace graphite
 		reportString += "Score:                " + std::to_string(this->m_gssw_mapping_ptr->score) + eol;
 		reportString += "Node Cigar String:    " + cigarString + eol;
 		reportString += "Node Type Traceback:  " + nodeTracebackString + eol;
+		reportString += "Node ID Traceback:    " + nodeIDString + eol;
 		reportString += "Reference:            " + referenceString + eol;
 		// reportString += "Reference (new):      " + tmpReferenceString + eol;
 		// reportString += "Alignment (new):      " + tmpAlignmentString + eol;

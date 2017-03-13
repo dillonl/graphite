@@ -4,6 +4,7 @@
 #include "core/alignment/IAlignment.h"
 
 //#include "gssw.h"
+#include "core/util/Types.h"
 #include "core/util/Noncopyable.hpp"
 
 namespace graphite

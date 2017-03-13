@@ -16,7 +16,14 @@ namespace graphite
 	class EquivalentAllele : public Allele
 	{
 	public:
-	    EquivalentAllele(Sequence::SharedPtr sequence) : Allele(sequence) {}
+	    EquivalentAllele(Sequence::SharedPtr sequence) : Allele(sequence)
+		{
+			int x = 0;
+			if (x > 0)
+			{
+				x = 1;
+			}
+		}
 	    EquivalentAllele(const std::string& seqString, std::vector< IAllele::SharedPtr > allelePtrs) :
 		    Allele(seqString),
 			m_allele_ptrs(allelePtrs)

@@ -11,8 +11,6 @@
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
 #include "core/allele/Allele.h"
-#include "core/genotyper/IGenotyperVariant.h"
-#include "core/genotyper/GenotyperAllele.hpp"
 
 namespace graphite
 {
@@ -24,7 +22,7 @@ namespace graphite
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
-		GSSWGraph(graphite::IReference::SharedPtr referencePtr, graphite::IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
+		GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		virtual ~GSSWGraph();
 
 		virtual void constructGraph() override;
@@ -36,9 +34,12 @@ namespace graphite
 		IAllele::SharedPtr getAllelePtrFromNodeID(uint32_t id);
 		size_t getTotalGraphLength() { return m_total_graph_length; }
 		std::string getSkipped() { return (m_skipped) ? "skipped" : "not skipped"; }
+		std::vector< std::string > getGraphPaths();
+
 	protected:
-		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr);
-		gssw_node* addReference(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices);
+		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr, std::vector< std::string >& pathComponents);
+		gssw_node* addReferenceVertex(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices, std::vector< std::string >& pathComponents);
+		void generatePaths(std::vector< std::vector< std::string > >& pathsComponents, std::vector< std::string >& result, uint32_t depth, std::string current);
 
 		std::deque< GSSWGraphPtr > m_gssw_contigs;
 		int32_t m_match;
@@ -50,22 +51,13 @@ namespace graphite
 		size_t m_graph_size;
 		position m_start_position;
 		gssw_graph* m_graph_ptr;
-		uint32_t m_next_id = 0;
-		std::map< uint32_t, GenotyperAllele::SharedPtr > m_genotyper_map;
+		uint32_t m_next_id;
 		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
-        std::list< IGenotyperVariant > m_genotype_variants;
 		std::map< uint32_t, IVariant::SharedPtr > m_variants_map;
 
 		size_t m_total_graph_length;
 		bool m_skipped;
-
-	private:
-		void graphConstructed();
-		IVariantList::SharedPtr m_variant_list_ptr;
-		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
-		std::unordered_map< uint32_t, IAllele::SharedPtr > m_node_id_to_allele_ptrs;
-
-		std::mutex m_traceback_lock;
+		std::vector< std::string > m_sequence_paths;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
@@ -90,6 +82,7 @@ namespace graphite
 			}
 			n->id = this->m_next_id;
 			m_node_id_to_allele_ptrs.emplace(n->id, allelePtr);
+			allelePtr->setID(this->m_next_id);
 			n->len = allelePtr->getLength();
 			n->seq = (char*)allelePtr->getSequence();
 			n->data = (void*)allelePtr.get();
@@ -100,6 +93,14 @@ namespace graphite
 			n->cigar = NULL;
 			return n;
 		}
+
+	private:
+		void graphConstructed();
+		IVariantList::SharedPtr m_variant_list_ptr;
+		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
+		std::unordered_map< uint32_t, IAllele::SharedPtr > m_node_id_to_allele_ptrs;
+
+		std::mutex m_traceback_lock;
 
 	};
 

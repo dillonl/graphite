@@ -34,12 +34,14 @@ namespace graphite
 
 	void MappingManager::evaluateAlignmentMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
-		adjudicateMappings(adjudicatorPtr);
+		// adjudicateMappings(adjudicatorPtr);
 		incrementVariantCounts();
 	}
 
 	void MappingManager::adjudicateMappings(IAdjudicator::SharedPtr adjudicatorPtr)
 	{
+		throw std::runtime_error("Not implemented error: MappingManager::adjudicateMappings");
+		/*
 		std::lock_guard< std::mutex > lock(this->m_alignment_mapping_map_mutex);
 		std::deque< std::shared_ptr< std::future< void > > > futureFuncts;
 		for (auto& mappingPtr : this->m_mappings)
@@ -53,6 +55,7 @@ namespace graphite
 			futureFuncts.front()->wait();
 			futureFuncts.pop_front();
 		}
+		*/
 	}
 
 	void MappingManager::incrementVariantCounts()
@@ -63,12 +66,6 @@ namespace graphite
 		{
 			auto funct = std::bind(&IMapping::incrementAlleleCounts, mappingPtr);
 			futureFuncts.push_back(ThreadPool::Instance()->enqueue(funct));
-			/*
-			if (mappingPtr->getMapped())
-			{
-				mappingPtr->printMapping();
-			}
-			*/
 		}
 		while (!futureFuncts.empty())
 		{

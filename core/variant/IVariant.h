@@ -37,7 +37,6 @@ namespace graphite
 			virtual void incrementRepositionedCount() = 0;
 			virtual void printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs, std::unordered_set< std::string > sampleNames) = 0;
 			virtual std::string getVariantLine(IHeader::SharedPtr headerPtr) = 0;
-			virtual size_t getMaxAlleleSize() = 0;
 			virtual bool shouldSkip() = 0;
 			virtual void setSkip(bool) = 0;
     };

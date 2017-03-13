@@ -136,7 +136,7 @@ namespace graphite
 				position linePosition = getPositionFromLine(line.c_str());
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr, m_max_allowed_allele_size));
+					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr));
 					wasInRegion = true;
 					continue;
 				}

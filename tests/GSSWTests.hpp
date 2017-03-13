@@ -2,6 +2,7 @@
 #define GRAPHITE_GSSWTESTS_HPP
 
 #include "gssw.h"
+#include "core/graph/GSSWGraph.h"
 
 #include <functional>
 
@@ -128,16 +129,14 @@ TEST(GSSWTests, GSSWComplexDiamondGraph)
 	runTestsViaLambda(alignment, nodes, nt_table, mat, funct);
 }
 
-/*
-//current gssw fails this test
-
-TEST(GSSWTests, GSSWComplexDiamondGraph2)
+TEST(GSSWTests, GSSWSingleton)
 {
 	int8_t* nt_table = gssw_create_nt_table();
 	int8_t* mat = gssw_create_score_matrix(match, mismatch);
 
-	std::string alignment = "ATGCTCAATGCGTAG";
-	std::vector< std::string > nodeSeqs = {"ATGCTCG","A","C","ATGCGTAG"};
+	std::string alignment = "AAAAAAAGAAAA";
+
+	std::vector< std::string > nodeSeqs = {"TAAAAAAAGAAAAT"};
 	std::vector< gssw_node* > nodes;
 	uint32_t count = 0;
 	for (auto& nodeSeq : nodeSeqs)
@@ -145,28 +144,37 @@ TEST(GSSWTests, GSSWComplexDiamondGraph2)
 		nodes.emplace_back(gssw_node_create(nullptr, count++, nodeSeq.c_str(), nt_table, mat));
 	}
 
-	gssw_nodes_add_edge(nodes[0], nodes[1]);
-	gssw_nodes_add_edge(nodes[0], nodes[2]);
-	gssw_nodes_add_edge(nodes[1], nodes[3]);
-	gssw_nodes_add_edge(nodes[2], nodes[3]);
-
 	auto funct = [](gssw_graph_mapping* gm)
 		{
-			std::vector< uint32_t > path = {0,1,3};
-			std::string cigar = "";
-			std::string cigarMapping = "7M1M8M";
 			gssw_node_cigar* nc = gm->cigar.elements;
 			for (int i = 0; i < gm->cigar.length; ++i, ++nc)
 			{
 				for (int j = 0; j < nc->cigar->length; ++j)
 				{
-					cigar += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
+					ASSERT_EQ(nc->cigar->elements[i].length, 12);
+					ASSERT_EQ(nc->cigar->elements[i].type, 'M');
 				}
-				ASSERT_EQ(path[i], nc->node->id);
 			}
-			ASSERT_STREQ(cigarMapping.c_str(), cigar.c_str());
 		};
 	runTestsViaLambda(alignment, nodes, nt_table, mat, funct);
+}
+
+/*
+TEST(GSSWTests, TestPaths)
+{
+	std::vector< std::string > v1 = {"1"};
+	std::vector< std::string > v2 = {"2a", "2b", "2c", "2d"};
+	std::vector< std::string > v3 = {"3"};
+	std::vector< std::string > v4 = {"4a", "4b", "4c", "4d"};
+	std::vector< std::string > v5 = {"5"};
+	std::vector< std::vector< std::string > > pathsComponents = {v1, v2, v3, v4, v5};
+	std::vector< std::string > paths;
+	graphite::GSSWGraph::generatePaths(pathsComponents, paths, 0, "");
+	for (auto path : paths)
+	{
+		std::cout << path << std::endl;
+	}
+
 }
 */
 

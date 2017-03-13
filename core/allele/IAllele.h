@@ -21,7 +21,8 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
-	    IAllele()
+	    IAllele() :
+		    m_id(-1)
 		{
 		}
 
@@ -55,9 +56,13 @@ namespace graphite
 		virtual uint32_t getCommonPrefixSize(IAllele::SharedPtr allelePtr) = 0;
 		virtual uint32_t getCommonSuffixSize(IAllele::SharedPtr allelePtr) = 0;
 
+		void setID(int32_t id) { m_id = id; }
+		int32_t getID() { return m_id; }
+
 	protected:
 
 		std::weak_ptr< IVariant > m_variant_wptr;
+		int32_t m_id;
 
 	};
 }

@@ -74,6 +74,7 @@ set(GRAPHITE_CORE_VARIANT_SOURCES
   )
 
 set(GRAPHITE_CORE_GRAPH_SOURCES
+  graph/ReferenceGraph.cpp
   graph/GSSWGraph.cpp
   graph/GraphManager.cpp
   )

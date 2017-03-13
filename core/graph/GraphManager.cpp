@@ -1,7 +1,7 @@
 #include "GraphManager.h"
+#include "ReferenceGraph.h"
 #include "core/alignment/AlignmentReporter.h"
 #include "core/util/ThreadPool.hpp"
-#include "core/genotyper/IGenotyper.h"
 #include "core/variant/VariantList.h"
 #include "core/mapping/MappingManager.h"
 #include "core/alignment/SampleManager.hpp"
@@ -61,13 +61,6 @@ namespace graphite
 						std::function< void() >  funct = std::bind(&GraphManager::constructAndAdjudicateGraph, this, variantsListPtr, alp, currentPosition, graphSize);
 						auto future = ThreadPool::Instance()->enqueue(funct);
 						futureFunctions.push_back(future);
-						/*
-						IVariant::SharedPtr variantPtr;
-						while (variantsListPtr->getNextVariant(variantPtr))
-						{
-							variantPtr->setSkip(true);
-						}
-						*/
 					}
 					else
 					{
@@ -92,34 +85,36 @@ namespace graphite
 
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize)
 	{
-		// static std::mutex l;
-		// std::lock_guard< std::mutex > lock(l);
 		auto gsswGraphPtr = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue());
 		gsswGraphPtr->constructGraph();
+
+		auto referenceGraphPtr = std::make_shared< ReferenceGraph >(this->m_reference_ptr, variantsListPtr, startPosition, graphSize, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue());
+		referenceGraphPtr->constructGraph();
+		/*
 		{
 			std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
 			this->m_gssw_graphs.emplace_back(gsswGraphPtr);
 		}
-
-
+		*/
 
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
-			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
-			MappingManager::Instance()->registerMapping(gsswMappingPtr);
-		}
-	}
+			auto referenceMappingPtr = std::make_shared< GSSWMapping >(referenceGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+			// this->m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr);
 
-	void GraphManager::adjudicateList(std::vector< IAlignment::SharedPtr > alignmentPtrs, GSSWGraph::SharedPtr graphPtr)
-	{
-		// static std::mutex l;
-		// std::lock_guard< std::mutex > lock(l);
-		for (auto alignmentPtr : alignmentPtrs)
-		{
-			auto tracebackItem = graphPtr->traceBackAlignment(alignmentPtr);
-			auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackItem, alignmentPtr);
-			m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr);
+			auto referenceSWScore = referenceMappingPtr->getMappingScore();
+			uint32_t referenceSWPercent = ((referenceSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);
+			auto gsswMappingPtr = std::make_shared< GSSWMapping >(gsswGraphPtr->traceBackAlignment(alignmentPtr), alignmentPtr);
+			this->m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr, referenceSWPercent);
+
+			/*
+			{
+				static std::mutex m;
+				std::lock_guard< std::mutex > l(m);
+				gsswMappingPtr->printMapping();
+			}
+			*/
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
 		}
 	}

@@ -8,7 +8,7 @@
 #include "SequenceManagerTests.hpp"
 #include "GSSWTests.hpp"
 #include "AlleleTests.hpp"
-
+#include "VariantsTest.hpp" // segfault
 
 /*
 #include "VariantsTest.hpp" // segfault

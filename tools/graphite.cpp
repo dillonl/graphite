@@ -234,7 +234,7 @@ int main(int argc, char** argv)
 			// for (auto samplePtr : alignmentManager->getSamplePtrs())
 			for (auto samplePtr : samplePtrs)
 			{
-				vcfHeaderPtr->registerActiveSample(samplePtr);
+				vcfHeaderPtr->registerNewSample(samplePtr);
 			}
 			if (firstTime)
 			{

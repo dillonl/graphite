@@ -21,12 +21,14 @@ namespace graphite
 
 		std::string getHeader() override;
 		void registerReferencePath(const std::string& referencePath);
-		void registerActiveSample(std::shared_ptr< Sample > samplePtr) override;
-		std::vector< std::string > getSampleNames() override { return m_sample_names; }
+		bool registerNewSample(std::shared_ptr< Sample > samplePtr) override;
+		std::vector< std::string > getSampleNames() override;
 		int32_t getColumnPosition(const std::string& columnTitle) override;
 		void setColumn(const std::string& column) override;
 		std::vector< std::string > getColumnNames() override;
-		bool isActiveSampleColumnName(const std::string& headerName) override;
+		/* bool isActiveSampleColumnName(const std::string& headerName) override; */
+		bool isNewSampleColumnName(const std::string& headerName) override;
+		bool isSampleColumnName(const std::string& headerName) override;
 	private:
 		void setColumns(const std::string& headerString);
 		std::string getColumnsString();
@@ -36,9 +38,10 @@ namespace graphite
 		std::string m_columns_line;
 		std::vector< std::string > m_lines;
 		std::vector< std::string > m_columns;
-	    std::vector< std::string > m_sample_names;
 		std::vector< AlleleCountType > m_allele_count_type_registry;
-		std::unordered_set< std::string > m_active_sample_name;
+		std::unordered_set< std::string > m_new_sample_names;
+		std::unordered_set< std::string > m_sample_names;
+		std::vector< std::string > m_sample_names_by_column_order;
 	};
 }
 

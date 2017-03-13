@@ -74,7 +74,9 @@ namespace graphite
 		++i; // increament i to skip FORMAT if there is one
 		for (; i < headerSplit.size(); ++i)
 		{
-			m_sample_names.emplace_back(headerSplit[i]);
+			setColumn(headerSplit[i]);
+			m_sample_names_by_column_order.emplace_back(headerSplit[i]);
+			m_sample_names.emplace(headerSplit[i]);
 		}
 	}
 
@@ -156,17 +158,33 @@ namespace graphite
 		m_reference_path = referencePath;
 	}
 
-	void VCFHeader::registerActiveSample(std::shared_ptr< Sample > samplePtr)
+	bool VCFHeader::registerNewSample(std::shared_ptr< Sample > samplePtr)
 	{
-		if (getColumnPosition(samplePtr->getName()) < 0)
+		if (isNewSampleColumnName(samplePtr->getName()))
 		{
-			setColumn(samplePtr->getName());
+			return false;
 		}
-		this->m_active_sample_name.emplace(samplePtr->getName());
+		else
+		{
+			m_sample_names_by_column_order.emplace_back(samplePtr->getName());
+			this->m_sample_names.emplace(samplePtr->getName());
+			this->m_new_sample_names.emplace(samplePtr->getName());
+			return true;
+		}
 	}
 
-	bool VCFHeader::isActiveSampleColumnName(const std::string& headerName)
+	bool VCFHeader::isNewSampleColumnName(const std::string& sampleName)
 	{
-		return this->m_active_sample_name.find(headerName) != this->m_active_sample_name.end();
+		return this->m_new_sample_names.find(sampleName) != this->m_new_sample_names.end();
+	}
+
+	bool VCFHeader::isSampleColumnName(const std::string& sampleName)
+	{
+		return this->m_sample_names.find(sampleName) != this->m_sample_names.end();
+	}
+
+	std::vector< std::string > VCFHeader::getSampleNames()
+	{
+		return m_sample_names_by_column_order;
 	}
 }

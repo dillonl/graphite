@@ -31,7 +31,6 @@ namespace graphite
 
 	private:
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize);
-		void adjudicateList(std::vector< IAlignment::SharedPtr > alignmentPtrs, GSSWGraph::SharedPtr graphPtr);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;

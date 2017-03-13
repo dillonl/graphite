@@ -14,7 +14,7 @@ namespace graphite
 		GSSWAdjudicator(uint32_t swPercent, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		~GSSWAdjudicator();
 
-		void adjudicateMapping(IMapping::SharedPtr mappingPtr) override;
+		void adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent) override;
 		int getMatchValue() override;
 		int getMisMatchValue() override;
 		int getGapOpenValue() override;
@@ -23,7 +23,7 @@ namespace graphite
 		static uint32_t s_adj_count;
 
 	private:
-		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix);
+		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix, bool referenceSWScoreIdentical);
 
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;

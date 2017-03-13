@@ -55,7 +55,6 @@ namespace fileTests
 TEST(ASCIIGZFileReaderTests, OpenValidFileTest)
 {
 	std::string path = TEST_LINE_NUMBERS_GZ_FILE;
-	std::cout << path << std::endl;
 	auto gzAsciiReaderPtr = std::make_shared<graphite::ASCIIGZFileReader>(path);
 	fileTests::testOpenValidFileTest(gzAsciiReaderPtr);
 }

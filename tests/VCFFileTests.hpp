@@ -27,9 +27,12 @@ TEST(VCFFileReaderTests, ReadAllChrom20)
 	uint32_t count = 0;
 	while (variantListPtr->getNextVariant(variantPtr))
 	{
+		std::cout << "a" << count << std::endl;
 		ASSERT_STREQ(variantPtr->getChrom().c_str(), chrom.c_str());
+		std::cout << "b" << count << std::endl;
 		++count;
 	}
+	std::cout << "c" << count << std::endl;
 	ASSERT_EQ(count, totalCount); // 181 is the number of variants in chrom 20 for the TEST_VCF_FILE
 }
 

@@ -1,6 +1,5 @@
 #include "AlignmentList.h"
 #include "SampleManager.hpp"
-#include "SamtoolsAlignmentReader.h"
 #include "BamAlignmentReader.h"
 
 namespace graphite
