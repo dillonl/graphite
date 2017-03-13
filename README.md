@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/dillonl/graphite.svg?branch=master)](https://travis-ci.org/dillonl/graphite)
 Graphite - Graph-based adjudication 
 ========================================
 
