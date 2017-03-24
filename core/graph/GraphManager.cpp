@@ -47,7 +47,8 @@ namespace graphite
 				if (alignmentPtrsCount > 0)
 				{
 					uint32_t cutoff = ((((endGraphPosition - alignmentPadding) - (currentPosition + alignmentPadding)) / 100) * 60) * SampleManager::Instance()->getSampleCount();
-					if (alignmentPtrsCount > cutoff)
+					// if (alignmentPtrsCount > cutoff)
+					if (false)
 					{
 						std::vector< IAlignment::SharedPtr > alignmentPtrs;
 						IAlignment::SharedPtr alignmentPtr;

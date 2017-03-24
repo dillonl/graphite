@@ -158,9 +158,9 @@ namespace graphite
 		m_reference_path = referencePath;
 	}
 
-	bool VCFHeader::registerNewSample(std::shared_ptr< Sample > samplePtr)
+	bool VCFHeader::registerActiveSample(std::shared_ptr< Sample > samplePtr)
 	{
-		if (isNewSampleColumnName(samplePtr->getName()))
+		if (isActiveSampleColumnName(samplePtr->getName()))
 		{
 			return false;
 		}
@@ -168,14 +168,17 @@ namespace graphite
 		{
 			m_sample_names_by_column_order.emplace_back(samplePtr->getName());
 			this->m_sample_names.emplace(samplePtr->getName());
-			this->m_new_sample_names.emplace(samplePtr->getName());
+			this->m_active_sample_names.emplace(samplePtr->getName());
+			bool isInColumns = false;
+			for (auto& col : m_columns) { if (col.compare(samplePtr->getName()) == 0) { isInColumns = true; break; } }
+			if (!isInColumns) { setColumn(samplePtr->getName()); }
 			return true;
 		}
 	}
 
-	bool VCFHeader::isNewSampleColumnName(const std::string& sampleName)
+	bool VCFHeader::isActiveSampleColumnName(const std::string& sampleName)
 	{
-		return this->m_new_sample_names.find(sampleName) != this->m_new_sample_names.end();
+		return this->m_active_sample_names.find(sampleName) != this->m_active_sample_names.end();
 	}
 
 	bool VCFHeader::isSampleColumnName(const std::string& sampleName)

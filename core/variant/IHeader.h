@@ -18,12 +18,12 @@ namespace graphite
 		virtual ~IHeader() {}
 
 		virtual std::string getHeader() = 0;
-		virtual bool registerNewSample(std::shared_ptr< Sample > samplePtr) = 0;
+		virtual bool registerActiveSample(std::shared_ptr< Sample > samplePtr) = 0;
 		virtual std::vector< std::string > getSampleNames() = 0;
 		virtual int32_t getColumnPosition(const std::string& columnTitle) = 0;
 		virtual std::vector< std::string > getColumnNames() = 0;
 		virtual void setColumn(const std::string& column) = 0;
-		virtual bool isNewSampleColumnName(const std::string& sampleName) = 0;
+		virtual bool isActiveSampleColumnName(const std::string& sampleName) = 0;
 		virtual bool isSampleColumnName(const std::string& headerName) = 0;
 	private:
 	};

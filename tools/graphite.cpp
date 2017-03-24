@@ -27,21 +27,38 @@
 
 #include <zlib.h>
 
-inline bool file_exists (const std::string& name)
+inline bool fileExists(const std::string& name, const std::string& errorMessage, bool exitOnFailure)
 {
 	ifstream f(name.c_str());
-	return f;
-}
-// void writeVariantListToFile(const std::string& path, graphite::VariantList::SharedPtr variantListPtr);
-void validatePath(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
-{
-	if (!file_exists(path))
+	if (!f)
 	{
-		std::cout << errorMessage << std::endl;
-		if (exitOnFailure) {
+		if (exitOnFailure)
+		{
+			std::cout << errorMessage << std::endl;
 			exit(EXIT_FAILURE);
 		}
+		return false;
 	}
+	return true;
+}
+
+bool folderExists(const std::string& path, const std::string& errorMessage, bool exitOnFailure)
+{
+	if(!path.empty())
+	{
+		struct stat sb;
+
+		if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+		{
+			return true;
+		}
+	}
+	if (exitOnFailure)
+	{
+		std::cout << errorMessage << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return false;
 }
 
 void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::SharedPtr vcfHeaderPtr, graphite::VariantList::SharedPtr variantListPtr)
@@ -49,7 +66,7 @@ void writeVariantListToCompressedFile(std::string path, graphite::VCFHeader::Sha
 	int fd = 0;
 
 
-	if (file_exists(path))
+	if (fileExists(path, "", false))
 	{
 		fd = open(path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0666);
 		variantListPtr->printToCompressedVCF(vcfHeaderPtr, false, fd);
@@ -114,17 +131,19 @@ int main(int argc, char** argv)
 	// skip the bampath checking for now
 	for (auto bamPath : bamPaths)
 	{
-		validatePath(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
+		fileExists(bamPath, "Invalid BAM path: " + bamPath + ", please provide the correct path to the BAM and rerun Graphite", true);
 	}
 
 	for (auto vcfPath : vcfPaths)
 	{
-		validatePath(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
+		fileExists(vcfPath, "Invalid VCF path: " + vcfPath + ", please provide the correct path to the VCF and rerun Graphite", true);
 	}
-	if (outputDirectory.size() == 0)
+    if (outputDirectory.size() > 0)
 	{
-		validatePath(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
+		folderExists(outputDirectory, "Invalid output directory, please create that directory or change to an existing directory and rerun Graphite", true);
 	}
+	// make sure paths exist
+	fileExists(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
 
 	std::vector< graphite::Sample::SharedPtr > samplePtrs;
 	for (auto bamPath : bamPaths)
@@ -139,16 +158,13 @@ int main(int argc, char** argv)
 
 	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount);
 
-	// make sure paths exist
-	validatePath(fastaPath, "Invalid Fasta path, please provide the correct path to the Fasta file and rerun Graphite", true);
-
 	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
 	for (auto vcfPath : vcfPaths)
 	{
 		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
 		std::string filePath = outputDirectory + "/" + path;
 		uint32_t counter = 1;
-		while (file_exists(filePath))
+		while (fileExists(filePath, "", false))
 		{
 			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
 			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
@@ -188,7 +204,6 @@ int main(int argc, char** argv)
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(samplePtrs, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
 		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
@@ -234,7 +249,7 @@ int main(int argc, char** argv)
 			// for (auto samplePtr : alignmentManager->getSamplePtrs())
 			for (auto samplePtr : samplePtrs)
 			{
-				vcfHeaderPtr->registerNewSample(samplePtr);
+				vcfHeaderPtr->registerActiveSample(samplePtr);
 			}
 			if (firstTime)
 			{

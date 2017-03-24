@@ -361,7 +361,7 @@ namespace graphite
 				samplePaddingSet = true;
 				auto formatIdx = headerPtr->getColumnPosition("FORMAT");
 				auto formatField = lineSplit[formatIdx];
-				auto numFields = std::count(formatField.begin(), formatField.end(), ":");
+				auto numFields = std::count(formatField.begin(), formatField.end(), ':');
 				for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
 			}
 		}
@@ -371,7 +371,7 @@ namespace graphite
 		for (i = 0; i < 9; ++i)
 		{
 			line += (i > 0) ? "\t" : "";
-			if (i == formatColumnIdx)
+			if (i == formatColumnIdx) // append the format info to the format columns
 			{
 				if (lineSplit.size() >= i && !lineSplit[i].empty())
 				{
@@ -397,9 +397,10 @@ namespace graphite
 			{
 				line += lineSplit[i] + ":";
 			}
-			auto sampleCounts = (headerPtr->isNewSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
+			auto sampleCounts = (headerPtr->isActiveSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
 			line += sampleCounts;
 		}
+
 		return line + "\n";
 	}
 
@@ -418,11 +419,12 @@ namespace graphite
 
 	std::string Variant::getBlankSampleCounts()
 	{
-		std::string alleleCountString = (AllAlleleCountTypes.size() > 0) ? "." :  "";
+		std::string alleleCountString = "";
 	    for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
 		{
-			alleleCountString += ":.";
+			alleleCountString += ".:.:";
 		}
+		alleleCountString += ".";
 		return alleleCountString;
 	}
 
