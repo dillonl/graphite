@@ -350,7 +350,7 @@ namespace graphite
 		split(this->m_line, '\t', lineSplit);
 		std::string line = "";
 
-		std::string samplePadding = ".";
+		std::string samplePadding = "";
 		bool samplePaddingSet = false;
 		for (auto i = lineSplit.size(); i < 9 + headerPtr->getColumnNames().size(); ++i) // add blank sample columns
 		{
@@ -362,7 +362,11 @@ namespace graphite
 				auto formatIdx = headerPtr->getColumnPosition("FORMAT");
 				auto formatField = lineSplit[formatIdx];
 				auto numFields = std::count(formatField.begin(), formatField.end(), ':');
-				for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
+				if (formatField.size() > 0)
+				{
+					samplePadding += ".";
+					for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
+				}
 			}
 		}
 

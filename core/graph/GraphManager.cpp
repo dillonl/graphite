@@ -98,6 +98,7 @@ namespace graphite
 		}
 		*/
 
+		int count = 0;
 		IAlignment::SharedPtr alignmentPtr;
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
@@ -117,6 +118,7 @@ namespace graphite
 			}
 			*/
 			MappingManager::Instance()->registerMapping(gsswMappingPtr);
+
 		}
 	}
 
