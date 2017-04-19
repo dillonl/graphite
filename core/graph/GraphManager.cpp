@@ -37,7 +37,6 @@ namespace graphite
 		IVariant::SharedPtr variantPtr = nullptr;
 		while (variantsListPtr->getNextVariant(variantPtr))
 		{
-			std::cout << variantPtr->getPosition() << std::endl;
 			position startPosition = 0;
 			position endPosition = 0;
 			auto variantRegionPtrs = variantPtr->getRegions();
