@@ -13,16 +13,13 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< Sample > SharedPtr;
-		Sample(const std::string& sampleName, const std::string& readGroup, const std::string& samplePath) :
-			m_sample_name(sampleName),
-			m_sample_readgroup(readGroup),
-			m_sample_path(samplePath)
-		{
-		}
+		Sample(const std::string& sampleName, const std::string& readGroup, const std::string& samplePath);
+		Sample() = delete;
+		~Sample();
 
-		std::string getName() { return m_sample_name; }
-		std::string getReadgroup() { return m_sample_readgroup; }
-		std::string getPath() { return m_sample_path; }
+		std::string getName();
+		std::string getReadgroup();
+		std::string getPath();
 
 	private:
 		std::string m_sample_name;

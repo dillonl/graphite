@@ -8,7 +8,7 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_skip(false)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs, uint32_t readLength) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_skip(false), m_read_length(readLength), m_reference_size(0)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -19,7 +19,7 @@ namespace graphite
 	}
 
 	Variant::Variant() :
-		m_unmapped_to_mapped_count(0), m_mapped_to_unmapped_count(0), m_repositioned_count(0), m_skip(false)
+		m_skip(false)
 	{
 	}
 
@@ -27,7 +27,7 @@ namespace graphite
 	{
 	}
 
-	Variant::SharedPtr Variant::BuildVariant(const std::string& vcfLine, IReference::SharedPtr referencePtr)
+	Variant::SharedPtr Variant::BuildVariant(const std::string& vcfLine, IReference::SharedPtr referencePtr, uint32_t readLength)
 	{
 		std::string fields;
 		auto variantPtr = std::make_shared< Variant >();
@@ -55,9 +55,10 @@ namespace graphite
 
 		variantPtr->m_info_fields.clear();
 		variantPtr->setUnorderedMapKeyValue(fields);
-		variantPtr->setAlleles(referencePtr, ref, alts);
+		variantPtr->setAlleles(referencePtr, ref, alts, readLength);
 
 		variantPtr->m_line = std::string(vcfLine.c_str());
+
 		return variantPtr;
 	}
 
@@ -121,82 +122,244 @@ namespace graphite
 		return std::regex_match(alt, reg);
 	}
 
-	void Variant::setAsDeletion(Reference::SharedPtr referencePtr, int svLength)
+	std::string getTruncatedSequence(const char* sequence, uint32_t svLength, uint32_t readLength)
 	{
-		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
-		std::string ref = std::string(reference, svLength + 1);
-		std::string altString(1, reference[0]);
-		std::vector< std::string > alts;
-		alts.emplace_back(altString);
-		setRefAndAltAlleles(ref, alts);
+		return std::string(sequence, (readLength + 1)) + std::string(readLength, 'N') + std::string(sequence + (svLength - readLength), readLength);
 	}
 
-	void Variant::setAsDuplication(Reference::SharedPtr referencePtr, int svLength)
+	void Variant::setAsDeletion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
-		std::string ref = std::string(reference, svLength + 1);
-		std::string alt = ref + std::string(reference + 1, svLength);
-		std::vector< std::string > alts;
-		alts.emplace_back(alt);
-		setRefAndAltAlleles(ref, alts);
-	}
-
-	void Variant::setAsInversion(Reference::SharedPtr referencePtr, int svLength)
-	{
-		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
-		std::string ref = std::string(reference, svLength + 1);
-		std::string alt = std::string(reference + 1, svLength);
-		std::reverse(alt.begin(), alt.end());
-		std::vector< std::string > alts;
-		alts.emplace_back(alt);
-		setRefAndAltAlleles(ref, alts);
-	}
-
-	void Variant::setAsInsertion(const std::string& ref, const std::string& alt)
-	{
-		std::vector< std::string > alts;
-		alts.emplace_back(alt);
-		setRefAndAltAlleles(ref, alts);
-	}
-
-	void Variant::setAsStandardAlt(const std::string& ref, const std::string& alt)
-	{
-		std::vector< std::string > alts;
-		if (alt.find(",") != std::string::npos)
+		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
+		auto maxSize = readLength * 3;
+		std::string ref;
+		if (svLength > maxSize) // if the variant is too large then create a truncated reference allele with Ns seperating the two breakpoints
 		{
-			split(alt, ',', alts);
+			ref = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, m_position, m_position + (readLength + 1), Region::BASED::ONE)) + std::string(readLength, 'N') + referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, (m_position + 1) + svLength - readLength, m_position + svLength + 1, Region::BASED::ONE));
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			position startPosition2 = (((this->m_position + 1) + svLength - readLength) <= 0) ? 0 : ((this->m_position + 1) + svLength - readLength);
+			position endPosition2 = (this->m_position + svLength + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+			m_reference_size = svLength;
 		}
 		else
 		{
-			alts.emplace_back(alt);
+			ref = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, m_position, (m_position + svLength + 1), Region::BASED::ONE));
+			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_reference_size = ref.size();
 		}
+		std::vector< std::string > alts;
+		alts.emplace_back(std::string(1, ref[0]));
 		setRefAndAltAlleles(ref, alts);
 	}
 
-	void Variant::setAlleles(Reference::SharedPtr referencePtr, const std::string& vcfReferenceString, const std::string& alt)
+	void Variant::setAsDuplication(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
+	{
+		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
+		auto maxSize = readLength * 3;
+		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
+		std::string ref;
+		std::string alt;
+		std::vector< std::string > alts;
+		if (svLength > maxSize)
+		{
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			position startPosition2 = ((this->m_position + svLength - (readLength + 1)) <= 0) ? 0 : (this->m_position + svLength - (readLength + 1));
+			position endPosition2 = (this->m_position + svLength + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+
+			std::string sequenceA = std::string(reference + 1, readLength);
+			std::string intermediateSequence(readLength, 'N');
+			std::string sequenceB = std::string((reference + 1) + (svLength - readLength), readLength);
+			ref = std::string(1, reference[0]) + sequenceA + intermediateSequence + sequenceB;
+			alt = std::string(1, reference[0]) + sequenceA + intermediateSequence + sequenceB + sequenceA + intermediateSequence + sequenceB;
+
+			m_reference_size = svLength;
+		}
+		else
+		{
+			ref = std::string(reference, svLength + 1);
+			alt = ref + std::string(reference + 1, svLength); // the duplicated region does not contain the first bp of the reported ref sequence
+
+			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_reference_size = ref.size();
+		}
+		alts.emplace_back(alt);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsInversion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
+	{
+		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
+		auto maxSize = readLength * 3;
+		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
+		std::string ref;
+		std::string alt;
+		if (svLength > maxSize)
+		{
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			position startPosition2 = ((this->m_position + svLength - (readLength + 1)) <= 0) ? 0 : (this->m_position + svLength - (readLength + 1));
+			position endPosition2 = (this->m_position + svLength + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+
+			std::string intermediateSequence(readLength, 'N');
+			std::string sequenceA = std::string(reference + 1, readLength);
+			std::string sequenceB = std::string((reference + 1) + (svLength - readLength), readLength);
+			ref = std::string(1, reference[0]) + sequenceA + intermediateSequence + sequenceB;
+			std::reverse(sequenceA.begin(), sequenceA.end());
+			std::reverse(sequenceB.begin(), sequenceB.end());
+			alt = std::string(1, reference[0]) + sequenceB + intermediateSequence + sequenceA;
+			m_reference_size = svLength;
+		}
+		else
+		{
+			ref = std::string(reference, svLength + 1);
+			alt = std::string(reference + 1, svLength);
+			std::reverse(alt.begin(), alt.end());
+			alt = std::string(1, reference[0]) + alt; // add on the anchor base
+
+			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			ref.size();
+		}
+		std::vector< std::string > alts;
+		alts.emplace_back(alt);
+		setRefAndAltAlleles(ref, alts);
+	}
+
+	void Variant::setAsInsertion(const std::string& ref, const std::string& alt, uint32_t readLength)
+	{
+		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
+		auto maxSize = readLength * 3;
+		std::vector< std::string > alts;
+		std::string tmpRef;
+		if (ref.size() > maxSize)
+		{
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			position startPosition2 = ((this->m_position + ref.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + ref.size() - (readLength + 1));
+			position endPosition2 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+
+			tmpRef = getTruncatedSequence(ref.c_str(), ref.size(), readLength);
+		}
+		else
+		{
+			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+
+			tmpRef = ref;
+		}
+		if (alt.size() > maxSize)
+		{
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			position startPosition2 = ((this->m_position + alt.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + alt.size() - (readLength + 1));
+			position endPosition2 = (this->m_position + alt.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+
+			alts.emplace_back(getTruncatedSequence(alt.c_str(), alt.size(), readLength));
+		}
+		else
+		{
+			position endPosition1 = (this->m_position + alt.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+
+			alts.emplace_back(alt);
+		}
+		setRefAndAltAlleles(tmpRef, alts);
+		m_reference_size = ref.size();
+	}
+
+	void Variant::setAsStandardAlt(const std::string& ref, const std::string& alt, uint32_t readLength)
+	{
+		m_reference_size = ref.size();
+		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
+		auto maxSize = readLength * 3;
+		std::string tmpRef;
+		if (ref.size() > maxSize)
+		{
+			position endPosition1 = startPosition1 + (readLength * 2) + 1;
+			// position startPosition2 = ((this->m_position + ref.size() - readLength) <= 0) ? 0 : (this->m_position + ref.size() - (readLength + 1));
+			position startPosition2 = this->m_position + ref.size() - readLength;
+			std::cout << startPosition2 << std::endl;
+			position endPosition2 = (this->m_position + ref.size() + readLength + 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+
+			tmpRef = getTruncatedSequence(ref.c_str(), ref.size(), readLength);
+		}
+		else
+		{
+			position endPosition1 = (this->m_position + ref.size() + readLength - 1);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+
+			tmpRef = ref;
+		}
+
+		std::vector< std::string > tmpAlts;
+		std::vector< std::string > alts;
+		if (alt.find(",") != std::string::npos)
+		{
+			split(alt, ',', tmpAlts);
+		}
+		else
+		{
+			tmpAlts.emplace_back(alt);
+		}
+		// for each alt allele make sure it's not larger than the maxSize, if it is then truncate it and add the truncated allele
+		for (auto& tmpAlt : tmpAlts)
+		{
+			if (tmpAlt.size() > maxSize)
+			{
+				// position endPosition1 = startPosition1 + (readLength * 2) + 1;
+				// position startPosition2 = ((this->m_position + tmpAlt.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + tmpAlt.size() - (readLength + 1));
+				// position endPosition2 = (this->m_position + tmpAlt.size() + readLength + 1);
+				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1), Region::BASED::ONE);
+				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2), Region::BASED::ONE);
+
+				alts.emplace_back(getTruncatedSequence(tmpAlt.c_str(), tmpAlt.size(), readLength));
+			}
+			else
+			{
+				// position endPosition1 = (this->m_position + tmpAlt.size() + readLength + 1);
+				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1), Region::BASED::ONE);
+
+				alts.emplace_back(tmpAlt);
+			}
+		}
+
+		setRefAndAltAlleles(tmpRef, alts);
+	}
+
+	void Variant::setAlleles(Reference::SharedPtr referencePtr, const std::string& vcfReferenceString, const std::string& alt, uint32_t readLength)
 	{
 		bool shouldSkip = true;
 		int svLength = getSVLengthFromInfo(m_info_fields, m_position);
 		if (isStandardAlt(alt))
 		{
-			setAsStandardAlt(vcfReferenceString, alt);
+			setAsStandardAlt(vcfReferenceString, alt, readLength);
 			shouldSkip = false;
 		}
 		else if (isSymbolicAlt(alt) && svLength > 0)
 		{
 			if (alt.compare("<DEL>") == 0)
 			{
-				setAsDeletion(referencePtr, svLength);
+				setAsDeletion(referencePtr, svLength, readLength);
 				shouldSkip = false;
 			}
 			else if (alt.compare("<DUP>") == 0)
 			{
-				setAsDuplication(referencePtr, svLength);
+				setAsDuplication(referencePtr, svLength, readLength);
 				shouldSkip = false;
 			}
 			else if (alt.compare("<INV>") == 0)
 			{
-				setAsInversion(referencePtr, svLength);
+				setAsInversion(referencePtr, svLength, readLength);
 				shouldSkip = false;
 			}
 			else if (alt.compare("<INS>") == 0)
@@ -204,7 +367,7 @@ namespace graphite
 				std::string insertionSequence  = getInsertionSequenceFromInfo(m_info_fields);
 				if (insertionSequence.size() > 0)
 				{
-					setAsInsertion(vcfReferenceString, insertionSequence);
+					setAsInsertion(vcfReferenceString, insertionSequence, readLength);
 					shouldSkip = false;
 				}
 
@@ -214,18 +377,6 @@ namespace graphite
 		{
 			setSkip(true);
 		}
-	}
-
-	std::string Variant::alleleString()
-	{
-		std::stringstream ss;
-		const auto lastIter = this->m_alt_allele_ptrs.end() - 1;
-		for (auto iter = this->m_alt_allele_ptrs.begin(); iter != this->m_alt_allele_ptrs.end(); ++iter)
-		{
-			ss << (*iter)->getSequence();
-			if (iter != lastIter) { ss << ","; } // don't add a comma on the end of the alt section
-		}
-		return ss.str();
 	}
 
 	uint32_t Variant::getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr)
@@ -281,7 +432,9 @@ namespace graphite
 	{
 		int id = 0;
 		this->m_all_allele_ptrs.clear();
-		this->m_ref_allele_ptr = std::make_shared< Allele >(SequenceManager::Instance()->getSequence(ref));
+		std::string upperRef = ref;
+		std::transform(upperRef.begin(), upperRef.begin(), upperRef.end(), ::toupper);
+		this->m_ref_allele_ptr = std::make_shared< Allele >(upperRef);
 		this->m_ref_allele_ptr->setID(id);
 		this->m_all_allele_ptrs.reserve(alts.size() + 1);
 		this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
@@ -289,33 +442,14 @@ namespace graphite
 		id += 1;
 		for (const auto& alt : alts)
 		{
-			auto sequencePtr = SequenceManager::Instance()->getSequence(alt);
-			auto altAllelePtr = std::make_shared< Allele >(sequencePtr);
+			std::string upperAlt = alt;
+			std::transform(upperAlt.begin(), upperAlt.begin(), upperAlt.end(), ::toupper);
+			auto altAllelePtr = std::make_shared< Allele >(upperAlt);
 			altAllelePtr->setID(id);
 			this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
 			this->m_all_allele_ptrs.emplace_back(altAllelePtr);
 			id += 2;
 		}
-	}
-
-	void Variant::incrementUnmappedToMappedCount()
-	{
-		++this->m_unmapped_to_mapped_count;
-	}
-
-	void Variant::incrementMappedToUnmappedCount()
-	{
-		++this->m_mapped_to_unmapped_count;
-	}
-
-	void Variant::incrementRepositionedCount()
-	{
-		++this->m_repositioned_count;
-	}
-
-	std::string Variant::getGenotype()
-	{
-		return "";
 	}
 
 	bool Variant::shouldSkip() { return this->m_skip; }
@@ -326,6 +460,37 @@ namespace graphite
 		std::string ref = "";
 		std::vector< std::string > alts;
 		setRefAndAltAlleles(ref, alts);
+	}
+
+	bool Variant::doesOverlap(IVariant::SharedPtr variantPtr)
+	{
+		auto variantRegionPtrs =  variantPtr->getRegions();
+		for (auto thisRegionPtr : m_region_ptrs)
+		{
+			auto thisStartPosition = thisRegionPtr->getStartPosition();
+			auto thisEndPosition = thisRegionPtr->getEndPosition();
+			for (auto variantRegionPtr : variantRegionPtrs)
+			{
+				auto variantStartPosition = variantRegionPtr->getStartPosition();
+				auto variantEndPosition = variantRegionPtr->getEndPosition();
+				if ((thisStartPosition <= variantStartPosition && variantStartPosition <= thisEndPosition) ||
+					(variantStartPosition <= thisStartPosition && thisStartPosition <= variantEndPosition))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	uint32_t Variant::getReferenceSize()
+	{
+		return m_reference_size;
+	}
+
+	void Variant::addRegion(Region::SharedPtr regionPtr)
+	{
+		m_region_ptrs.emplace_back(regionPtr);
 	}
 
 	std::string Variant::getInfoFieldsString()
@@ -339,18 +504,13 @@ namespace graphite
 		return (this->m_info_fields.size() > 0) ? infoFields : ".";
 	}
 
-	void Variant::printVariant(std::ostream& out, std::vector< std::shared_ptr< Sample > > samplePtrs, std::unordered_set< std::string > sampleNames)
-	{
-		// out << this->m_line << "\t" << getSampleCounts("") << std::endl;
-	}
-
 	std::string Variant::getVariantLine(IHeader::SharedPtr headerPtr)
 	{
 		std::vector< std::string > lineSplit;
 		split(this->m_line, '\t', lineSplit);
 		std::string line = "";
 
-		std::string samplePadding = ".";
+		std::string samplePadding = "";
 		bool samplePaddingSet = false;
 		for (auto i = lineSplit.size(); i < 9 + headerPtr->getColumnNames().size(); ++i) // add blank sample columns
 		{
@@ -361,8 +521,12 @@ namespace graphite
 				samplePaddingSet = true;
 				auto formatIdx = headerPtr->getColumnPosition("FORMAT");
 				auto formatField = lineSplit[formatIdx];
-				auto numFields = std::count(formatField.begin(), formatField.end(), ":");
-				for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
+				auto numFields = std::count(formatField.begin(), formatField.end(), ':');
+				if (formatField.size() > 0)
+				{
+					samplePadding += ".";
+					for (auto n = 0; n < numFields; ++n) { samplePadding += ":."; }
+				}
 			}
 		}
 
@@ -371,7 +535,7 @@ namespace graphite
 		for (i = 0; i < 9; ++i)
 		{
 			line += (i > 0) ? "\t" : "";
-			if (i == formatColumnIdx)
+			if (i == formatColumnIdx) // append the format info to the format columns
 			{
 				if (lineSplit.size() >= i && !lineSplit[i].empty())
 				{
@@ -397,9 +561,10 @@ namespace graphite
 			{
 				line += lineSplit[i] + ":";
 			}
-			auto sampleCounts = (headerPtr->isNewSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
+			auto sampleCounts = (headerPtr->isActiveSampleColumnName(columnName)) ?  getSampleCounts(columnName) : getBlankSampleCounts();
 			line += sampleCounts;
 		}
+
 		return line + "\n";
 	}
 
@@ -418,11 +583,12 @@ namespace graphite
 
 	std::string Variant::getBlankSampleCounts()
 	{
-		std::string alleleCountString = (AllAlleleCountTypes.size() > 0) ? "." :  "";
+		std::string alleleCountString = "";
 	    for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
 		{
-			alleleCountString += ":.";
+			alleleCountString += ".:.:";
 		}
+		alleleCountString += ".";
 		return alleleCountString;
 	}
 
@@ -460,54 +626,5 @@ namespace graphite
 		}
 		return alleleCountString;
 	}
-
-	/*
-	std::string Variant::getSampleCounts(std::vector< Sample::SharedPtr > samplePtrs)
-	{
-		std::string alleleCountString = "";
-		std::unordered_map< std::string, std::vector< VariantSampleContainer > > sampleNameToCounts; // counts are total, ( forward, reverse )
-
-		std::unordered_set< std::string > sampleNameSet;
-		for (auto samplePtr : samplePtrs)
-		{
-			if (sampleNameSet.find(samplePtr->getName()) == sampleNameSet.end())
-			{
-				sampleNameSet.emplace(samplePtr->getName());
-
-				// for (auto alleleCountType : AllAlleleCountTypes)
-				for (auto i = 0; i < AllAlleleCountTypes.size(); ++i)
-				{
-					auto alleleCountType = AllAlleleCountTypes[i];
-					std::string suffix = (i < AllAlleleCountTypes.size() - 1) ? ":" : "";
-					std::string alleleTypeCountString = AlleleCountTypeToString(alleleCountType);
-					uint32_t totalCount = 0;
-					std::string sampleString = "";
-					for (size_t i = 0; i < m_all_allele_ptrs.size(); ++i)
-					{
-						auto allelePtr = m_all_allele_ptrs[i];
-						uint32_t forwardCount = allelePtr->getForwardCount(sampleName, alleleCountType);
-						uint32_t reverseCount = allelePtr->getReverseCount(sampleName, alleleCountType);
-						std::string prefix = (i == 0) ? "" : ",";
-
-						if (m_skip)
-						{
-							sampleString += prefix + ".,.";
-						}
-						else
-						{
-							sampleString += prefix + std::to_string(forwardCount) + "," + std::to_string(reverseCount);
-						}
-
-						totalCount += (forwardCount + reverseCount);
-					}
-					std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
-					// alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
-					alleleCountString += totalCountString + ":" + sampleString + suffix;
-				}
-			}
-		}
-		return alleleCountString;
-	}
-	*/
 
 }

@@ -24,7 +24,6 @@ namespace graphite
 		void setSequence(Region::SharedPtr region);
 
 		std::string m_fasta_path;
-		std::string m_sequence;
 		std::shared_ptr< ::FastaReference > m_fasta_reference;
 
 	};

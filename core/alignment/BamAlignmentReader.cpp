@@ -1,7 +1,7 @@
 #include "BamAlignmentReader.h"
 #include "BamAlignment.h"
 #include "AlignmentList.h"
-#include "SampleManager.hpp"
+#include "core/sample/Sample.h"
 
 #include <unordered_set>
 
@@ -45,7 +45,7 @@ namespace graphite
 		this->m_bam_reader.Close();
 	}
 
-	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, bool excludeDuplicateReads)
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads)
 	{
 		if (!m_is_open)
 		{
@@ -66,13 +66,13 @@ namespace graphite
 		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
 		{
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
-			std::string sample;
-			bamAlignment.GetTag("RG", sample);
+			std::string sampleName;
+			bamAlignment.GetTag("RG", sampleName);
 
-			Sample::SharedPtr samplePtr = SampleManager::Instance()->getSamplePtr(sample);
+			Sample::SharedPtr samplePtr = sampleManagerPtr->getSamplePtr(sampleName);
 			if (samplePtr == nullptr)
 			{
-				throw "There was an error in the sample name for: " + sample;
+				throw "There was an error in the sample name for: " + sampleName;
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
 		}
@@ -115,5 +115,26 @@ namespace graphite
 		auto referenceData = bamReader.GetReferenceData();
 		bamReader.Close();
 		return referenceData[refID].RefLength;
+	}
+
+	uint32_t BamAlignmentReader::GetReadLength(const std::string& bamPath)
+	{
+		uint32_t bamReadLength = 300;
+		BamTools::BamReader bamReader;
+		if (!bamReader.Open(bamPath))
+		{
+			throw "Unable to open bam file";
+		}
+		BamTools::BamAlignment bamAlignment;
+		while(bamReader.GetNextAlignment(bamAlignment))
+		{
+			if (bamAlignment.IsPrimaryAlignment())
+			{
+				bamReadLength = bamAlignment.QueryBases.size();
+				break;
+			}
+		}
+		bamReader.Close();
+		return bamReadLength;
 	}
 }

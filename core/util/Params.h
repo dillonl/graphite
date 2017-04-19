@@ -28,7 +28,6 @@ namespace graphite
 		std::vector< std::string > getInVCFPaths();
 		std::vector< std::string > getBAMPaths();
 		std::string getOutputDirectory();
-		std::string getFilePrefix();
 		Region::SharedPtr getRegion();
         bool getExcludeDuplicates();
 		uint32_t getPercent();
@@ -39,6 +38,9 @@ namespace graphite
 		int getGapExtensionValue();
 		uint32_t getGraphSize();
 	private:
+		void validateFolderPaths(const std::vector< std::string >& paths, bool exitOnFailure);
+		void validateFilePaths(const std::vector< std::string >& paths, bool exitOnFailure);
+
 		cxxopts::Options m_options;
 
 		std::vector< std::string > m_bam_paths;

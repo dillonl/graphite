@@ -7,7 +7,7 @@
 #include "core/region/Region.h"
 #include "core/variant/IVariantList.h"
 #include "core/variant/IVariantManager.h"
-#include "Sample.hpp"
+#include "core/sample/SampleManager.h"
 
 #include <mutex>
 #include <thread>
@@ -21,15 +21,17 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignmentManager > SharedPtr;
-		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, bool excludeDuplicateReads = false);
-		BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads = false);
+		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, bool excludeDuplicateReads = false);
+		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads = false);
 		~BamAlignmentManager();
 
 		void asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		void processMappingStatistics() override;
-		std::vector< Sample::SharedPtr > getSamplePtrs() override;
+		SampleManager::SharedPtr getSamplePtrs() override;
+		static std::vector< Sample::SharedPtr > GetSamplePtrs(std::vector< std::string >& bamPaths);
+		static uint32_t GetReadLength(std::vector< std::string >& bamPaths);
 	private:
 		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 
@@ -39,7 +41,7 @@ namespace graphite
 		std::string m_bam_path;
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
 		std::mutex m_alignment_ptrs_lock;
-		std::vector< Sample::SharedPtr > m_sample_ptrs;
+		SampleManager::SharedPtr m_sample_manager_ptr;
 		AlignmentReaderManager< BamAlignmentReader >::SharedPtr m_alignment_reader_manager;
 	};
 }

@@ -38,6 +38,20 @@ namespace graphite
 		}
 	}
 
+	bool VariantList::peekNextVariant(IVariant::SharedPtr& variantPtr)
+	{
+		if (this->m_current_index < this->m_variant_ptrs.size())
+		{
+			variantPtr = this->m_variant_ptrs[this->m_current_index];
+			return true;
+		}
+		else
+		{
+			variantPtr = nullptr;
+			return false;
+		}
+	}
+
 	size_t VariantList::getCount()
 	{
 		return this->m_variant_ptrs.size();
@@ -82,6 +96,38 @@ namespace graphite
 		}
 		bgzf_close(fp);
 	}
+
+	/*
+	bool VariantList::getNextCompoundVariant(IVariant::SharedPtr& variant)
+	{
+		// the first time we call this function we need to get the first variant
+		if (!m_next_variant_init)
+		{
+			m_next_variant_init = true;
+			getNextVariant(this->m_next_variant);
+		}
+        variant = this->m_next_variant; // set the variant to be returned
+		if (this->m_next_variant == NULL) { return false; } // if the variant is NULL then return false, this indicates we are past the region of interest
+
+		std::string referenceString = variant->getRefAllelePtr()->getSequenceString();
+		std::vector< IVariant::SharedPtr > variants;
+		IVariant::SharedPtr nextVariant;
+		bool variantAdded = false;
+		position startPosition = variant->getPosition();
+		std::string variantChrom = variant->getChrom();
+		position compoundStartPosition = startPosition;
+		position variantEndPosition = (startPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
+
+		// loop through variants until the variants stop overlapping.
+		// As we loop through build a concatenated reference string
+		// that represents the entire overlapped variants reference.
+		// for those overlapped variants add them to a vector so
+		// a "compound variant" can be generated.
+		getNextVariant(nextVariant);
+		this->m_next_variant = nextVariant; // set the next variant
+		return true;
+	}
+	*/
 
 	bool VariantList::getNextCompoundVariant(IVariant::SharedPtr& variant)
 	{
@@ -132,7 +178,7 @@ namespace graphite
 			{
 				position referenceDelta = (nextVariantEndPosition - variantEndPosition);
 				referenceString += nextReferenceString.substr(nextReferenceString.size() - referenceDelta);
-				variantEndPosition = (compoundStartPosition + referenceString.size() - 1); // subtract 1 because we are conuting starting with the position we are on
+				variantEndPosition = (compoundStartPosition + referenceString.size() - 1); // subtract 1 because we are counting starting with the position we are on
 			}
 			variants.push_back(nextVariant); // we will build a compound variant with all these variants
 			if (nextVariant->getPosition() < startPosition)
@@ -153,19 +199,24 @@ namespace graphite
 	{
 		position referenceEndPosition = referenceString.size() + startPosition;
 		auto compoundVariantPtr = std::make_shared< Variant::SharedPtr >();
-		std::unordered_map< Sequence::SharedPtr, IAllele::SharedPtr > sequenceAlleleMap;
-		std::vector< Sequence::SharedPtr > sequenceKeyOrder;
+		std::unordered_map< std::string, IAllele::SharedPtr > sequenceAlleleMap;
+		std::vector< std::string > sequenceKeyOrder;
+		std::vector< Region::SharedPtr > regionPtrs;
 
 		// since this is a "compound variant" we know that there is going to be more than one reference allele.
 		// They may be the same sequence but they will come from different variants and therefore we want to
 		// create an equivalentAllele and add all the variant's reference alleles
-		auto equivalentRefAllelePtr = std::make_shared< EquivalentAllele >(SequenceManager::Instance()->getSequence(referenceString));
+		auto equivalentRefAllelePtr = std::make_shared< EquivalentAllele >(referenceString);
 		// loop over all the variants
 		for (auto variantPtr : variants)
 		{
+			for (Region::SharedPtr regionPtr : variantPtr->getRegions())
+			{
+				regionPtrs.emplace_back(regionPtr);
+			}
 			// calculate the reference padding and then add it to the allele and add the allele to the equivalentRefAllele
 			uint16_t refPaddingPrefix = variantPtr->getPosition() - startPosition;
-			uint16_t refPaddingSuffix = referenceString.size() - (refPaddingPrefix + variantPtr->getRefAllelePtr()->getSequencePtr()->getLength());
+			uint16_t refPaddingSuffix = referenceString.size() - (refPaddingPrefix + variantPtr->getRefAllelePtr()->getLength());
 			variantPtr->getRefAllelePtr()->setAlleleMetaData(std::make_shared< AlleleMetaData >(refPaddingPrefix, refPaddingSuffix));
 			equivalentRefAllelePtr->addAllele(variantPtr->getRefAllelePtr());
 			// loop over all the alts in the variants
@@ -177,7 +228,7 @@ namespace graphite
 				std::string variantString = referenceString;
 				variantString.erase(variantPtr->getPosition() - startPosition, variantPtr->getRefAllelePtr()->getSequenceString().size());
 				variantString.insert(variantPtr->getPosition() - startPosition, altString);
-				altAllelePtr->setSequence(SequenceManager::Instance()->getSequence(variantString));
+				altAllelePtr->setSequence(variantString);
 
 				// calculate padding for the alt allele and add it to the allele
 				uint32_t paddingPrefix = variantPtr->getPosition() - startPosition;
@@ -190,33 +241,37 @@ namespace graphite
 				// are on different lines of the same vcf. Keeping track of these types
 				// of alleles make it possible to reconstruct the output vcfs to match
 				// the input vcfs exactly.
-				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequencePtr());
+				auto seqAlleleIter = sequenceAlleleMap.find(altAllelePtr->getSequenceString());
 				if (seqAlleleIter != sequenceAlleleMap.end()) // if this is not the first time we have seen this allele sequence
 				{
 					auto equivalentAllelePtr = std::dynamic_pointer_cast< EquivalentAllele >(seqAlleleIter->second);
 					if (!equivalentAllelePtr) // if the seqAllele is not an equivalentallele then create a new one, add the allele in the map and then add the equivalentallele it to the map
 					{
-						equivalentAllelePtr = std::make_shared< EquivalentAllele >(altAllelePtr->getSequencePtr());
+						equivalentAllelePtr = std::make_shared< EquivalentAllele >(altAllelePtr->getSequenceString());
 						equivalentAllelePtr->addAllele(seqAlleleIter->second);
-						sequenceAlleleMap[altAllelePtr->getSequencePtr()] = equivalentAllelePtr;
+						sequenceAlleleMap[altAllelePtr->getSequenceString()] = equivalentAllelePtr;
 					}
 					equivalentAllelePtr->addAllele(altAllelePtr);
 				}
 				else // if this is the first time we have seen this allele sequence
 				{
-					sequenceAlleleMap[altAllelePtr->getSequencePtr()] = altAllelePtr;
-					sequenceKeyOrder.emplace_back(altAllelePtr->getSequencePtr()); // add the allelesequence to the keysequencetracker
+					sequenceAlleleMap[altAllelePtr->getSequenceString()] = altAllelePtr;
+					sequenceKeyOrder.emplace_back(altAllelePtr->getSequenceString()); // add the allelesequence to the keysequencetracker
 				}
 			}
 		}
 		// create the varaintPtr and add all the variant information
 		std::vector< IAllele::SharedPtr > altAllelePtrs;
 		altAllelePtrs.reserve(sequenceAlleleMap.size());
-		for (auto sequencePtr : sequenceKeyOrder) // add the alleles back in the order they were seen
+		for (auto sequence : sequenceKeyOrder) // add the alleles back in the order they were seen
 		{
-			altAllelePtrs.emplace_back(sequenceAlleleMap[sequencePtr]);
+			altAllelePtrs.emplace_back(sequenceAlleleMap[sequence]);
 		}
 		auto variantPtr = std::make_shared< Variant >(startPosition, variants[0]->getChrom(), ".", "0", "PASS", equivalentRefAllelePtr, altAllelePtrs);
+		for (Region::SharedPtr regionPtr : regionPtrs)
+		{
+			variantPtr->addRegion(regionPtr);
+		}
 
 		return variantPtr;
 	}

@@ -1,4 +1,4 @@
-#include "core/file/ASCIIFileReader.h"
+ #include "core/file/ASCIIFileReader.h"
 #include "core/file/ASCIIGZFileReader.h"
 #include "core/util/ThreadPool.hpp"
 #include "core/region/Region.h"
@@ -17,10 +17,10 @@
 namespace graphite
 {
 
-	VCFFileReader::VCFFileReader(const std::string& path, const std::vector< Sample::SharedPtr >& samplePtrs, IReference::SharedPtr referencePtr, uint32_t maxAlleleSize) :
+	VCFFileReader::VCFFileReader(const std::string& path, IReference::SharedPtr referencePtr, uint32_t readLength) :
 		m_path(path),
 		m_reference_ptr(referencePtr),
-		m_max_allowed_allele_size(maxAlleleSize)
+		m_read_length(readLength)
 	{
 		static uint32_t s_vcf_id = 0; // An id that is set and auto increments when a new reader is created
 		m_id = s_vcf_id;
@@ -29,7 +29,7 @@ namespace graphite
 		Open();
 	}
 
-	VCFFileReader::VCFFileReader(const std::string& path, const std::vector< Sample::SharedPtr >& samplePtrs) :
+	VCFFileReader::VCFFileReader(const std::string& path) :
 		m_path(path)
 	{
 		setFileReader(m_path);
@@ -83,23 +83,26 @@ namespace graphite
 		m_vcf_header = std::make_shared< VCFHeader >(vcfHeaderLines);
 	}
 
-	std::vector< Region::SharedPtr > VCFFileReader::GetAllRegionsInVCF(const std::string& vcfPath)
+	std::vector< Region::SharedPtr > VCFFileReader::GetAllRegionsInVCF(const std::vector< std::string >& vcfPaths)
 	{
 		std::vector< Region::SharedPtr > regionPtrs;
-		std::vector< Sample::SharedPtr > samplePtrs;
-		std::string line;
-		std::string currentRegion = "";
-		auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath, samplePtrs); // samplePtrs can be empty since they are not used here
-		while (vcfFileReaderPtr->m_file_ptr->getNextLine(line))
+		std::unordered_set< std::string > regionStringSet;
+		for (auto vcfPath : vcfPaths)
 		{
-			auto region = line.substr(0, line.find("\t"));
-			if (currentRegion.compare(region) != 0)
+			std::string line;
+			auto vcfFileReaderPtr = std::make_shared< VCFFileReader >(vcfPath);
+			while (vcfFileReaderPtr->m_file_ptr->getNextLine(line))
 			{
-				auto regionPtr = std::make_shared< Region >(region);
-				regionPtrs.emplace_back(regionPtr);
-				currentRegion = region;
+				auto region = line.substr(0, line.find("\t"));
+				if (regionStringSet.find(region) == regionStringSet.end())
+				{
+					auto regionPtr = std::make_shared< Region >(region, Region::BASED::ONE);
+					regionPtrs.emplace_back(regionPtr);
+					regionStringSet.emplace(region);
+				}
 			}
 		}
+
 		return regionPtrs;
 	}
 
@@ -126,17 +129,17 @@ namespace graphite
 		std::string regionReferenceIDWithTab = regionPtr->getReferenceID() + "\t";
 		std::string line;
 		uint32_t count = 0;
-		bool wasInRegion = false;
 		// this->m_file_ptr->setFilePosition(findRegionStartPosition(regionPtr));
 		// std::cout << "region not yet found" << std::endl;
 		while (this->m_file_ptr->getNextLine(line))
 		{
+			bool wasInRegion = false;
 			if (memcmp(regionReferenceIDWithTab.c_str(), line.c_str(), regionReferenceIDWithTab.size()) == 0) // if we are in the correct reference (chrom)
 			{
 				position linePosition = getPositionFromLine(line.c_str());
 				if ((regionPtr->getStartPosition() <= linePosition && linePosition <= regionPtr->getEndPosition()))
 				{
-					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr));
+					variantPtrs.emplace_back(Variant::BuildVariant(line, this->m_reference_ptr, m_read_length));
 					wasInRegion = true;
 					continue;
 				}

@@ -1,5 +1,6 @@
 #include "Params.h"
 #include "Utility.h"
+#include "core/file/IFile.h"
 
 #include <string.h>
 #include <thread>
@@ -91,35 +92,39 @@ namespace graphite
 
 	std::string Params::getFastaPath()
 	{
-		return m_options["f"].as< std::string >();
+		auto fastaPath = m_options["f"].as< std::string >();
+		std::vector< std::string > fastaPaths = {fastaPath};
+		validateFilePaths(fastaPaths, true);
+		return fastaPath;
 	}
 
 	std::vector< std::string > Params::getInVCFPaths()
 	{
-		return m_options["v"].as< std::vector< std::string > >();
+		auto vcfPaths =  m_options["v"].as< std::vector< std::string > >();
+		validateFilePaths(vcfPaths, true);
+		return vcfPaths;
 	}
 
 	std::vector< std::string > Params::getBAMPaths()
 	{
-		return m_options["b"].as< std::vector< std::string > >();
+		auto bamPaths =  m_options["b"].as< std::vector< std::string > >();
+		validateFilePaths(bamPaths, true);
+		return bamPaths;
 	}
 
 	std::string Params::getOutputDirectory()
 	{
-		return m_options["o"].as< std::string >();
-	}
-
-	std::string Params::getFilePrefix()
-	{
-		// return m_variables_map["-p"].as< std::string >();
-		return "";
+		auto outputDir = m_options["o"].as< std::string >();
+		std::vector< std::string > outputDirs = {outputDir};
+		validateFolderPaths(outputDirs, true);
+		return outputDir;
 	}
 
 	Region::SharedPtr Params::getRegion()
 	{
 		if (m_options.count("r"))
 		{
-			return std::make_shared< Region >(m_options["r"].as< std::string >());
+			return std::make_shared< Region >(m_options["r"].as< std::string >(), Region::BASED::ONE);
 		}
 		return nullptr;
 	}
@@ -157,6 +162,22 @@ namespace graphite
 	int Params::getGapExtensionValue()
 	{
 		return m_options["e"].as< uint32_t >();
+	}
+
+	void Params::validateFolderPaths(const std::vector< std::string >& paths, bool exitOnFailure)
+	{
+		for (auto path : paths)
+		{
+			IFile::folderExists(path, exitOnFailure);
+		}
+	}
+
+	void Params::validateFilePaths(const std::vector< std::string >& paths, bool exitOnFailure)
+	{
+		for (auto path : paths)
+		{
+			IFile::fileExists(path, exitOnFailure);
+		}
 	}
 
 }

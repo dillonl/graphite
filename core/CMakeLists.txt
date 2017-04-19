@@ -43,11 +43,6 @@ set(GRAPHITE_CORE_REGION_SOURCES
   region/Region.cpp
   )
 
-set(GRAPHITE_CORE_PATH_SOURCES
-  path/Path.cpp
-  path/PathManager.cpp
-  )
-
 set(GRAPHITE_CORE_MAPPING_SOURCES
   mapping/MappingManager.cpp
   mapping/GSSWMapping.cpp
@@ -63,6 +58,11 @@ set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/BamAlignmentReader.cpp
   alignment/AlignmentReporter.cpp
   alignment/AlignmentReport.cpp
+  )
+
+set(GRAPHITE_CORE_SAMPLE_SOURCES
+  sample/Sample.cpp
+  sample/SampleManager.cpp
   )
 
 set(GRAPHITE_CORE_VARIANT_SOURCES
@@ -86,6 +86,7 @@ add_library(graphite_core STATIC
   ${GRAPHITE_CORE_REFERENCE_SOURCES}
   ${GRAPHITE_CORE_REGION_SOURCES}
   ${GRAPHITE_CORE_ALIGNMENT_SOURCES}
+  ${GRAPHITE_CORE_SAMPLE_SOURCES}
   ${GRAPHITE_CORE_VARIANT_SOURCES}
   ${GRAPHITE_CORE_PATH_SOURCES}
   ${GRAPHITE_CORE_MAPPING_SOURCES}

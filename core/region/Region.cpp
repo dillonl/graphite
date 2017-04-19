@@ -10,10 +10,11 @@
 namespace graphite
 {
 
-	Region::Region(const std::string& regionString) :
+	Region::Region(const std::string& regionString, BASED based) :
 		m_region_string(regionString),
 		m_start_position(0),
-		m_end_position(0)
+		m_end_position(0),
+		m_based(based)
 	{
 		std::vector< std::string > chromWithPositionComponents;
 		std::vector< std::string > positionComponents;
@@ -45,15 +46,21 @@ namespace graphite
 	}
 
 
-	Region::Region(const std::string& referenceID, position startPosition, position endPosition) :
+	Region::Region(const std::string& referenceID, position startPosition, position endPosition, BASED based) :
 	    m_reference_id(referenceID),
 		m_start_position(startPosition),
 		m_end_position(endPosition),
-		m_region_string(referenceID + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition))
+		m_region_string(referenceID + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition)),
+		m_based(based)
 	{
 	}
 
 	Region::~Region()
 	{
+	}
+
+	void Region::setBased(BASED based)
+	{
+		m_based = based;
 	}
 }

@@ -6,6 +6,7 @@
 #include "core/util/Noncopyable.hpp"
 #include "core/variant/IVariantList.h"
 #include "core/variant/IVariantManager.h"
+#include "core/sample/SampleManager.h"
 
 #include <memory>
 #include <functional>
@@ -24,7 +25,7 @@ namespace graphite
 
 		virtual void releaseResources() = 0;
 		virtual void processMappingStatistics() = 0;
-		virtual std::vector< std::shared_ptr< Sample > > getSamplePtrs() = 0;
+		virtual SampleManager::SharedPtr getSamplePtrs() = 0;
 		virtual IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr)
 		{
 			position startPosition = regionPtr->getStartPosition();
@@ -68,7 +69,7 @@ namespace graphite
 					++j;
 				}
 				i = j - 1;
-				regionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), startPosition, endPosition);
+				regionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), startPosition, endPosition, Region::BASED::ONE);
 				regionPtrs.push_back(regionPtr);
 			}
 			return regionPtrs;

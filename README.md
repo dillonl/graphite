@@ -11,7 +11,7 @@ Graphite annotates existing VCFs by appending allele "counts" to the VCF that re
 
 Installation
 ========================================
-Building and installing Graphite is made simple with [CMAKE](https://cmake.org/). Additionally, Graphite takes advantage of the new and improved C11 C++ compiler.
+Building and installing Graphite is made simple with [CMAKE](https://cmake.org/). Additionally, Graphite takes advantage of the new and improved C11 C++ compiler. If you are using the GCC compiler please use 4.9.2 or greater.
 
 To build Graphite, use the following commands (from the base Graphite directory):
 

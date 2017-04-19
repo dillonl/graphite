@@ -23,7 +23,7 @@ namespace graphite
 	{
 	}
 
-	void GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent)
+	bool GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent)
 	{
 		// std::cout << "comment out this lock" << std::endl;
 		// std::lock_guard< std::mutex > sGuard(s_lock);
@@ -49,7 +49,7 @@ namespace graphite
 			uint32_t swAlignmentPercent = ((swAlignmentScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 			if (swAlignmentPercent <= swPercent) // if the new alignment isn't "better" than the previous alignment
 			{
-				return;
+				return false;
 			}
 			alignmentMappingWPtr->setMapped(false);
 		}
@@ -62,6 +62,8 @@ namespace graphite
 		// std::lock_guard< std::mutex > l(tmpLock);
 	    // std::cout << alignmentPtr->getPosition() << " " << alignmentPtr->getID() << " sw: " << swPercent << " refSW: " << referenceSWPercent << std::endl;
 
+		bool didMap = false;
+
 		for (uint32_t i = 0; i < mappingAlignmentInfoPtrs.size(); ++i)
 		{
 			auto mappingAlignmentInfoPtr = mappingAlignmentInfoPtrs[i];
@@ -73,44 +75,51 @@ namespace graphite
 			{
 				for (auto currentAllelePtr : equivalentAllelePtr->getAllAlleles())
 				{
-					mapAllele(currentAllelePtr, mappingAlignmentInfoPtr, mappingPtr, alignmentPtr, checkAllelePrefix, checkAlleleSuffix, referenceSWScoreIdentical);
+					didMap = didMap || mapAllele(currentAllelePtr, mappingAlignmentInfoPtr, mappingPtr, alignmentPtr, checkAllelePrefix, checkAlleleSuffix, referenceSWScoreIdentical);
 				}
 			}
 			else
 			{
-				mapAllele(allelePtr, mappingAlignmentInfoPtr, mappingPtr, alignmentPtr, checkAllelePrefix, checkAlleleSuffix, referenceSWScoreIdentical);
+				didMap = didMap || mapAllele(allelePtr, mappingAlignmentInfoPtr, mappingPtr, alignmentPtr, checkAllelePrefix, checkAlleleSuffix, referenceSWScoreIdentical);
 			}
 
 		}
+		return didMap;
 	}
 
-	void GSSWAdjudicator::mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix, bool referenceSWScoreIdentical)
+	bool GSSWAdjudicator::mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix, bool referenceSWScoreIdentical)
 	{
 		auto variantPtr = allelePtr->getVariantWPtr().lock();
 		auto alleleMappingScorePercent = ((mappingAlignmentInfoPtr->getSWScore() / (double)(mappingAlignmentInfoPtr->getLength() * this->m_match_value)) * 100);
 
-		if ((variantPtr == nullptr)) // || // if this allele doesn't belong to a variant in the VCF (if it's a reference node at a non variant site)
-		{
-			return;
-		}
-		else // if this allele was successfully mapped,
+		if (variantPtr != nullptr) // || // if this allele doesn't belong to a variant in the VCF (if it's a reference node at a non variant site)
 		{
 			bool isAlt = allelePtr->getID() % 2 != 0;
 			// if ((referenceSWScoreIdentical && isAlt) || (checkAlleleSuffix && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getPrefixMatch()) ||(checkAllelePrefix && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getSuffixMatch()))  // check that the alignment maps to unique areas of the allele
 			if (referenceSWScoreIdentical && isAlt)
 			{
-				// static std::mutex lock;
-				// std::lock_guard< std::mutex > l(lock);
-				// std::cout << alignmentPtr->getPosition() << " " << alignmentPtr->getID() << " swScore: " << mappingAlignmentInfoPtr->getSWScore() << " len: " << mappingAlignmentInfoPtr->getLength() << " amb: id: " << allelePtr->getID() << " " << allelePtr.get()  << std::endl;
 				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, AlleleCountType::Ambiguous));
+				alignmentPtr->setMapping(mappingPtr);
+				mappingPtr->setMapped(true);
+				/*
+				{
+					static std::mutex l;
+					std::lock_guard< std::mutex > lock(l);
+					mappingPtr->printMapping();
+					// std::cout << mappingAlignmentInfoPtr->getSWScore() << std::endl;
+				}
+				*/
+				return true;
 			}
 			else
 			{
 				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, scoreToAlleleCountType(alleleMappingScorePercent)));
+				alignmentPtr->setMapping(mappingPtr);
+				mappingPtr->setMapped(true);
+				return true;
 			}
-			alignmentPtr->setMapping(mappingPtr);
-			mappingPtr->setMapped(true);
 		}
+		return false;
 	}
 
 	int GSSWAdjudicator::getMatchValue()

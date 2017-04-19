@@ -24,6 +24,9 @@ namespace graphite
 		}
 		virtual ~IGraph() {}
 
+		virtual position getStartPosition() = 0;
+		virtual position getEndPosition() = 0;
+
 	protected:
 
 		virtual void constructGraph() = 0;

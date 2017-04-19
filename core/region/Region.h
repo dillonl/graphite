@@ -19,29 +19,28 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< Region > SharedPtr;
-		Region(const std::string& regionString);
-		Region(const std::string& referenceID, position startPosition, position endPosition);
+
+		enum class BASED { ZERO = 0, ONE = 1 }; // based on this https://www.biostars.org/p/84686/ interpretation of zero and one based
+
+		Region(const std::string& regionString, BASED based);
+		Region(const std::string& referenceID, position startPosition, position endPosition, BASED based);
 		~Region();
 
 		std::string getRegionString() const { return m_region_string; }
 		std::string getReferenceID() const { return this->m_reference_id; }
-		/*
-		std::string getReferenceIDNormalized() const
-		{
-			return this->m_reference_id_normalized;
-		}
-		*/
 		position getStartPosition() const { return this->m_start_position; }
 		position getEndPosition() const { return this->m_end_position; }
 		void setStartPosition(position startPosition) { this->m_start_position = startPosition; }
 		void setEndPosition(position endPosition) { this->m_end_position = endPosition; }
+		BASED getBased() { return m_based; }
+		void setBased(BASED based);
 
 	private:
 		std::string m_region_string;
 		std::string m_reference_id;
-		/* std::string m_reference_id_normalized; */
 		position m_start_position;
 		position m_end_position;
+		BASED m_based;
 
 		/* RegionParser< const char* > m_region_parser; */
 	};

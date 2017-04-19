@@ -1,5 +1,4 @@
 #include "VCFHeader.h"
-#include "core/alignment/Sample.hpp"
 #include "core/util/Utility.h"
 
 #include <unordered_set>
@@ -158,24 +157,25 @@ namespace graphite
 		m_reference_path = referencePath;
 	}
 
-	bool VCFHeader::registerNewSample(std::shared_ptr< Sample > samplePtr)
+	void VCFHeader::registerActiveSample(SampleManager::SharedPtr sampleManagerPtr)
 	{
-		if (isNewSampleColumnName(samplePtr->getName()))
+		for (auto samplePtr : sampleManagerPtr->getSamplePtrs())
 		{
-			return false;
-		}
-		else
-		{
-			m_sample_names_by_column_order.emplace_back(samplePtr->getName());
-			this->m_sample_names.emplace(samplePtr->getName());
-			this->m_new_sample_names.emplace(samplePtr->getName());
-			return true;
+			if (!isActiveSampleColumnName(samplePtr->getName()))
+			{
+				m_sample_names_by_column_order.emplace_back(samplePtr->getName());
+				this->m_sample_names.emplace(samplePtr->getName());
+				this->m_active_sample_names.emplace(samplePtr->getName());
+				bool isInColumns = false;
+				for (auto& col : m_columns) { if (col.compare(samplePtr->getName()) == 0) { isInColumns = true; break; } }
+				if (!isInColumns) { setColumn(samplePtr->getName()); }
+			}
 		}
 	}
 
-	bool VCFHeader::isNewSampleColumnName(const std::string& sampleName)
+	bool VCFHeader::isActiveSampleColumnName(const std::string& sampleName)
 	{
-		return this->m_new_sample_names.find(sampleName) != this->m_new_sample_names.end();
+		return this->m_active_sample_names.find(sampleName) != this->m_active_sample_names.end();
 	}
 
 	bool VCFHeader::isSampleColumnName(const std::string& sampleName)

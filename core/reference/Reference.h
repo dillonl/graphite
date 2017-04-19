@@ -13,7 +13,7 @@ namespace graphite
 	class Reference : public IReference
 	{
 	public:
-		Reference(std::string& regionString);
+		Reference(const std::string& regionSequence, Region::SharedPtr regionPtr);
 		~Reference();
 
 	private:

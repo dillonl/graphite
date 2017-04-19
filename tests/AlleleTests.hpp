@@ -25,7 +25,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingPrefixCountZero)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("TGACCCTTCTTTTATTCTC");
 		auto altAllelePtr = std::make_shared< Allele >("ACCTG");
 		std::vector< IAllele::SharedPtr > altAllelePtrs = { altAllelePtr };
@@ -44,7 +44,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingPrefixCountNoSuffix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("TGACCCTTCTTTTATTCTCT");
 		auto altAllele1Ptr = std::make_shared< Allele >("TGACCCTTACCTG");
 		auto altAllele2Ptr = std::make_shared< Allele >("TGACCCTTGATTCA");
@@ -66,7 +66,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingSuffixCountNoPrefix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("ATCGACGG");
 		auto altAllele1Ptr = std::make_shared< Allele >("GTCG");
 		auto altAllele2Ptr = std::make_shared< Allele >("TAAAAAAAG");
@@ -88,7 +88,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingSuffixCountPrefix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("GATCGACGG");
 		auto altAllele1Ptr = std::make_shared< Allele >("GTCG");
 		auto altAllele2Ptr = std::make_shared< Allele >("GCAAAAAAAG");
@@ -110,7 +110,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingMultiMatchOneMisMatchCountPrefix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("ATCGACGG");
 		auto altAllele1Ptr = std::make_shared< Allele >("GTC");
 		auto altAllele2Ptr = std::make_shared< Allele >("GCAAAAAAA");
@@ -132,7 +132,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingMultiMatchOneMisMatchCountSuffix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("ATCGACGGA");
 		auto altAllele1Ptr = std::make_shared< Allele >("TC");
 		auto altAllele2Ptr = std::make_shared< Allele >("GCAAAAAAA");
@@ -154,7 +154,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingMultiMatchPrefixMixedCountSuffix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("TCGACGGA");
 		auto altAllele1Ptr = std::make_shared< Allele >("TC");
 		auto altAllele2Ptr = std::make_shared< Allele >("TAAAAAAA");
@@ -176,7 +176,7 @@ namespace adj_test
 	TEST(AlleleTest, overlappingMultiMatchPrefixMixedHigherCountOnPrefix)
 	{
 		std::string seq = TEST_REFERENCE_SEQUENCE;
-		auto regionPtr = std::make_shared< Region >("1:1-3720");
+		auto regionPtr = std::make_shared< Region >("1:1-3720", graphite::Region::BASED::ONE);
 		auto refAllelePtr = std::make_shared< Allele >("TCGACGGA");
 		auto altAllele1Ptr = std::make_shared< Allele >("TCTTTTT");
 		auto altAllele2Ptr = std::make_shared< Allele >("TCGACAAAAAG");

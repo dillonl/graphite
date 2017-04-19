@@ -3,7 +3,12 @@
 
 #include <string>
 #include <memory>
+#include <iostream>
 #include <fstream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "core/util/Noncopyable.hpp"
 
@@ -26,6 +31,40 @@ namespace graphite
 		/* virtual const char* getNextLine() = 0; */
 		virtual bool getNextLine(std::string& line) = 0;
 		virtual void setFilePosition(uint64_t pos) = 0;
+
+		static bool fileExists(const std::string& name, bool exitOnFailure)
+		{
+			std::ifstream f(name.c_str());
+			if (!f)
+			{
+				if (exitOnFailure)
+				{
+					std::cout << "File not found: " << name << std::endl;
+					exit(EXIT_FAILURE);
+				}
+				return false;
+			}
+			return true;
+		}
+
+		static bool folderExists(const std::string& path, bool exitOnFailure)
+		{
+			if(!path.empty())
+			{
+				struct stat sb;
+
+				if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+				{
+					return true;
+				}
+			}
+			if (exitOnFailure)
+			{
+                std::cout << "Folder not found: " << path << std::endl;
+				exit(EXIT_FAILURE);
+			}
+			return false;
+		}
 
 	protected:
 		inline bool fileExists(const std::string& filename)

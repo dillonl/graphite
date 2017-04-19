@@ -27,10 +27,10 @@ namespace graphite
 		 *
 		 * overlap: The number of base pairs that will overlap between graphs.
 		 */
-		void buildGraphs(Region::SharedPtr region, size_t graphSize, size_t overlap, size_t alignmentPadding);
+		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
 
 	private:
-		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, position startPosition, size_t graphSize);
+		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;

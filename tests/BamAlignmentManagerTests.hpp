@@ -51,10 +51,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegion)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20:10000000-30000000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -69,10 +69,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentSmallRegion)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20:10000000-10003000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -87,10 +87,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionEmpty)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20:1-10000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -106,10 +106,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentSmallHundredThousandRegion)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "1";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "1:12300000-12400000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -125,10 +125,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentSmallHundredThousandExactRegion)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "1:12300000-12400000";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "1:12300000-12400000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -144,10 +144,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionTwoSpecific)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20:10000000-50000000";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20:30000000-40000000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -162,10 +162,10 @@ TEST(BamAlignmentManagerTests, TestLoadNineThousandRegion)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "1:12300000-12309000";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "1:12300000-12309000";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -181,10 +181,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentRegionOverlapByOne)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20:26000000-27000000";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20:26151952-26151953";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);
@@ -199,10 +199,10 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentAllChrom20)
 {
 	std::string path = TEST_BAM_FILE;
 	std::string regionString = "20";
-	auto regionPtr1 = std::make_shared< graphite::Region >(regionString);
+	auto regionPtr1 = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 
 	std::string region2String = "20";
-	auto regionPtr2 = std::make_shared< graphite::Region >(region2String);
+	auto regionPtr2 = std::make_shared< graphite::Region >(region2String, graphite::Region::BASED::ONE);
 	std::vector< graphite::IAlignment::SharedPtr > alignmentPtrs;
 	getAlignmentPtrsFromReader(path, alignmentPtrs, regionPtr2);
 	auto alignmentListReaderPtr = std::make_shared< graphite::AlignmentList >(alignmentPtrs);

@@ -13,7 +13,7 @@ namespace graphite
 		IAdjudicator() {}
 		virtual ~IAdjudicator() {}
 
-		virtual void adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent) = 0;
+		virtual bool adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent) = 0;
 		virtual int getMatchValue() = 0;
 		virtual int getMisMatchValue() = 0;
 		virtual int getGapOpenValue() = 0;

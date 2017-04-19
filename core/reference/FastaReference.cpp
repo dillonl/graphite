@@ -17,28 +17,37 @@ namespace graphite
 	{
 	}
 
-	void FastaReference::setSequence(Region::SharedPtr region)
+	void FastaReference::setSequence(Region::SharedPtr regionPtr)
 	{
-		// this->m_region = std::make_shared< Region >(region->getRegionString());
-		this->m_region = std::make_shared< Region >(region->getReferenceID());
+		std::string seqName = regionPtr->getReferenceID();
+		this->m_sequence = this->m_fasta_reference->getSequence(seqName);
 
-		std::string seqName = this->m_region->getReferenceID();
+		this->m_region = std::make_shared< Region >(seqName, Region::BASED::ONE);
+		this->m_region->setBased(Region::BASED::ZERO);
+		this->m_region->setStartPosition(0);
+		this->m_region->setEndPosition(this->m_region->getStartPosition() + this->m_sequence.size());
+
+		/*
 		if (this->m_region->getStartPosition() == 0 || this->m_region->getEndPosition() == 0)
 		{
 			this->m_sequence = this->m_fasta_reference->getSequence(seqName);
-			this->m_region->setStartPosition(1);
+			this->m_region->setStartPosition(0);
 			this->m_region->setEndPosition(this->m_region->getStartPosition() + this->m_sequence.size());
 		}
 		else
 		{
-			// we must subtract 1 because fastahack is 1 based and strings are 0 based and since we
-			// are using this as a char* then we must account for that
-			position startPosition = this->m_region->getStartPosition() - 1;
-			// we must add 1 because fastahack is not inclusive
-			// so [100-200] would be position 100 to 199
-			size_t length = (this->m_region->getEndPosition() + 1) - startPosition;
-			this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, startPosition, length);
+			if (regionPtr->getBased() == Region::BASED::ONE) // fastahack is one based so we just provide the start position as is, length we must add one because of math!
+			{
+				this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, this->m_region->getStartPosition(), (this->m_region->getEndPosition() - this->m_region->getStartPosition()) + 1);
+				this->m_region->setStartPosition(this->m_region->getStartPosition() - 1);
+				this->m_region->setEndPosition(this->m_region->getEndPosition() - 1);
+			}
+			else
+			{
+				this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, this->m_region->getStartPosition() + 1, (this->m_region->getEndPosition() - this->m_region->getStartPosition()) + 1);
+			}
 		}
+		*/
 	}
 
 } // end namespace graphite

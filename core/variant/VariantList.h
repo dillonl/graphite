@@ -21,6 +21,7 @@ namespace graphite
 		~VariantList();
 
 		bool getNextVariant(IVariant::SharedPtr& variantPtr) override;
+		bool peekNextVariant(IVariant::SharedPtr& variantPtr) override;
 		size_t getCount() override;
 		void sort() override;
 		/* void printToVCF(IHeader::SharedPtr header, bool printHeader, std::vector< Sample::SharedPtr > samplePtrs, std::ostream& out) override; */

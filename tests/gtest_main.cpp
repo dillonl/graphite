@@ -5,22 +5,12 @@
 #include "RegionTests.hpp"
 #include "FileTests.hpp"
 #include "VCFFileTests.hpp"
-#include "SequenceManagerTests.hpp"
 #include "GSSWTests.hpp"
+#include "GSSWGraphTests.hpp"
 #include "AlleleTests.hpp"
-#include "VariantsTest.hpp" // segfault
-
-/*
-#include "VariantsTest.hpp" // segfault
-
-#include "BamAlignmentManagerTests.hpp"
+#include "VariantsTest.hpp"
 #include "CompoundVariantTests.hpp"
-#include "AdjudicationTests.hpp"
-
-
-#include "plugins/TestIncludes.h"
-*/
-// #include "S3FileTests.hpp"
+#include "FastaReferenceTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)
 {

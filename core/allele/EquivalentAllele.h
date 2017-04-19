@@ -16,7 +16,7 @@ namespace graphite
 	class EquivalentAllele : public Allele
 	{
 	public:
-	    EquivalentAllele(Sequence::SharedPtr sequence) : Allele(sequence)
+	    EquivalentAllele(const std::string& sequence) : Allele(sequence)
 		{
 			int x = 0;
 			if (x > 0)

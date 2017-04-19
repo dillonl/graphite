@@ -3,7 +3,6 @@
 
 #include "core/region/Region.h"
 #include "core/util/Noncopyable.hpp"
-#include "core/alignment/Sample.hpp"
 #include "IVariant.h"
 #include "IHeader.h"
 
@@ -28,6 +27,7 @@ namespace graphite
 
 		virtual void processOverlappingAlleles() = 0;
 		virtual bool getNextVariant(IVariant::SharedPtr& variantPtr) = 0;
+		virtual bool peekNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
 	};

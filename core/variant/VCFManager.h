@@ -21,8 +21,8 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< VCFManager > SharedPtr;
 
-		VCFManager(const std::string& vcfPath, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
-		VCFManager(const std::vector< std::string >& vcfFilePaths, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize);
+		VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t readLength);
+		VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t readLength);
 		~VCFManager();
 
 		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr) override;
@@ -42,9 +42,7 @@ namespace graphite
 		std::atomic< bool > m_loaded_vcfs;
 		std::mutex m_loaded_mutex;
 		std::shared_ptr< std::thread > m_loading_thread_ptr;
-		uint32_t m_max_allowed_allele_size;
 		IReference::SharedPtr m_reference_ptr;
-		std::vector< Sample::SharedPtr > m_sample_ptrs;
 	};
 }
 

@@ -2,7 +2,7 @@
 #define GRAPHITE_BAMALIGNMENTREADERTESTS_HPP
 
 #include "core/alignment/AlignmentList.h"
-#include "core/alignment/SampleManager.hpp"
+#include "core/sample/SampleManager.h"
 #include "core/alignment/BamAlignmentReader.h"
 #include "core/region/Region.h"
 #include "config/TestConfig.h"
@@ -11,11 +11,11 @@ graphite::BamAlignmentReader::SharedPtr getBamAlignmentReader(const std::string&
 {
 	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
 	bamAlignmentReaderPtr->open();
-	auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
-	for (auto samplePtr : samplePtrs)
-	{
-		graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
-	}
+	// auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(path);
+	// for (auto samplePtr : samplePtrs)
+	// {
+		// graphite::SampleManager::Instance()->addSamplePtr(samplePtr);
+	// }
 	return bamAlignmentReaderPtr;
 }
 
@@ -55,7 +55,6 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentsRegionWithoutAlignments)
 	auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
 	ASSERT_EQ(alignmentsList.size(), 0);
 }
-*/
 
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
 {
@@ -69,6 +68,8 @@ TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositions)
 	bamAlignmentReaderPtr->close();
 	ASSERT_EQ(alignmentsList.size(), 1988);
 }
+*/
+
 
 /*
 TEST(BamAlignmentReaderTests, TestLoadAlignmentAtStartRegionWithPositionsSmallRegion)

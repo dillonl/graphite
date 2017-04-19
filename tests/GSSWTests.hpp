@@ -1,13 +1,18 @@
 #ifndef GRAPHITE_GSSWTESTS_HPP
 #define GRAPHITE_GSSWTESTS_HPP
 
+#include "TestClasses.hpp"
+
 #include "gssw.h"
+#include "core/region/Region.h"
+#include "core/reference/FastaReference.h"
+#include "core/reference/Reference.h"
 #include "core/graph/GSSWGraph.h"
 
 #include <functional>
 
-static uint32_t match = 1;
-static uint32_t mismatch = 4;
+static uint32_t test_match = 1;
+static uint32_t test_mismatch = 4;
 static uint32_t gapOpen = 6;
 static uint32_t gapExtension = 1;
 
@@ -21,7 +26,7 @@ void runTestsViaLambda(const std::string& alignment, const std::vector< gssw_nod
 	}
 
 	gssw_graph_fill(graph, alignment.c_str(), alignment.size(), nt_table, mat, gapOpen, gapExtension, 15, 2);
-	gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignment.c_str(), alignment.size(), match, mismatch, gapOpen, gapExtension);
+	gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignment.c_str(), alignment.size(), test_match, test_mismatch, gapOpen, gapExtension);
 
 	funct(gm);
 
@@ -34,7 +39,7 @@ void runTestsViaLambda(const std::string& alignment, const std::vector< gssw_nod
 TEST(GSSWTests, GSSWSimpleDiamondGraph)
 {
 	int8_t* nt_table = gssw_create_nt_table();
-	int8_t* mat = gssw_create_score_matrix(match, mismatch);
+	int8_t* mat = gssw_create_score_matrix(test_match, test_mismatch);
 
 	std::string alignment = "ACGT";
 
@@ -66,7 +71,7 @@ TEST(GSSWTests, GSSWSimpleDiamondGraph)
 TEST(GSSWTests, GSSWSimple3WayGraph)
 {
 	int8_t* nt_table = gssw_create_nt_table();
-	int8_t* mat = gssw_create_score_matrix(match, mismatch);
+	int8_t* mat = gssw_create_score_matrix(test_match, test_mismatch);
 
 	std::string alignment = "ACGT";
 
@@ -100,7 +105,7 @@ TEST(GSSWTests, GSSWSimple3WayGraph)
 TEST(GSSWTests, GSSWComplexDiamondGraph)
 {
 	int8_t* nt_table = gssw_create_nt_table();
-	int8_t* mat = gssw_create_score_matrix(match, mismatch);
+	int8_t* mat = gssw_create_score_matrix(test_match, test_mismatch);
 
 	std::string alignment = "GGATT";
 
@@ -132,7 +137,7 @@ TEST(GSSWTests, GSSWComplexDiamondGraph)
 TEST(GSSWTests, GSSWSingleton)
 {
 	int8_t* nt_table = gssw_create_nt_table();
-	int8_t* mat = gssw_create_score_matrix(match, mismatch);
+	int8_t* mat = gssw_create_score_matrix(test_match, test_mismatch);
 
 	std::string alignment = "AAAAAAAGAAAA";
 

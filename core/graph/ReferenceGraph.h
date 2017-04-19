@@ -11,15 +11,15 @@
 
 namespace graphite
 {
-	class ReferenceGraph : private  GSSWGraph
+	class ReferenceGraph : public GSSWGraph
 	{
 	public:
 		typedef std::shared_ptr< ReferenceGraph > SharedPtr;
 
-	    ReferenceGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, position startPosition, size_t graphSize, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
+	    ReferenceGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, Region::SharedPtr regionPtr, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue, uint32_t numGraphCopies);
 		virtual ~ReferenceGraph();
 
-		GSSWGraph::GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
+		/* GSSWGraph::GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr); */
 
 		void constructGraph() override;
 

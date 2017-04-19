@@ -8,7 +8,7 @@
 TEST(RegionTest, ConstructorWithGetRegionString)
 {
 	std::string regionString = "20:10-100";
-	graphite::Region region(regionString);
+	graphite::Region region(regionString, graphite::Region::BASED::ONE);
 	EXPECT_STREQ(regionString.c_str(), region.getRegionString().c_str());
 	std::string regionNotEqual = "1:1-1";
 	EXPECT_STRNE(regionNotEqual.c_str(), region.getRegionString().c_str());
@@ -19,7 +19,7 @@ TEST(RegionTest, GetReferenceID)
 {
 	std::string reference = "20";
 	std::string regionString = reference + ":10-100";
-	graphite::Region region(regionString);
+	graphite::Region region(regionString, graphite::Region::BASED::ONE);
 	EXPECT_STREQ(reference.c_str(), region.getReferenceID().c_str());
 	std::string referenceNotEqual = "1";
 	regionString = referenceNotEqual + ":10-100";
@@ -44,7 +44,7 @@ TEST(RegionTest, GetStartPosition)
 	graphite::position startPosition = 2000;
 	std::string startPositionString = std::to_string(startPosition);
 	std::string regionString = "20:" + startPositionString + "-100000";
-	graphite::Region region(regionString);
+	graphite::Region region(regionString, graphite::Region::BASED::ONE);
 	EXPECT_EQ(startPosition, region.getStartPosition());
 	graphite::position startPositionNotEqual = 1;
 	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
@@ -57,7 +57,7 @@ TEST(RegionTest, TestRegionRegionIDOnly)
 	bool success = false;
 	std::string regionString = "Y";
 
-	graphite::Region region(regionString);
+	graphite::Region region(regionString, graphite::Region::BASED::ONE);
 	EXPECT_EQ(regionString, region.getReferenceID());
 	graphite::position startPositionNotEqual = 1;
 	std::string startPositionNotEqualString = std::to_string(startPositionNotEqual);
@@ -69,7 +69,7 @@ TEST(RegionTest, TestRegionInvalidArgument)
 {
 	bool success = false;
 	std::string invalidString = "";
-	ASSERT_THROW(graphite::Region region(invalidString), std::invalid_argument);
+	ASSERT_THROW(graphite::Region region(invalidString, graphite::Region::BASED::ONE), std::invalid_argument);
 }
 
 // Tests invalid position
@@ -77,7 +77,7 @@ TEST(RegionTest, TestRegionInvalidStartAndEndPositions)
 {
 	bool success = false;
 	std::string invalidString = "10:10000-1";
-	ASSERT_THROW(graphite::Region region(invalidString), std::invalid_argument);
+	ASSERT_THROW(graphite::Region region(invalidString, graphite::Region::BASED::ONE), std::invalid_argument);
 }
 
 #endif //GRAPHITE_TESTS_REGION_HPP

@@ -1,7 +1,6 @@
 #include "VCFManager.h"
 #include "Variant.h"
 
-#include "core/parser/VCFParser.hpp"
 #include "core/util/ThreadPool.hpp"
 
 #include <functional>
@@ -9,27 +8,23 @@
 
 namespace graphite
 {
-	VCFManager::VCFManager(const std::string& vcfPath, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
+	VCFManager::VCFManager(const std::string& vcfPath, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t readLength) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
-		m_max_allowed_allele_size(maxAllowedAlleleSize),
-		m_reference_ptr(referencePtr),
-		m_sample_ptrs(samplePtrs)
+		m_reference_ptr(referencePtr)
 	{
-		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, samplePtrs, referencePtr, m_max_allowed_allele_size);
+		auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, readLength);
 		this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 	}
 
-	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t maxAllowedAlleleSize) :
+	VCFManager::VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t readLength) :
 		m_loaded_vcfs(false),
 		m_region_ptr(regionPtr),
-		m_max_allowed_allele_size(maxAllowedAlleleSize),
-		m_reference_ptr(referencePtr),
-		m_sample_ptrs(samplePtrs)
+		m_reference_ptr(referencePtr)
 	{
 		for (const auto& vcfPath : vcfFilePaths)
 		{
-			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, samplePtrs, referencePtr, m_max_allowed_allele_size);
+			auto vcfFileReaderPtr = VCFFileReader::CreateVCFFileReader(vcfPath, referencePtr, readLength);
 			this->m_vcf_file_reader_ptrs.emplace_back(vcfFileReaderPtr);
 		}
 	}

@@ -11,16 +11,16 @@
 
 namespace graphite
 {
-	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, bool excludeDuplicateReads) :
-		m_sample_ptrs(samplePtrs),
+	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, bool excludeDuplicateReads) :
+		m_sample_manager_ptr(sampleManagerPtr),
 		m_loaded(false),
         m_exclude_duplicate_reads(excludeDuplicateReads)
 	{
 		m_region_ptr = regionPtr;
     }
 
-	BamAlignmentManager::BamAlignmentManager(const std::vector< Sample::SharedPtr >& samplePtrs, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads) :
-		m_sample_ptrs(samplePtrs),
+	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads) :
+		m_sample_manager_ptr(sampleManagerPtr),
 		m_loaded(false),
         m_exclude_duplicate_reads(excludeDuplicateReads),
 		m_alignment_reader_manager(alignmentReaderManagerPtr)
@@ -36,7 +36,7 @@ namespace graphite
 	{
 		if (this->m_loaded) { return; }
 		std::unordered_set< std::string > usedPaths;
-		for (auto samplePtr : this->m_sample_ptrs)
+		for (auto samplePtr : this->m_sample_manager_ptr->getSamplePtrs())
 		{
 			if (usedPaths.find(samplePtr->getPath()) != usedPaths.end()) { continue; }
 			usedPaths.emplace(samplePtr->getPath());
@@ -57,7 +57,7 @@ namespace graphite
 		{
 			auto bamAlignmentReaderPtr = m_alignment_reader_manager->getReader(bamPath);
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, this->m_exclude_duplicate_reads);
+			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, m_sample_manager_ptr, this->m_exclude_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
@@ -93,7 +93,7 @@ namespace graphite
 		this->m_loaded = true;
 	}
 
-	std::vector< Sample::SharedPtr > BamAlignmentManager::getSamplePtrs() { return m_sample_ptrs; }
+	SampleManager::SharedPtr BamAlignmentManager::getSamplePtrs() { return m_sample_manager_ptr; }
 
 	void BamAlignmentManager::waitForAlignmentsToLoad()
 	{
@@ -106,6 +106,28 @@ namespace graphite
 				  {
 					  return a->getPosition() < b->getPosition();
 				  });
+	}
+
+	std::vector< Sample::SharedPtr > BamAlignmentManager::GetSamplePtrs(std::vector< std::string >& bamPaths)
+	{
+		std::vector< Sample::SharedPtr > samplePtrs;
+		for (auto bamPath : bamPaths)
+		{
+			auto tmpSamplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
+			samplePtrs.insert(samplePtrs.end(), tmpSamplePtrs.begin(), tmpSamplePtrs.end());
+		}
+		return samplePtrs;
+	}
+
+	uint32_t BamAlignmentManager::GetReadLength(std::vector< std::string >& bamPaths)
+	{
+		uint32_t readLength = 0;
+		for (auto bamPath : bamPaths)
+		{
+			auto tmpReadLength = graphite::BamAlignmentReader::GetReadLength(bamPath);
+			readLength = (readLength < tmpReadLength) ? tmpReadLength : readLength;
+		}
+		return readLength;
 	}
 
 	void BamAlignmentManager::releaseResources()

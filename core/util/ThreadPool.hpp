@@ -25,6 +25,11 @@ namespace graphite
 			return s_threadpool;
 		}
 
+		uint32_t getThreadCount()
+		{
+			return m_thread_count;
+		}
+
 		void joinAll()
 		{
 			stop();

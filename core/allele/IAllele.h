@@ -28,10 +28,9 @@ namespace graphite
 
 		virtual ~IAllele() {}
 		virtual size_t getLength() = 0;
-		virtual std::shared_ptr< Sequence > getSequencePtr() = 0;
 		virtual const char* getSequence() = 0;
 		virtual std::string getSequenceString() = 0;
-		virtual void setSequence(std::shared_ptr< Sequence > sequencePtr) = 0;
+		virtual void setSequence(const std::string& sequence) = 0;
 		virtual void setAlleleMetaData(AlleleMetaData::SharedPtr alleleMetaDataPtr) = 0;
 		virtual AlleleMetaData::SharedPtr getAlleleMetaData() = 0;
 
