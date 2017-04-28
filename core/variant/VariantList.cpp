@@ -156,7 +156,7 @@ namespace graphite
 		// a "compound variant" can be generated.
 		while (getNextVariant(nextVariant))
 		{
-			if (variantEndPosition < nextVariant->getPosition() || strcmp(variantChrom.c_str(), nextVariant->getChrom().c_str()) != 0)
+			if (variantEndPosition < nextVariant->getPosition() || strcmp(variantChrom.c_str(), nextVariant->getChrom().c_str()) != 0 || variant->isStructuralVariant() || nextVariant->isStructuralVariant())
 			{
 				break;
 			}

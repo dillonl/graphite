@@ -60,6 +60,8 @@ namespace graphite
 		bool doesOverlap(IVariant::SharedPtr variantPtr) override;
 		uint32_t getReferenceSize() override;
 		void addRegion(Region::SharedPtr regionPtr) override;
+		uint32_t getVariantSize() override { return m_variant_size; }
+		bool isStructuralVariant() { return m_is_sv; }
 
 	protected:
 		void setAlleleOverlapMaxCountIfGreaterThan(IAllele::SharedPtr allelePtr, std::unordered_map< IAllele::SharedPtr, uint32_t >& alleleOverlapCountMap, uint32_t overlapCount);
@@ -84,8 +86,10 @@ namespace graphite
 		std::unordered_map< std::string, std::string > m_info_fields;
 		std::string m_line;
 		bool m_skip;
+		bool m_is_sv;
 		uint32_t m_read_length;
 		uint32_t m_reference_size;
+		uint32_t m_variant_size;
 
 	private:
 		void setUnorderedMapKeyValue(const std::string& rawString);

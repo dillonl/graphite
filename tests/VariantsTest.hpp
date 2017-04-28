@@ -18,9 +18,6 @@ namespace
 	static std::string VCF_LINE_3 = "20\t249590\tBI_GS_DEL1_B5_P2733_211\tC\t<CN0>\t100\tPASS\tSVTYPE=DEL;CIEND=-7,7;CIPOS=-7,7;END=250420;CS=DEL_union;MC=EM_DL_DEL10608605;AC=1;AF=0.00019968;NS=2504;AN=5008;EAS_AF=0.0;EUR_AF=0.0;AFR_AF=0.0;AMR_AF=0.0;SAS_AF=0.001\tGT\t0|0"; // is not the complete first line
 	static std::string VCF_LINE_4 = "20\t254691\t.\tG\tA\t100\tPASS\tAC=4;AF=0.000798722;AN=5008;NS=2504;DP=14874;EAS_AF=0;AMR_AF=0;AFR_AF=0.003;EUR_AF=0;SAS_AF=0;AA=G|||\tGT\t0|0\t0|0\t0|0\t0|0\t0|0";
 	static std::string VCF_LINE_5 = "1\t75148200\tWG:DEL:a3bcba65\tA\t<DEL>\t.\t.\tSVTYPE=DEL;SVLEN=-20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47"; // is not the complete first line
-	static std::string VCF_LINE_DEL = "1\t75148190\tWG:DEL:a3bcba65\tT\t<DEL>\t.\t.\tSVTYPE=DEL;SVLEN=20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
-	static std::string VCF_LINE_INV = "1\t75148190\tWG:INV:a3bcba65\tT\t<INV>\t.\t.\tSVTYPE=INV;SVLEN=20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
-	static std::string VCF_LINE_INS = "1\t75148190\tWG:INS:a3bcba65\tT\t<INS>\t.\t.\tSVTYPE=INS;SVLEN=20;SEQ=TGTACGTACGTACGTACGTA;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
 
 	std::string getVariantLineRefOfSize(size_t refSize)
 	{
@@ -284,87 +281,86 @@ namespace
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
+	static std::string VCF_LINE_DEL = "1\t10\tWG:DEL:a3bcba65\tT\t<DEL>\t.\t.\tSVTYPE=DEL;SVLEN=20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
 	TEST(VariantsTest, ParseVariantDelTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
-
+		// CTATGATGTTGATGGAACTGACCAAACGTCGTTAGGCCAGTTTTCTGGTCGTGTTCAACA
+		// TGATGGAACTGACCAAACGTC
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_DEL.c_str(), referencePtr, 300);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGAAGGCCAAAATTCAGATTC");
+		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGATGGAACTGACCAAACGTC");
 		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "T");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
 	TEST(VariantsTest, ParseVariantDelSVTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
-
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_DEL.c_str(), referencePtr, 6);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGAAGGCNNNNNNAGATTC");
+		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGATGGANNNNNNAACGTC");
 		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "T");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
+	static std::string VCF_LINE_INV = "1\t10\tWG:INV:a3bcba65\tT\t<INV>\t.\t.\tSVTYPE=INV;SVLEN=20;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
 	TEST(VariantsTest, ParseVariantInvTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
+		// TGATGGAACTGACCAAACGTC
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INV.c_str(), referencePtr, 300);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGAAGGCCAAAATTCAGATTC");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TCTTAGACTTAAAACCGGAAG");
+		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGATGGAACTGACCAAACGTC");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TCTGCAAACCAGTCAAGGTAG");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
 	TEST(VariantsTest, ParseVariantInvSVTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INV.c_str(), referencePtr, 6);
 
-		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGAAGGCNNNNNNAGATTC");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TCTTAGANNNNNNCGGAAG");
+		ASSERT_STREQ(variantPtr->getRef().c_str(), "TGATGGANNNNNNAACGTC");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TCTGCAANNNNNNAGGTAG");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
+	static std::string VCF_LINE_INS = "1\t10\tWG:INS:a3bcba65\tT\t<INS>\t.\t.\tSVTYPE=INS;SVLEN=20;SEQ=AAAAAAAAAAAAAAAAAAAA;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
 	TEST(VariantsTest, ParseVariantInsTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
+		// TGATGGAACTGACCAAACGTC
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INS.c_str(), referencePtr, 300);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "T");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TGTACGTACGTACGTACGTA");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAAAAAAAAAAAAAAAAA");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
 	TEST(VariantsTest, ParseVariantInsSVTest)
 	{
-		auto regionPtr = std::make_shared< graphite::Region >("1", 75148190,75148250, graphite::Region::BASED::ONE);
-		std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
-		auto referencePtr = std::make_shared< graphite::Reference >(sequence, regionPtr);
+		auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
+		auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
 
 		graphite::Variant::SharedPtr variantPtr;
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INS.c_str(), referencePtr, 6);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "T");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TGTACGTNNNNNNTACGTA");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAAANNNNNNAAAAAA");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
