@@ -40,6 +40,8 @@ namespace graphite
 			virtual bool doesOverlap(IVariant::SharedPtr variantPtr) = 0;
 			virtual uint32_t getReferenceSize() = 0;
 			virtual void addRegion(Region::SharedPtr regionPtr) = 0;
+			virtual uint32_t getVariantSize() = 0;
+			virtual bool isStructuralVariant() = 0;
     };
 }
 

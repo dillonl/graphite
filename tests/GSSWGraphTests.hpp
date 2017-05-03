@@ -44,7 +44,7 @@ TEST(GSSWGraphTests, GSSWSimpleGraph)
 
 TEST(GSSWGraphTests, GSSWSimpleLargeVariant)
 {
-	uint32_t readLength = 6;
+	uint32_t readLength = 3;
 	std::string vcfLine = "1\t20\trs11575897\tGACCAAACGTCGTTAGGCCAGTTTTCTGGT\tG\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line
 	auto regionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
 	auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, regionPtr);
@@ -59,10 +59,10 @@ TEST(GSSWGraphTests, GSSWSimpleLargeVariant)
 
 	gssw_graph* gsswPtr = gsswGraphPtr->getGSSWGraph();
 	ASSERT_TRUE(gsswPtr->size == 4);
-	ASSERT_STREQ(gsswPtr->nodes[0]->seq, "GGAACT");
+	ASSERT_STREQ(gsswPtr->nodes[0]->seq, "ACT");
 	ASSERT_STREQ(gsswPtr->nodes[1]->seq, "G");
-	ASSERT_STREQ(gsswPtr->nodes[2]->seq, "GACCAAANNNNNNTCTGGT"); // GACCAAACGTCGTTAGGCCAG
-	ASSERT_STREQ(gsswPtr->nodes[3]->seq, "CGTGTT");
+	ASSERT_STREQ(gsswPtr->nodes[2]->seq, "GACCNNNGGT"); // GACCAAACGTCGTTAGGCCAG
+	ASSERT_STREQ(gsswPtr->nodes[3]->seq, "CGT");
 }
 
 #endif
