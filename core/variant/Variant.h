@@ -90,6 +90,7 @@ namespace graphite
 		uint32_t m_read_length;
 		uint32_t m_reference_size;
 		uint32_t m_variant_size;
+		uint32_t m_overlap; // the amount the region overlaps the critical section of the variant (used for getting alignments from this region)
 
 	private:
 		void setUnorderedMapKeyValue(const std::string& rawString);

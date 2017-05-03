@@ -8,7 +8,7 @@
 
 namespace graphite
 {
-	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs, uint32_t readLength) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_skip(false), m_read_length(readLength), m_reference_size(0)
+	Variant::Variant(position pos, const std::string& chrom, const std::string& id, const std::string& quality, const std::string& filter, IAllele::SharedPtr refAllelePtr, std::vector< IAllele::SharedPtr > altAllelePtrs, uint32_t readLength) : m_position(pos), m_chrom(chrom), m_id(id), m_qual(quality), m_filter(filter), m_skip(false), m_read_length(readLength), m_reference_size(0), m_overlap(10)
 	{
 		this->m_ref_allele_ptr = refAllelePtr;
 		this->m_alt_allele_ptrs = altAllelePtrs;
@@ -19,7 +19,7 @@ namespace graphite
 	}
 
 	Variant::Variant() :
-		m_skip(false)
+		m_skip(false), m_overlap(10)
 	{
 	}
 
@@ -129,24 +129,17 @@ namespace graphite
 
 	void Variant::setAsDeletion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
-		auto maxSize = readLength * 3;
+		// auto maxSize = readLength * 3;
+		auto maxSize = std::numeric_limits< uint32_t >::max();
 		std::string ref;
 		if (svLength > maxSize) // if the variant is too large then create a truncated reference allele with Ns seperating the two breakpoints
 		{
 			ref = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, m_position, m_position + readLength, Region::BASED::ONE)) + std::string(readLength, 'N') + referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, (m_position + 1) + svLength - readLength, m_position + svLength, Region::BASED::ONE));
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			position startPosition2 = (((this->m_position + 1) + svLength - readLength) <= 0) ? 0 : ((this->m_position + 1) + svLength - readLength);
-			position endPosition2 = (this->m_position + svLength + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
 			m_reference_size = svLength;
 		}
 		else
 		{
 			ref = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, m_position, (m_position + svLength), Region::BASED::ONE));
-			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
 			m_reference_size = ref.size();
 		}
 		std::vector< std::string > alts;
@@ -156,20 +149,14 @@ namespace graphite
 
 	void Variant::setAsDuplication(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
-		auto maxSize = readLength * 3;
+		// auto maxSize = readLength * 3;
+		auto maxSize = std::numeric_limits< uint32_t >::max();
 		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
 		std::string ref;
 		std::string alt;
 		std::vector< std::string > alts;
 		if (svLength > maxSize)
 		{
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			position startPosition2 = ((this->m_position + svLength - (readLength + 1)) <= 0) ? 0 : (this->m_position + svLength - (readLength + 1));
-			position endPosition2 = (this->m_position + svLength + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-
 			std::string sequenceA = std::string(reference + 1, readLength);
 			std::string intermediateSequence(readLength, 'N');
 			std::string sequenceB = std::string((reference + 1) + (svLength - readLength), readLength);
@@ -183,8 +170,6 @@ namespace graphite
 			ref = std::string(reference, svLength + 1);
 			alt = ref + std::string(reference + 1, svLength); // the duplicated region does not contain the first bp of the reported ref sequence
 
-			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
 			m_reference_size = ref.size();
 		}
 		alts.emplace_back(alt);
@@ -193,25 +178,17 @@ namespace graphite
 
 	void Variant::setAsInversion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
-		auto maxSize = readLength * 3;
+		// auto maxSize = readLength * 3;
+		auto maxSize = std::numeric_limits< uint32_t >::max();
 		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
 		std::string ref;
 		std::string alt;
 		if (svLength > maxSize)
 		{
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			position startPosition2 = ((this->m_position + svLength - (readLength + 1)) <= 0) ? 0 : (this->m_position + svLength - (readLength + 1));
-			position endPosition2 = (this->m_position + svLength + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-
 			std::string intermediateSequence(readLength, 'N');
 			std::string anchorBase = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, m_position, (m_position), Region::BASED::ONE));
 			std::string sequenceA = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, (m_position + 1), (m_position + readLength), Region::BASED::ONE));
 			std::string sequenceB = referencePtr->getSequenceFromRegion(std::make_shared< Region >(this->m_chrom, ((m_position + 1) + svLength - readLength), (m_position + svLength), Region::BASED::ONE));
-			// std::string sequenceA = std::string(reference + 1, readLength);
-			// std::string sequenceB = std::string((reference + 1) + (svLength - readLength), readLength);
 			ref = anchorBase + sequenceA + intermediateSequence + sequenceB;
 			std::reverse(sequenceA.begin(), sequenceA.end());
 			std::reverse(sequenceB.begin(), sequenceB.end());
@@ -225,8 +202,6 @@ namespace graphite
 			std::reverse(alt.begin(), alt.end());
 			alt = std::string(1, ref.c_str()[0]) + alt; // add on the anchor base
 
-			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
 			ref.size();
 		}
 		std::vector< std::string > alts;
@@ -236,40 +211,18 @@ namespace graphite
 
 	void Variant::setAsInsertion(const std::string& ref, const std::string& alt, uint32_t readLength)
 	{
-		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
-		auto maxSize = readLength * 3;
+		// auto maxSize = readLength * 3;
+		auto maxSize = std::numeric_limits< uint32_t >::max();
 		std::vector< std::string > alts;
-		if (ref.size() > maxSize)
-		{
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			position startPosition2 = ((this->m_position + ref.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + ref.size() - (readLength + 1));
-			position endPosition2 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-		}
-		else
-		{
-			position endPosition1 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-
-		}
 		if (alt.size() > maxSize)
 		{
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			position startPosition2 = ((this->m_position + alt.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + alt.size() - (readLength + 1));
-			position endPosition2 = (this->m_position + alt.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-
-			std::string altSequence = ref + getTruncatedSequence(alt.c_str(), alt.size(), readLength);
+			// std::string altSequence = ref + getTruncatedSequence(alt.c_str(), alt.size(), readLength);
+			std::string altSequence = getTruncatedSequence(alt.c_str(), alt.size(), readLength);
 			alts.emplace_back(altSequence);
 		}
 		else
 		{
-			position endPosition1 = (this->m_position + alt.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-
-			alts.emplace_back(ref + alt);
+			alts.emplace_back(alt);
 		}
 		setRefAndAltAlleles(ref, alts);
 		m_reference_size = ref.size();
@@ -278,27 +231,14 @@ namespace graphite
 	void Variant::setAsStandardAlt(const std::string& ref, const std::string& alt, uint32_t readLength)
 	{
 		m_reference_size = ref.size();
-		position startPosition1 = (this->m_position - (readLength + 1) <= 0) ? 0 : (this->m_position - (readLength + 1));
 		std::string tmpRef;
 		m_variant_size = ref.size();
 		if (m_is_sv)
 		{
-			position endPosition1 = startPosition1 + (readLength * 2) + 1;
-			// position startPosition2 = ((this->m_position + ref.size() - readLength) <= 0) ? 0 : (this->m_position + ref.size() - (readLength + 1));
-			position startPosition2 = this->m_position + ref.size() - readLength;
-			std::cout << startPosition2 << std::endl;
-			position endPosition2 = (this->m_position + ref.size() + readLength + 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-
 			tmpRef = ref.c_str()[0] + getTruncatedSequence(ref.c_str() + 1, ref.size() - 1, readLength);
-			// tmpRef = std::string(ref, readLength);
 		}
 		else
 		{
-			position endPosition1 = (this->m_position + ref.size() + readLength - 1);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-
 			tmpRef = ref;
 		}
 
@@ -321,19 +261,10 @@ namespace graphite
 			}
 			if (m_is_sv)
 			{
-				// position endPosition1 = startPosition1 + (readLength * 2) + 1;
-				// position startPosition2 = ((this->m_position + tmpAlt.size() - (readLength + 1)) <= 0) ? 0 : (this->m_position + tmpAlt.size() - (readLength + 1));
-				// position endPosition2 = (this->m_position + tmpAlt.size() + readLength + 1);
-				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1), Region::BASED::ONE);
-				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2), Region::BASED::ONE);
-
 				alts.emplace_back(getTruncatedSequence(tmpAlt.c_str(), tmpAlt.size(), readLength));
 			}
 			else
 			{
-				// position endPosition1 = (this->m_position + tmpAlt.size() + readLength + 1);
-				// m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1), Region::BASED::ONE);
-
 				alts.emplace_back(tmpAlt);
 			}
 		}
@@ -347,12 +278,15 @@ namespace graphite
 		int svLength = getSVLengthFromInfo(m_info_fields, m_position);
 		if (isStandardAlt(alt))
 		{
-			for (auto allelePtr  : m_all_allele_ptrs)
-			{
-				if (allelePtr->getLength() > (readLength * 3)) { m_is_sv = true; break; }
-			}
+			// for (auto allelePtr  : m_all_allele_ptrs)
+			// {
+				// if (allelePtr->getLength() > (readLength * 3)) { m_is_sv = true; break; }
+			// }
+			m_is_sv = false;
 			setAsStandardAlt(vcfReferenceString, alt, readLength);
 			shouldSkip = false;
+			svLength = vcfReferenceString.size();
+			m_variant_size = svLength;
 		}
 		else if (isSymbolicAlt(alt) && svLength > 0)
 		{
@@ -387,6 +321,21 @@ namespace graphite
 		if (shouldSkip)
 		{
 			setSkip(true);
+		}
+		if (m_is_sv)
+		{
+			position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
+			position endPosition1 = this->m_position + (readLength + m_overlap);
+			position startPosition2 = (((this->m_position + 1) + svLength - (readLength + m_overlap)) <= 0) ? 0 : ((this->m_position + 1) + svLength - (readLength + m_overlap));
+			position endPosition2 = (this->m_position + 1 + svLength + readLength + m_overlap);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+		}
+		else
+		{
+			position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
+			position endPosition1 = (this->m_position + svLength + 1 + readLength + m_overlap);
+			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
 		}
 	}
 
