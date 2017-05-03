@@ -31,12 +31,12 @@ set(GRAPHITE_FILE_SOURCES
   file/ASCIIFileWriter.cpp
   file/ASCIIFileReader.cpp
   file/ASCIIGZFileReader.cpp
+  file/FastaFileWriter.cpp
   )
 
 set(GRAPHITE_CORE_REFERENCE_SOURCES
   reference/Reference.cpp
   reference/FastaReference.cpp
-  reference/FastaWriter.cpp
   )
 
 set(GRAPHITE_CORE_REGION_SOURCES
