@@ -196,6 +196,19 @@ public:
 
     const char* getSequence() override { return m_sequence.c_str(); }
     size_t getSequenceSize() override { return m_sequence.size(); }
+    std::string getSequenceFromRegion (graphite::Region::SharedPtr regionPtr)
+    {
+        uint64_t sequenceLength = regionPtr->getEndPosition() - regionPtr->getStartPosition();
+        uint32_t startPosition = regionPtr->getStartPosition() - m_region->getStartPosition();
+        if (regionPtr->getBased() == graphite::Region::BASED::ONE)
+        {
+            startPosition -= 1;
+            sequenceLength += 1;
+        }
+        std::string sequence = std::string(m_sequence.c_str() + startPosition, sequenceLength);
+
+        return sequence;
+    }
 
     void setSequence (graphite::Region::SharedPtr regionPtr, const std::string& sequence)
     {
@@ -203,19 +216,6 @@ public:
         m_sequence = sequence;
     }
 };
-
-// The problem lies in GSSWGraph->constructGraph() with the referenceSequenceString line.
-//   In the getSequenceFromRegion function underflow occurs in the if statement when 1 is subtracted from startPosition.
-//   The startPosition for both regionPtr and referencePtr = 1. This causes underflow when execution enters the if statement checking for BASED.
-// Do a traceback starting with this line.
-// Notes:
-//   currentReferencePosition is set equal to regionPtr startPosition before entering whiel loop (GSSWGraph.cpp).
-// Should currentReferencePosition = 0 ?
-//
-// The solution likely lies with adjusting the parameters of either regionPtr or referencePtr.
-//   Why doesn't currentReferencePosition change when I change the startPosition of regionPtr from 1 to 2?
-//   Try printing out all local variables in (gdb) info locals.
-//   Can compile in gdb using make.
 
 TEST(GSSWTests, GSSWSimplePaths)
 {
@@ -225,21 +225,7 @@ TEST(GSSWTests, GSSWSimplePaths)
 
     auto referencePtr = std::make_shared< TestReference1 > ();
     referencePtr->setSequence(regionPtr, sequence);
-
-    /*
-    std::cout << "Start position from region: " << regionPtr->getStartPosition() << std::endl;
-    std::cout << "Start position from reference: " << referencePtr->getRegion()->getStartPosition() << std::endl;
-    std::cout << "getRegionString: " << regionPtr->getRegionString() << std::endl;
-    std::cout << "getEndPosition(): " << regionPtr->getEndPosition() << std::endl;
-    std::cout << "getBased(): " << static_cast<int>(regionPtr->getBased()) << std::endl;
-    std::cout << "getBased() from referencePtr: " << static_cast<int>(referencePtr->getRegion()->getBased()) << std::endl;
-    std::cout << "region string from referencePtr: " << referencePtr->getRegion()->getRegionString() << std::endl;
-    //std::cout << "getSequence test: " << std::endl;
-    // The following test doesn't work.
-    //std::string referenceString = referencePtr->getSequenceFromRegion(regionPtr);
-    //std::cout << "The reference string: \n" << sequence << std::endl;
-    */
-    uint32_t readLength = 40;  // Need to double check that this works with BuildVariant
+    uint32_t readLength = 20;  // Need to double check that this works with BuildVariant
     auto variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), referencePtr, readLength);
 
     std::vector< graphite::IVariant::SharedPtr > variantPtrs = {variantPtr};

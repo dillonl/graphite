@@ -36,34 +36,87 @@ namespace graphite
 
 	void GSSWGraph::constructGraph()
 	{
+        std::cout << "Entered constructGraph" << std::endl;
 		int64_t referenceSize;
 		IVariant::SharedPtr variantPtr = nullptr;
 		std::vector< gssw_node* > altAndRefVertices;
 		position currentReferencePosition = this->m_region_ptr->getStartPosition();
+        //std::cout << "currentReferencePosition: " << currentReferencePosition << std::endl;
 
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
+            std::cout << "Entered while loop." << std::endl;
+            /*
+            // Instantiate vectors for the sequence headers and related sequences.
+            std::vector< std::string > sequenceHeaders(variantPtr->getAltAllelePtrs().size() + 1);
+            std::vector< std::string > sequences(variantPtr->getAltAllelePtrs().size() + 1);
+            */
+
 			if (variantPtr->shouldSkip())
 			{
 				m_skipped = true;
 				continue;
 			}
 			referenceSize = variantPtr->getPosition() - currentReferencePosition;
+
+            /*
+            // Double check that these sequence lengths are calculated correctly.
+            std::string refSeqStart = std::string(currentReferencePosition + this->m_reference_ptr->getSequence(), referenceSize);
+            std::string refSeqEnd = std::string(currentReferencePosition + this->m_reference_ptr->getSequence() + variantPtr->getRefAllelePtr()->getLength(), referenceSize);
+            */
+
 			if (referenceSize > 0)
 			{
+                std::cout << "Entered referenceSize if statement." << std::endl;
 				auto refRegionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), currentReferencePosition, variantPtr->getPosition() - 1, Region::BASED::ONE); // minus one because we don't want to include the actual variant position
+                //std::cout << "currentReferencePosition: " << currentReferencePosition << std::endl;
+                std::cout << "Setup refRegionPtr." << std::endl;
+                //std::cout << "getRegionString(): " << refRegionPtr->getRegionString() << std::endl;
 				std::string referenceSequenceString = this->m_reference_ptr->getSequenceFromRegion(refRegionPtr);
+                std::cout << "Setup referenceSequenceString." << std::endl;
 				auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
+                // std::cout << "Setup referenceAllelePtr." << std::endl;
 				auto referenceNode = addReferenceVertex(variantPtr->getRegions()[0]->getStartPosition(), referenceAllelePtr, altAndRefVertices);
+                // std::cout << "Setup referenceNode. " << std::endl;
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
+                // std::cout << "Added referenceNode." << std::endl;
 				m_total_graph_length += referenceSize;
 				currentReferencePosition += referenceSize;
 			}
+            std::cout << "Exited referenceSize if statement. " << std::endl;
+
+            /*
+            // Construct paths by Variant.
+            
+            // Create sequence headers and insert the starting reference sequence.
+            for (int i = 0; i < sequenceHeaders.size(); i++)
+            {
+                sequenceHeaders[i] = ">" + variantPtr->getChrom() + ":" + std::to_string(variantPtr->getPosition()) + ":" + std::to_string(i);
+                sequences[i] = refSeqStart;
+            }
+
+            // Append the rest of the reference sequence to refSeqStart.
+            sequences[0] += variantPtr->getRefAllelePtr()->getSequence() + refSeqEnd;
+
+            // Add the alternate alleles as well as refSeqEnd. Need to make sure this is done correctly.
+            for (int i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
+            {
+                sequences[i + 1] += variantPtr->getAltAllelePtrs()[i]->getSequence() + refSeqEnd;
+            }
+
+            // Append headers and paths to member variable.
+            for (int i = 0; i < sequences.size(); ++i)
+            {
+                m_graph_path_headers.emplace_back(sequenceHeaders[i]);
+                m_graph_path_sequences.emplace_back(sequences[i]);
+            }
+            */
 
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
 			currentReferencePosition += variantPtr->getReferenceSize();
 		}
+        std::cout << "Exited while loop." << std::endl;
         referenceSize = this->m_region_ptr->getEndPosition() - currentReferencePosition;
 		if (referenceSize > 0)
 		{
@@ -222,4 +275,13 @@ namespace graphite
 		m_graph_container_ptrs_queue.emplace(graphContainerPtr);
 	}
 
+    std::vector< std::string > GSSWGraph::getGraphPathHeaders()
+    {
+        return m_graph_path_headers;
+    }
+
+    std::vector< std::string > GSSWGraph::getGraphPathSequences()
+    {
+        return m_graph_path_sequences;
+    }
 }

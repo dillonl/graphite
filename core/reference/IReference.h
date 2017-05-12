@@ -23,11 +23,18 @@ namespace graphite
 		virtual size_t getSequenceSize(){ m_sequence.size(); }
 		virtual std::string getSequenceFromRegion(Region::SharedPtr regionPtr)
 		{
+            //std::cout << "Entered fxn getSequenceFromRegion" << std::endl;
 			uint64_t sequenceLength = regionPtr->getEndPosition() - regionPtr->getStartPosition();
+            //std::cout << "sequenceLength: " << sequenceLength << std::endl;
 			uint32_t startPosition = regionPtr->getStartPosition() - this->m_region->getStartPosition();
+            //std::cout << "region start position: " << regionPtr->getStartPosition() << std::endl;
+            //std::cout << " reference start position: " << m_region->getStartPosition() << std::endl;
+            //std::cout << "startPosition: " << startPosition << std::endl;
 			if (regionPtr->getBased() == Region::BASED::ONE)
 			{
-				startPosition -= 1;;
+                std::cout << "Entered if statement BASED::ONE" << std::endl;
+				startPosition -= 1;
+                std::cout << "startPosition: " << startPosition << std::endl;
 				sequenceLength += 1;
 			}
 			std::string sequence = std::string(this->m_sequence.c_str() + startPosition, sequenceLength);

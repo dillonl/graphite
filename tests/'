@@ -205,22 +205,13 @@ public:
 };
 
 // The problem lies in GSSWGraph->constructGraph() with the referenceSequenceString line.
-//   In the getSequenceFromRegion function underflow occurs in the if statement when 1 is subtracted from startPosition.
-//   The startPosition for both regionPtr and referencePtr = 1. This causes underflow when execution enters the if statement checking for BASED.
+// In the getSequenceFromRegion function underflow occurs in the if statement when 1 is subtracted from startPosition.
 // Do a traceback starting with this line.
-// Notes:
-//   currentReferencePosition is set equal to regionPtr startPosition before entering whiel loop (GSSWGraph.cpp).
-// Should currentReferencePosition = 0 ?
-//
-// The solution likely lies with adjusting the parameters of either regionPtr or referencePtr.
-//   Why doesn't currentReferencePosition change when I change the startPosition of regionPtr from 1 to 2?
-//   Try printing out all local variables in (gdb) info locals.
-//   Can compile in gdb using make.
 
 TEST(GSSWTests, GSSWSimplePaths)
 {
     std::string VCF_LINE_1 = "chr1\t10\trs11575897\tA\tT\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line.
-    auto regionPtr = std::make_shared< graphite::Region > ("1", 1, 50, graphite::Region::BASED::ONE);
+    auto regionPtr = std::make_shared< graphite::Region > ("1", 2, 50, graphite::Region::BASED::ONE);
     std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
 
     auto referencePtr = std::make_shared< TestReference1 > ();

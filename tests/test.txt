@@ -1,0 +1,51 @@
+class TestReference1: public graphite::IReference
+{
+private:
+
+public:
+    TestReference1 () {}
+
+    ~TestReference1 () {}
+
+    const char* getSequence() override { return m_sequence.c_str(); }
+    size_t getSequenceSize() override { return m_sequence.size(); }
+    std::string getSequenceFromRegion (graphite::Region::SharedPtr regionPtr)
+    {
+        uint64_t sequenceLength = regionPtr->getEndPosition() - regionPtr->getStartPosition();
+        uint32_t startPosition = regionPtr->getStartPosition() - m_region->getStartPosition();
+        if (regionPtr->getBased() == graphite::Region::BASED::ONE)
+        {
+            startPosition -= 1;
+            sequenceLength += 1;
+        }
+        std::string sequence = std::string(m_sequence.c_str() + startPosition, sequenceLength);
+
+        return sequence;
+    }
+
+    void setSequence (graphite::Region::SharedPtr regionPtr, const std::string& sequence)
+    {
+        m_region = regionPtr;
+        m_sequence = sequence;
+    }
+};
+
+TEST(GSSWTests, GSSWSimplePaths)
+{
+    std::string VCF_LINE_1 = "chr1\t10\trs11575897\tA\tT\t34439.5\tPASS\tAA=G;AC=22;AF=0.0178427;AN=1233;DP=84761;NS=1233;AMR_AF=0.0000;AFR_AF=0.0000;EUR_AF=0.0000;SAS_AF=0.0000;EAS_AF=0.0451\tGT\t0\t0"; // is not the complete first line.
+    auto regionPtr = std::make_shared< graphite::Region > ("1", 1, 50, graphite::Region::BASED::ONE);
+    std::string sequence = "TGAAGGCCAAAATTCAGATTCAGGACCCCTCCCGGGTAAAAATATATATA";
+
+    auto referencePtr = std::make_shared< TestReference1 > ();
+    referencePtr->setSequence(regionPtr, sequence);
+    uint32_t readLength = 20;  // Need to double check that this works with BuildVariant
+    auto variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), referencePtr, readLength);
+
+    std::vector< graphite::IVariant::SharedPtr > variantPtrs = {variantPtr};
+    auto variantListPtr = std::make_shared< graphite::VariantList >(variantPtrs, referencePtr);
+    uint32_t numGraphCopies = 1;    // Dummy variable for the updated GSSWGraph constructor.
+    auto gsswGraphPtr = std::make_shared< graphite::GSSWGraph >(referencePtr, variantListPtr, regionPtr, 1, 1, 1, 1, numGraphCopies);
+
+    std::cout << "Created gsswGraphPtr" << std::endl;
+    gsswGraphPtr->constructGraph();
+}

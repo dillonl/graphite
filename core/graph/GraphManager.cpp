@@ -7,6 +7,7 @@
 #include "core/mapping/GSSWMapping.h"
 
 #include "core/alignment/BamAlignmentManager.h"
+#include "core/file/FastaFileWriter.h"
 
 #include <queue>
 #include <algorithm>
@@ -125,6 +126,20 @@ namespace graphite
 
 		auto referenceGraphPtr = std::make_shared< ReferenceGraph >(this->m_reference_ptr, variantsListPtr, regionPtr, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue(), numGraphCopies);
 		referenceGraphPtr->constructGraph();
+
+        // Write fasta headers and sequences to file.
+        {
+            std::vector< std::string > graphPathHeaders = gsswGraphPtr->getGraphPathHeaders();
+            std::vector< std::string > graphPathSequences = gsswGraphPtr->getGraphPathSequences();
+
+            std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
+            graphite::FastaFileWriter fastaFileWriter;
+            fastaFileWriter.open("TestFastaFile.fa");
+            fastaFileWriter.write(graphPathHeaders, graphPathSequences);
+            fastaFileWriter.close();
+
+            this->m_gssw_graphs.emplace_back(gsswGraphPtr);
+        }
 
 		static int count = 0;
 

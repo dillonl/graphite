@@ -63,6 +63,10 @@ namespace graphite
 		position getEndPosition() override {  this->m_region_ptr->getEndPosition(); }
 		std::shared_ptr< GSSWGraphContainer > getGraphContainer();
 
+        // Fasta getter fxns.
+        std::vector< std::string > getGraphPathHeaders();
+        std::vector< std::string > getGraphPathSequences();
+
 	protected:
 
 		void generateGraphCopies();
@@ -87,6 +91,10 @@ namespace graphite
 
 		size_t m_total_graph_length;
 		bool m_skipped;
+        
+        // Fasta Headers and Sequences.
+        std::vector< std::string > m_graph_path_headers;
+        std::vector< std::string > m_graph_path_sequences;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
