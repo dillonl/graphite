@@ -58,6 +58,7 @@ namespace graphite
 				continue;
 			}
 			referenceSize = variantPtr->getPosition() - currentReferencePosition;
+            std::cout << "referenceSize: " << referenceSize << std::endl;
 
             /*
             // Double check that these sequence lengths are calculated correctly.

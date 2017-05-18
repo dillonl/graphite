@@ -239,7 +239,7 @@ TEST(GSSWTests, GSSWSimplePaths)
     //std::string referenceString = referencePtr->getSequenceFromRegion(regionPtr);
     //std::cout << "The reference string: \n" << sequence << std::endl;
     */
-    uint32_t readLength = 40;  // Need to double check that this works with BuildVariant
+    uint32_t readLength = 5;  // Need to double check that this works with BuildVariant
     auto variantPtr = graphite::Variant::BuildVariant(VCF_LINE_1.c_str(), referencePtr, readLength);
 
     std::vector< graphite::IVariant::SharedPtr > variantPtrs = {variantPtr};
