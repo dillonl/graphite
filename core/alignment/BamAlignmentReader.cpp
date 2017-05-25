@@ -12,6 +12,7 @@ namespace graphite
 		m_is_open(false),
 		m_alignment_reader_manager_ptr(nullptr)
 	{
+
 	}
 
 	BamAlignmentReader::BamAlignmentReader(const std::string& bamPath, AlignmentReaderManager< BamAlignmentReader >* alignmentReaderManagerPtr) :
@@ -30,11 +31,12 @@ namespace graphite
 		std::lock_guard< std::mutex > l(m_lock);
 		if (m_is_open) { return; }
 		m_is_open = true;
-		if (!this->m_bam_reader.Open(this->m_bam_path))
+		this->m_bam_reader = std::make_shared< BamTools::BamReader >();
+		if (!this->m_bam_reader->Open(this->m_bam_path))
 		{
 			throw "Unable to open bam file";
 		}
-		this->m_bam_reader.LocateIndex();
+		this->m_bam_reader->LocateIndex();
 	}
 
 	void BamAlignmentReader::close()
@@ -42,7 +44,7 @@ namespace graphite
 		std::lock_guard< std::mutex > l(m_lock);
 		if (!m_is_open) { return; }
 		m_is_open = false;
-		this->m_bam_reader.Close();
+		this->m_bam_reader->Close();
 	}
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads)
@@ -54,16 +56,17 @@ namespace graphite
 		}
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 
-		int refID = this->m_bam_reader.GetReferenceID(regionPtr->getReferenceID());
+		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
-		this->m_bam_reader.SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
+		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 
 
 		size_t counter = 0;
 
 		uint32_t count = 0;
+		// std::cout << "BamAlignmentReader.cpp refID: " << refID << std::endl;
 		BamTools::BamAlignment bamAlignment;
-		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
+		while(this->m_bam_reader->GetNextAlignment(bamAlignment))
 		{
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
 			std::string sampleName;
@@ -80,6 +83,8 @@ namespace graphite
 		{
 			m_alignment_reader_manager_ptr->checkinReader(this->shared_from_this());
 		}
+
+		// std::cout << "got reads: " << regionPtr->getRegionString() << " " << alignmentPtrs.size() << std::endl;
 		return alignmentPtrs;
 	}
 

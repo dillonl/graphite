@@ -37,7 +37,7 @@ namespace graphite
 	private:
         AlignmentReaderManager< BamAlignmentReader >* m_alignment_reader_manager_ptr;
 
-        BamTools::BamReader m_bam_reader;
+		std::shared_ptr< BamTools::BamReader > m_bam_reader;
 		std::string m_bam_path;
 		bool m_is_open;
 		std::mutex m_lock;
