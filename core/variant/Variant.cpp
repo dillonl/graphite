@@ -52,7 +52,6 @@ namespace graphite
 		variantPtr->m_filter = vcfComponents[6];
 		fields = vcfComponents[7];
 
-
 		variantPtr->m_info_fields.clear();
 		variantPtr->setUnorderedMapKeyValue(fields);
 		variantPtr->setAlleles(referencePtr, ref, alts, readLength);
@@ -322,20 +321,23 @@ namespace graphite
 		{
 			setSkip(true);
 		}
-		if (m_is_sv)
-		{
-			position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
-			position endPosition1 = this->m_position + (readLength + m_overlap);
-			position startPosition2 = (((this->m_position + 1) + svLength - (readLength + m_overlap)) <= 0) ? 0 : ((this->m_position + 1) + svLength - (readLength + m_overlap));
-			position endPosition2 = (this->m_position + 1 + svLength + readLength + m_overlap);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
-		}
 		else
 		{
-			position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
-			position endPosition1 = (this->m_position + svLength + 1 + readLength + m_overlap);
-			m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			if (m_is_sv)
+			{
+				position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
+				position endPosition1 = this->m_position + (readLength + m_overlap);
+				position startPosition2 = (((this->m_position + 1) + svLength - (readLength + m_overlap)) <= 0) ? 0 : ((this->m_position + 1) + svLength - (readLength + m_overlap));
+				position endPosition2 = (this->m_position + 1 + svLength + readLength + m_overlap);
+				m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+				m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition2, endPosition2, Region::BASED::ONE));
+			}
+			else
+			{
+				position startPosition1 = (this->m_position - (readLength + m_overlap) <= 0) ? 0 : (this->m_position - (readLength + m_overlap));
+				position endPosition1 = (this->m_position + svLength + 1 + readLength + m_overlap);
+				m_region_ptrs.emplace_back(std::make_shared< Region >(m_chrom, startPosition1, endPosition1, Region::BASED::ONE));
+			}
 		}
 	}
 

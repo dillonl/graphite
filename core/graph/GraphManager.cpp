@@ -37,6 +37,7 @@ namespace graphite
 		IVariant::SharedPtr variantPtr = nullptr;
 		while (variantsListPtr->getNextVariant(variantPtr))
 		{
+			if (variantPtr->shouldSkip()) { continue; }
 			position startPosition = 0;
 			position endPosition = 0;
 			auto variantRegionPtrs = variantPtr->getRegions();
@@ -89,6 +90,7 @@ namespace graphite
 				}
 			}
 			alignmentPtrSet.clear();
+			// std::cout << regionPtr->getRegionString() << " " << alignmentPtrs.size() << std::endl;
 			if (alignmentPtrs.size() > 0)
 			{
 				// find the start and end position for the graph

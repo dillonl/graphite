@@ -47,7 +47,15 @@ namespace graphite
 	void BamAlignmentManager::loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding)
 	{
 		ThreadPool::Instance()->start();
-		auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
+		// auto regionPtrs = getRegionsContainingVariantsWithPadding(variantManagerPtr, variantPadding);
+		std::vector< Region::SharedPtr > regionPtrs;
+		auto variantListPtr = variantManagerPtr->getVariantsInRegion(this->m_region_ptr);
+		IVariant::SharedPtr variantPtr;
+		while (variantListPtr->getNextVariant(variantPtr))
+		{
+			auto variantRegionPtrs = variantPtr->getRegions();
+			regionPtrs.insert(regionPtrs.end(), variantRegionPtrs.begin(), variantRegionPtrs.end());
+		}
 
 		std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > > futureFunctions;
 
