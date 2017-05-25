@@ -336,7 +336,7 @@ namespace
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
-	static std::string VCF_LINE_INS = "1\t10\tWG:INS:a3bcba65\tT\t<INS>\t.\t.\tSVTYPE=INS;SVLEN=20;SEQ=AAAAAAAAAAAAAAAAAAAA;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
+	static std::string VCF_LINE_INS = "1\t10\tWG:INS:a3bcba65\tT\t<INS>\t.\t.\tSVTYPE=INS;SVLEN=20;SEQ=TAAAAAAAAAAAAAAAAAAA;ID=a3bcba65;SUPPORT=21,22;MERGED=0;REFINED=1;END=75148220;POS=75148200,75148220;LID=NA12878;RID=NA12878;CIPOS=-10,10;CIEND=-10,10;COLLAPSED=0\tGT:GL:AS:RS\t0/1:-2655.97,-1567.88,-6335.32:24:47";
 	TEST(VariantsTest, ParseVariantInsTest)
 	{
 		// TGATGGAACTGACCAAACGTC
@@ -347,7 +347,7 @@ namespace
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INS.c_str(), referencePtr, 300);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "T");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAAAAAAAAAAAAAAAAA");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAAAAAAAAAAAAAAAA");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 
@@ -360,7 +360,7 @@ namespace
 		variantPtr = graphite::Variant::BuildVariant(VCF_LINE_INS.c_str(), referencePtr, 6);
 
 		ASSERT_STREQ(variantPtr->getRef().c_str(), "T");
-		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAAANNNNNNAAAAAA");
+		ASSERT_STREQ(variantPtr->getAltAllelePtrs()[0]->getSequence(), "TAAAAANNNNNNAAAAAA");
 		ASSERT_EQ(variantPtr->getAltAllelePtrs().size(), 1);
 	}
 

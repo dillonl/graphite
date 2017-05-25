@@ -128,8 +128,8 @@ namespace graphite
 
 	void Variant::setAsDeletion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		// auto maxSize = readLength * 3;
-		auto maxSize = std::numeric_limits< uint32_t >::max();
+		auto maxSize = readLength * 3;
+		// auto maxSize = std::numeric_limits< uint32_t >::max();
 		std::string ref;
 		if (svLength > maxSize) // if the variant is too large then create a truncated reference allele with Ns seperating the two breakpoints
 		{
@@ -148,8 +148,8 @@ namespace graphite
 
 	void Variant::setAsDuplication(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		// auto maxSize = readLength * 3;
-		auto maxSize = std::numeric_limits< uint32_t >::max();
+		auto maxSize = readLength * 3;
+		// auto maxSize = std::numeric_limits< uint32_t >::max();
 		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
 		std::string ref;
 		std::string alt;
@@ -177,8 +177,8 @@ namespace graphite
 
 	void Variant::setAsInversion(Reference::SharedPtr referencePtr, int svLength, uint32_t readLength)
 	{
-		// auto maxSize = readLength * 3;
-		auto maxSize = std::numeric_limits< uint32_t >::max();
+		auto maxSize = readLength * 3;
+		// auto maxSize = std::numeric_limits< uint32_t >::max();
 		const char* reference = referencePtr->getSequence() + (m_position - referencePtr->getRegion()->getStartPosition());
 		std::string ref;
 		std::string alt;
@@ -210,8 +210,8 @@ namespace graphite
 
 	void Variant::setAsInsertion(const std::string& ref, const std::string& alt, uint32_t readLength)
 	{
-		// auto maxSize = readLength * 3;
-		auto maxSize = std::numeric_limits< uint32_t >::max();
+		auto maxSize = readLength * 3;
+		// auto maxSize = std::numeric_limits< uint32_t >::max();
 		std::vector< std::string > alts;
 		if (alt.size() > maxSize)
 		{
@@ -232,8 +232,9 @@ namespace graphite
 		m_reference_size = ref.size();
 		std::string tmpRef;
 		m_variant_size = ref.size();
-		if (m_is_sv)
+		if (ref.size() > (readLength * 3))
 		{
+			m_is_sv = true;
 			tmpRef = ref.c_str()[0] + getTruncatedSequence(ref.c_str() + 1, ref.size() - 1, readLength);
 		}
 		else
@@ -258,8 +259,9 @@ namespace graphite
 			{
 				m_variant_size = tmpAlt.size();
 			}
-			if (m_is_sv)
+			if (tmpAlt.size() > (readLength * 3))
 			{
+				m_is_sv = true;
 				alts.emplace_back(getTruncatedSequence(tmpAlt.c_str(), tmpAlt.size(), readLength));
 			}
 			else
@@ -273,15 +275,11 @@ namespace graphite
 
 	void Variant::setAlleles(Reference::SharedPtr referencePtr, const std::string& vcfReferenceString, const std::string& alt, uint32_t readLength)
 	{
+		m_is_sv = false;
 		bool shouldSkip = true;
 		int svLength = getSVLengthFromInfo(m_info_fields, m_position);
 		if (isStandardAlt(alt))
 		{
-			// for (auto allelePtr  : m_all_allele_ptrs)
-			// {
-				// if (allelePtr->getLength() > (readLength * 3)) { m_is_sv = true; break; }
-			// }
-			m_is_sv = false;
 			setAsStandardAlt(vcfReferenceString, alt, readLength);
 			shouldSkip = false;
 			svLength = vcfReferenceString.size();
