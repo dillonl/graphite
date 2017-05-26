@@ -65,8 +65,6 @@ int main(int argc, char** argv)
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
 	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
 
-	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount);
-
 	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
 	for (auto vcfPath : vcfPaths)
 	{
@@ -99,6 +97,7 @@ int main(int argc, char** argv)
 
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
+		auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount); // this used to go above this loop but it caused issues with loading bam regions from out-of-order VCFs
 		auto regionPtr = regionPtrs[regionCount];
 
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
