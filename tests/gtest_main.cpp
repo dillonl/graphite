@@ -12,6 +12,9 @@
 #include "CompoundVariantTests.hpp"
 #include "FastaReferenceTests.hpp"
 
+#include "BamHeaderTests.hpp"
+#include "BamAlignmentManagerTests.hpp"
+
 GTEST_API_ int main(int argc, char** argv)
 {
 	::testing::InitGoogleTest(&argc, argv);

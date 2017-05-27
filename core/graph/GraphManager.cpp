@@ -7,6 +7,7 @@
 #include "core/mapping/GSSWMapping.h"
 
 #include "core/alignment/BamAlignmentManager.h"
+#include "core/alignment/BamAlignment.h"
 #include "core/file/FastaFileWriter.h"
 
 #include <queue>
@@ -137,19 +138,28 @@ namespace graphite
             fastaFileWriter.open("TestFastaFile.fa");
             fastaFileWriter.write(graphPathHeaders, graphPathSequences);
             fastaFileWriter.close();
-
-            this->m_gssw_graphs.emplace_back(gsswGraphPtr);
         }
 
 		static int count = 0;
 
 		IAlignment::SharedPtr alignmentPtr;
 		auto alignmentPtrs = alignmentListPtr->getAlignmentPtrs();
+        
+        /*
+        // Write sam header to file. Am trying to setup a getter function in BamAlignmentManager.h so that I can get the BamAlignmentReader from m_alignment_manager_ptr.
+        graphite::BamAlignmentManager::SharedPtr bamAlignmentManagerPtr = std::dynamic_pointer_cast< graphite::BamAlignmentManager >(m_alignment_manager_ptr);
+        std::ofstream samFile;
+        samFile.open("NewSamFile.sam");
+
+        samFile.close();     // Close the SAM file.
+        */
+        
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
+
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
-			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this]()
+			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this, regionPtr]()
 			{
 				auto refTraceback = referenceGraphPtr->traceBackAlignment(alignmentPtr, refGraphContainer);
 				auto referenceMappingPtr = std::make_shared< GSSWMapping >(refTraceback, alignmentPtr);
@@ -158,6 +168,35 @@ namespace graphite
 
 				auto tracebackPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr, gsswGraphContainer);
 				auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackPtr, alignmentPtr);
+
+                // Write Bam data to new sam file.
+                // Verify new position calculation.
+                // Need to modify column 3.
+                // Want to doulbe check that the CIGAR string is correct.
+                // Need to modify column 7.
+                {
+                    std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
+                    graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(alignmentPtr);
+                    std::ofstream samFile;
+                    samFile.open("NewSamFile.sam", std::ios::app);
+
+                    samFile
+                        << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
+                        << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
+                        << regionPtr->getRegionString().substr(0, 5)    << "\t" //  3. RNAME Need to parse string to obtain the correct chromosome.
+                        << gsswMappingPtr->getPosition()                << "\t" //  4. POS New position.
+                        << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
+                        << gsswMappingPtr->getCigarString(m_adjudicator_ptr) << "\t" //  6. New CIGAR string.
+                        << "*"                                          << "\t" // 7. Place holder for actual value.
+                        //<< bamAlignmentPtr->getMateID()                 << "\t" //  7. RNEXT INCORRECT value.
+                        << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
+                        << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
+                        << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
+                        << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
+                        << std::endl; 
+
+                    samFile.close();     // Close the SAM file.
+                }
 
 				auto gsswSWScore = referenceMappingPtr->getMappingScore();
 				uint32_t gsswSWPercent = ((gsswSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);

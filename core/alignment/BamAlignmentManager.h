@@ -32,6 +32,7 @@ namespace graphite
 		SampleManager::SharedPtr getSamplePtrs() override;
 		static std::vector< Sample::SharedPtr > GetSamplePtrs(std::vector< std::string >& bamPaths);
 		static uint32_t GetReadLength(std::vector< std::string >& bamPaths);
+
 	private:
 		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 

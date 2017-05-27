@@ -72,6 +72,29 @@ namespace graphite
 		return mappingAlignmentInfoPtrs;
 	}
 
+    std::string GSSWMapping::getCigarString (IAdjudicator::SharedPtr adjudicatorPtr)
+    {
+        std::vector< MappingAlignmentInfo::SharedPtr > MappingAlignmentPtrs;
+        gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+
+        std::string cigar = "";
+        for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+        {
+            int32_t score = 0;
+            uint32_t length = 0;
+            uint32_t prefixMatch = 0;
+            uint32_t suffixMatch = 0;
+            auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
+
+            for (int j = 0; j < nc->cigar->length; ++j)
+            {
+                cigar += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
+            }
+        }
+
+        return cigar;
+    }
+
 	int GSSWMapping::getMappingScore()
 	{
 		return this->m_gssw_mapping_ptr->score;

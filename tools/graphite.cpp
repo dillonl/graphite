@@ -63,6 +63,31 @@ int main(int argc, char** argv)
 	}
 
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
+
+    // One solution for multiple bam files is to make a struct or class that contains all the open new_bam files. Then use them to write out the BamAlignment to the appropriate new_bam file.
+    if (bamPaths.size() == 1)
+    {
+        graphite::BamAlignmentReader bar(bamPaths[0]);
+        bar.open();
+        std::string samHeader = bar.getSamHeader();
+        bar.close();
+        std::ofstream samFile;
+        samFile.open("NewSamFile.sam", std::ios::trunc);
+        samFile << samHeader << std::endl;
+        samFile.close();
+    }
+    /*
+    for (auto& bamPath : bamPaths)
+    {
+        graphite::BamAlignmentReader bar(bamPath);
+        std::string samHeader = bar.getSamHeader();
+        std::fstream samFile;
+        samFile.open("NewSamFile.sam");//, std::ios::trunc);
+        samFile << samHeader << std::endl;
+        samFile.close();
+    }
+    */
+
 	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
 
 	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount);

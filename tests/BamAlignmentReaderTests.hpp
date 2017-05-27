@@ -19,6 +19,37 @@ graphite::BamAlignmentReader::SharedPtr getBamAlignmentReader(const std::string&
 	return bamAlignmentReaderPtr;
 }
 
+TEST(BamAlignmentReaderTests, GetSamHeader)
+{
+    std::cout << "Test is running! " << std::endl;
+    std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
+    auto bamAlignmentReaderPtr = getBamAlignmentReader(bamPath);
+    std::cout << bamAlignmentReaderPtr->getSamHeader() << std::endl;
+}
+
+/*
+ * Refer to whiteboard image of discussion with Dillon.
+TEST(BamAlignmentReaderTests, GetSamDataInRegion)
+{
+    std::cout << "Test is running! " << std:endl;
+    std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
+    auto bamAlignmentReaderPtr = getBamAlignmentReader(bamPath);
+    std::string regionString = "20:1-1000000";
+    auto regionPtr = std::make_shared< graphite::Region >(regionString);
+    auto alignmentsList = bamAlignmentReaderPtr->loadAlignmentsInRegion(regionPtr);
+    std::vector< std::string > BamReadNames;
+	for (auto alignmentPtr : alignmentsList)
+    {
+        BamReadNames.push_back(alignmentPtr->getQNAME);
+    }
+    
+    for (auto namesPtr : BamReadNames)
+    {
+        std::cout << namesPtr << std::endl;
+    }
+}
+*/
+
 /*
 TEST(BamAlignmentReaderTests, TestLoadAlignmentRegion)
 {

@@ -30,6 +30,8 @@ namespace graphite
 		void printMapping() override;
 		void printSimpleMapping();
 
+        std::string getCigarString (IAdjudicator::SharedPtr adjudicatorPtr);
+
     private:
 
 		std::shared_ptr< gssw_graph_mapping > m_gssw_mapping_ptr;

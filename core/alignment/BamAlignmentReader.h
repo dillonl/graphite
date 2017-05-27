@@ -33,6 +33,8 @@ namespace graphite
 
 		std::string getPath() { return m_bam_path; }
         uint32_t getReaderID() { return m_id; }
+        
+        std::string getSamHeader () { return m_bam_reader.GetHeaderText();}    // Return SAM header from the BAM file as a string.
 
 	private:
         AlignmentReaderManager< BamAlignmentReader >* m_alignment_reader_manager_ptr;

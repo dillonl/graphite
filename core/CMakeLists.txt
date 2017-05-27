@@ -32,6 +32,7 @@ set(GRAPHITE_FILE_SOURCES
   file/ASCIIFileReader.cpp
   file/ASCIIGZFileReader.cpp
   file/FastaFileWriter.cpp
+  file/BamFileReader.cpp
   )
 
 set(GRAPHITE_CORE_REFERENCE_SOURCES

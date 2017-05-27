@@ -32,9 +32,9 @@ namespace graphite
             //std::cout << "startPosition: " << startPosition << std::endl;
 			if (regionPtr->getBased() == Region::BASED::ONE)
 			{
-                std::cout << "Entered if statement BASED::ONE" << std::endl;
+                //std::cout << "Entered if statement BASED::ONE" << std::endl;
 				startPosition -= 1;
-                std::cout << "startPosition: " << startPosition << std::endl;
+                //std::cout << "startPosition: " << startPosition << std::endl;
 				sequenceLength += 1;
 			}
 			std::string sequence = std::string(this->m_sequence.c_str() + startPosition, sequenceLength);
