@@ -19,7 +19,7 @@ namespace graphite
     {
         if (m_opened) { return true; }
         //m_out_stream.open(m_file_path);
-        m_out_stream.open(fileName);
+        m_out_stream.open(fileName, std::ios::app);
         m_opened = true;
     }
 

@@ -46,11 +46,9 @@ namespace graphite
 		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		{
             //std::cout << "Entered while loop." << std::endl;
-            /*
             // Instantiate vectors for the sequence headers and related sequences.
             std::vector< std::string > sequenceHeaders(variantPtr->getAltAllelePtrs().size() + 1);
             std::vector< std::string > sequences(variantPtr->getAltAllelePtrs().size() + 1);
-            */
 
 			if (variantPtr->shouldSkip())
 			{
@@ -60,11 +58,9 @@ namespace graphite
 			referenceSize = variantPtr->getPosition() - currentReferencePosition;
             //std::cout << "referenceSize: " << referenceSize << std::endl;
 
-            /*
-            // Double check that these sequence lengths are calculated correctly.
+            // refSeqEnd should be calculated correctly if the alt sequence region is the same length as the ref sequences.
             std::string refSeqStart = std::string(currentReferencePosition + this->m_reference_ptr->getSequence(), referenceSize);
             std::string refSeqEnd = std::string(currentReferencePosition + this->m_reference_ptr->getSequence() + variantPtr->getRefAllelePtr()->getLength(), referenceSize);
-            */
 
 			if (referenceSize > 0)
 			{
@@ -87,9 +83,7 @@ namespace graphite
 			}
             //std::cout << "Exited referenceSize if statement. " << std::endl;
 
-            /*
             // Construct paths by Variant.
-            
             // Create sequence headers and insert the starting reference sequence.
             for (int i = 0; i < sequenceHeaders.size(); i++)
             {
@@ -112,7 +106,6 @@ namespace graphite
                 m_graph_path_headers.emplace_back(sequenceHeaders[i]);
                 m_graph_path_sequences.emplace_back(sequences[i]);
             }
-            */
 
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
 			currentReferencePosition += variantPtr->getReferenceSize();

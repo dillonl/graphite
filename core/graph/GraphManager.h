@@ -29,6 +29,9 @@ namespace graphite
 		 */
 		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
 
+        std::vector< std::string > getGraphPathHeaders ();
+        std::vector< int > getGraphPathLengths ();
+
 	private:
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength);
 
@@ -39,6 +42,9 @@ namespace graphite
 		IVariantManager::SharedPtr m_variant_manager_ptr;
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
 		IAdjudicator::SharedPtr m_adjudicator_ptr;
+
+        std::vector< std::string > m_graph_path_headers;  // Graph path headers for the resulting fasta file.
+        std::vector< int > m_graph_path_lengths;
 	};
 }
 

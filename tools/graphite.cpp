@@ -16,17 +16,17 @@
 #include "core/file/IFile.h"
 #include "core/file/BGZFFileWriter.h"
 #include "core/file/ASCIIFileWriter.h"
+#include "core/file/BamHeaderReader.h"
 
 #include <thread>
 #include <unordered_set>
 #include <fstream>
 #include <stdio.h>
 
-#include <zlib.h>
+#include <zlib.h>   // May not need this.
 
 int main(int argc, char** argv)
 {
-	// graphite::AlignmentManager< HTSLibAlignmentReader > tmp;
 	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
@@ -65,6 +65,8 @@ int main(int argc, char** argv)
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
 
     // One solution for multiple bam files is to make a struct or class that contains all the open new_bam files. Then use them to write out the BamAlignment to the appropriate new_bam file.
+    // Retrieve SAM header from input bam file.
+    /*
     if (bamPaths.size() == 1)
     {
         graphite::BamAlignmentReader bar(bamPaths[0]);
@@ -73,9 +75,10 @@ int main(int argc, char** argv)
         bar.close();
         std::ofstream samFile;
         samFile.open("NewSamFile.sam", std::ios::trunc);
-        samFile << samHeader << std::endl;
+        samFile << samHeader;
         samFile.close();
     }
+    */
     /*
     for (auto& bamPath : bamPaths)
     {
@@ -164,6 +167,28 @@ int main(int argc, char** argv)
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 		// auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
+
+        // Update SAM Header with new reference names and write to file.
+        if (bamPaths.size() == 1)
+        {
+            // Retrieve output FASTA information.
+            std::vector< std::string > graphPathHeaders = gsswGraphManager->getGraphPathHeaders();
+            std::vector< int > graphPathLengths = gsswGraphManager->getGraphPathLengths();
+            
+            // Add graphPathHeaders to SAM header and output.
+            graphite::BamHeaderReader bamFile(bamPaths[0]);
+            bamFile.open();
+            bamFile.createPathHeaderVector(graphPathHeaders, graphPathLengths);
+            bamFile.addPathHeadersToSamHeader();
+            std::string samHeader = bamFile.getModifiedSamHeader();
+            bamFile.close();
+
+            // Write modified SAM header to file. Need to append alignment data manually for now.
+            std::ofstream samFile;
+            samFile.open("NewSamFile.sam", std::ios::trunc);
+            samFile << samHeader;
+            samFile.close();
+        }
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 		graphite::MappingManager::Instance()->clearRegisteredMappings();

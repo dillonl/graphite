@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <functional>
 
+//#include <string>
+
 namespace graphite
 {
 
@@ -130,8 +132,22 @@ namespace graphite
 
         // Write fasta headers and sequences to file.
         {
+            //std::vector< std::string > graphPathHeaders = gsswGraphPtr->getGraphPathHeaders();
+            //std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
             std::vector< std::string > graphPathHeaders = gsswGraphPtr->getGraphPathHeaders();
             std::vector< std::string > graphPathSequences = gsswGraphPtr->getGraphPathSequences();
+
+            // Store headers in member variable. Can also use a.insert(a.end(), b.begin(), b.end()); May be using std namespace.
+            for (auto header : graphPathHeaders)
+            {
+                m_graph_path_headers.push_back(header.substr(1));
+            }
+
+            // Store sequence lengths in member variable.
+            for (auto sequence : graphPathSequences)
+            {
+                m_graph_path_lengths.push_back(sequence.length());
+            }
 
             std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
             graphite::FastaFileWriter fastaFileWriter;
@@ -174,16 +190,21 @@ namespace graphite
                 // Need to modify column 3.
                 // Want to doulbe check that the CIGAR string is correct.
                 // Need to modify column 7.
+                // Remember that SAM has to be sorted by position to be loaded into IGV.
                 {
                     std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
                     graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(alignmentPtr);
                     std::ofstream samFile;
-                    samFile.open("NewSamFile.sam", std::ios::app);
+                    samFile.open("SamAlignmentData.sam", std::ios::app);
+                    for (auto headerName : m_graph_path_headers)
+                    {
 
                     samFile
                         << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
                         << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
-                        << regionPtr->getRegionString().substr(0, 5)    << "\t" //  3. RNAME Need to parse string to obtain the correct chromosome.
+                        // May be able to get this amount from variant_manager to variantPtr to getChrom().
+                        //<< regionPtr->getRegionString().substr(0, 5)    << "\t" //  3. RNAME Need to parse string to obtain the correct chromosome.
+                        << headerName    << "\t" //  3. RNAME; need to modify so that it outputs the correct "reference" name.
                         << gsswMappingPtr->getPosition()                << "\t" //  4. POS New position.
                         << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
                         << gsswMappingPtr->getCigarString(m_adjudicator_ptr) << "\t" //  6. New CIGAR string.
@@ -194,6 +215,7 @@ namespace graphite
                         << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
                         << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
                         << std::endl; 
+                    }
 
                     samFile.close();     // Close the SAM file.
                 }
@@ -223,4 +245,13 @@ namespace graphite
 		}
 	}
 
+    std::vector< std::string > GraphManager::getGraphPathHeaders ()
+    {
+        return m_graph_path_headers;
+    }
+    
+    std::vector< int > GraphManager::getGraphPathLengths ()
+    {
+        return m_graph_path_lengths;
+    }
 }
