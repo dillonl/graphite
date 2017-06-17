@@ -222,6 +222,7 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentAllChrom20)
 /**
  * Test that the BamAlignment object can be used to output the appropriate columns of the original BAM file.
  */
+/*
 TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
 {
 
@@ -240,13 +241,13 @@ TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
     // Print out first line of BAM region.
     // Will likely want to implement a more robust test method than printing out the values and eyeballing them.
     // May also want to change the function names for these parameters in BamAlignment.h
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         // Cast iAlgnmentPtrs vector to bamAlignment ptrs.
         graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(iAlignmentPtrs[i]);
         std::cout
-            /*
             << bamAlignmentPtr->getName() << "\t"                   //  1. QNAME
+            << bamAlignmentPtr->getRefSeqName()
             << bamAlignmentPtr->getAlignmentFlag() << "\t"          //  2. FLAG
             << "RNAME Place_Holder" << "\t"                         // RNAME ERROR
             //<< bamAlignmentPtr->getRefSeqName() << "\t"           //  3. RNAME ERROR May just need to get the chr from the regionPtr.
@@ -260,13 +261,13 @@ TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
             << bamAlignmentPtr->getTemplateLength() << "\t"         //  9. TLEN
             << bamAlignmentPtr->getSequence() << "\t"               // 10. SEQ
             << bamAlignmentPtr->getFastqQualities() << "\t"         // 11. QUAL
-            */
             << std::endl;
     }
 
     bamAlignmentReader.close();
 
 }
+*/
 /*
 TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
 {

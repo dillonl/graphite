@@ -63,9 +63,15 @@ namespace graphite
 		position getEndPosition() override {  this->m_region_ptr->getEndPosition(); }
 		std::shared_ptr< GSSWGraphContainer > getGraphContainer();
 
-        // Fasta getter fxns.
-        std::vector< std::string > getGraphPathHeaders();
-        std::vector< std::string > getGraphPathSequences();
+        /* Old graph path getters
+        std::vector< std::string > getGraphPathHeaders ();      // Get graph path headers for FASTA file.
+        std::vector< std::string > getGraphPathSequences ();    // Get graph path sequences for FASTA file.
+        std::vector< int > getGraphPathOffsets ();  // Get graph path offsets to adjust the position in the resulting SAM file.
+        std::vector< int > getGraphPathLengths ();  // Get the size the each graphPath sequence.
+        */
+        // Sam getters
+        position getVariantPosition () { return m_variant_position; }
+
 
 	protected:
 
@@ -92,9 +98,6 @@ namespace graphite
 		size_t m_total_graph_length;
 		bool m_skipped;
         
-        // Fasta Headers and Sequences.
-        std::vector< std::string > m_graph_path_headers;
-        std::vector< std::string > m_graph_path_sequences;
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
@@ -166,6 +169,16 @@ namespace graphite
 		std::condition_variable m_condition;
 		std::queue< std::shared_ptr< GSSWGraphContainer > > m_graph_container_ptrs_queue;
 
+        // Fasta variables.
+        /*
+        std::vector< std::string > m_graph_path_headers;
+        std::vector< std::string > m_graph_path_sequences;
+        std::vector< int > m_graph_path_lengths;
+        std::vector< int > m_graph_path_offsets;
+        */
+
+        // Sam variables.
+        position m_variant_position;
 	};
 
 }

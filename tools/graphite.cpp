@@ -18,10 +18,14 @@
 #include "core/file/ASCIIFileWriter.h"
 #include "core/file/BamHeaderReader.h"
 
+#include "core/file/FastaFileWriter.h"
+
 #include <thread>
 #include <unordered_set>
 #include <fstream>
 #include <stdio.h>
+
+#include <unordered_map>
 
 #include <zlib.h>   // May not need this.
 
@@ -172,8 +176,31 @@ int main(int argc, char** argv)
         if (bamPaths.size() == 1)
         {
             // Retrieve output FASTA information.
+            std::unordered_map< std::string, std::string > headerSequenceMap = gsswGraphManager->getHeaderSequenceMap();
             std::vector< std::string > graphPathHeaders = gsswGraphManager->getGraphPathHeaders();
+            std::vector< std::string > graphPathSequences = gsswGraphManager->getGraphPathSequences();
             std::vector< int > graphPathLengths = gsswGraphManager->getGraphPathLengths();
+
+            graphite::FastaFileWriter fastaWriter;
+            fastaWriter.open("GraphPaths.fa");
+            for (auto& hs: headerSequenceMap)
+            {
+                /*
+                fastaWriter << ">" << hs.first << std::endl;
+                fastaWriter << hs.second << std::endl;
+                */
+                //fastaWriter.write(std::to_string(hs.first), std::to_string(hs.second));
+                fastaWriter.write(hs.first, hs.second);
+            }
+            fastaWriter.close();
+
+            // Write out the fasta file.
+            /*
+            graphite::FastaFileWriter fastaFileWriter;
+            fastaFileWriter.open("GraphPaths.fa");
+            fastaFileWriter.write(graphPathHeaders, graphPathSequences);
+            fastaFileWriter.close();
+            */
             
             // Add graphPathHeaders to SAM header and output.
             graphite::BamHeaderReader bamFile(bamPaths[0]);
@@ -184,6 +211,7 @@ int main(int argc, char** argv)
             bamFile.close();
 
             // Write modified SAM header to file. Need to append alignment data manually for now.
+            // May be able to write the samHeader close to where the bam alignment data is currently written out.
             std::ofstream samFile;
             samFile.open("NewSamFile.sam", std::ios::trunc);
             samFile << samHeader;

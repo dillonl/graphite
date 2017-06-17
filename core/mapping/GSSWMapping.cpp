@@ -1,4 +1,5 @@
 #include "GSSWMapping.h"
+#include "core/alignment/BamAlignment.h"
 
 #include <algorithm>
 #include <iostream>
@@ -9,6 +10,7 @@ namespace graphite
 {
     GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
 		m_gssw_mapping_ptr(gsswMappingPtr),
+        m_offset(m_gssw_mapping_ptr->position),
 		m_alignment_ptr(alignmentPtr),
 		m_position(0),
 		m_mapped(false)
@@ -35,6 +37,7 @@ namespace graphite
 	{
 		std::vector< MappingAlignmentInfo::SharedPtr > mappingAlignmentInfoPtrs;
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+        //std::vector< uint32_t > nids;
 		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
 			int32_t score = 0;
@@ -42,6 +45,9 @@ namespace graphite
 			uint32_t prefixMatch = 0;
 			uint32_t suffixMatch = 0;
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
+
+            //uint32_t nid = nc->node->id;
+
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
 				switch (nc->cigar->elements[j].type)
@@ -71,6 +77,33 @@ namespace graphite
 		}
 		return mappingAlignmentInfoPtrs;
 	}
+
+    void GSSWMapping::getGraphPathHeaderAndSequence (std::string& graphPathHeader, std::string& graphPathSequence, position variantPosition)
+    {
+		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+
+        std::string nids = "_";
+        // Need to alter refOrAlt to account for vcf lines that contain more than one variant.
+        int8_t refOrAlt = 0;
+
+        // Loop through nodes to extract node id's and sequences.
+        for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+        {
+            gssw_node* n = nc->node;
+            if (n->id % 2 != 0)
+                refOrAlt += 1;
+            nids +=  std::to_string(n->id) + ":";
+            /*
+            if (i != this->m_gssw_mapping_ptr->cigar.length - 1)
+                nids += ":";
+                */
+            graphPathSequence += std::string(n->seq, n->len);
+        }
+
+        graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(m_alignment_ptr);
+        //graphPathHeader = "RNAME_Header" + std::to_string(bamAlignmentPtr->getRefeqName()) + ":" + std::to_string(variantPosition) + ":" + std::to_string(refOrAlt) + "_" + nids;
+        graphPathHeader = bamAlignmentPtr->getAlignmentRegion(bamAlignmentPtr->getRefID()) + ":" + std::to_string(variantPosition) + "->" + "NEW_VARIANT_POSITION" + ":" + std::to_string(refOrAlt) + nids;
+    }
 
     std::string GSSWMapping::getCigarString (IAdjudicator::SharedPtr adjudicatorPtr)
     {

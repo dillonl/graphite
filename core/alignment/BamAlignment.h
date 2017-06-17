@@ -15,23 +15,8 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignment > SharedPtr;
-		/*
-	    BamAlignment(BamAlignmentPtr bamAlignmentPtr, std::shared_ptr< Sample > samplePtr) :
-		            m_position(bamAlignmentPtr->Position),
-					m_first_mate(bamAlignmentPtr->IsFirstMate()),
-					m_mapped(bamAlignmentPtr->IsMapped()),
-					m_reverse_strand(bamAlignmentPtr->IsReverseStrand()),
-					m_original_map_quality(bamAlignmentPtr->MapQuality),
-					m_id(bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate())),
-					m_length(bamAlignmentPtr->QueryBases.size())
-		{
-			m_sample_ptr = samplePtr;
-			m_sequence = new char[bamAlignmentPtr->QueryBases.size() + 1];
-			memcpy(m_sequence, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size() + 1); // the +1 is for the '\0' char
-		}
-		*/
-
-	    BamAlignment(BamTools::BamAlignment& bamAlignment, std::shared_ptr< Sample > samplePtr) :
+        // Currently a vector ref sequences is stored with each bamAlignment. A more optimized solution may be to create only a single instance. Maybe a static vector.
+	    BamAlignment(BamTools::BamAlignment& bamAlignment, std::shared_ptr< Sample > samplePtr, BamTools::RefVector refVector) :
 				m_position(bamAlignment.Position),
 				m_first_mate(bamAlignment.IsFirstMate()),
 				m_mapped(bamAlignment.IsMapped()),
@@ -44,13 +29,13 @@ namespace graphite
                 
                 m_name(bamAlignment.Name),                      // Read name.
                 m_alignment_flag(bamAlignment.AlignmentFlag),   // Alignment bit-flag.
-                m_ref_seq_name(bamAlignment.Name),              // Wrong value is returned... ID number for reference sequence.
+                m_ref_ID(bamAlignment.RefID),              // Wrong value is returned... ID number for reference sequence.
                 //m_cigar_data(bamAlignment.CigarData),           // CIGAR operations for this alignment.
                 m_mateID(bamAlignment.Qualities),               // ID number for the reference sequence where alignment's mate was aligned.
                 m_mate_position(bamAlignment.MatePosition),     // Position (0-based) where alignment's mate starts.
                 m_template_length(bamAlignment.InsertSize),     // Ovserved template length
-                m_qualities(bamAlignment.Qualities)             // FASTQ qualities (ASCII, not numerical values).
-
+                m_qualities(bamAlignment.Qualities),            // FASTQ qualities (ASCII, not numerical values).
+                m_ref_vector(refVector)                         // Original reference name of the alignment.
 		{
 			m_sample_ptr = samplePtr;
 			m_sequence = new char[bamAlignment.QueryBases.size() + 1];
@@ -71,22 +56,6 @@ namespace graphite
         // SEQ - BamTools::BamAlignment.QueryBases???
         // QUAL - BamTools::BamAlignment.Qualities
 
-				/*
-	    BamAlignment(position pos, bool firstMate, bool isMapped, bool isReverseStrand, bool duplicate, uint16_t mapQuality, char* id, std::shared_ptr< Sample > samplePtr) :
-				m_position(pos),
-				m_first_mate(firstMate),
-				m_mapped(isMapped),
-				m_reverse_strand(isReverseStrand),
-				m_original_map_quality(mapQuality),
-				m_id(std::string(id) + std::to_string(firstMate)),
-				m_duplicate(duplicate),
-				m_sequence_counter(0),
-				m_length(0),
-				m_sequence(nullptr)
-		{
-			m_sample_ptr = samplePtr;
-		}
-				*/
 		virtual ~BamAlignment() { delete[] m_sequence; }
 
 		const char* getSequence() override { return m_sequence; }
@@ -125,7 +94,7 @@ namespace graphite
         // New functions added.
         const std::string getName () { return m_name; }
         const uint32_t getAlignmentFlag () { return m_alignment_flag; }
-        const std::string getRefSeqName () { return m_ref_seq_name; } // Wrong value returned.
+        const int32_t getRefID () { return m_ref_ID; } // Wrong value returned.
         //void setNewPosition () {};
         //const std::vector< BamTools::CigarOp > getOriginalCigarData () { return m_cigar_data; }
         //void calculateNewCigarData () {};
@@ -134,6 +103,11 @@ namespace graphite
         const int32_t getMatePosition () { return m_mate_position; }
         const int32_t getTemplateLength () { return m_template_length; }
         const std::string getFastqQualities () { return m_qualities; }
+
+        std::string getAlignmentRegion (int32_t refID)
+        {
+            return m_ref_vector[refID].RefName;
+        }
 
     private:
 		std::mutex m_sequence_mutex;
@@ -150,14 +124,13 @@ namespace graphite
 
         std::string m_name;
         uint32_t m_alignment_flag;
-        std::string  m_ref_seq_name;       // Wrong value returned.
-        //std::vector< BamTools::CigarOp > m_cigar_data;
+        int32_t m_ref_ID;
         std::string m_mateID;
         int32_t m_mate_position;
         int32_t m_template_length;
         std::string m_qualities;
-        position m_new_position;
-        //std::vector m_new_cigar_data;
+        position m_new_position;                // May not need this.
+        BamTools::RefVector m_ref_vector;       // BamTools::BamReader::RefVector
 	};
 }
 

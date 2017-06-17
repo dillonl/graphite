@@ -21,6 +21,13 @@ namespace graphite
 		IAlignment::SharedPtr getAlignmentPtr() override;
 		std::vector< IAllele::SharedPtr > getAllelePtrs() override;
 		position getPosition() override { return m_position; }
+        uint32_t getOffset () 
+        { 
+            if (m_offset == 0)
+                m_offset = 1;
+
+            return m_offset;
+        }      // Return the offset from the beginning of the graph. +1 because the started base will be at position 1.
 		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);
 		void incrementAlleleCounts() override;
 		void setMapped(bool mapped) override;
@@ -29,6 +36,8 @@ namespace graphite
 
 		void printMapping() override;
 		void printSimpleMapping();
+
+        void getGraphPathHeaderAndSequence (std::string& graphPathHeader, std::string& graphPathSequence, position variantPosition);  // Append the graph path headers to each node during traceback.
 
         std::string getCigarString (IAdjudicator::SharedPtr adjudicatorPtr);
 
@@ -41,6 +50,8 @@ namespace graphite
 		position m_position;
 		std::vector< std::function< void () > > m_allele_incrementor_callback_list;
 		bool m_mapped;
+
+        uint32_t m_offset;      // Offset from the starting of the graph.
 	};
 
 }

@@ -7,6 +7,9 @@
 #include "core/region/Region.h"
 #include "config/TestConfig.h"
 
+#include "api/BamReader.h"
+#include "api/BamAlignment.h"
+
 graphite::BamAlignmentReader::SharedPtr getBamAlignmentReader(const std::string& path)
 {
 	auto bamAlignmentReaderPtr = std::make_shared< graphite::BamAlignmentReader >(path);
@@ -23,8 +26,21 @@ TEST(BamAlignmentReaderTests, GetSamHeader)
 {
     std::cout << "Test is running! " << std::endl;
     std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
-    auto bamAlignmentReaderPtr = getBamAlignmentReader(bamPath);
-    std::cout << bamAlignmentReaderPtr->getSamHeader() << std::endl;
+    //auto bamAlignmentReaderPtr = getBamAlignmentReader(bamPath);
+    //std::cout << bamAlignmentReaderPtr->getSamHeader() << std::endl;
+    
+    BamTools::BamReader bamReader;
+    bamReader.Open(bamPath);
+    BamTools::RefVector refVector = bamReader.GetReferenceData();
+    //for (int i = 0; i < refVector.size() ; ++i) // refVector.size(); ++i)
+    for (int i = 0; i < 20 ; ++i) 
+    {
+        std::cout << refVector[i].RefName << std::endl;
+    }
+    std::cout << refVector[19].RefName << std::endl;
+
+
+    bamReader.Close();
 }
 
 /*

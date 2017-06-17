@@ -23,11 +23,13 @@ namespace graphite
         m_opened = true;
     }
 
+    /*
     void FastaFileWriter::write (const std::vector< std::string >& headers, const std::vector< std::string >& sequences)
     {
         uint32_t lineLength = 80;
         for (uint32_t i = 0; i < headers.size(); ++i)
         {
+            m_out_stream << ">";
             for (uint32_t j = 0; j < headers[i].size(); ++j)
                 m_out_stream.write(headers[i].c_str() + j, 1);
 
@@ -42,6 +44,27 @@ namespace graphite
 
             m_out_stream << std::endl;
         }
+    }
+    */
+
+    void FastaFileWriter::write (const std::string& header, const std::string& sequence)
+    {
+        uint32_t lineLength = 80;
+
+        m_out_stream << ">";
+        for (uint32_t i = 0; i < header.size(); ++i)
+            m_out_stream.write(header.c_str() + i, 1);
+
+        m_out_stream << std::endl;
+
+        for (uint32_t i = 0; i < sequence.size(); ++i)
+        {
+            if (i > 0 && (i % lineLength) == 0)
+                m_out_stream << std::endl;
+            m_out_stream.write(sequence.c_str() + i, 1);
+        }
+
+        m_out_stream << std::endl;
     }
 
     void FastaFileWriter::close()

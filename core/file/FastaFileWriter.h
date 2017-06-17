@@ -26,7 +26,8 @@ namespace graphite
         ~FastaFileWriter ();
 
         bool open (std::string fileName);
-        void write (const std::vector< std::string >& headers, const std::vector< std::string >& sequences);
+        //void write (const std::vector< std::string >& headers, const std::vector< std::string >& sequences);
+        void write (const std::string& header, const std::string& sequence);
         void close ();
         // std::string getFilePath() overried { return m_file_path; }
 

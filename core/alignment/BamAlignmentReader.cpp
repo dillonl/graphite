@@ -44,6 +44,7 @@ namespace graphite
 		m_is_open = false;
 		this->m_bam_reader.Close();
 	}
+    
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads)
 	{
@@ -63,6 +64,7 @@ namespace graphite
 
 		uint32_t count = 0;
 		BamTools::BamAlignment bamAlignment;
+        BamTools::RefVector refVector = m_bam_reader.GetReferenceData();
 		while(this->m_bam_reader.GetNextAlignment(bamAlignment))
 		{
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
@@ -74,7 +76,8 @@ namespace graphite
 			{
 				throw "There was an error in the sample name for: " + sampleName;
 			}
-			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
+            
+			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr, refVector));
 		}
 		if (m_alignment_reader_manager_ptr != nullptr)
 		{
@@ -137,4 +140,7 @@ namespace graphite
 		bamReader.Close();
 		return bamReadLength;
 	}
+
+    // Want to create a static lookup table.
+
 }

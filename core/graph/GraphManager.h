@@ -11,6 +11,8 @@
 #include <memory>
 #include <mutex>
 
+#include <unordered_map>
+
 namespace graphite
 {
 	class GraphManager : private Noncopyable
@@ -29,7 +31,9 @@ namespace graphite
 		 */
 		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
 
+        std::unordered_map< std::string, std::string > getHeaderSequenceMap ();     // Return a map containing the headers and sequences for the graph paths.
         std::vector< std::string > getGraphPathHeaders ();
+        std::vector< std::string > getGraphPathSequences ();
         std::vector< int > getGraphPathLengths ();
 
 	private:
@@ -43,8 +47,11 @@ namespace graphite
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
 		IAdjudicator::SharedPtr m_adjudicator_ptr;
 
-        std::vector< std::string > m_graph_path_headers;  // Graph path headers for the resulting fasta file.
+        std::unordered_map< std::string, std::string > m_header_sequence_map;  // Header sequence map for fasta.
+        std::vector< std::string > m_graph_path_headers;    // Graph path headers for the resulting fasta file.
+        std::vector< std::string > m_graph_path_sequences;  // Graph path sequences for the resulting fasta file.
         std::vector< int > m_graph_path_lengths;
+        //std::vector< int > m_graph_path_offsets;            // Get graph path offsets to adjust the position in the resulting SAM file.
 	};
 }
 
