@@ -71,7 +71,7 @@ namespace graphite
         */
         // Sam getters
         position getVariantPosition () { return m_variant_position; }
-
+        Region::SharedPtr getRegionPtr ();
 
 	protected:
 
@@ -101,14 +101,16 @@ namespace graphite
 
 		gssw_node* gssw_node_create_alt(const uint32_t position,
 										const char* referenceSeq,
-										const uint32_t referenceLength,
+										//const uint32_t referenceLength,
+										const uint32_t alternateLength,
 										IAllele::SharedPtr allelePtr,
 										bool isReference,
 										const int8_t* nt_table,
 										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
-			n->ref_len = referenceLength;
+			//n->ref_len = referenceLength;
+			n->ref_len = alternateLength;
 			n->ref_seq = (char*)referenceSeq;
 			n->position = position;
 			// if this node is reference then the id is even otherwise it is odd

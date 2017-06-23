@@ -76,7 +76,9 @@ namespace graphite
 				auto refRegionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), currentReferencePosition, variantPtr->getPosition() - 1, Region::BASED::ONE); // minus one because we don't want to include the actual variant position
 				std::string referenceSequenceString = this->m_reference_ptr->getSequenceFromRegion(refRegionPtr);
 				auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
-				auto referenceNode = addReferenceVertex(variantPtr->getRegions()[0]->getStartPosition(), referenceAllelePtr, altAndRefVertices);
+                // May be able to change variantPtr to refRegionPtr to get the correct node position.
+				//auto referenceNode = addReferenceVertex(variantPtr->getRegions()[0]->getStartPosition(), referenceAllelePtr, altAndRefVertices);
+				auto referenceNode = addReferenceVertex(refRegionPtr->getStartPosition(), referenceAllelePtr, altAndRefVertices);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 				m_total_graph_length += referenceSize;
@@ -297,4 +299,6 @@ namespace graphite
         return m_graph_path_offsets;
     }
     */
+
+    Region::SharedPtr GSSWGraph::getRegionPtr () { return m_region_ptr; }
 }

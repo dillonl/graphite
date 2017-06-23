@@ -119,6 +119,12 @@ namespace graphite
 		}
 	}
 
+    void GraphManager::registerNodeInfo(uint32_t nodeID, int32_t length, NodeInfo::VariantType variantType)
+    {
+        auto nodeInfoPtr = std::make_shared< NodeInfo >(length, variantType);
+        m_node_info_map.insert( {nodeID, nodeInfoPtr} );
+    }
+
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength)
 	{
 		uint32_t numGraphCopies = (alignmentListPtr->getCount() < ThreadPool::Instance()->getThreadCount()) ? alignmentListPtr->getCount() : ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
@@ -204,6 +210,38 @@ namespace graphite
                     m_graph_path_lengths.push_back(graphPathSequence.length());
                     m_header_sequence_map.insert( {graphPathHeader, graphPathSequence} );
 
+                    // Write bed lines to file.
+                    std::vector< uint32_t > nodeIDs = gsswMappingPtr->getNodeIDs();
+                    std::vector< int32_t > nodeLengths = gsswMappingPtr->getNodeLengths();
+                    /*
+                    std::vector< uint32_t > nodeStartPositions = gsswMappingPtr->getNodeStartPositions();
+                    std::vector< uint32_t > nodeEndPositions = gsswMappingPtr->getNodeEndPositions();
+                    std::vector< std::string >  refOrAltStrings = gsswMappingPtr->getRefOrAltStrings();
+                    */
+                    std::vector< NodeInfo::VariantType > variantTypes = gsswMappingPtr->getVariantTypes();
+                    
+                    for (int i = 0; i < nodeIDs.size(); ++i)
+                    {
+                        registerNodeInfo(nodeIDs[i], nodeLengths[i], variantTypes[i]);
+                    }
+
+                    /*
+                    std::ofstream bedFile;
+                    bedFile.open("GraphPaths.bed", std::ios::app);
+                    for (int i = 0; i < nodeStartPositions.size(); ++i)
+                    {
+                        bedFile 
+                            << graphPathHeader          << "\t" 
+                            << nodeStartPositions[i]    << "\t" 
+                            << nodeEndPositions[i]      << "\t"
+                            << refOrAltStrings[i]
+                            << std::endl;
+                    }
+
+                    bedFile.close();
+                    */
+
+                    // Write out graph path references.
                     graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(alignmentPtr);
                     std::ofstream samFile;
                     samFile.open("SamAlignmentData.sam", std::ios::app);
@@ -213,7 +251,7 @@ namespace graphite
                         << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
                         << graphPathHeader                              << "\t" //  3. RNAME;
                         // Need to find out why I need to + 1 on the offset.
-                        << gsswMappingPtr->getOffset() + 1              << "\t" //  4. POS New position.
+                        << gsswMappingPtr->getOffset()                  << "\t" //  4. POS New position.
                         << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
                         << gsswMappingPtr->getCigarString(m_adjudicator_ptr) << "\t" //  6. New CIGAR string.
                         << "*"                                          << "\t" // 7. Place holder for actual value.
@@ -252,23 +290,9 @@ namespace graphite
 		}
 	}
 
-    std::unordered_map< std::string, std::string > GraphManager::getHeaderSequenceMap ()
-    {
-        return m_header_sequence_map;
-    }
-
-    std::vector< std::string > GraphManager::getGraphPathHeaders ()
-    {
-        return m_graph_path_headers;
-    }
-    
-    std::vector< std::string > GraphManager::getGraphPathSequences ()
-    {
-        return m_graph_path_sequences;
-    }
-
-    std::vector< int > GraphManager::getGraphPathLengths ()
-    {
-        return m_graph_path_lengths;
-    }
+    std::unordered_map< std::string, std::string > GraphManager::getHeaderSequenceMap () { return m_header_sequence_map; }
+    std::vector< std::string > GraphManager::getGraphPathHeaders () { return m_graph_path_headers; }
+    std::vector< std::string > GraphManager::getGraphPathSequences () { return m_graph_path_sequences; }
+    std::vector< int > GraphManager::getGraphPathLengths () { return m_graph_path_lengths; }
+    std::unordered_map< uint32_t, NodeInfo::SharedPtr > GraphManager::getNodeInfoMap () { return m_node_info_map; }
 }

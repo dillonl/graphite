@@ -19,6 +19,7 @@
 #include "core/file/BamHeaderReader.h"
 
 #include "core/file/FastaFileWriter.h"
+#include "core/util/Utility.h"
 
 #include <thread>
 #include <unordered_set>
@@ -26,6 +27,7 @@
 #include <stdio.h>
 
 #include <unordered_map>
+#include <string>
 
 #include <zlib.h>   // May not need this.
 
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
         // Update SAM Header with new reference names and write to file.
         if (bamPaths.size() == 1)
         {
-            // Retrieve output FASTA information.
+            // Write info FASTA and BED files.
             std::unordered_map< std::string, std::string > headerSequenceMap = gsswGraphManager->getHeaderSequenceMap();
             std::vector< std::string > graphPathHeaders = gsswGraphManager->getGraphPathHeaders();
             std::vector< std::string > graphPathSequences = gsswGraphManager->getGraphPathSequences();
@@ -194,6 +196,41 @@ int main(int argc, char** argv)
             }
             fastaWriter.close();
 
+            // Write out BED file. 
+            // Not sure why the unordered_map find function isn't working.
+            // May be able to combine this with the headerSequenceMap for loop.
+            std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr > nodeInfoMap = gsswGraphManager->getNodeInfoMap();
+            //auto nodeInfoMap = gsswGraphManager->getNodeInfoMap();
+
+            std::ofstream bedFile;
+            bedFile.open("GraphPaths.bed");
+            for (auto& hs: headerSequenceMap)
+            {
+                uint8_t nodeStringStart= hs.first.find("_") + 1;
+                std::string nodeString = hs.first.substr(nodeStringStart);
+                std::vector< std::string > nodeVector;
+                graphite::split(nodeString, ':', nodeVector);
+
+                int32_t startPosition = 0;
+                int32_t endPosition;
+                for (int i = 0; i < nodeVector.size(); ++i)
+                {
+                    auto iter = nodeInfoMap.find(std::stoi(nodeVector[i]));
+                    //std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr >::const_iterator iter = nodeInfoMap.find("2");
+                    endPosition = startPosition + iter->second->getLength();
+                    bedFile 
+                        << hs.first << "\t" 
+                        << startPosition << "\t" 
+                        << endPosition << "\t"
+                        << std::to_string(iter->second->getVariantType())
+                        << std::endl;
+                    startPosition = endPosition;
+                    
+                }
+            }
+            bedFile.close();
+
+
             // Write out the fasta file.
             /*
             graphite::FastaFileWriter fastaFileWriter;
@@ -202,6 +239,7 @@ int main(int argc, char** argv)
             fastaFileWriter.close();
             */
             
+            // Need to createPathHeaderVector using the graphMap. Then I won't need to return graphPathHeaders and graphPathSequences from the GraphManager.
             // Add graphPathHeaders to SAM header and output.
             graphite::BamHeaderReader bamFile(bamPaths[0]);
             bamFile.open();

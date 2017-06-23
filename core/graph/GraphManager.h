@@ -15,6 +15,35 @@
 
 namespace graphite
 {
+    // May want to turn this into a struct since it only houses data.
+    /**
+     * This class stores the length and variantType of a node.
+     */
+    class NodeInfo
+    {
+    public:
+		typedef std::shared_ptr< NodeInfo > SharedPtr;
+
+        enum VariantType { REF, ALT };
+
+        NodeInfo (int32_t length, VariantType variantType) :
+            m_length(length),
+            m_variant_type(variantType)
+        {
+        }
+
+        ~NodeInfo ()
+        {
+        }
+
+        int32_t getLength () { return m_length; }
+        VariantType getVariantType () { return m_variant_type; }
+
+    private:
+        int32_t m_length;
+        VariantType m_variant_type;
+    };
+
 	class GraphManager : private Noncopyable
 	{
 	public:
@@ -31,10 +60,13 @@ namespace graphite
 		 */
 		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
 
+        void registerNodeInfo(uint32_t nodeID, int length, NodeInfo::VariantType variantType);
+
         std::unordered_map< std::string, std::string > getHeaderSequenceMap ();     // Return a map containing the headers and sequences for the graph paths.
         std::vector< std::string > getGraphPathHeaders ();
         std::vector< std::string > getGraphPathSequences ();
         std::vector< int > getGraphPathLengths ();
+        std::unordered_map< uint32_t, NodeInfo::SharedPtr > getNodeInfoMap ();      // Return a map with key/value pairs of nodeIDs/NodeInfo.
 
 	private:
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength);
@@ -52,6 +84,7 @@ namespace graphite
         std::vector< std::string > m_graph_path_sequences;  // Graph path sequences for the resulting fasta file.
         std::vector< int > m_graph_path_lengths;
         //std::vector< int > m_graph_path_offsets;            // Get graph path offsets to adjust the position in the resulting SAM file.
+        std::unordered_map< uint32_t, NodeInfo::SharedPtr> m_node_info_map;     // Used to create bed entries.
 	};
 }
 
