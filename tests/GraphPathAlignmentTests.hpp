@@ -30,8 +30,7 @@ TEST(GraphPathAlignmentTests, GetBamHeader)
     BamHeaderReader bamFile(bamPath);
     
     bamFile.open();
-    bamFile.createPathHeaderVector(graphPathHeaders, graphPathLengths);
-    bamFile.addPathHeadersToSamHeader();
+    bamFile.addPathHeaderToSamHeader(graphPathHeaders[0], graphPathLengths[0]);
     std::string samHeader = bamFile.getModifiedSamHeader();
     bamFile.close();
 

@@ -44,13 +44,11 @@ namespace graphite
 
         void getGraphPathHeaderAndSequence (std::string& graphPathHeader, std::string& graphPathSequence, position variantPosition);  // Append the graph path headers to each node during traceback.
 
+        int getAltCount ();      // Return the number alternate alleles mapped to by the current alignment.
         std::string getCigarString (IAdjudicator::SharedPtr adjudicatorPtr);
 
         std::vector< uint32_t > getNodeIDs ();
         std::vector< int32_t > getNodeLengths ();
-        std::vector< uint32_t > getNodeStartPositions ();
-        std::vector< uint32_t > getNodeEndPositions ();
-        std::vector< std::string > getRefOrAltStrings ();
         std::vector< NodeInfo::VariantType > getVariantTypes ();
 
     private:
@@ -64,16 +62,12 @@ namespace graphite
 		bool m_mapped;
 
         uint32_t m_offset;      // Offset from the starting of the graph.
+        // Overflow is occuring.
+        int m_alt_count;     // Number of alternate alleles the alignment mapped to.
         
         // BED info.
-        std::string m_graph_path_header;
         std::vector< uint32_t > m_node_IDs;
         std::vector< int32_t > m_node_lengths;
-        /*
-        std::vector< uint32_t > m_node_start_positions;
-        std::vector< uint32_t > m_node_end_positions;
-        std::vector< std::string > m_ref_or_alt_strings;
-        */
         std::vector< NodeInfo::VariantType > m_variant_types;
 
 	};

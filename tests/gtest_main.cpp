@@ -12,9 +12,10 @@
 #include "CompoundVariantTests.hpp"
 #include "FastaReferenceTests.hpp"
 
-#include "BamAlignmentManagerTests.hpp"
 #include "GraphPathAlignmentTests.hpp"
 #include "GraphPathRefTests.hpp"
+#include "BamAlignmentTests.hpp"
+#include "BamHeaderReaderTests.hpp"
 
 GTEST_API_ int main(int argc, char** argv)
 {

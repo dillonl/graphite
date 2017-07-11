@@ -85,24 +85,25 @@ namespace graphite
         //std::string nids = "_";
         std::string nids;
 
-        // Need to alter refOrAlt to account for vcf lines that contain more than one variant.
-        int8_t refOrAltCount = 0;
+        //int8_t altCount = 0;
+        m_alt_count = 0;
 
         // Loop through nodes to extract node id's and sequences.
         for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
         {
             gssw_node* n = nc->node;
             if (n->id % 2 != 0)
-                refOrAltCount += 1;
+            {
+                // Need to alter refOrAlt to account for vcf lines that contain more than one variant.
+                m_alt_count += 1;
+            }
 
             if (n->id % 2 == 0)
             {
-                //m_ref_or_alt_strings.push_back("ref");
                 m_variant_types.push_back(NodeInfo::REF);
             }
             else
             {
-                //m_ref_or_alt_strings.push_back("alt");
                 m_variant_types.push_back(NodeInfo::ALT);
             }
 
@@ -111,51 +112,15 @@ namespace graphite
                 nids += ":";
             graphPathSequence += std::string(n->seq, n->len);
 
-            /*
-            if (i == 0)
-            {
-                m_node_start_positions.push_back(0);
-                m_node_end_positions.push_back(m_node_start_positions[0] + n->len);
-            }
-            else
-            {
-                m_node_start_positions.push_back(m_node_end_positions[i - 1]);
-                m_node_end_positions.push_back(m_node_end_positions[i - 1] + n->len);
-            }
-            */
             m_node_IDs.push_back(n->id);
             m_node_lengths.push_back(n->len);
-            /*
-            // May be able to just set m_seq_start_position to 0
-            m_node_start_positions.push_back(n->position);
-            m_node_end_positions.push_back(n->position + n->len);
-            */
         }
 
         graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(m_alignment_ptr);
-        //graphPathHeader = "RNAME_Header" + std::to_string(bamAlignmentPtr->getRefeqName()) + ":" + std::to_string(variantPosition) + ":" + std::to_string(refOrAlt) + "_" + nids;
-        graphPathHeader = bamAlignmentPtr->getAlignmentRegion(bamAlignmentPtr->getRefID()) + ":" + std::to_string(variantPosition) + ":" + std::to_string(refOrAltCount) + "_" + nids;
-
-        m_graph_path_header = graphPathHeader;
+        graphPathHeader = bamAlignmentPtr->getReferenceName() + ":" + std::to_string(variantPosition) + ":" + std::to_string(m_alt_count) + "_" + nids;
     }
 
-    /*
-    std::vector< std::string > GSSWMapping::getBedLines ()
-    {
-        std::vector< std::string > bedLines;
-        for (int i = 0; i < m_seq_start_positions.size(); ++i)
-        {
-            std::string bedLine = m_graph_path_header       + "\t"
-                + std::to_string(m_seq_start_positions[i])  + "\t"
-                + std::to_string(m_seq_end_positions[i])    + "\t"
-                + m_ref_or_alt_strings[i];
-
-            bedLines.push_back(bedLine);
-        }
-
-        return  bedLines;
-    }
-    */
+    int GSSWMapping::getAltCount () { return m_alt_count; }
 
     std::string GSSWMapping::getCigarString (IAdjudicator::SharedPtr adjudicatorPtr)
     {
@@ -182,11 +147,6 @@ namespace graphite
 
     std::vector< uint32_t > GSSWMapping::getNodeIDs () { return m_node_IDs; }
     std::vector< int32_t > GSSWMapping::getNodeLengths () { return m_node_lengths; }
-    /*
-    std::vector< uint32_t > GSSWMapping::getNodeStartPositions () { return m_node_start_positions; }
-    std::vector< uint32_t > GSSWMapping::getNodeEndPositions () { return m_node_end_positions; }
-    std::vector< std::string > GSSWMapping::getRefOrAltStrings () { return m_ref_or_alt_strings; }
-    */
     std::vector< NodeInfo::VariantType > GSSWMapping::getVariantTypes () { return m_variant_types; }
 
 	int GSSWMapping::getMappingScore()

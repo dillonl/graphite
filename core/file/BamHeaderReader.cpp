@@ -20,20 +20,16 @@ namespace graphite
         m_sam_header = m_bam_reader.GetHeader();
     }
 
-    void BamHeaderReader::createPathHeaderVector (std::vector< std::string > graphPathHeaders, std::vector< int > graphPathLengths)
+    void BamHeaderReader::addPathHeaderToSamHeader (std::string graphPathHeader, int graphPathLength)
     {
-        // Make sure the header and length vectors are the same size.
-        assert(graphPathHeaders.size() == graphPathLengths.size());
-        for (int i = 0; i < graphPathHeaders.size(); ++i)
-        {
-            BamTools::SamSequence samSequence = BamTools::SamSequence(graphPathHeaders[i], graphPathLengths[i]);
-            m_sam_sequences.push_back(samSequence);
-        }
+        BamTools::SamSequence samSequence = BamTools::SamSequence(graphPathHeader, graphPathLength);
+        m_sam_header.Sequences.Add(samSequence);
     }
 
-    void BamHeaderReader::addPathHeadersToSamHeader ()
+    void BamHeaderReader::addReadGroupsToSamHeader ()
     {
-        m_sam_header.Sequences.Add(m_sam_sequences);
+        m_sam_header.ReadGroups.Add("REF");
+        m_sam_header.ReadGroups.Add("ALT");
     }
 
     void BamHeaderReader::close ()

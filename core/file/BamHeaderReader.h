@@ -21,18 +21,17 @@ namespace graphite
         ~BamHeaderReader ();
 
         void open ();                   // Open file.
-        void createPathHeaderVector (std::vector< std::string > graphPathHeaders, std::vector< int > graphPathLengths);    // Creates a compatible vector of SamSequences that can be added to the header.      
-        void addPathHeadersToSamHeader ();   // Add reference sequences to SAM header.
+        void addPathHeaderToSamHeader (std::string graphPathHeader, int graphPathLength);   // Add graphPathHeaders to SAM header.
+        void addReadGroupsToSamHeader ();   // Adds REF and ALT read group tags to the SAM header.
         void close ();                  // Close file.
         std::string getOriginalSamHeader ();    // Return original SAM header from input BAM file as a string.
-        std::string getModifiedSamHeader ();    // Retrun updated SAM header as a string.
+        std::string getModifiedSamHeader ();    // Return updated SAM header as a string.
 
     private:
         std::string m_bam_path;
         BamTools::BamReader m_bam_reader;
         bool m_opened;
         BamTools::SamHeader m_sam_header;
-        std::vector< BamTools::SamSequence > m_sam_sequences;   // Vector of SamSequence objects containing the graphPathHeader information.
     };
 }
 

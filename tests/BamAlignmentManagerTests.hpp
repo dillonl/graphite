@@ -219,55 +219,7 @@ TEST(BamAlignmentManagerTests, TestLoadAlignmentAllChrom20)
 }
 */
 
-/**
- * Test that the BamAlignment object can be used to output the appropriate columns of the original BAM file.
- */
-/*
-TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
-{
 
-    std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
-    //std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
-    std::string regionString = "chr20:1-1000000";
-	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
-
-    graphite::BamAlignmentReader bamAlignmentReader(bamPath);
-    bamAlignmentReader.open();
-    auto samplePtrs = graphite::BamAlignmentReader::GetBamReaderSamples(bamPath);
-    graphite::SampleManager::SharedPtr smPtr = std::make_shared< graphite::SampleManager >(samplePtrs);
-    auto iAlignmentPtrs = bamAlignmentReader.loadAlignmentsInRegion(regionPtr, smPtr, true);
-    std::vector< graphite::BamAlignment::SharedPtr > bamAlignmentPtrs;
-
-    // Print out first line of BAM region.
-    // Will likely want to implement a more robust test method than printing out the values and eyeballing them.
-    // May also want to change the function names for these parameters in BamAlignment.h
-    for (int i = 0; i < 3; ++i)
-    {
-        // Cast iAlgnmentPtrs vector to bamAlignment ptrs.
-        graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(iAlignmentPtrs[i]);
-        std::cout
-            << bamAlignmentPtr->getName() << "\t"                   //  1. QNAME
-            << bamAlignmentPtr->getRefSeqName()
-            << bamAlignmentPtr->getAlignmentFlag() << "\t"          //  2. FLAG
-            << "RNAME Place_Holder" << "\t"                         // RNAME ERROR
-            //<< bamAlignmentPtr->getRefSeqName() << "\t"           //  3. RNAME ERROR May just need to get the chr from the regionPtr.
-            << bamAlignmentPtr->getPosition() + 1 << "\t"           //  4. POS +1 because the BamTools position is 0-based.
-            << bamAlignmentPtr->getOriginalMapQuality() << "\t"     //  5. MAPQ
-            //<< bamAlignmentPtr->getOriginalCigarData() << "\t"    //  6. CIGAR Need to implment in header file first.
-            << "CIGAR_STR Place_holder" << "\t"
-            //<< bamAlignmentPtr->getMateID() << "\t"               //  7. RNEXT ERROR Not the correct value
-            << "RNEXT Place_Holder" << "\t"                         // RNEXT ERROR Not the correct value
-            << bamAlignmentPtr->getMatePosition() + 1 << "\t"       //  8. PNEXT +1 becuase BamTools mate position is 0-based.
-            << bamAlignmentPtr->getTemplateLength() << "\t"         //  9. TLEN
-            << bamAlignmentPtr->getSequence() << "\t"               // 10. SEQ
-            << bamAlignmentPtr->getFastqQualities() << "\t"         // 11. QUAL
-            << std::endl;
-    }
-
-    bamAlignmentReader.close();
-
-}
-*/
 /*
 TEST(BamAlignmentManagerTests, TestWritingBamDataToFile)
 {
