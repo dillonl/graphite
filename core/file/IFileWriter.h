@@ -7,7 +7,7 @@
 
 namespace graphite
 {
-	enum class FileType {ASCII, BGZF};
+	enum class FileType {ASCII, BGZF, FASTA};
 
 	class IFileWriter : private Noncopyable
 	{

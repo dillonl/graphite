@@ -59,7 +59,7 @@ namespace graphite
 		 *
 		 * overlap: The number of base pairs that will overlap between graphs.
 		 */
-		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
+		void buildGraphs(Region::SharedPtr region, uint32_t readLength, bool isIGVOutput);
 
         void registerNodeInfo(uint32_t nodeID, int length, NodeInfo::VariantType variantType);
 
@@ -67,7 +67,7 @@ namespace graphite
         std::unordered_map< uint32_t, NodeInfo::SharedPtr > getNodeInfoMap ();      // Return a map with key/value pairs of nodeIDs/NodeInfo.
 
 	private:
-		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength);
+		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, bool isIGVOutput);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;

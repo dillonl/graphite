@@ -18,7 +18,6 @@
 #include "core/file/ASCIIFileWriter.h"
 #include "core/file/BamHeaderReader.h"
 
-#include "core/file/FastaFileWriter.h"
 #include "core/util/Utility.h"
 
 #include <thread>
@@ -29,7 +28,29 @@
 #include <unordered_map>
 #include <string>
 
-#include <zlib.h>   // May not need this.
+void updateFileMap (std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > &outputFileMap, std::vector< std::string > inputFilePaths, graphite::FileType fileType, std::string outputDirectory, std::string fileExtension)
+{
+	for (auto inputFilePath : inputFilePaths)
+	{
+		std::string fileName = inputFilePath.substr(inputFilePath.find_last_of("/") + 1);
+		std::string fileNameWithoutExtension = fileName.substr(0, fileName.find_last_of("."));
+		std::string outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." +  fileExtension;
+		uint32_t counter = 1;
+		while (graphite::IFile::fileExists(outputFilePath, false))
+		{
+			outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + fileExtension;
+			++counter;
+		}
+		graphite::IFileWriter::SharedPtr fileWriterPtr;
+		if (fileType == graphite::FileType::BGZF)
+			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(outputFilePath);
+		else
+			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(outputFilePath);
+
+		fileWriterPtr->open();
+		outputFileMap[inputFilePath] = fileWriterPtr;
+	}
+}
 
 int main(int argc, char** argv)
 {
@@ -54,6 +75,7 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
+    auto isIGVOutput = params.getIGVOutput();
 	graphite::FileType fileType = graphite::FileType::ASCII;
 
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
@@ -70,78 +92,23 @@ int main(int argc, char** argv)
 
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
 
-    // One solution for multiple bam files is to make a struct or class that contains all the open new_bam files. Then use them to write out the BamAlignment to the appropriate new_bam file.
-    // Retrieve SAM header from input bam file.
-    /*
-    if (bamPaths.size() == 1)
-    {
-        graphite::BamAlignmentReader bar(bamPaths[0]);
-        bar.open();
-        std::string samHeader = bar.getSamHeader();
-        bar.close();
-        std::ofstream samFile;
-        samFile.open("NewSamFile.sam", std::ios::trunc);
-        samFile << samHeader;
-        samFile.close();
-    }
-    */
-    /*
-    for (auto& bamPath : bamPaths)
-    {
-        graphite::BamAlignmentReader bar(bamPath);
-        std::string samHeader = bar.getSamHeader();
-        std::fstream samFile;
-        samFile.open("NewSamFile.sam");//, std::ios::trunc);
-        samFile << samHeader << std::endl;
-        samFile.close();
-    }
-    */
-
 	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
 
 	auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount);
 
-	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
-	for (auto vcfPath : vcfPaths)
-	{
-		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
-		std::string filePath = outputDirectory + "/" + path;
-		uint32_t counter = 1;
-		while (graphite::IFile::fileExists(filePath, false))
-		{
-			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
-			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
-			filePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
-			++counter;
-		}
-		// filePath += ".tmp";
-		graphite::IFileWriter::SharedPtr fileWriterPtr;
-		if (fileType == graphite::FileType::BGZF)
-		{
-			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(filePath);
-		}
-		else
-		{
-			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(filePath);
-		}
-		fileWriterPtr->open();
-		vcfoutPaths[vcfPath] = fileWriterPtr;
-	}
+    // Create file map for tracking file writers.
+	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > outputFileMap;
+    graphite::FileType asciiFileType = graphite::FileType::ASCII;
+    updateFileMap (outputFileMap, vcfPaths, asciiFileType, outputDirectory, "vcf");
 
 	std::unordered_set< std::string > outputPaths;
 	bool firstTime = true;
 
-    // Refactor code so that all information related to the graphPathHeaders and the resulting bam can be written out after this for loop.
     // GraphPaths fasta file map
     std::unordered_map< std::string, std::string > headerSequenceMap; 
 
     // GraphPaths bed file map
     std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr > nodeInfoMap;
-
-    // Create a headerSequenceMap.
-    // Add code inside for loop that will insert key:values into the map.
-    // Test to see if I'm appropriately writing out the graphPaths and seuqences.
-    // If it works then I can mark the graphPathHeader map in the GraphManager to be removed. Need to implement the BED and SAM stuff before actually deleting it.
 
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
@@ -183,16 +150,19 @@ int main(int argc, char** argv)
 
 		// the gsswGraphManager adjudicates on the variantManager's variants
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		// auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
-		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
+		//gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
+		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength, isIGVOutput);
 
-        // Append headers and sequences to headerSequenceMap
-        std::unordered_map< std::string, std::string > tempHeaderSequenceMap = gsswGraphManager->getHeaderSequenceMap();
-        headerSequenceMap.insert(tempHeaderSequenceMap.begin(), tempHeaderSequenceMap.end());
+        if (isIGVOutput)
+        {
+            // Append headers and sequences to headerSequenceMap
+            std::unordered_map< std::string, std::string > tempHeaderSequenceMap = gsswGraphManager->getHeaderSequenceMap();
+            headerSequenceMap.insert(tempHeaderSequenceMap.begin(), tempHeaderSequenceMap.end());
 
-        // Store BED entries for BED file.
-        std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr > tempNodeInfoMap = gsswGraphManager->getNodeInfoMap();
-        nodeInfoMap.insert(tempNodeInfoMap.begin(), tempNodeInfoMap.end());
+            // Store BED entries for BED file.
+            std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr > tempNodeInfoMap = gsswGraphManager->getNodeInfoMap();
+            nodeInfoMap.insert(tempNodeInfoMap.begin(), tempNodeInfoMap.end());
+        }
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 		graphite::MappingManager::Instance()->clearRegisteredMappings();
@@ -204,7 +174,8 @@ int main(int argc, char** argv)
 		{
 			auto vcfReaderPtr = iter.first;
 			auto vcfPath = vcfReaderPtr->getFilePath();
-			graphite::IFileWriter::SharedPtr fileWriter = vcfoutPaths[vcfPath];
+			//graphite::IFileWriter::SharedPtr fileWriter = vcfoutPaths[vcfPath];
+			graphite::IFileWriter::SharedPtr fileWriter = outputFileMap[vcfPath];
 			std::string currentVCFOutPath = fileWriter->getFilePath();
 			auto variantListPtr = iter.second;
 			auto vcfHeaderPtr = vcfReaderPtr->getVCFHeader();
@@ -228,75 +199,92 @@ int main(int argc, char** argv)
 		firstTime = false;
 	}
 
-    // Write out GraphPaths fasta.
-    graphite::FastaFileWriter fastaWriter;
-    fastaWriter.open("GraphPaths.fa");
-    for (auto& hs: headerSequenceMap)
+    if (isIGVOutput)
     {
-        fastaWriter.write(hs.first, hs.second);
-    }
-    fastaWriter.close();
+        std::string firstFileName_withoutExtension = vcfPaths[0].substr(0, vcfPaths[0].find_last_of("."));
 
-    // Write out GraphPaths bed.
-    std::ofstream bedFile;
-    bedFile.open("GraphPaths.bed");
-    for (auto& hs: headerSequenceMap)
-    {
-        uint8_t nodeStringStart= hs.first.find("_") + 1;
-        std::string nodeString = hs.first.substr(nodeStringStart);
-        std::vector< std::string > nodeVector;
-        graphite::split(nodeString, ':', nodeVector);
+        // Write out GraphPaths fasta.
+        std::string fastaFileName = firstFileName_withoutExtension + "." + "fa";
+        std::vector< std::string > fastaFileVector;
+        fastaFileVector.push_back(fastaFileName);
+        updateFileMap(outputFileMap, fastaFileVector, asciiFileType, outputDirectory, "fa");
 
-        int32_t startPosition = 0;
-        int32_t endPosition;
-        std::string variantType;
-        for (int i = 0; i < nodeVector.size(); ++i)
+        for (auto& hs: headerSequenceMap)
         {
-            auto iter = nodeInfoMap.find(std::stoi(nodeVector[i]));
-            //std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr >::const_iterator iter = nodeInfoMap.find("2");
-            endPosition = startPosition + iter->second->getLength();
-            if (iter->second->getVariantType() == 0)
-                variantType = "Ref";
-            else
-                variantType = "Alt";
-
-            bedFile 
-                << hs.first << "\t" 
-                << startPosition << "\t" 
-                << endPosition << "\t"
-                << variantType
-                << std::endl;
-            startPosition = endPosition;
+            // Need +1 to account for the ">" symbol.
+            outputFileMap.at(fastaFileName)->write((">" + hs.first).c_str(), hs.first.length() + 1);
+            outputFileMap.at(fastaFileName)->write(hs.second.c_str(), hs.second.length());
         }
-    }
-    bedFile.close();
-    
-    // Write out SAM header and alignments.
-    graphite::BamHeaderReader bamFile(bamPaths[0]);
-    bamFile.open();
-    for (auto& hs: headerSequenceMap)
-    {
-        bamFile.addPathHeaderToSamHeader(hs.first, hs.second.length());
-    }
-    bamFile.addReadGroupsToSamHeader();
-    std::string samHeader = bamFile.getModifiedSamHeader();
-    bamFile.close();
 
-    std::ifstream tempAlignmentFile("TempAlignmentFile.sam");
-    std::ofstream samFile("NewSamFile.sam", std::ios::app);
-    samFile << samHeader;
-    for (std::string str; std::getline(tempAlignmentFile, str); )
-    {
-        samFile << str << std::endl;
-    }
-    samFile.close();
-    tempAlignmentFile.close();
+        // Write out GraphPaths bed.
+        std::string bedFileName = firstFileName_withoutExtension + "." + "bed";
+        std::vector< std::string > bedFileVector;
+        bedFileVector.push_back(bedFileName);
+        updateFileMap(outputFileMap, bedFileVector, asciiFileType, outputDirectory, "bed");
+        for (auto& hs : headerSequenceMap)
+        {
+            uint8_t nodeStringStart= hs.first.find("_") + 1;
+            std::string nodeString = hs.first.substr(nodeStringStart);
+            std::vector< std::string > nodeVector;
+            if (nodeString.find(":") == std::string::npos)
+                nodeVector.push_back(nodeString);
+            else
+                graphite::split(nodeString, ':', nodeVector);
 
-    // Remove temporary file.
-    remove("TempAlignmentFile.sam");
+            int32_t startPosition = 0;
+            int32_t endPosition;
+            std::string variantType;
+            for (int i = 0; i < nodeVector.size(); ++i)
+            {
+                auto iter = nodeInfoMap.find(std::stoi(nodeVector[i]));
+                //std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr >::const_iterator iter = nodeInfoMap.find("2");
+                endPosition = startPosition + iter->second->getLength();
+                if (iter->second->getVariantType() == 0)
+                    variantType = "Ref";
+                else
+                    variantType = "Alt";
+
+                std::string bedLine = hs.first + '\t' + std::to_string(startPosition) + '\t' + std::to_string(endPosition) + '\t' + variantType;
+                outputFileMap.at(bedFileName)->write(bedLine.c_str(), bedLine.length());
+
+                startPosition = endPosition;
+            }
+        }
+        
+        // Write out SAM header and alignments.
+        graphite::BamHeaderReader bamFile(bamPaths[0]);
+        bamFile.open();
+        for (auto& hs: headerSequenceMap)
+        {
+            bamFile.addPathHeaderToSamHeader(hs.first, hs.second.length());
+        }
+        bamFile.addReadGroupsToSamHeader();
+        std::string samHeader = bamFile.getModifiedSamHeader();
+        bamFile.close();
+
+        std::ifstream tempAlignmentFile("graphite_out/TempAlignmentFile.sam");
+        std::string samFileName = firstFileName_withoutExtension + "." + "sam";
+        std::vector< std::string > samFileVector;
+        samFileVector.push_back(samFileName);
+        updateFileMap(outputFileMap, samFileVector, asciiFileType, outputDirectory, "sam");
+        
+        outputFileMap.at(samFileName)->write(samHeader.c_str(), samHeader.length());
+
+        // Downcast IFileWriter to adjust the stream position to remove an unwanted extra line in the output SAM file.
+        graphite::ASCIIFileWriter::SharedPtr asciiSamFilePointer = std::dynamic_pointer_cast< graphite::ASCIIFileWriter > (outputFileMap.at(samFileName));
+        asciiSamFilePointer->adjustStreamPosition(-1);
+
+        for (std::string str; std::getline(tempAlignmentFile, str); )
+        {
+            outputFileMap.at(samFileName)->write(str.c_str(), str.length());
+        }
+        tempAlignmentFile.close();
+
+        // Remove temporary file.
+        remove("graphite_out/TempAlignmentFile.sam");
+    }
     
-    // Write out vcfs
-	for (auto& iter : vcfoutPaths)
+	for (auto& iter : outputFileMap)
 	{
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();

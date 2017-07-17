@@ -17,16 +17,10 @@ namespace graphite
 		}
 	}
 
-	bool ASCIIFileWriter::write(const char* data, size_t dataLength)
-	{
-		if (!m_opened) { return false; }
-		this->m_out_stream.write(data, dataLength);
-		m_opened = true;
-	}
-
 	bool ASCIIFileWriter::open()
 	{
 		if (m_opened) { return false; }
+		//this->m_out_stream.open(this->m_file_path, std::ios::app);
 		this->m_out_stream.open(this->m_file_path);
 		m_opened = true;
 		return true;
@@ -38,4 +32,20 @@ namespace graphite
 		this->m_out_stream.close();
 		m_opened = false;
 	}
+
+	bool ASCIIFileWriter::write(const char* data, size_t dataLength)
+	{
+		if (!m_opened) { return false; }
+		this->m_out_stream.write(data, dataLength);
+        m_out_stream << std::endl;
+		m_opened = true;
+	}
+
+    void ASCIIFileWriter::adjustStreamPosition (int adjustment)
+    {
+        long streamPos = m_out_stream.tellp();
+        m_out_stream.seekp(streamPos + adjustment);
+    }
+
+    long ASCIIFileWriter::getStreamPosition () { return m_out_stream.tellp(); }
 }

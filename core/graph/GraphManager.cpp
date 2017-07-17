@@ -27,7 +27,7 @@ namespace graphite
 	{
 	}
 
-	void GraphManager::buildGraphs(Region::SharedPtr regionPtr, uint32_t readLength)
+	void GraphManager::buildGraphs(Region::SharedPtr regionPtr, uint32_t readLength, bool isIGVOutput)
 	{
 		auto variantsListPtr = this->m_variant_manager_ptr->getVariantsInRegion(regionPtr);
 		if (variantsListPtr->getCount() == 0) // if we don't have variants or alignments in the region, then return
@@ -104,7 +104,7 @@ namespace graphite
 				}
 				auto variantListPtr = std::make_shared< VariantList >(variantPtrs, this->m_reference_ptr);
 				auto alignmentListPtr = std::make_shared< AlignmentList >(alignmentPtrs);
-				constructAndAdjudicateGraph(variantListPtr, alignmentListPtr, graphAlignmentRegion, readLength);
+				constructAndAdjudicateGraph(variantListPtr, alignmentListPtr, graphAlignmentRegion, readLength, isIGVOutput);
 			}
 		}
 
@@ -125,7 +125,7 @@ namespace graphite
         m_node_info_map.insert( {nodeID, nodeInfoPtr} );
     }
 
-	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength)
+	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, bool isIGVOutput)
 	{
 		uint32_t numGraphCopies = (alignmentListPtr->getCount() < ThreadPool::Instance()->getThreadCount()) ? alignmentListPtr->getCount() : ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
 		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
@@ -147,7 +147,7 @@ namespace graphite
 
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
-			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this, variantPosition]()
+			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this, variantPosition, isIGVOutput]()
 			{
                 std::string originalGraphPathHeader;
                 std::string alteredGraphPathHeader;
@@ -168,6 +168,7 @@ namespace graphite
                 //   New position caclulation (col 3)
                 //   New CIGAR string (col 7)
                 // Remember that SAM has to be sorted by position to be loaded into IGV.
+                if (isIGVOutput)
                 {
                     std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
                     // This function also updates the bamAlignment with the proper read group.
@@ -179,7 +180,7 @@ namespace graphite
                     // Get data for NodeInfo
                     std::vector< uint32_t > originalNodeIDs = referenceMappingPtr->getNodeIDs();
                     std::vector< int32_t > originalNodeLengths = referenceMappingPtr->getNodeLengths();
-                    std::vector< NodeInfo::VariantType > originalVariantTypes = gsswMappingPtr->getVariantTypes();
+                    std::vector< NodeInfo::VariantType > originalVariantTypes = referenceMappingPtr->getVariantTypes();
                     std::vector< uint32_t > alteredNodeIDs = gsswMappingPtr->getNodeIDs();
                     std::vector< int32_t > alteredNodeLengths = gsswMappingPtr->getNodeLengths();
                     std::vector< NodeInfo::VariantType > alteredVariantTypes = gsswMappingPtr->getVariantTypes();
@@ -193,31 +194,12 @@ namespace graphite
                     graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(alignmentPtr);
                     std::string readGroup;
                     if (gsswMappingPtr->getAltCount() > 0)
-                        readGroup = "REF";
+                        readGroup = "ALT";
                     else
-                        readGroup = "ALT"; 
-                    //m_bam_alignment_ptrs.push_back(alignmentPtr);
-                    //graphite::BamAlignment::SharedPtr alteredBamAlignmentPtr;
+                        readGroup = "REF"; 
 
                     std::ofstream samFile;
-                    samFile.open("TempAlignmentFile.sam", std::ios::app);
-
-                    // Write out original bamAlignment.
-                    samFile
-                        << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
-                        << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
-                        << originalGraphPathHeader                      << "\t" //  3. RNAME
-                        // Need to find out why I need to + 1 on the offset.
-                        << referenceMappingPtr->getOffset()             << "\t" //  4. POS New position.
-                        << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
-                        << bamAlignmentPtr->getCigarString()            << "\t" //  6. New CIGAR string.
-                        << bamAlignmentPtr->getMateReferenceName()      << "\t" //  7. Place holder for actual value.
-                        << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
-                        << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
-                        << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
-                        << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
-                        << "RG:Z:" << readGroup                                 // 12. Optional read group field.
-                        << std::endl; 
+                    samFile.open("graphite_out/TempAlignmentFile.sam", std::ios::app);
 
                     // Write out updated bamAlignment.
                     samFile
@@ -229,6 +211,23 @@ namespace graphite
                         << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
                         << gsswMappingPtr->getCigarString(m_adjudicator_ptr) << "\t" //  6. New CIGAR string.
                         << bamAlignmentPtr->getMateReferenceName()      << "\t" //  7. RNEXT INCORRECT value.
+                        << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
+                        << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
+                        << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
+                        << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
+                        << "RG:Z:" << readGroup                                 // 12. Optional read group field.
+                        << std::endl; 
+                        
+                    // Write out original bamAlignment.
+                    samFile
+                        << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
+                        << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
+                        << originalGraphPathHeader                      << "\t" //  3. RNAME
+                        // Need to find out why I need to + 1 on the offset.
+                        << referenceMappingPtr->getOffset()             << "\t" //  4. POS New position.
+                        << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
+                        << bamAlignmentPtr->getCigarString()            << "\t" //  6. New CIGAR string.
+                        << bamAlignmentPtr->getMateReferenceName()      << "\t" //  7. Place holder for actual value.
                         << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
                         << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
                         << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ

@@ -19,6 +19,9 @@ namespace graphite
 		void close() override;
 		bool write(const char* data, size_t dataLength) override;
 		std::string getFilePath() override { return m_file_path; }
+        void adjustStreamPosition (int adjustment);
+
+        long getStreamPosition ();
 
 	private:
 		std::ofstream m_out_stream;

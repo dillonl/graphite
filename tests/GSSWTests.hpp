@@ -8,7 +8,6 @@
 #include "core/reference/FastaReference.h"
 #include "core/reference/Reference.h"
 #include "core/graph/GSSWGraph.h"
-#include "core/file/FastaFileWriter.h"
 
 #include <functional>
 

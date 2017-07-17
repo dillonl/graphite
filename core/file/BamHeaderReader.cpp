@@ -28,8 +28,8 @@ namespace graphite
 
     void BamHeaderReader::addReadGroupsToSamHeader ()
     {
-        m_sam_header.ReadGroups.Add("REF");
         m_sam_header.ReadGroups.Add("ALT");
+        m_sam_header.ReadGroups.Add("REF");
     }
 
     void BamHeaderReader::close ()

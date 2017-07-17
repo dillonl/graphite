@@ -7,8 +7,6 @@
 #include "core/reference/FastaReference.h"
 #include "core/graph/GSSWGraph.h"
 
-#include "core/file/FastaFileWriter.h"
-
 TEST(GraphPathRefTests, ConstructPaths)
 {
     uint32_t readLength = 5;  
