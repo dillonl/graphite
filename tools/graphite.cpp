@@ -28,6 +28,8 @@
 #include <unordered_map>
 #include <string>
 
+
+// Is there a mechanism in C++, such as polymorphism, that I could use to use the same function below except allow for a string for inputFilePath instead of a vector. It would cut down on redundant code.
 void updateFileMap (std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > &outputFileMap, std::vector< std::string > inputFilePaths, graphite::FileType fileType, std::string outputDirectory, std::string fileExtension)
 {
 	for (auto inputFilePath : inputFilePaths)
@@ -100,6 +102,15 @@ int main(int argc, char** argv)
 	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > outputFileMap;
     graphite::FileType asciiFileType = graphite::FileType::ASCII;
     updateFileMap (outputFileMap, vcfPaths, asciiFileType, outputDirectory, "vcf");
+
+    // Append temporary SAM file to outputFileMap.
+    std::string firstFileName_withoutExtension = vcfPaths[0].substr(0, vcfPaths[0].find_last_of("."));
+    /*
+    std::string tempSamFileName = "temp" + firstFileName_withoutExtension + "." + "sam";
+    std::vector< std::string > tempSamFileVector;
+    tempSamFileVector.push_back(tempSamFileName);
+    updateFileMap (outputFileMap, tempSamFileVector, asciiFileType, outputDirectory, "sam");
+    */
 
 	std::unordered_set< std::string > outputPaths;
 	bool firstTime = true;
@@ -201,8 +212,6 @@ int main(int argc, char** argv)
 
     if (isIGVOutput)
     {
-        std::string firstFileName_withoutExtension = vcfPaths[0].substr(0, vcfPaths[0].find_last_of("."));
-
         // Write out GraphPaths fasta.
         std::string fastaFileName = firstFileName_withoutExtension + "." + "fa";
         std::vector< std::string > fastaFileVector;
@@ -286,6 +295,7 @@ int main(int argc, char** argv)
     
 	for (auto& iter : outputFileMap)
 	{
+        //std::cout << iter.first << std::endl;
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}

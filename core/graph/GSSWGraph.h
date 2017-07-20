@@ -19,7 +19,9 @@ namespace graphite
 	class GSSWGraphContainer
 	{
 	public:
-	GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr) :
+		typedef std::shared_ptr< GSSWGraphContainer > SharedPtr;
+
+        GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr) :
 		nt_table(NTtable), mat(mat), graph_ptr(graphPtr)
 		{
 			lock.unlock();

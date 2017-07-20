@@ -6,6 +6,7 @@
 #include "core/adjudicator/IAdjudicator.h"
 
 #include "core/graph/GSSWGraph.h"
+#include "core/graph/ReferenceGraph.h"
 #include "core/alignment/BamAlignment.h"
 
 #include <queue>
@@ -68,6 +69,7 @@ namespace graphite
 
 	private:
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, bool isIGVOutput);
+        void adjudicateGraph (GSSWGraphContainer::SharedPtr gsswGraphContainer, GSSWGraphContainer::SharedPtr refGraphContainer, GSSWGraph::SharedPtr gsswGraphPtr, ReferenceGraph::SharedPtr referenceGraphPtr, IAlignment::SharedPtr alignmentPtr, position variantPosition, bool isIGVOutput);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;
@@ -77,11 +79,10 @@ namespace graphite
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
 		IAdjudicator::SharedPtr m_adjudicator_ptr;
 
-        // May delete the following line of code.
         std::unordered_map< std::string, std::string > m_header_sequence_map;  // Header sequence map for fasta.
         std::unordered_map< uint32_t, NodeInfo::SharedPtr> m_node_info_map;     // Used to create bed entries.
         std::vector< graphite::BamAlignment::SharedPtr > m_bam_alignment_ptrs;    // Vector containing both the original and updated BamAlignments.
-        
+        std::vector< std::string > m_sam_entries;
 	};
 }
 

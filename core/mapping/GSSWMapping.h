@@ -30,7 +30,7 @@ namespace graphite
                 return m_offset;
             }
 
-            // Offset from the beginning of the graph. +1 because the started base will be at position 1.
+            // Offset from the beginning of the graph. +1 because the beginning base will be at position 1.
             return m_offset + 1;
         }      
 		std::vector< MappingAlignmentInfo::SharedPtr > getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr);

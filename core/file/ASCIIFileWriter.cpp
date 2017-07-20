@@ -20,7 +20,6 @@ namespace graphite
 	bool ASCIIFileWriter::open()
 	{
 		if (m_opened) { return false; }
-		//this->m_out_stream.open(this->m_file_path, std::ios::app);
 		this->m_out_stream.open(this->m_file_path);
 		m_opened = true;
 		return true;
