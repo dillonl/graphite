@@ -1,11 +1,9 @@
 /*
- * 1. setup appropriate mutex blocks to optibmize multi-threading in adjudicate function.
- * 2. Determine the best way to setup the samFile:
+ * 1. Determine the best way to setup the samFile:
  *   * either as an ASCIIFileWriter
  *   * or as it's own class.
- *   * either way it should be able to be opened up from graphite.cpp
+ * 2. setup filewriters so that they work for multiple variants.
  */
-
 
 #include "GraphManager.h"
 #include "core/alignment/AlignmentReporter.h"
@@ -16,7 +14,6 @@
 
 #include "core/alignment/BamAlignmentManager.h"
 #include "core/alignment/BamAlignment.h"
-//#include "core/file/FastaFileWriter.h"
 
 #include <queue>
 #include <algorithm>
@@ -155,7 +152,6 @@ namespace graphite
 
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
-            // Prior to turning the funct into a function for binding, look into non-blocking multi-threading.
             /*
 			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this, variantPosition, isIGVOutput]()
 			{
@@ -287,7 +283,7 @@ namespace graphite
             std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
         
             std::ofstream samFile;
-            samFile.open("graphite_out/TempAlignmentFile.sam");
+            samFile.open("graphite_out/TempAlignmentFile.sam", std::ios::app);
             for (auto& samEntry : m_sam_entries)
             {
                 samFile << samEntry << std::endl;
@@ -334,10 +330,10 @@ namespace graphite
             {
                 std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
                 for (int i = 0; i < originalNodeIDs.size(); ++i)
-                {
                     registerNodeInfo(originalNodeIDs[i], originalNodeLengths[i], originalVariantTypes[i]);
+
+                for (int i = 0; i < alteredNodeIDs.size(); ++i)
                     registerNodeInfo(alteredNodeIDs[i], alteredNodeLengths[i], alteredVariantTypes[i]);
-                }
             }
 
             // Setup the samfile ptr using the ASCIIFileWriter function in main.

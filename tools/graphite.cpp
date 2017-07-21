@@ -1,3 +1,8 @@
+/*
+ * Refactoring:
+ *   updateFileMap fxn
+ *      Look at what it would take to modify this function so that it takes a string instead of a vector. Would have to apply the for loop outside of the function.
+ */
 #include "core/alignment/AlignmentManager.hpp"
 #include "core/alignment/BamAlignmentManager.h"
 #include "core/alignment/BamAlignmentReader.h"
@@ -29,29 +34,25 @@
 #include <string>
 
 
-// Is there a mechanism in C++, such as polymorphism, that I could use to use the same function below except allow for a string for inputFilePath instead of a vector. It would cut down on redundant code.
-void updateFileMap (std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > &outputFileMap, std::vector< std::string > inputFilePaths, graphite::FileType fileType, std::string outputDirectory, std::string fileExtension)
+void updateFileMap (std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > &outputFileMap, std::string inputFilePath, graphite::FileType fileType, std::string outputDirectory, std::string fileExtension)
 {
-	for (auto inputFilePath : inputFilePaths)
-	{
-		std::string fileName = inputFilePath.substr(inputFilePath.find_last_of("/") + 1);
-		std::string fileNameWithoutExtension = fileName.substr(0, fileName.find_last_of("."));
-		std::string outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." +  fileExtension;
-		uint32_t counter = 1;
-		while (graphite::IFile::fileExists(outputFilePath, false))
-		{
-			outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + fileExtension;
-			++counter;
-		}
-		graphite::IFileWriter::SharedPtr fileWriterPtr;
-		if (fileType == graphite::FileType::BGZF)
-			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(outputFilePath);
-		else
-			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(outputFilePath);
+    std::string fileName = inputFilePath.substr(inputFilePath.find_last_of("/") + 1);
+    std::string fileNameWithoutExtension = fileName.substr(0, fileName.find_last_of("."));
+    std::string outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." +  fileExtension;
+    uint32_t counter = 1;
+    while (graphite::IFile::fileExists(outputFilePath, false))
+    {
+        outputFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + fileExtension;
+        ++counter;
+    }
+    graphite::IFileWriter::SharedPtr fileWriterPtr;
+    if (fileType == graphite::FileType::BGZF)
+        fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(outputFilePath);
+    else
+        fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(outputFilePath);
 
-		fileWriterPtr->open();
-		outputFileMap[inputFilePath] = fileWriterPtr;
-	}
+    fileWriterPtr->open();
+    outputFileMap[inputFilePath] = fileWriterPtr;
 }
 
 int main(int argc, char** argv)
@@ -101,7 +102,10 @@ int main(int argc, char** argv)
     // Create file map for tracking file writers.
 	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > outputFileMap;
     graphite::FileType asciiFileType = graphite::FileType::ASCII;
-    updateFileMap (outputFileMap, vcfPaths, asciiFileType, outputDirectory, "vcf");
+    for (auto& vcfPath : vcfPaths)
+    {
+        updateFileMap (outputFileMap, vcfPath, asciiFileType, outputDirectory, "vcf");
+    }
 
     // Append temporary SAM file to outputFileMap.
     std::string firstFileName_withoutExtension = vcfPaths[0].substr(0, vcfPaths[0].find_last_of("."));
@@ -161,7 +165,6 @@ int main(int argc, char** argv)
 
 		// the gsswGraphManager adjudicates on the variantManager's variants
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		//gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength, isIGVOutput);
 
         if (isIGVOutput)
@@ -214,9 +217,7 @@ int main(int argc, char** argv)
     {
         // Write out GraphPaths fasta.
         std::string fastaFileName = firstFileName_withoutExtension + "." + "fa";
-        std::vector< std::string > fastaFileVector;
-        fastaFileVector.push_back(fastaFileName);
-        updateFileMap(outputFileMap, fastaFileVector, asciiFileType, outputDirectory, "fa");
+        updateFileMap(outputFileMap, fastaFileName, asciiFileType, outputDirectory, "fa");
 
         for (auto& hs: headerSequenceMap)
         {
@@ -227,9 +228,7 @@ int main(int argc, char** argv)
 
         // Write out GraphPaths bed.
         std::string bedFileName = firstFileName_withoutExtension + "." + "bed";
-        std::vector< std::string > bedFileVector;
-        bedFileVector.push_back(bedFileName);
-        updateFileMap(outputFileMap, bedFileVector, asciiFileType, outputDirectory, "bed");
+        updateFileMap(outputFileMap, bedFileName, asciiFileType, outputDirectory, "bed");
         for (auto& hs : headerSequenceMap)
         {
             uint8_t nodeStringStart= hs.first.find("_") + 1;
@@ -243,10 +242,14 @@ int main(int argc, char** argv)
             int32_t startPosition = 0;
             int32_t endPosition;
             std::string variantType;
-            for (int i = 0; i < nodeVector.size(); ++i)
+
+            for (auto& node : nodeVector)
             {
-                auto iter = nodeInfoMap.find(std::stoi(nodeVector[i]));
-                //std::unordered_map< uint32_t, graphite::NodeInfo::SharedPtr >::const_iterator iter = nodeInfoMap.find("2");
+                auto iter = nodeInfoMap.find(std::stoi(node));
+                /*
+                if (iter == nodeInfoMap.end())
+                    std::cout << "Node " << node << " not found" << std::endl;
+                    */
                 endPosition = startPosition + iter->second->getLength();
                 if (iter->second->getVariantType() == 0)
                     variantType = "Ref";
@@ -273,9 +276,7 @@ int main(int argc, char** argv)
 
         std::ifstream tempAlignmentFile("graphite_out/TempAlignmentFile.sam");
         std::string samFileName = firstFileName_withoutExtension + "." + "sam";
-        std::vector< std::string > samFileVector;
-        samFileVector.push_back(samFileName);
-        updateFileMap(outputFileMap, samFileVector, asciiFileType, outputDirectory, "sam");
+        updateFileMap(outputFileMap, samFileName, asciiFileType, outputDirectory, "sam");
         
         outputFileMap.at(samFileName)->write(samHeader.c_str(), samHeader.length());
 
@@ -295,7 +296,6 @@ int main(int argc, char** argv)
     
 	for (auto& iter : outputFileMap)
 	{
-        //std::cout << iter.first << std::endl;
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}
