@@ -1,8 +1,3 @@
-/*
- * Refactoring:
- *   updateFileMap fxn
- *      Look at what it would take to modify this function so that it takes a string instead of a vector. Would have to apply the for loop outside of the function.
- */
 #include "core/alignment/AlignmentManager.hpp"
 #include "core/alignment/BamAlignmentManager.h"
 #include "core/alignment/BamAlignmentReader.h"

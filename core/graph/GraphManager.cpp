@@ -1,8 +1,5 @@
 /*
- * 1. Determine the best way to setup the samFile:
- *   * either as an ASCIIFileWriter
- *   * or as it's own class.
- * 2. setup filewriters so that they work for multiple variants.
+ * 1. Create samFileWriter class.
  */
 
 #include "GraphManager.h"
@@ -18,8 +15,6 @@
 #include <queue>
 #include <algorithm>
 #include <functional>
-
-//#include <string>
 
 namespace graphite
 {
@@ -152,116 +147,7 @@ namespace graphite
 
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
-            /*
-			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this, variantPosition, isIGVOutput]()
-			{
-                std::string originalGraphPathHeader;
-                std::string alteredGraphPathHeader;
-                std::string originalGraphPathSequence;
-                std::string alteredGraphPathSequence;
-                
-				auto refTraceback = referenceGraphPtr->traceBackAlignment(alignmentPtr, refGraphContainer);
-				auto referenceMappingPtr = std::make_shared< GSSWMapping >(refTraceback, alignmentPtr);
-				auto referenceSWScore = referenceMappingPtr->getMappingScore();
-				uint32_t referenceSWPercent = ((referenceSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);
 
-				auto tracebackPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr, gsswGraphContainer);
-				auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackPtr, alignmentPtr);
-
-                // Write Bam data to new sam file.
-                // If I can tie the header to the appropriate alignment then I can use the same process to tie the new position to the appropriate alignment.
-                // Verify:
-                //   New position caclulation (col 3)
-                //   New CIGAR string (col 7)
-                // Remember that SAM has to be sorted by position to be loaded into IGV.
-                if (isIGVOutput)
-                {
-                    std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
-                    // This function also updates the bamAlignment with the proper read group.
-                    referenceMappingPtr->getGraphPathHeaderAndSequence(originalGraphPathHeader, originalGraphPathSequence, variantPosition);
-                    gsswMappingPtr->getGraphPathHeaderAndSequence(alteredGraphPathHeader, alteredGraphPathSequence, variantPosition);
-                    m_header_sequence_map.insert( {originalGraphPathHeader, originalGraphPathSequence} ); 
-                    m_header_sequence_map.insert( {alteredGraphPathHeader, alteredGraphPathSequence} );
-
-                    // Get data for NodeInfo
-                    std::vector< uint32_t > originalNodeIDs = referenceMappingPtr->getNodeIDs();
-                    std::vector< int32_t > originalNodeLengths = referenceMappingPtr->getNodeLengths();
-                    std::vector< NodeInfo::VariantType > originalVariantTypes = referenceMappingPtr->getVariantTypes();
-                    std::vector< uint32_t > alteredNodeIDs = gsswMappingPtr->getNodeIDs();
-                    std::vector< int32_t > alteredNodeLengths = gsswMappingPtr->getNodeLengths();
-                    std::vector< NodeInfo::VariantType > alteredVariantTypes = gsswMappingPtr->getVariantTypes();
-                    
-                    for (int i = 0; i < originalNodeIDs.size(); ++i)
-                    {
-                        registerNodeInfo(originalNodeIDs[i], originalNodeLengths[i], originalVariantTypes[i]);
-                        registerNodeInfo(alteredNodeIDs[i], alteredNodeLengths[i], alteredVariantTypes[i]);
-                    }
-
-                    graphite::BamAlignment::SharedPtr bamAlignmentPtr = std::dynamic_pointer_cast< graphite::BamAlignment >(alignmentPtr);
-                    std::string readGroup;
-                    if (gsswMappingPtr->getAltCount() > 0)
-                        readGroup = "ALT";
-                    else
-                        readGroup = "REF"; 
-
-                    // Write a samFileWriter class that stores the relevant alignment information as a string. They will be written out at the end of this function.
-                    // Setup the samfile ptr using the ASCIIFileWriter function in main.
-                    // Remember that you can't multithread insertions into vectors.
-                    std::ofstream samFile;
-                    samFile.open("graphite_out/TempAlignmentFile.sam", std::ios::app);
-
-                    // Write out updated bamAlignment.
-                    samFile
-                        << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
-                        << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
-                        << alteredGraphPathHeader                       << "\t" //  3. RNAME;
-                        // Need to find out why I need to + 1 on the offset.
-                        << gsswMappingPtr->getOffset()                  << "\t" //  4. POS New position.
-                        << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
-                        << gsswMappingPtr->getCigarString(m_adjudicator_ptr) << "\t" //  6. New CIGAR string.
-                        << bamAlignmentPtr->getMateReferenceName()      << "\t" //  7. RNEXT INCORRECT value.
-                        << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
-                        << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
-                        << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
-                        << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
-                        << "RG:Z:" << readGroup                                 // 12. Optional read group field.
-                        << std::endl; 
-                        
-                    // Write out original bamAlignment.
-                    samFile
-                        << bamAlignmentPtr->getName()                   << "\t" //  1. QNAME
-                        << bamAlignmentPtr->getAlignmentFlag()          << "\t" //  2. FLAG
-                        << originalGraphPathHeader                      << "\t" //  3. RNAME
-                        // Need to find out why I need to + 1 on the offset.
-                        << referenceMappingPtr->getOffset()             << "\t" //  4. POS New position.
-                        << bamAlignmentPtr->getOriginalMapQuality()     << "\t" //  5. MAPQ
-                        << bamAlignmentPtr->getCigarString()            << "\t" //  6. New CIGAR string.
-                        << bamAlignmentPtr->getMateReferenceName()      << "\t" //  7. Place holder for actual value.
-                        << bamAlignmentPtr->getMatePosition() + 1       << "\t" //  8. PNEXT +1 because BamTools mate position is 0-based.
-                        << bamAlignmentPtr->getTemplateLength()         << "\t" //  9. TLEN
-                        << bamAlignmentPtr->getSequence()               << "\t" // 10. SEQ
-                        << bamAlignmentPtr->getFastqQualities()         << "\t" // 11. QUAL
-                        << "RG:Z:" << readGroup                                 // 12. Optional read group field.
-                        << std::endl; 
-
-                    samFile.close();     // Close the SAM file.
-                }
-
-				auto gsswSWScore = referenceMappingPtr->getMappingScore();
-				uint32_t gsswSWPercent = ((gsswSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);
-
-				if (this->m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr, referenceSWPercent))
-				{
-					MappingManager::Instance()->registerMapping(gsswMappingPtr);
-				}
-		    };
-            */
-
-            // bind function using std::bind() and feed it into the enqueue.
-            //auto boundFxnAdjudicateGraph = std::bind(&GraphManager::adjudicateGraph, this, gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, variantPosition, isIGVOutput);
-
-			//auto future = ThreadPool::Instance()->enqueue(funct);
-			//auto future = ThreadPool::Instance()->enqueue(boundFxnAdjudateGraph);
             auto future = ThreadPool::Instance()->enqueue(std::bind(&GraphManager::adjudicateGraph, this, gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, variantPosition, isIGVOutput));
 			futureFunctions.push_back(future);
 		}
@@ -279,7 +165,6 @@ namespace graphite
 
         {
             // Write out alignments.
-
             std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
         
             std::ofstream samFile;
@@ -295,9 +180,9 @@ namespace graphite
     void GraphManager::adjudicateGraph (GSSWGraphContainer::SharedPtr gsswGraphContainer, GSSWGraphContainer::SharedPtr refGraphContainer, GSSWGraph::SharedPtr gsswGraphPtr, ReferenceGraph::SharedPtr referenceGraphPtr, IAlignment::SharedPtr alignmentPtr, position variantPosition, bool isIGVOutput)
     {
         std::string originalGraphPathHeader;
-        std::string alteredGraphPathHeader;
+        std::string gsswGraphPathHeader;
         std::string originalGraphPathSequence;
-        std::string alteredGraphPathSequence;
+        std::string gsswGraphPathSequence;
         
         auto refTraceback = referenceGraphPtr->traceBackAlignment(alignmentPtr, refGraphContainer);
         auto referenceMappingPtr = std::make_shared< GSSWMapping >(refTraceback, alignmentPtr);
@@ -312,28 +197,28 @@ namespace graphite
         {
             // This function also updates the bamAlignment with the proper read group.
             referenceMappingPtr->getGraphPathHeaderAndSequence(originalGraphPathHeader, originalGraphPathSequence, variantPosition);
-            gsswMappingPtr->getGraphPathHeaderAndSequence(alteredGraphPathHeader, alteredGraphPathSequence, variantPosition);
+            gsswMappingPtr->getGraphPathHeaderAndSequence(gsswGraphPathHeader, gsswGraphPathSequence, variantPosition);
             {
                 std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
                 m_header_sequence_map.insert( {originalGraphPathHeader, originalGraphPathSequence} ); 
-                m_header_sequence_map.insert( {alteredGraphPathHeader, alteredGraphPathSequence} );
+                m_header_sequence_map.insert( {gsswGraphPathHeader, gsswGraphPathSequence} );
             }
 
             // Get data for NodeInfo
             std::vector< uint32_t > originalNodeIDs = referenceMappingPtr->getNodeIDs();
             std::vector< int32_t > originalNodeLengths = referenceMappingPtr->getNodeLengths();
             std::vector< NodeInfo::VariantType > originalVariantTypes = referenceMappingPtr->getVariantTypes();
-            std::vector< uint32_t > alteredNodeIDs = gsswMappingPtr->getNodeIDs();
-            std::vector< int32_t > alteredNodeLengths = gsswMappingPtr->getNodeLengths();
-            std::vector< NodeInfo::VariantType > alteredVariantTypes = gsswMappingPtr->getVariantTypes();
+            std::vector< uint32_t > gsswNodeIDs = gsswMappingPtr->getNodeIDs();
+            std::vector< int32_t > gsswNodeLengths = gsswMappingPtr->getNodeLengths();
+            std::vector< NodeInfo::VariantType > gsswVariantTypes = gsswMappingPtr->getVariantTypes();
             
             {
                 std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
                 for (int i = 0; i < originalNodeIDs.size(); ++i)
                     registerNodeInfo(originalNodeIDs[i], originalNodeLengths[i], originalVariantTypes[i]);
 
-                for (int i = 0; i < alteredNodeIDs.size(); ++i)
-                    registerNodeInfo(alteredNodeIDs[i], alteredNodeLengths[i], alteredVariantTypes[i]);
+                for (int i = 0; i < gsswNodeIDs.size(); ++i)
+                    registerNodeInfo(gsswNodeIDs[i], gsswNodeLengths[i], gsswVariantTypes[i]);
             }
 
             // Setup the samfile ptr using the ASCIIFileWriter function in main.
@@ -347,6 +232,9 @@ namespace graphite
             else
                 readGroup = "REF"; 
 
+            // Create a samFileWriter class that takes as input the alignmentPtr. 
+            // Have samFileWriter inherit from IFileWriter.
+            // Add a function writeAlignment.
             std::string originalSamLine;
             originalSamLine = 
                 bamAlignmentPtr->getName()                              + '\t' //  1. QNAME
@@ -367,7 +255,7 @@ namespace graphite
             updatedSamLine = 
                 bamAlignmentPtr->getName()                              + '\t' //  1. QNAME
                 + std::to_string(bamAlignmentPtr->getAlignmentFlag())   + '\t' //  2. FLAG
-                + alteredGraphPathHeader                                + '\t' //  3. RNAME
+                + gsswGraphPathHeader                                   + '\t' //  3. RNAME
                 // Need to find out why I need to + 1 on the offset.
                 + std::to_string(gsswMappingPtr->getOffset())           + '\t' //  4. POS New position.
                 + std::to_string(bamAlignmentPtr->getOriginalMapQuality()) + '\t'//  5. MAPQ
