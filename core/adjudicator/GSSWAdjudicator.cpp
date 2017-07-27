@@ -25,6 +25,8 @@ namespace graphite
 
 	bool GSSWAdjudicator::adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent)
 	{
+		//static std::mutex l;
+		//std::lock_guard< std::mutex > locktmp(l);
 		// std::cout << "comment out this lock" << std::endl;
 		// std::lock_guard< std::mutex > sGuard(s_lock);
 		// {
@@ -42,6 +44,7 @@ namespace graphite
 		auto swScore = mappingPtr->getMappingScore();
 		uint32_t swPercent = ((swScore / (double)(alignmentPtr->getLength() * this->m_match_value)) * 100);
 
+		/*
 		auto alignmentMappingWPtr = alignmentPtr->getMapping().lock();
 		if (alignmentMappingWPtr && alignmentMappingWPtr->getMapped()) // check if the alignment has already been aligned previously
 		{
@@ -53,6 +56,7 @@ namespace graphite
 			}
 			alignmentMappingWPtr->setMapped(false);
 		}
+		*/
 
 		auto gsswMappingPtr = (GSSWMapping*)mappingPtr.get();
 		auto mappingAlignmentInfoPtrs = gsswMappingPtr->getMappingAlignmentInfoPtrs(shared_from_this());
@@ -66,6 +70,12 @@ namespace graphite
 
 		for (uint32_t i = 0; i < mappingAlignmentInfoPtrs.size(); ++i)
 		{
+			{
+				// static std::mutex l;
+				// std::lock_guard< std::mutex > lock(l);
+				//mappingPtr->printMapping();
+				// std::cout << mappingAlignmentInfoPtr->getSWScore() << std::endl;
+			}
 			auto mappingAlignmentInfoPtr = mappingAlignmentInfoPtrs[i];
 			auto allelePtr = mappingAlignmentInfoPtr->getAllelePtr();
 			auto equivalentAllelePtr = std::dynamic_pointer_cast< EquivalentAllele >(allelePtr);
@@ -98,8 +108,8 @@ namespace graphite
 			// if ((referenceSWScoreIdentical && isAlt) || (checkAlleleSuffix && variantPtr->getAlleleSuffixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getPrefixMatch()) ||(checkAllelePrefix && variantPtr->getAllelePrefixOverlapMaxCount(allelePtr) >= mappingAlignmentInfoPtr->getSuffixMatch()))  // check that the alignment maps to unique areas of the allele
 			if (referenceSWScoreIdentical && isAlt)
 			{
-				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, AlleleCountType::Ambiguous));
-				alignmentPtr->setMapping(mappingPtr);
+				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr->isReverseStrand(), alignmentPtr->getSample(), AlleleCountType::Ambiguous));
+				alignmentPtr->addMapping(mappingPtr);
 				mappingPtr->setMapped(true);
 				/*
 				{
@@ -113,8 +123,8 @@ namespace graphite
 			}
 			else
 			{
-				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr, scoreToAlleleCountType(alleleMappingScorePercent)));
-				alignmentPtr->setMapping(mappingPtr);
+				mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr->isReverseStrand(), alignmentPtr->getSample(), scoreToAlleleCountType(alleleMappingScorePercent)));
+				alignmentPtr->addMapping(mappingPtr);
 				mappingPtr->setMapped(true);
 				return true;
 			}

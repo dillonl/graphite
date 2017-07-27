@@ -24,7 +24,7 @@ namespace graphite
 		virtual ~IAlignmentManager() {}
 
 		virtual void releaseResources() = 0;
-		virtual void processMappingStatistics() = 0;
+		/* virtual void processMappingStatistics() = 0; */
 		virtual SampleManager::SharedPtr getSamplePtrs() = 0;
 		virtual IAlignmentList::SharedPtr getAlignmentsInRegion(Region::SharedPtr regionPtr)
 		{

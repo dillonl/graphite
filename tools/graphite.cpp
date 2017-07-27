@@ -99,7 +99,6 @@ int main(int argc, char** argv)
 	{
 		auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount); // this used to go above this loop but it caused issues with loading bam regions from out-of-order VCFs
 		auto regionPtr = regionPtrs[regionCount];
-
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 		// load variants from vcf
@@ -110,9 +109,9 @@ int main(int argc, char** argv)
 
 		// load bam alignments
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
-		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
-		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-
+		bamAlignmentManager->loadAlignments(variantManagerPtr);
+		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
+		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources

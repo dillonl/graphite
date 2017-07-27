@@ -119,7 +119,8 @@ namespace graphite
 
 	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength)
 	{
-		uint32_t numGraphCopies = (alignmentListPtr->getCount() < ThreadPool::Instance()->getThreadCount()) ? alignmentListPtr->getCount() : ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
+		// uint32_t numGraphCopies = (alignmentListPtr->getCount() < ThreadPool::Instance()->getThreadCount()) ? alignmentListPtr->getCount() : ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
+		uint32_t numGraphCopies = ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
 		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
 
 		auto gsswGraphPtr = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, regionPtr, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue(), numGraphCopies);
@@ -128,12 +129,46 @@ namespace graphite
 		auto referenceGraphPtr = std::make_shared< ReferenceGraph >(this->m_reference_ptr, variantsListPtr, regionPtr, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue(), numGraphCopies);
 		referenceGraphPtr->constructGraph();
 
+		/*
 		static int count = 0;
+
+		std::cout << std::string(40, '-') << std::endl;
+		std::cout << regionPtr->getRegionString() << std::endl;
+
+		for (auto variantPtr : variantsListPtr->getAllVariantPtrs())
+		{
+			std::cout << variantPtr->getPosition() << " " << variantPtr->getRefAllelePtr()->getSequenceString();
+			for (auto altAllelePtr : variantPtr->getAltAllelePtrs())
+			{
+				std::cout << " " << altAllelePtr->getSequenceString();
+			}
+			std::cout << std::endl;
+		}
+		std::cout << "===PATHS===" << std::endl;
+
+		auto paths = std::static_pointer_cast< GSSWGraph >(gsswGraphPtr)->generateAllPaths();
+		// get all graph paths from Andrew
+		for (auto i = 0; i < paths.size(); ++i)
+		{
+			std::cout << std::get< 1 >(paths[i]) << std::endl;
+			std::cout << std::get< 0 >(paths[i]) << std::endl;
+			std::cout << std::endl;
+		}
+		std::cout << "===ALIGNMENTS===" << std::endl;
+		*/
 
 		IAlignment::SharedPtr alignmentPtr;
 		auto alignmentPtrs = alignmentListPtr->getAlignmentPtrs();
 		while (alignmentListPtr->getNextAlignment(alignmentPtr))
 		{
+			/*
+			static std::mutex mut;
+			{
+				mut.lock();
+				std::cout << std::string(alignmentPtr->getSequence(), alignmentPtr->getLength()) << " " << alignmentPtr->getID().substr(0, alignmentPtr->getID().size() - 1) << std::endl;
+				mut.unlock();
+			}
+			*/
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
 			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this]()

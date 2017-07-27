@@ -30,6 +30,7 @@ namespace graphite
 		virtual bool peekNextVariant(IVariant::SharedPtr& variantPtr) = 0;
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
+		virtual std::vector< IVariant::SharedPtr > getAllVariantPtrs() = 0;
 	};
 
 } // end namespace graphite

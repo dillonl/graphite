@@ -31,6 +31,7 @@ namespace graphite
 		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
 		void processOverlappingAlleles() override;
 		void writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr, bool printHeader);
+		std::vector< IVariant::SharedPtr > getAllVariantPtrs() { return m_variant_ptrs; }
 
 	protected:
 		bool getNextCompoundVariant(IVariant::SharedPtr& variant);

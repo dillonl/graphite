@@ -33,11 +33,11 @@ namespace graphite
 		virtual const bool isReverseStrand() { return false; }
 		virtual const bool isDuplicate() { return false; }
 		virtual const uint16_t getOriginalMapQuality() { return 0; }
-		virtual std::weak_ptr< IMapping > getMapping() { return this->m_mapping_wptr; }
-		virtual void setMapping(std::shared_ptr< IMapping > mappingPtr)
+		virtual std::vector< std::shared_ptr< IMapping > > getMappingPtrs() { return this->m_mapping_ptrs; }
+		virtual void addMapping(std::shared_ptr< IMapping > mappingPtr)
 		{
 			std::lock_guard< std::recursive_mutex > r_lock(*this->m_mapping_mutex);
-			this->m_mapping_wptr = mappingPtr;
+			m_mapping_ptrs.emplace_back(mappingPtr);
 		}
 		std::recursive_mutex* getMappingMutex() { return this->m_mapping_mutex; }
 		const Sample::SharedPtr getSample() { return m_sample_ptr; }
@@ -49,7 +49,7 @@ namespace graphite
 	protected:
 		std::mutex m_mutex;
 		std::unordered_map< uint32_t, std::string > m_mapped_variants_information;
-		std::weak_ptr< IMapping > m_mapping_wptr;
+		std::vector< std::shared_ptr< IMapping > > m_mapping_ptrs;
 		std::recursive_mutex* m_mapping_mutex;
 		Sample::SharedPtr m_sample_ptr;
 	};

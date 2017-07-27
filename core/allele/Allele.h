@@ -66,10 +66,9 @@ namespace graphite
 			return totalCount;
 		}
 
-		virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		virtual void incrementForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto samplePtr = alignmentPtr->getSample();
 			auto iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
 			if (iter == m_alignment_sample_forward_count_map.end())
 			{
@@ -86,10 +85,9 @@ namespace graphite
 			}
 		}
 
-		virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		virtual void incrementReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			std::lock_guard< std::mutex > lock(m_alignment_count_mutex);
-			auto samplePtr = alignmentPtr->getSample();
 			auto iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName());
 			if (iter == m_alignment_sample_reverse_count_map.end())
 			{
@@ -104,9 +102,9 @@ namespace graphite
 			}
 		}
 
-		virtual void incrementCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		virtual void incrementCount(bool isReverseStrand, std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) override
 		{
-			if (alignmentPtr->isReverseStrand())
+			if (isReverseStrand)
 			{
 				incrementReverseCount(alignmentPtr, alleleCountType);
 			}

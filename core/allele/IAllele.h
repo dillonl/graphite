@@ -40,9 +40,9 @@ namespace graphite
 
 		/* virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) = 0; */
 		/* virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) = 0; */
-		virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) = 0;
-		virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) = 0;
-		virtual void incrementCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) = 0;
+		virtual void incrementForwardCount(std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;
+		virtual void incrementReverseCount(std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;
+		virtual void incrementCount(bool isReverseStrand, std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;
 
 		void setVariantWPtr(std::weak_ptr< IVariant > variantWPtr) { m_variant_wptr = variantWPtr; }
 		std::weak_ptr< IVariant > getVariantWPtr() { return m_variant_wptr; }

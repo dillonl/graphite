@@ -62,25 +62,25 @@ namespace graphite
 			return count;
 		}
 
-		inline void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		inline void incrementForwardCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementForwardCount(alignmentPtr, alleleCountType);
+				allelePtr->incrementForwardCount(samplePtr, alleleCountType);
 			}
 		}
-		inline void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		inline void incrementReverseCount(std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementReverseCount(alignmentPtr, alleleCountType);
+				allelePtr->incrementReverseCount(samplePtr, alleleCountType);
 			}
 		}
-		inline void incrementCount(std::shared_ptr< IAlignment > alignmentPtr, AlleleCountType alleleCountType) override
+		inline void incrementCount(bool isReverseStrand, std::shared_ptr< Sample > samplePtr, AlleleCountType alleleCountType) override
 		{
 			for (auto& allelePtr : this->m_allele_ptrs)
 			{
-				allelePtr->incrementCount(alignmentPtr, alleleCountType);
+				allelePtr->incrementCount(isReverseStrand, samplePtr, alleleCountType);
 			}
 		}
 

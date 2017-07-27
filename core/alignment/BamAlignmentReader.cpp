@@ -60,10 +60,6 @@ namespace graphite
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 
-
-		size_t counter = 0;
-
-		uint32_t count = 0;
 		// std::cout << "BamAlignmentReader.cpp refID: " << refID << std::endl;
 		BamTools::BamAlignment bamAlignment;
 		while(this->m_bam_reader->GetNextAlignment(bamAlignment))
@@ -79,6 +75,7 @@ namespace graphite
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
 		}
+		// std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 		if (m_alignment_reader_manager_ptr != nullptr)
 		{
 			m_alignment_reader_manager_ptr->checkinReader(this->shared_from_this());

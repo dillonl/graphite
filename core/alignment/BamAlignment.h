@@ -15,22 +15,6 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignment > SharedPtr;
-		/*
-	    BamAlignment(BamAlignmentPtr bamAlignmentPtr, std::shared_ptr< Sample > samplePtr) :
-		            m_position(bamAlignmentPtr->Position),
-					m_first_mate(bamAlignmentPtr->IsFirstMate()),
-					m_mapped(bamAlignmentPtr->IsMapped()),
-					m_reverse_strand(bamAlignmentPtr->IsReverseStrand()),
-					m_original_map_quality(bamAlignmentPtr->MapQuality),
-					m_id(bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate())),
-					m_length(bamAlignmentPtr->QueryBases.size())
-		{
-			m_sample_ptr = samplePtr;
-			m_sequence = new char[bamAlignmentPtr->QueryBases.size() + 1];
-			memcpy(m_sequence, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size() + 1); // the +1 is for the '\0' char
-		}
-		*/
-
 	    BamAlignment(BamTools::BamAlignment& bamAlignment, std::shared_ptr< Sample > samplePtr) :
 				m_position(bamAlignment.Position),
 				m_first_mate(bamAlignment.IsFirstMate()),
@@ -47,22 +31,6 @@ namespace graphite
 			memcpy(m_sequence, bamAlignment.QueryBases.c_str(), bamAlignment.QueryBases.size() + 1); // the +1 is for the '\0' char
 		}
 
-				/*
-	    BamAlignment(position pos, bool firstMate, bool isMapped, bool isReverseStrand, bool duplicate, uint16_t mapQuality, char* id, std::shared_ptr< Sample > samplePtr) :
-				m_position(pos),
-				m_first_mate(firstMate),
-				m_mapped(isMapped),
-				m_reverse_strand(isReverseStrand),
-				m_original_map_quality(mapQuality),
-				m_id(std::string(id) + std::to_string(firstMate)),
-				m_duplicate(duplicate),
-				m_sequence_counter(0),
-				m_length(0),
-				m_sequence(nullptr)
-		{
-			m_sample_ptr = samplePtr;
-		}
-				*/
 		virtual ~BamAlignment() { delete[] m_sequence; }
 
 		const char* getSequence() override { return m_sequence; }

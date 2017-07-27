@@ -63,6 +63,8 @@ namespace graphite
 		position getEndPosition() override {  this->m_region_ptr->getEndPosition(); }
 		std::shared_ptr< GSSWGraphContainer > getGraphContainer();
 
+		std::vector< std::tuple< std::string, std::string > > generateAllPaths();
+
 	protected:
 
 		void generateGraphCopies();

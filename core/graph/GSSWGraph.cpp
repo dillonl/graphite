@@ -222,4 +222,37 @@ namespace graphite
 		m_graph_container_ptrs_queue.emplace(graphContainerPtr);
 	}
 
+	void getAllPaths(gssw_node* node, std::string currentPath, std::string nodeIDs, int numberOfSibs, std::vector< std::tuple< std::string, std::string > >& paths)
+	{
+		std::string tmpPath = std::string(node->seq, node->len);
+		if (numberOfSibs == 0)
+		{
+			std::transform(tmpPath.begin(), tmpPath.end(), tmpPath.begin(), tolower);
+		}
+		else
+		{
+			std::transform(tmpPath.begin(), tmpPath.end(), tmpPath.begin(), ::toupper);
+		}
+		currentPath += tmpPath;
+		nodeIDs += (node->id % 2 == 0) ? ":REF:" : ":ALT:";
+		if (node->count_next == 0)
+		{
+			paths.emplace_back(std::make_tuple(currentPath, nodeIDs));
+		}
+		else
+		{
+			for (auto i = 0; i < node->count_next; ++i)
+			{
+				getAllPaths(node->next[i], currentPath, nodeIDs, node->count_next - 1, paths);
+			}
+		}
+	}
+
+	std::vector< std::tuple< std::string, std::string > > GSSWGraph::generateAllPaths()
+	{
+		std::vector< std::tuple< std::string, std::string > > paths;
+		getAllPaths(this->m_graph_ptr->nodes[0], "", "", 0, paths);
+		return paths;
+	}
+
 }
