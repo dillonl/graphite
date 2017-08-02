@@ -13,17 +13,14 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< ASCIIFileWriter > SharedPtr;
 		ASCIIFileWriter(const std::string& path);
-		~ASCIIFileWriter() override;
+		virtual ~ASCIIFileWriter() override;
 
-		bool open() override;
+		virtual bool open() override;
 		void close() override;
-		bool write(const char* data, size_t dataLength) override;
+		virtual bool write(const char* data, size_t dataLength) override;
 		std::string getFilePath() override { return m_file_path; }
-        void adjustStreamPosition (int adjustment);
 
-        long getStreamPosition ();
-
-	private:
+    protected:
 		std::ofstream m_out_stream;
 		std::string m_file_path;
 		bool m_opened;

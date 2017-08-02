@@ -39,12 +39,4 @@ namespace graphite
         m_out_stream << std::endl;
 		m_opened = true;
 	}
-
-    void ASCIIFileWriter::adjustStreamPosition (int adjustment)
-    {
-        long streamPos = m_out_stream.tellp();
-        m_out_stream.seekp(streamPos + adjustment);
-    }
-
-    long ASCIIFileWriter::getStreamPosition () { return m_out_stream.tellp(); }
 }

@@ -1,15 +1,15 @@
 #ifndef GRAPHITE_ADJUDICATOR_MAPPING_H
 #define GRAPHITE_ADJUDICATOR_MAPPING_H
 
-#include "core/mapping/IMapping.h"
 #include "core/adjudicator/IAdjudicator.h"
-#include "core/graph/GraphManager.h"
+#include "core/mapping/IMapping.h"
+#include "core/mapping/NodeInfo.h"
+//#include "core/graph/GraphManager.h"    // There is a circular dependency between GraphManager, SAMFileWriter and GSSWMapping. I'm pretty sure the only thing that GSSWMapping needs from GraphManager is the NodeInfo class. Find out the best way to address this problem when I get the SAMFileWriter where I want it in the GraphManager.
 
 #include "gssw.h"
 
 namespace graphite
 {
-
 	class GSSWMapping : public IMapping
 	{
     public:
