@@ -17,11 +17,11 @@ namespace graphite
 	    IFileWriter(FileType ft) : m_file_type(ft) {}
 		virtual ~IFileWriter() {}
 
-		FileType getFileType() { return m_file_type; }
-
 		virtual bool open() = 0;
 		virtual void close() = 0;
 		virtual bool write(const char* data, size_t dataLength) = 0;
+
+		FileType getFileType() { return m_file_type; }
 		virtual std::string getFilePath() = 0;
 
 	protected:

@@ -17,7 +17,7 @@ namespace graphite
 
 		virtual bool open() override;
 		void close() override;
-		virtual bool write(const char* data, size_t dataLength) override;
+		bool write(const char* data, size_t dataLength) override;
 		std::string getFilePath() override { return m_file_path; }
 
     protected:

@@ -1,6 +1,5 @@
-/**
- * 2. Modify SAMFileWriter so that it can read and write to the SAM file at different time points.
- * 3. Ensure temp file is removed.
+/*
+ * Need to write unit testing for the code I have added.
  */
 #include "core/alignment/AlignmentManager.hpp"
 #include "core/alignment/BamAlignmentManager.h"
@@ -116,13 +115,6 @@ int main(int argc, char** argv)
     updateFileMap (outputFileMap, tempSamFileName, samFileType, outputDirectory, "sam");
     graphite::SAMFileWriter::SharedPtr tempSamFilePtr = std::dynamic_pointer_cast< graphite::SAMFileWriter >(outputFileMap.at(tempSamFileName));
 
-    // Testing sam pointer.
-    /*
-    std::string testString = "At least it's writing this!";
-    outputFileMap.at(tempSamFileName)->write(testString.c_str(), testString.size());
-    tempSamFilePtr->write(testString.c_str(), testString.size());
-    */
-
 	std::unordered_set< std::string > outputPaths;
 	bool firstTime = true;
 
@@ -173,7 +165,6 @@ int main(int argc, char** argv)
 		// the gsswGraphManager adjudicates on the variantManager's variants
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength, isIGVOutput, tempSamFilePtr);
-        std::cout << "Graphs built" << std::endl;
 
         if (isIGVOutput)
         {
@@ -229,9 +220,9 @@ int main(int argc, char** argv)
 
         for (auto& hs: headerSequenceMap)
         {
-            // Need +1 to account for the ">" symbol.
-            outputFileMap.at(fastaFileName)->write((">" + hs.first).c_str(), hs.first.length() + 1);
-            outputFileMap.at(fastaFileName)->write(hs.second.c_str(), hs.second.length());
+            // Need +2 to account for the ">" and '\n' symbols.
+            outputFileMap.at(fastaFileName)->write((">" + hs.first + '\n').c_str(), hs.first.length() + 2);
+            outputFileMap.at(fastaFileName)->write((hs.second + '\n').c_str(), hs.second.length() + 1);
         }
 
         // Write out GraphPaths bed.
@@ -254,17 +245,13 @@ int main(int argc, char** argv)
             for (auto& node : nodeVector)
             {
                 auto iter = nodeInfoMap.find(std::stoi(node));
-                /*
-                if (iter == nodeInfoMap.end())
-                    std::cout << "Node " << node << " not found" << std::endl;
-                    */
                 endPosition = startPosition + iter->second->getLength();
                 if (iter->second->getVariantType() == 0)
-                    variantType = "Ref";
+                    variantType = "REF";
                 else
-                    variantType = "Alt";
+                    variantType = "ALT";
 
-                std::string bedLine = hs.first + '\t' + std::to_string(startPosition) + '\t' + std::to_string(endPosition) + '\t' + variantType;
+                std::string bedLine = hs.first + '\t' + std::to_string(startPosition) + '\t' + std::to_string(endPosition) + '\t' + variantType + '\n';
                 outputFileMap.at(bedFileName)->write(bedLine.c_str(), bedLine.length());
 
                 startPosition = endPosition;
@@ -285,76 +272,34 @@ int main(int argc, char** argv)
         std::string samFileName = firstFileName_withoutExtension + "." + "sam";
         updateFileMap(outputFileMap, samFileName, samFileType, outputDirectory, "sam");
         
-        outputFileMap.at(samFileName)->write(samHeader.c_str(), samHeader.length());
+        // Write out SAM header.
+        graphite::SAMFileWriter::SharedPtr samFilePtr = std::dynamic_pointer_cast< graphite::SAMFileWriter >(outputFileMap.at(samFileName));
+        samFilePtr->writeSamHeader(samHeader.c_str(), samHeader.length());
 
-        // Modify the SamFileWriter so that I can read and write the same file. Try using fstream. Make sure I know where the variables are coming from i.e. ASCII or SAM.
-        // 
-        tempSamFilePtr->close();
-        tempSamFilePtr->printIosState();
-        /*
-        std::cout << std::endl;
-        tempSamFilePtr->open();
-        tempSamFilePtr->printIosState();
+        // Adjust stream positions for the temporary SAM file and the final sam file.
+        tempSamFilePtr->setInStreamToBeginning();
 
-        std::ifstream tempSamFile;
-        tempSamFile.open("20170109_HG00514.sv_callsTEMP.sam");
-        */
-
-        /*
-        std::cout << "Is m_out_stream open? " << tempSamFile.is_open() << std::endl;
-        std::cout << "good()=" << tempSamFile.good() << std::endl;
-        std::cout << "eof()=" << tempSamFile.eof() << std::endl;
-        std::cout << "fail()=" << tempSamFile.fail() << std::endl;
-        std::cout << "bad()=" << tempSamFile.bad() << std::endl;
-        std::string test = tempSamFileName.substr(tempSamFileName.find_last_of("/") + 1);
-        std::ifstream tempSamFile(test);
-        std::cout << test << std::endl;
-        */
-        /*
-        int count = 0;
-        for (std::string str; std::getline(tempSamFile, str); )
+        // Write alignments from temp SAM file to final SAM file.
+        while (!tempSamFilePtr->endOfFile())
         {
-            if (count < 2)
-                std::cout << str << std::endl;
-            outputFileMap.at(samFileName)->write(str.c_str(), str.length());
-            //outputFileMap.at(samFileName)->write(samHeader.c_str(), samHeader.length());
-            count++;
+            std::string line;
+            tempSamFilePtr->getInLine(line);
+            samFilePtr->write(line.c_str(), line.length());
         }
-        tempSamFile.close();
-        */
-
-        /*
-        // Remove temporary file.
-        remove(tempSamFile);
-        */
-        
-        // Would like to read and write out the lines by line to avoid memory consumption issues.
-        // Move stream position to beginning of file and start reading.
-        /*
-        std::cout << "In stream pos: " << tempSamFilePtr->getInStreamPosition() << std::endl;
-        long inStreamPos = tempSamFilePtr->getInStreamPosition();
-        //tempSamFilePtr->adjustInStreamPosition(-inStreamPos);
-        //tempSamFilePtr->setInStreamToBeginning();
-        std::cout << "In stream pos: " << tempSamFilePtr->getInStreamPosition() << std::endl;
-        for (std::string line; line != ""; )
-        {
-            line = tempSamFilePtr->getInLine();
-            outputFileMap.at(samFileName)->write(str.c_str(), str.length());
-        }
-        */
     }
     
+    // Close all open files.
 	for (auto& iter : outputFileMap)
 	{
-        //std::cout << "File path: " << iter.first << '\n' << std::endl;
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}
-    // Remove temporary file.
-    //remove(OutputDirectory + tempSamFileName);
 
-	// graphite::GSSWAdjudicator* adj_p;
-	// std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
+    // Remove temporary file containing alignments.
+    if (isIGVOutput)
+    {
+        remove(tempSamFilePtr->getFilePath().c_str());
+    }
 
 	return 0;
 }

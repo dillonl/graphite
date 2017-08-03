@@ -36,7 +36,6 @@ namespace graphite
 	{
 		if (!m_opened) { return false; }
 		this->m_out_stream.write(data, dataLength);
-        m_out_stream << std::endl;
 		m_opened = true;
 	}
 }

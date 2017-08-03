@@ -21,26 +21,22 @@ namespace graphite
         bool open () override;
 
         void recordSamLines (IAlignment::SharedPtr alignmentPtr, GSSWMapping::SharedPtr referenceMappingPtr, GSSWMapping::SharedPtr gsswMappingPtr, std::string originalGraphPathHeader, std::string gsswGraphPathHeader, std::string newCigarString);    // Store the original and updated SamLines in m_sam_lines.
-        bool write (const char* data, size_t datalength) override;  // Write data to SAMFileWriter. Used to write the SAM header to file.
-        bool writeSamLines ();  // Write entries to SAM file.
-        void clearSamLines ();  // Remove all SAM lines from  the m_sam_out_lines vector.
+        bool write (const char* data, size_t datalength);   // Write data to SAMFileWriter. Used to write the SAM header to file.
+        bool writeSamHeader (const char* header, size_t headerLength); // Write entries to SAM file.
+        bool writeStoredAlignments ();      // Write entries to SAM file.
+        void clearStoredAlignments ();      // Remove all SAM lines from  the m_sam_alignments vector.
+        bool endOfFile ();          // Returns true of the stream position reaches the end of the file.
 
-        void printIosState ();
-        /* OLD
-        //void adjustInStreamPosition (long adjustment);
-        //void adjustOutStreamPosition (long adjustment);
+        void setInStreamToBeginning ();     // Set in stream position to the beginning of file.
 
-        //void setInStreamToBeginning ();
+        void getInLine (std::string& line); // Reads a single line and returns it as a string (not including the end of line character.
 
-        //std::string getInLine ();   // Reads a single line and returns it as a string (not including the end of line character.
-        //long getInStreamPosition ();
-        //long getOutStreamPosition ();
-        */
+        void printIosState ();      // Usefule for debuggin purposes.
 
     private:
-        //std::ofstream m_in_out_stream;
+        std::fstream m_in_out_stream;
         std::mutex m_sam_file_writer_mutex;
-        std::vector< std::string >  m_sam_out_lines;
+        std::vector< std::string >  m_sam_alignments;
     };
 }
 

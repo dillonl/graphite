@@ -1,7 +1,3 @@
-/*
- * 1. Create samFileWriter class.
- */
-
 #include "GraphManager.h"
 #include "core/alignment/AlignmentReporter.h"
 #include "core/util/ThreadPool.hpp"
@@ -164,22 +160,10 @@ namespace graphite
 		}
 
         {
-            // Will need to eventually alter the following code so that all the samLines aren't stored in memory.
-            std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
-
             // Write out alignments.
-            tempSamFilePtr->writeSamLines();
-            //tempSamFilePtr->clearSamLines();
-        
-            /*
-            std::ofstream samFile;
-            samFile.open("graphite_out/TempAlignmentFile.sam", std::ios::app);
-            for (auto& samEntry : m_sam_entries)
-            {
-                samFile << samEntry << std::endl;
-            }
-            samFile.close();
-            */
+            std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
+            tempSamFilePtr->writeStoredAlignments();
+            tempSamFilePtr->clearStoredAlignments();
         }
 	}
 
@@ -229,15 +213,6 @@ namespace graphite
 
             std::string newCigarString = gsswMappingPtr->getCigarString(m_adjudicator_ptr);
             tempSamFilePtr->recordSamLines(alignmentPtr, referenceMappingPtr, gsswMappingPtr, originalGraphPathHeader, gsswGraphPathHeader, newCigarString);
-
-            {
-                /*
-                // Write out alignments.
-                std::lock_guard< std::mutex > lock(this->m_gssw_graph_mutex);
-                tempSamFilePtr->writeSamLines();
-                tempSamFilePtr->clearSamLines();
-                */
-            }
         }
 
         auto gsswSWScore = referenceMappingPtr->getMappingScore();

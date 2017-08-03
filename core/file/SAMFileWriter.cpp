@@ -11,7 +11,7 @@ namespace graphite
 
     SAMFileWriter::~SAMFileWriter ()
     {
-        if (m_opened)
+        if (m_in_out_stream.is_open())
         {
             close();
         }
@@ -20,10 +20,11 @@ namespace graphite
     // Create an open function that will allow the SAMFileWriter to be read and written.
     bool SAMFileWriter::open ()
     {
-		if (m_opened) { return false; }
-		//m_out_stream.open(m_file_path, std::fstream::in | std::fstream::out);
-		this->m_out_stream.open(this->m_file_path);
-		m_opened = true;
+		if (m_in_out_stream.is_open()) { return false; }
+		//m_in_out_stream.open(m_file_path, std::ios::in | std::ios::out);
+		m_in_out_stream.open(m_file_path, std::fstream::in | std::fstream::out | std::fstream::app);
+		//m_in_out_stream.open(m_file_path, std::fstream::in | std::fstream::out | std::fstream::ate);
+		//this->m_out_stream.open(this->m_file_path);
 		return true;
     }
     
@@ -70,79 +71,69 @@ namespace graphite
         
         {
             std::lock_guard< std::mutex > lock(this->m_sam_file_writer_mutex);
-            m_sam_out_lines.push_back(originalSamLine);
-            m_sam_out_lines.push_back(updatedSamLine);
+            m_sam_alignments.push_back(originalSamLine);
+            m_sam_alignments.push_back(updatedSamLine);
         }
     }
 
     bool SAMFileWriter::write (const char* data, size_t dataLength)
     {
-		if (!m_opened) { return false; }
-		this->m_out_stream.write(data, dataLength);
-		m_opened = true;
+		if (!m_in_out_stream.is_open()) { return false; }
+		m_in_out_stream.write(data, dataLength);
+        m_in_out_stream << std::endl;
+        return true;
     }
 
-    bool SAMFileWriter::writeSamLines ()
+    bool SAMFileWriter::writeSamHeader (const char* header, size_t headerLength)
     {
-        if (!m_opened) { return false; }
+		if (!m_in_out_stream.is_open()) { return false; }
+		m_in_out_stream.write(header, headerLength);
+        return true;
+    }
 
-        if (m_sam_out_lines.size() == 0)
+    bool SAMFileWriter::writeStoredAlignments ()
+    {
+        if (!m_in_out_stream.is_open()) { return false; }
+
+        if (m_sam_alignments.size() == 0)
             return false;
 
-        for (auto &samLine : m_sam_out_lines)
+        for (auto &alignment: m_sam_alignments)
         {
-           m_out_stream.write(samLine.c_str(), samLine.size());
-           m_out_stream << std::endl;
+           m_in_out_stream.write(alignment.c_str(), alignment.size());
+           m_in_out_stream << std::endl;
         }
 
         return true;
     }
 
-    void SAMFileWriter::clearSamLines()
+    void SAMFileWriter::clearStoredAlignments()
     {
-        m_sam_out_lines.clear();
+        m_sam_alignments.clear();
     }
 
-    /* OLD
-    void SAMFileWriter::adjustInStreamPosition (long adjustment)
+    bool SAMFileWriter::endOfFile ()
     {
-        long streamPos = m_out_stream.tellg();
-        m_out_stream.seekg(streamPos + adjustment);
-    }
-
-    void SAMFileWriter::adjustOutStreamPosition (long adjustment)
-    {
-        long streamPos = m_out_stream.tellp();
-        m_out_stream.seekp(streamPos + adjustment);
+        return m_in_out_stream.eof();
     }
 
     void SAMFileWriter::setInStreamToBeginning ()
     {
-        m_out_stream.seekg(0);
+        m_in_out_stream.seekg(0);
     }
 
-    std::string SAMFileWriter::getInLine ()
+    void SAMFileWriter::getInLine (std::string& line)
     {
-        std::string str;
-        while (!m_out_stream.eof())
-        {
-            std::getline(m_out_stream, str);
-            return str;
-        }
-
-        return "";
+        std::getline(m_in_out_stream, line);
     }
-
-    long SAMFileWriter::getInStreamPosition () { return m_out_stream.tellg(); }
-    long SAMFileWriter::getOutStreamPosition () { return m_out_stream.tellp(); }
-    */
 
     void SAMFileWriter::printIosState ()
     {
-        std::cout << "Is m_out_stream open? " << m_out_stream.is_open() << std::endl;
-        std::cout << "good()=" << m_out_stream.good() << std::endl;
-        std::cout << "eof()=" << m_out_stream.eof() << std::endl;
-        std::cout << "fail()=" << m_out_stream.fail() << std::endl;
-        std::cout << "bad()=" << m_out_stream.bad() << std::endl;
+        std::cout << "Is m_in_out_stream open? " << m_in_out_stream.is_open() << std::endl;
+        std::cout << "good()=" << m_in_out_stream.good() << std::endl;
+        std::cout << "eof()=" << m_in_out_stream.eof() << std::endl;
+        std::cout << "fail()=" << m_in_out_stream.fail() << std::endl;
+        std::cout << "bad()=" << m_in_out_stream.bad() << std::endl;
     }
+
 }
