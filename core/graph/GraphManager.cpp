@@ -182,10 +182,9 @@ namespace graphite
         auto tracebackPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr, gsswGraphContainer);
         auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackPtr, alignmentPtr);
 
-        // Setup and write sam alignment information to file.
+        // Store Sam alignment information in the SamFileWriter.
         if (isIGVOutput)
         {
-            // This function also updates the bamAlignment with the proper read group.
             referenceMappingPtr->getGraphPathHeaderAndSequence(originalGraphPathHeader, originalGraphPathSequence, variantPosition);
             gsswMappingPtr->getGraphPathHeaderAndSequence(gsswGraphPathHeader, gsswGraphPathSequence, variantPosition);
             {

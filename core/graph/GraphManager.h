@@ -52,9 +52,8 @@ namespace graphite
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
 		IAdjudicator::SharedPtr m_adjudicator_ptr;
 
-        std::unordered_map< std::string, std::string > m_header_sequence_map;  // Header sequence map for fasta.
+        std::unordered_map< std::string, std::string > m_header_sequence_map;   // Header sequence map for fasta.
         std::unordered_map< uint32_t, NodeInfo::SharedPtr> m_node_info_map;     // Used to create bed entries.
-        std::vector< graphite::BamAlignment::SharedPtr > m_bam_alignment_ptrs;    // Vector containing both the original and updated BamAlignments.
 	};
 }
 

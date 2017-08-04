@@ -1,5 +1,23 @@
-/*
+/* Currently on GraphManager::adjudicateGraph looking at changes I've made.
+ *
+ * Files that have been modified:
+ *   * alignment/BamAlignment.h
+ *   * file/ASCIIFileWriter.h
+ *   * file/IFileWriter.h
+ *   * file/SAMFileWriter.cpp
+ *   * file/SAMFileWriter.h
+ *   * graph/GraphManager.cpp
+ *   * graph/GraphManager.h
+ *   * graph/GSSWGraph.cpp
+ *   * graph/GSSWGraph.h
+ *   * mapping/GSSWMapping.cpp
+ *   * mapping/GSSWMapping.h
+ *   * mapping/NodeInfo.h
+ *   * ../tools/graphite.cpp
  * Need to write unit testing for the code I have added.
+ *
+ * Ideas for tests:
+ *   * Test multiple bams and vcfs.
  */
 #include "core/alignment/AlignmentManager.hpp"
 #include "core/alignment/BamAlignmentManager.h"
@@ -80,7 +98,6 @@ int main(int argc, char** argv)
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
     auto isIGVOutput = params.getIGVOutput();
-	graphite::FileType fileType = graphite::FileType::ASCII;
 
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
@@ -141,7 +158,6 @@ int main(int argc, char** argv)
 		bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 
-
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
 		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
@@ -187,7 +203,6 @@ int main(int argc, char** argv)
 		{
 			auto vcfReaderPtr = iter.first;
 			auto vcfPath = vcfReaderPtr->getFilePath();
-			//graphite::IFileWriter::SharedPtr fileWriter = vcfoutPaths[vcfPath];
 			graphite::IFileWriter::SharedPtr fileWriter = outputFileMap[vcfPath];
 			std::string currentVCFOutPath = fileWriter->getFilePath();
 			auto variantListPtr = iter.second;

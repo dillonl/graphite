@@ -15,7 +15,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignment > SharedPtr;
-        // Currently a vector ref sequences is stored with each bamAlignment. A more optimized solution may be to create only a single instance. Maybe a static vector.
+        // Currently a refVector  is stored with each bamAlignment. A more optimized solution may be to create only a single instance. Maybe a static vector.
 	    BamAlignment(BamTools::BamAlignment& bamAlignment, std::shared_ptr< Sample > samplePtr, BamTools::RefVector refVector) :
                 m_name(bamAlignment.Name),                      // QNAME.   Read name.
 				m_position(bamAlignment.Position),              // POS.     Start position.
