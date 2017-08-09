@@ -45,6 +45,7 @@ namespace graphite
 			m_sample_ptr = samplePtr;
 			m_sequence = new char[bamAlignment.QueryBases.size() + 1];
 			memcpy(m_sequence, bamAlignment.QueryBases.c_str(), bamAlignment.QueryBases.size() + 1); // the +1 is for the '\0' char
+			m_tlen = bamAlignment.InsertSize;
 		}
 
 				/*
@@ -98,6 +99,11 @@ namespace graphite
 			}
 		}
 
+		int32_t getTLen() override
+		{
+			return m_tlen;
+		}
+
     private:
 		std::mutex m_sequence_mutex;
 		uint16_t m_sequence_counter;
@@ -110,6 +116,7 @@ namespace graphite
 		bool m_reverse_strand;
 		bool m_duplicate;
 		uint16_t m_original_map_quality;
+		int32_t m_tlen;
 	};
 }
 

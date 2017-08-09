@@ -1,5 +1,8 @@
 #include "Utility.h"
 
+#include "core/file/ASCIIFileWriter.h"
+#include "core/file/BGZFFileWriter.h"
+
 // #include <regex>
 #include <string>
 #include <iostream>
@@ -38,4 +41,35 @@ namespace graphite
 		}
 	}
 	*/
+
+	std::unordered_map< std::string, IFileWriter::SharedPtr > getUniqueFileNames(const std::vector< std::string >& filePaths, const std::string& outputDirectory)
+	{
+		std::unordered_map< std::string, IFileWriter::SharedPtr > outPaths;
+		for (auto filePath : filePaths)
+		{
+			std::string path = filePath.substr(filePath.find_last_of("/") + 1);
+			std::string outFilePath = outputDirectory + "/" + path;
+			uint32_t counter = 1;
+			std::string extension = "";
+			while (IFile::fileExists(outFilePath, false))
+			{
+				extension = filePath.substr(filePath.find_last_of(".") + 1);
+				std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
+				outFilePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
+				++counter;
+			}
+			IFileWriter::SharedPtr fileWriterPtr;
+			if (extension.compare("gz") == 0)
+			{
+				fileWriterPtr = std::make_shared< BGZFFileWriter >(outFilePath);
+			}
+			else
+			{
+				fileWriterPtr = std::make_shared< ASCIIFileWriter >(outFilePath);
+			}
+			fileWriterPtr->open();
+			outPaths[filePath] = fileWriterPtr;
+		}
+		return outPaths;
+	}
 }

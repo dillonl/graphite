@@ -46,6 +46,8 @@ namespace graphite
 		virtual const void removeSequence() = 0;
 		virtual const void incrementReferenceCount() = 0;
 
+		virtual int32_t getTLen() { return 0; }
+
 	protected:
 		std::mutex m_mutex;
 		std::unordered_map< uint32_t, std::string > m_mapped_variants_information;

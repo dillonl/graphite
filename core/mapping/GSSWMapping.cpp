@@ -163,6 +163,28 @@ namespace graphite
 
 	void GSSWMapping::printMapping()
 	{
+		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+		if (this->m_gssw_mapping_ptr->cigar.length < 2)
+		{
+			return;
+		}
+		std::string output = "";
+		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+		{
+			output += (nc->node->id % 2 == 0) ? "R" : "V";
+		}
+		std::string readName = std::string(this->m_alignment_ptr->getID(), 0, this->m_alignment_ptr->getID().size() - 1);
+		if (readName.find(":FS:") == std::string::npos)
+		{
+			readName += ":FS:1";
+		}
+		output += "|||" + std::to_string(this->m_alignment_ptr->getTLen()) + "|||" + readName;
+		std::cout << output << std::endl;
+	}
+
+	/*
+	void GSSWMapping::printMapping()
+	{
 		position startPosition = 0;
 		size_t startSoftClipLength = 0;
 		size_t endSoftClipLength = 0;
@@ -306,5 +328,6 @@ namespace graphite
 
 		std::cout << reportString;
 	}
+	*/
 
 }

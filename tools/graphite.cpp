@@ -8,6 +8,7 @@
 #include "core/variant/VCFHeader.h"
 #include "core/util/Params.h"
 #include "core/util/ThreadPool.hpp"
+#include "core/util/Utility.h"
 #include "core/graph/GraphManager.h"
 #include "core/adjudicator/GSSWAdjudicator.h"
 #include "core/variant/VCFHeader.h"
@@ -48,7 +49,6 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto excludeDuplicates = params.getExcludeDuplicates();
 	auto graphSize = params.getGraphSize();
-	graphite::FileType fileType = graphite::FileType::ASCII;
 
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
 
@@ -65,32 +65,7 @@ int main(int argc, char** argv)
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
 	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
 
-	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
-	for (auto vcfPath : vcfPaths)
-	{
-		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
-		std::string filePath = outputDirectory + "/" + path;
-		uint32_t counter = 1;
-		while (graphite::IFile::fileExists(filePath, false))
-		{
-			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
-			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
-			filePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
-			++counter;
-		}
-		// filePath += ".tmp";
-		graphite::IFileWriter::SharedPtr fileWriterPtr;
-		if (fileType == graphite::FileType::BGZF)
-		{
-			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(filePath);
-		}
-		else
-		{
-			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(filePath);
-		}
-		fileWriterPtr->open();
-		vcfoutPaths[vcfPath] = fileWriterPtr;
-	}
+	auto vcfoutPaths = graphite::getUniqueFileNames(vcfPaths, outputDirectory);
 
 	std::unordered_set< std::string > outputPaths;
 	bool firstTime = true;

@@ -38,6 +38,9 @@ namespace graphite
 		while (variantsListPtr->getNextVariant(variantPtr))
 		{
 			if (variantPtr->shouldSkip()) { continue; }
+
+			std::cout << ">" << variantPtr->getPosition() << std::endl;
+
 			position startPosition = 0;
 			position endPosition = 0;
 			auto variantRegionPtrs = variantPtr->getRegions();
@@ -151,6 +154,11 @@ namespace graphite
 
 				if (this->m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr, referenceSWPercent))
 				{
+					{
+						static std::mutex l;
+						std::lock_guard< std::mutex > lock(l);
+						gsswMappingPtr->printMapping();
+					}
 					MappingManager::Instance()->registerMapping(gsswMappingPtr);
 				}
 		    };
