@@ -82,10 +82,8 @@ namespace graphite
     {
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
 
-        //std::string nids = "_";
         std::string nids;
 
-        //int8_t altCount = 0;
         m_alt_count = 0;
 
         // Loop through nodes to extract node id's and sequences.

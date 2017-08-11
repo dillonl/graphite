@@ -15,7 +15,6 @@
 
 TEST(GraphPathAlignmentTests, GetBamHeader)
 {
-
     // Setup variables.
     std::vector< std::string > graphPathHeaders;
     graphPathHeaders.push_back("chr20:61537:0");
@@ -25,7 +24,6 @@ TEST(GraphPathAlignmentTests, GetBamHeader)
     graphPathLengths.push_back(439);
 
     // Load bam.
-    //std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
     std::string bamPath = "/uufs/chpc.utah.edu/common/home/u0702603/Marthlab/Projects/GraphiteDataViewer/graphite_acmiller015/tests/data/test.bam";
     BamHeaderReader bamFile(bamPath);
     

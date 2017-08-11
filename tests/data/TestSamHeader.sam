@@ -86,7 +86,6 @@
 @SQ	SN:NC_007605	LN:171823	AS:NCBI37	M5:6743bd63b3ff2b5b8985d8933c53290a	SP:Human	UR:ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
 @SQ	SN:hs37d5	LN:35477943	AS:NCBI37	M5:5b6a4b3a81a2d3c134b7d14bf6ad39f1	SP:Human	UR:ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
 @SQ	SN:chr20:61537:0	LN:439
-@SQ	SN:chr20:61537:1	LN:439
 @RG	ID:SRR622461	CN:ILLUMINA	DS:SRP000547	LB:Illumina NA12878	PI:250	PL:ILLUMINA	SM:NA12878
 @PG	ID:bwa_index	PN:bwa	CL:bwa index -a bwtsw $reference_fasta	VN:0.5.9-r16
 @PG	ID:bwa_aln_fastq	PN:bwa	CL:bwa aln -q 15 -f $sai_file $reference_fasta $fastq_file	PP:bwa_index	VN:0.5.9-r16

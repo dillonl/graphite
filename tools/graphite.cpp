@@ -1,24 +1,3 @@
-/* Currently on GraphManager::adjudicateGraph looking at changes I've made.
- *
- * Files that have been modified:
- *   * alignment/BamAlignment.h
- *   * file/ASCIIFileWriter.h
- *   * file/IFileWriter.h
- *   * file/SAMFileWriter.cpp
- *   * file/SAMFileWriter.h
- *   * graph/GraphManager.cpp
- *   * graph/GraphManager.h
- *   * graph/GSSWGraph.cpp
- *   * graph/GSSWGraph.h
- *   * mapping/GSSWMapping.cpp
- *   * mapping/GSSWMapping.h
- *   * mapping/NodeInfo.h
- *   * ../tools/graphite.cpp
- * Need to write unit testing for the code I have added.
- *
- * Ideas for tests:
- *   * Test multiple bams and vcfs.
- */
 #include "core/alignment/AlignmentManager.hpp"
 #include "core/alignment/BamAlignmentManager.h"
 #include "core/alignment/BamAlignmentReader.h"

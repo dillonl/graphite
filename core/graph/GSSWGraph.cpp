@@ -51,71 +51,19 @@ namespace graphite
 				continue;
 			}
 
-            // Instantiate vectors graph path headers and sequences.
-            /*
-            std::vector< std::string > sequenceHeaders(variantPtr->getAltAllelePtrs().size() + 1);
-            std::vector< std::string > sequences(variantPtr->getAltAllelePtrs().size() + 1);
-
-            // Track graph offset so that the reads can be defined with respect to the graph "references". Need to verify that this is the correct position.
-            for (int i = 0; i < sequenceHeaders.size(); ++i)
-            {
-                m_graph_path_offsets.push_back(currentReferencePosition);
-            }
-            */
-
 			referenceSize = variantPtr->getPosition() - currentReferencePosition;
-
-            // Setup regions flanking variant.
-            /*
-            auto refStartRegionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), currentReferencePosition, currentReferencePosition + referenceSize - 1, Region::BASED::ONE);     // -1 so that we don't include the variant.
-            auto refEndRegionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), currentReferencePosition + referenceSize + variantPtr->getRefAllelePtr()->getLength(), currentReferencePosition + referenceSize + variantPtr->getRefAllelePtr()->getLength() + referenceSize, Region::BASED::ONE);
-            */
 
 			if (referenceSize > 0)
 			{
 				auto refRegionPtr = std::make_shared< Region >(this->m_region_ptr->getReferenceID(), currentReferencePosition, variantPtr->getPosition() - 1, Region::BASED::ONE); // minus one because we don't want to include the actual variant position
 				std::string referenceSequenceString = this->m_reference_ptr->getSequenceFromRegion(refRegionPtr);
 				auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
-                // May be able to change variantPtr to refRegionPtr to get the correct node position.
-				//auto referenceNode = addReferenceVertex(variantPtr->getRegions()[0]->getStartPosition(), referenceAllelePtr, altAndRefVertices);
 				auto referenceNode = addReferenceVertex(refRegionPtr->getStartPosition(), referenceAllelePtr, altAndRefVertices);
 				altAndRefVertices.clear();
 				altAndRefVertices.push_back(referenceNode);
 				m_total_graph_length += referenceSize;
 				currentReferencePosition += referenceSize;
 			}
-
-            // Construct paths by Variant.
-            /*
-            // Create sequence headers and insert the starting reference sequence.
-            for (int i = 0; i < sequenceHeaders.size(); i++)
-            {
-                sequenceHeaders[i] = ">" + variantPtr->getChrom() + ":" + std::to_string(variantPtr->getPosition()) + ":" + std::to_string(i);
-                sequences[i] = this->m_reference_ptr->getSequenceFromRegion(refStartRegionPtr);
-            }
-
-            // Append the rest of the reference sequence to refSeqStart.
-            sequences[0] += variantPtr->getRefAllelePtr()->getSequence() + this->m_reference_ptr->getSequenceFromRegion(refEndRegionPtr);
-
-            // Add the alternate alleles as well as refSeqEnd. Need to make sure this is done correctly.
-            for (int i = 0; i < variantPtr->getAltAllelePtrs().size(); ++i)
-            {
-                sequences[i + 1] += variantPtr->getAltAllelePtrs()[i]->getSequence() + this->m_reference_ptr->getSequenceFromRegion(refEndRegionPtr);
-            }
-
-            // Append headers and paths to member variable.
-            for (int i = 0; i < sequences.size(); ++i)
-            {
-                m_graph_path_headers.emplace_back(sequenceHeaders[i]);
-                m_graph_path_sequences.emplace_back(sequences[i]);
-            }
-
-            // Calculate the lengths of each graph path sequence.
-            for (auto sequence : sequences)
-            {
-                m_graph_path_lengths.push_back(sequence.length());
-            }
-            */
 
 			altAndRefVertices = addAlternateVertices(altAndRefVertices, variantPtr);
 			currentReferencePosition += variantPtr->getReferenceSize();

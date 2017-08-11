@@ -26,6 +26,7 @@ namespace graphite
         void close ();                  // Close file.
         std::string getOriginalSamHeader ();    // Return original SAM header from input BAM file as a string.
         std::string getModifiedSamHeader ();    // Return updated SAM header as a string.
+        bool containsReadGroup (std::string readGroup);    // Checks if the readGroup is contained in the SAM Header.
 
     private:
         std::string m_bam_path;

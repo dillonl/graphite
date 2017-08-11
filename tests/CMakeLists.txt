@@ -19,11 +19,10 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/core/util
   ${GTEST_SOURCE_DIR}/include
   ${GTEST_SOURCE_DIR}
+  ${GMOCK_SOURCE_DIR}
   ${FASTAHACK_INCLUDE}
   ${SCI_BOOST_INCLUDE}
  )
-
-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") # clang Doesnt use pthread
@@ -41,6 +40,7 @@ target_link_libraries(graphite_tests
   ${CORE_LIB}
   ${GRAPHITE_ADJUDICATOR}
   ${GTEST_LIB}
+  ${GMOCK_LIB}
 )
 
 add_dependencies(graphite_tests ${GRAPHITE_EXTERNAL_PROJECT})

@@ -21,10 +21,7 @@ namespace graphite
     bool SAMFileWriter::open ()
     {
 		if (m_in_out_stream.is_open()) { return false; }
-		//m_in_out_stream.open(m_file_path, std::ios::in | std::ios::out);
 		m_in_out_stream.open(m_file_path, std::fstream::in | std::fstream::out | std::fstream::app);
-		//m_in_out_stream.open(m_file_path, std::fstream::in | std::fstream::out | std::fstream::ate);
-		//this->m_out_stream.open(this->m_file_path);
 		return true;
     }
     

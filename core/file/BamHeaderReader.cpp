@@ -50,4 +50,9 @@ namespace graphite
     {
         return m_sam_header.ToString();
     }
+
+    bool BamHeaderReader::containsReadGroup (std::string readGroup)
+    {
+        return m_sam_header.ReadGroups.Contains(readGroup);
+    }
 }

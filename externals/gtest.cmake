@@ -47,4 +47,6 @@ ExternalProject_Get_Property(${GTEST_PROJECT} SOURCE_DIR)
 ExternalProject_Get_Property(${GTEST_PROJECT} BINARY_DIR)
 
 SET(GTEST_LIB ${BINARY_DIR}/googlemock/gtest/libgtest.a CACHE INTERNAL "GTEST Lib")
+SET(GMOCK_LIB ${BINARY_DIR}/googlemock/libgmock.a CACHE INTERNAL "GMOCK Lib")
 SET(GTEST_SOURCE_DIR ${SOURCE_DIR}/googletest/include/ CACHE INTERNAL "GTEST Include")
+SET(GMOCK_SOURCE_DIR ${SOURCE_DIR}/googlemock/include/ CACHE INTERNAL "GMOCK Include")

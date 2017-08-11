@@ -1,22 +1,42 @@
 #ifndef GRAPHITE_BAMHEADERREADERTESTS_HPP
 #define GRAPHITE_BAMHEADERREADERTESTS_HPP
 
+#include "core/file/BamHeaderReader.h"
+#include "TestConfig.h"
+
 #include <iostream>
 
-#include "core/file/BamHeaderReader.h"
-
-/**
- * When running this test then you may want to pipe it to less -S.
- */
-TEST(BamHeaderReaderTests, AddReadGroupsToSamHeader)
+/*
+ * Check that RNAME's are included in the header.
+ */ 
+class BamHeaderReaderTest : public ::testing::Test
 {
-    std::string bamPath = "/uufs/chpc.utah.edu/common/home/marth-d1/data/project_bam/hgsvc_from_cram/CHS/HG00514.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.bam";
-    
+protected:
+    std::string bamPath = {TEST_BAM_FILE};
     graphite::BamHeaderReader bamReader = graphite::BamHeaderReader(bamPath);
-    bamReader.open();
+
+    virtual void SetUp ()
+    {
+        bamReader.open();
+    }
+
+    virtual void TearDown ()
+    {
+        bamReader.close();
+    }
+};
+
+TEST_F (BamHeaderReaderTest, addReadGroups_toSamHeader)
+{
     bamReader.addReadGroupsToSamHeader();
-    std::cout << bamReader.getModifiedSamHeader();
-    bamReader.close();
+    ASSERT_TRUE(bamReader.containsReadGroup("ALT"));
+    ASSERT_TRUE(bamReader.containsReadGroup("REF"));
 }
+
+/*
+TEST_F (BamHeaderReaderTest, addRnameTo_header)
+{
+}
+*/
 
 #endif // GRAPHITE_BAMHEADERREADERTESTS_HPP
