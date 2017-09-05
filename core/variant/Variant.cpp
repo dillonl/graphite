@@ -4,7 +4,7 @@
 
 #include <unordered_map>
 #include <sstream>
-#include <regex>
+// #include <regex>
 
 namespace graphite
 {
@@ -47,6 +47,12 @@ namespace graphite
 		variantPtr->m_id = vcfComponents[2];
 		ref = vcfComponents[3];
 		alts = vcfComponents[4];
+
+		{
+			static std::mutex l;
+			std::lock_guard< std::mutex > lg(l);
+			std::cout << "working on: " << variantPtr->m_chrom << " " << variantPtr->m_position << std::endl;
+		}
 
 		variantPtr->m_qual = vcfComponents[5];
 		variantPtr->m_filter = vcfComponents[6];
@@ -111,18 +117,33 @@ namespace graphite
 
 	bool isStandardAlt(const std::string& alt)
 	{
-		std::regex reg("^[ATCG,]*$");
-		return std::regex_match(alt, reg);
+		std::unordered_set< char > validSequence = {'A', 'C', 'G', 'T', ','};
+		for (auto c : alt)
+		{
+			if (validSequence.find(c) == validSequence.end())
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	bool isSymbolicAlt(const std::string& alt)
 	{
-		std::regex reg("<([^>]+)>");
-		return std::regex_match(alt, reg);
+		std::unordered_set< char > symbolicSequence = {'<', '>'};
+		for (auto c : alt)
+		{
+			if (symbolicSequence.find(c) != symbolicSequence.end())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	std::string getTruncatedSequence(const char* sequence, uint32_t svLength, uint32_t readLength)
 	{
+		std::cout << std::string(sequence, readLength) + std::string(readLength, 'N') + std::string(sequence + (svLength - readLength), readLength) << std::endl;
 		return std::string(sequence, readLength) + std::string(readLength, 'N') + std::string(sequence + (svLength - readLength), readLength);
 	}
 
