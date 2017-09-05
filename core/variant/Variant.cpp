@@ -48,12 +48,6 @@ namespace graphite
 		ref = vcfComponents[3];
 		alts = vcfComponents[4];
 
-		{
-			static std::mutex l;
-			std::lock_guard< std::mutex > lg(l);
-			std::cout << "working on: " << variantPtr->m_chrom << " " << variantPtr->m_position << std::endl;
-		}
-
 		variantPtr->m_qual = vcfComponents[5];
 		variantPtr->m_filter = vcfComponents[6];
 		fields = vcfComponents[7];
@@ -143,7 +137,6 @@ namespace graphite
 
 	std::string getTruncatedSequence(const char* sequence, uint32_t svLength, uint32_t readLength)
 	{
-		std::cout << std::string(sequence, readLength) + std::string(readLength, 'N') + std::string(sequence + (svLength - readLength), readLength) << std::endl;
 		return std::string(sequence, readLength) + std::string(readLength, 'N') + std::string(sequence + (svLength - readLength), readLength);
 	}
 
