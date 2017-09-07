@@ -46,6 +46,8 @@ def genotypeVCF(vcf, outputDirectory, errorRate):
                 formatInfo[formatSplit[i]] = i
 
         numOfAlts = vcfLineSplit[4].count(',') + 1
+        if numOfAlts > 1:
+            numOfAlts = 1
         for sampleColumnIdx in sampleColumnIdxs:
             genotype = getGenotypeUpdatedSampleInfo(vcfLineSplit[sampleColumnIdx], formatInfo, errorRate, numOfAlts)
             if 'GT' not in vcfLineSplit[formatColumnIdx]:
@@ -95,6 +97,7 @@ def getGenotypeUpdatedSampleInfo(vcfSampleInfo, formatInfo, errorRate, numOfAlts
 def getCountsFromSampleInfo(vcfSampleInfo, formatInfo, numOfAlts):
     vcfSampleInfoSplit = vcfSampleInfo.split(':')
     counts = []
+
     for altCount in range(1, numOfAlts + 1):
         counts.append({'refCounts': 0, 'altCounts': 0})
         for field in ['DP4_NFP', 'DP4_NP', 'DP4_EP']:
