@@ -48,66 +48,58 @@ def genotypeVCF(vcf, outputDirectory, errorRate):
         numOfAlts = vcfLineSplit[4].count(',') + 1
         if numOfAlts > 1:
             numOfAlts = 1
+        gtIdx = -1
+        if 'GT' not in vcfLineSplit[formatColumnIdx]:
+            vcfLineSplit[formatColumnIdx] = "GT:" + vcfLineSplit[formatColumnIdx]
+            gtIdx = 0
+        else:
+            gtIdx = formatInfo['GT']
         for sampleColumnIdx in sampleColumnIdxs:
             genotype = getGenotypeUpdatedSampleInfo(vcfLineSplit[sampleColumnIdx], formatInfo, errorRate, numOfAlts)
-            if 'GT' not in vcfLineSplit[formatColumnIdx]:
-                vcfLineSplit[formatColumnIdx] = "GT:" + vcfLineSplit[formatColumnIdx]
-                vcfLineSplit[sampleColumnIdx] = genotype + ":" + vcfLineSplit[sampleColumnIdx]
-            else:
-                sampleSplit = vcfLineSplit[sampleColumnIdx].split(':')
-                sampleSplit[formatInfo['GT']] = genotype
-                vcfLineSplit[sampleColumnIdx] = ':'.join(sampleSplit)
-            out.write('\t'.join(vcfLineSplit) + '\n')
+            sampleSplit = vcfLineSplit[sampleColumnIdx].split(':')
+            sampleSplit[gtIdx] = genotype
+            vcfLineSplit[sampleColumnIdx] = ':'.join(sampleSplit)
+        out.write('\t'.join(vcfLineSplit) + '\n')
     out.close()
 
 def getGenotypeUpdatedSampleInfo(vcfSampleInfo, formatInfo, errorRate, numOfAlts):
     graphiteCounts = getCountsFromSampleInfo(vcfSampleInfo, formatInfo, numOfAlts)
-    genotypeArray = [0,0]
+    genotypeArray = ['.','.']
     thresholdsCountsAndIdxs = []
-    for altCount in range(1, numOfAlts + 1):
-        refCounts = graphiteCounts[altCount - 1]['refCounts']
-        altCounts = graphiteCounts[altCount - 1]['altCounts']
-        totalCounts = refCounts + altCounts
+    totalCounts = sum(graphiteCounts)
 
-        minAltConfirmedCounts = binom.ppf(errorRate, totalCounts, 0.5)
-        minRefConfirmedCounts = binom.ppf(1-errorRate, totalCounts, 0.5)
 
-        refThreshold = minRefConfirmedCounts
-        altThreshold = max(10, minAltConfirmedCounts)
-        if refCounts > refThreshold:
-            if len(thresholdsCountsAndIdxs) == 0: thresholdsCountsAndIdxs.append({})
-            thresholdsCountsAndIdxs[0] = {'counts': refCounts, 'index': 0}
-        if altCounts > altThreshold:
-            thresholdsCountsAndIdxs.append({'counts': altCounts, 'index': altCount})
+    # minAltConfirmedCounts = binom.ppf(errorRate, totalCounts, 0.5)
+    # minRefConfirmedCounts = binom.ppf(1-errorRate, totalCounts, 0.5)
 
-    if len(thresholdsCountsAndIdxs) > 1:
-        sortedList = sorted(thresholdsCountsAndIdxs, key=lambda v: v['counts'])
-        genotypeArray[0] = sortedList[0]['index']
-        genotypeArray[1] = sortedList[1]['index']
-    elif len(thresholdsCountsAndIdxs) == 1:
-        genotypeArray[0] = thresholdsCountsAndIdxs[0]['index']
-        genotypeArray[1] = thresholdsCountsAndIdxs[0]['index']
-    else:
-        genotypeArray[0] = '.'
-        genotypeArray[1] = '.'
+    threshold = 3
+    if graphiteCounts[0] > threshold:
+        genotypeArray = [0,0]
+    for idx in range(1, len(graphiteCounts)):
+        if graphiteCounts[idx] > threshold:
+            if genotypeArray[0] == '.':
+                genotypeArray[0] = idx
+                genotypeArray[1] = idx
+            else:
+                genotypeArray[0] = genotypeArray[1]
+                genotypeArray[1] = idx
 
     genotype = '/'.join(str(i) for i in genotypeArray)
     return genotype
 
 def getCountsFromSampleInfo(vcfSampleInfo, formatInfo, numOfAlts):
     vcfSampleInfoSplit = vcfSampleInfo.split(':')
-    counts = []
+    counts = [0] * int(len(vcfSampleInfoSplit[formatInfo['DP4_NFP']].split(',')) / 2)
 
-    for altCount in range(1, numOfAlts + 1):
-        counts.append({'refCounts': 0, 'altCounts': 0})
-        for field in ['DP4_NFP', 'DP4_NP', 'DP4_EP']:
-            graphiteCounts = vcfSampleInfoSplit[formatInfo[field] * altCount].split(',')
-            if graphiteCounts[0] == '.':
-                counts[altCount - 1]['refCounts'] = -1
-                counts[altCount - 1]['altCounts'] = -1
-                break
-            counts[altCount - 1]['refCounts'] += int(graphiteCounts[0]) + int(graphiteCounts[1])
-            counts[altCount - 1]['altCounts'] += int(graphiteCounts[2]) + int(graphiteCounts[3])
+    for field in ['DP4_NFP', 'DP4_NP', 'DP4_EP']:
+        graphiteCounts = vcfSampleInfoSplit[formatInfo[field]].split(',')
+        if graphiteCounts[0] == '.':
+            return [0]
+        idxCount = 0
+        for alleleIdx in range(0, len(graphiteCounts), 2):
+            counts[idxCount] += int(graphiteCounts[alleleIdx]) + int(graphiteCounts[alleleIdx+1])
+            idxCount += 1
+
     return counts
 
 if __name__ == "__main__":
