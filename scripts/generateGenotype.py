@@ -8,9 +8,9 @@ def main (argv):
     parser.add_argument('-e', '--error_rate', action="store", dest="error_rate", default=0.01, type=float, help="Error rate of the sequencing technology")
     parser.add_argument('-v', '--vcfs', action="append", dest="vcfs", default=[])
     parser.add_argument('-o', '--output_directory', action="store", dest="output_directory")
-    parser.add_argument('-u', '--upper_bound_percent', action="store", dest="upper_bound_percent", default=0.8, type=float, help="Upper percentage bound for het calls")
-    parser.add_argument('-l', '--lower_bound_percent', action="store", dest="lower_bound_percent", default=0.2, type=float, help="Lower percentage bound for het calls")
-    parser.add_argument('-t', '--threshold', action="store", dest="threshold", default=10, type=float, help="Threshold for total counts")
+    parser.add_argument('-u', '--upper_bound_percent', action="store", dest="upper_bound_percent", default=0.8, type=float, help="Upper percentage bound for het calls between 0 and 1")
+    parser.add_argument('-l', '--lower_bound_percent', action="store", dest="lower_bound_percent", default=0.2, type=float, help="Lower percentage bound for het calls between 0 and 1")
+    parser.add_argument('-t', '--threshold', action="store", dest="threshold", default=10, type=int, help="Threshold for total counts")
 
     results = parser.parse_args()
     errorRate = results.error_rate
@@ -26,7 +26,7 @@ def main (argv):
     for vcf in vcfs:
         genotypeVCF(vcf, outputDirectory, errorRate, lowerBoundPercent, upperBoundPercent, threshold)
 
-def genotypeVCF(vcf, outputDirectory, errorRate, lowerBoundPercent, upperBoundPercent):
+def genotypeVCF(vcf, outputDirectory, errorRate, lowerBoundPercent, upperBoundPercent, threshold):
     outFilePath = outputDirectory + '/' + vcf.split('/')[-1].replace('.vcf', '.filtered') + '.vcf'
     out = open(outFilePath, 'w')
     vcfFile = open(vcf, "r")
