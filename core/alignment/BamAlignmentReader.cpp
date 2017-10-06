@@ -58,6 +58,11 @@ namespace graphite
 		std::vector< IAlignment::SharedPtr > alignmentPtrs;
 
 		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
+		if (refID == -1)
+		{
+			std::cout << "Invalid BAM Region: " << regionPtr->getReferenceID() << std::endl;
+			exit(0);
+		}
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 
