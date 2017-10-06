@@ -60,9 +60,7 @@ namespace graphite
 		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
-		std::cout << "region: " << regionPtr->getRegionString() << " " << regionPtr->getStartPosition() << " "<< regionPtr->getEndPosition() << std::endl;
 
-		// std::cout << "BamAlignmentReader.cpp refID: " << refID << std::endl;
 		BamTools::BamAlignment bamAlignment;
 		while(this->m_bam_reader->GetNextAlignment(bamAlignment))
 		{
@@ -79,21 +77,11 @@ namespace graphite
 				throw "There was an error in the sample name for: " + sampleName;
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
-			static std::mutex m;
-			{
-				m.lock();
-				std::cout << bamAlignment.RefID << " " << bamAlignment.Position << " " << sampleName << std::endl;
-				m.unlock();
-			}
 		}
-		// std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 		if (m_alignment_reader_manager_ptr != nullptr)
 		{
 			m_alignment_reader_manager_ptr->checkinReader(this->shared_from_this());
 		}
-		std::cout << "loaded: " << alignmentPtrs.size() << std::endl;
-
-		// std::cout << "got reads: " << regionPtr->getRegionString() << " " << alignmentPtrs.size() << std::endl;
 		return alignmentPtrs;
 	}
 

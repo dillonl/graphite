@@ -116,16 +116,9 @@ int main(int argc, char** argv)
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 
-		std::cout << "alignments loading: " << std::endl;
-		for (auto samplePtr : sampleManagerPtr->getSamplePtrs())
-		{
-			std::cout << "sn: " << samplePtr->getName() << " " << samplePtr->getReadgroup() << " " << samplePtr->getPath() << std::endl;
-		}
 		// load bam alignments
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
 		bamAlignmentManager->loadAlignments(variantManagerPtr);
-
-		std::cout << "alignments loaded" << std::endl;
 
 		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
@@ -194,9 +187,6 @@ int main(int argc, char** argv)
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
 	}
-
-	// graphite::GSSWAdjudicator* adj_p;
-	// std::cout << "adj counts: " << (uint32_t)adj_p->s_adj_count << " [total]" << std::endl;
 
 	return 0;
 }
