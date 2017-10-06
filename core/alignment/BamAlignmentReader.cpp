@@ -49,6 +49,7 @@ namespace graphite
 
 	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads)
 	{
+		std::string bamFileName = this->m_bam_path.substr(this->m_bam_path.find_last_of("/") + 1);
 		if (!m_is_open)
 		{
 			std::cout << "Bam file not opened" << std::endl;
@@ -59,6 +60,7 @@ namespace graphite
 		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
+		std::cout << "region: " << regionPtr->getRegionString() << " " << regionPtr->getStartPosition() << " "<< regionPtr->getEndPosition() << std::endl;
 
 		// std::cout << "BamAlignmentReader.cpp refID: " << refID << std::endl;
 		BamTools::BamAlignment bamAlignment;
@@ -67,19 +69,29 @@ namespace graphite
             if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
 			std::string sampleName;
 			bamAlignment.GetTag("RG", sampleName);
-
+			if (sampleName.size() == 0)
+			{
+				sampleName = bamFileName;
+			}
 			Sample::SharedPtr samplePtr = sampleManagerPtr->getSamplePtr(sampleName);
 			if (samplePtr == nullptr)
 			{
 				throw "There was an error in the sample name for: " + sampleName;
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
+			static std::mutex m;
+			{
+				m.lock();
+				std::cout << bamAlignment.RefID << " " << bamAlignment.Position << " " << sampleName << std::endl;
+				m.unlock();
+			}
 		}
 		// std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 		if (m_alignment_reader_manager_ptr != nullptr)
 		{
 			m_alignment_reader_manager_ptr->checkinReader(this->shared_from_this());
 		}
+		std::cout << "loaded: " << alignmentPtrs.size() << std::endl;
 
 		// std::cout << "got reads: " << regionPtr->getRegionString() << " " << alignmentPtrs.size() << std::endl;
 		return alignmentPtrs;

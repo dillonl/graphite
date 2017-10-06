@@ -31,7 +31,7 @@ SET(TABIX_PROJECT tabix_project CACHE INTERNAL "tabix project name")
 SET(TABIX_DIR ${CMAKE_BINARY_DIR}/externals/tabix CACHE INTERNAL "tabix project directory")
 ExternalProject_Add(${TABIX_PROJECT}
 	GIT_REPOSITORY https://github.com/dillonl/tabix.git
-	GIT_TAG 656f0c8ae8d8e94416c0a310cf22087a3880e585
+	GIT_TAG e12b75b88e3ff9e098a07976c3b1062b1f3182f4
 	DEPENDS ${ZLIB_PROJECT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""

@@ -64,6 +64,15 @@ int main(int argc, char** argv)
 
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
 	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
+	if (sampleManagerPtr->getSampleCount() == 0)
+	{
+		for (auto bamPath : bamPaths)
+		{
+			std::string bamFileName = bamPath.substr(bamPath.find_last_of("/") + 1);
+			auto samplePtr = std::make_shared< graphite::Sample >(bamFileName, bamFileName, bamPath);
+			sampleManagerPtr->addSamplePtr(samplePtr);
+		}
+	}
 
 	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
 	for (auto vcfPath : vcfPaths)
@@ -107,9 +116,17 @@ int main(int argc, char** argv)
 
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 
+		std::cout << "alignments loading: " << std::endl;
+		for (auto samplePtr : sampleManagerPtr->getSamplePtrs())
+		{
+			std::cout << "sn: " << samplePtr->getName() << " " << samplePtr->getReadgroup() << " " << samplePtr->getPath() << std::endl;
+		}
 		// load bam alignments
 		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
 		bamAlignmentManager->loadAlignments(variantManagerPtr);
+
+		std::cout << "alignments loaded" << std::endl;
+
 		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
 		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
 
