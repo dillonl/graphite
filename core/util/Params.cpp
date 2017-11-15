@@ -23,7 +23,7 @@ namespace graphite
 	{
 		this->m_options.add_options()
 			("h,help","Print help message")
-			("d,exclude_duplicates", "Exclude Duplicate Reads")
+			("d,include_duplicates", "Include Duplicate Reads")
 			("v,vcf", "Path to input VCF file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("r,region", "Region information", cxxopts::value< std::string >())
@@ -85,7 +85,7 @@ namespace graphite
 	}
 
 
-    bool Params::getExcludeDuplicates()
+    bool Params::getIncludeDuplicates()
     {
         return m_options.count("d") > 0;
     }

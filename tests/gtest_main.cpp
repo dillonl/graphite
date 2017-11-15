@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "IntegrationTests.hpp"
 #include "VCFFileTests.hpp"
 #include "BamAlignmentReaderTests.hpp"
 #include "RegionTests.hpp"

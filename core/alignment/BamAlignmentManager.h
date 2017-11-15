@@ -21,8 +21,8 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< BamAlignmentManager > SharedPtr;
-		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, bool excludeDuplicateReads = false);
-		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads = false);
+		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, bool includeDuplicateReads = false);
+		BamAlignmentManager(SampleManager::SharedPtr sampleManager, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool includeDuplicateReads = false);
 		~BamAlignmentManager();
 
 		void loadAlignments(IVariantManager::SharedPtr variantManagerPtr);
@@ -38,7 +38,7 @@ namespace graphite
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;
-        bool m_exclude_duplicate_reads;
+        bool m_include_duplicate_reads;
 		std::string m_bam_path;
 		std::vector< std::shared_ptr< std::thread > > m_loading_thread_ptrs;
 		std::mutex m_alignment_ptrs_lock;

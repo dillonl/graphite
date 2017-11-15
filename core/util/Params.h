@@ -29,7 +29,7 @@ namespace graphite
 		std::vector< std::string > getBAMPaths();
 		std::string getOutputDirectory();
 		Region::SharedPtr getRegion();
-        bool getExcludeDuplicates();
+        bool getIncludeDuplicates();
 		uint32_t getPercent();
 		uint32_t getThreadCount();
 		int getMatchValue();

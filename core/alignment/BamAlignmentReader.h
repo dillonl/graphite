@@ -25,7 +25,7 @@ namespace graphite
 		void open() override;
 		void close() override;
 
-        std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads = false) override;
+        std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool includeDuplicateReads = false) override;
 
         static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
 		static position GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr);
