@@ -47,5 +47,4 @@ target_link_libraries(graphite
 )
 
 add_dependencies(graphite ${GRAPHITE_EXTERNAL_PROJECT})
-
-
+install(TARGETS graphite DESTINATION bin)
