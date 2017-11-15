@@ -47,7 +47,7 @@ namespace graphite
 		this->m_bam_reader->Close();
 	}
 
-	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads)
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool includeDuplicateReads)
 	{
 		std::string bamFileName = this->m_bam_path.substr(this->m_bam_path.find_last_of("/") + 1);
 		if (!m_is_open)
@@ -69,7 +69,7 @@ namespace graphite
 		BamTools::BamAlignment bamAlignment;
 		while(this->m_bam_reader->GetNextAlignment(bamAlignment))
 		{
-            if (bamAlignment.IsDuplicate() && excludeDuplicateReads) { continue; }
+            if (bamAlignment.IsDuplicate() && !includeDuplicateReads) { continue; }
 			std::string sampleName;
 			bamAlignment.GetTag("RG", sampleName);
 			if (sampleName.size() == 0)

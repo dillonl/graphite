@@ -57,7 +57,7 @@ namespace graphite
 		bool shouldSkip() override;
 
 		std::vector< Region::SharedPtr > getRegions() override { return m_region_ptrs; }
-		bool doesOverlap(IVariant::SharedPtr variantPtr) override;
+		bool doesOverlap(IVariant::SharedPtr variantPtr, uint32_t readLength) override;
 		uint32_t getReferenceSize() override;
 		void addRegion(Region::SharedPtr regionPtr) override;
 		uint32_t getVariantSize() override { return m_variant_size; }

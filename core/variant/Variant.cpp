@@ -436,8 +436,36 @@ namespace graphite
 		setRefAndAltAlleles(ref, alts);
 	}
 
-	bool Variant::doesOverlap(IVariant::SharedPtr variantPtr)
+	bool Variant::doesOverlap(IVariant::SharedPtr variantPtr, uint32_t readLength)
 	{
+		position startPosition = 0;
+		position endPosition = 0;
+		for (auto thisRegionPtr : m_region_ptrs)
+		{
+			int startPos = thisRegionPtr->getStartPosition() - readLength;
+			if (startPos > 0 && startPos < startPosition)
+			{
+				startPosition = startPos;
+			}
+			uint32_t endPos = thisRegionPtr->getEndPosition() + readLength;
+			if (endPos > endPosition)
+			{
+				endPosition = endPos;
+			}
+		}
+		auto variantRegionPtrs =  variantPtr->getRegions();
+		for (auto variantRegionPtr : variantRegionPtrs)
+		{
+			auto variantStartPosition = variantRegionPtr->getStartPosition();
+			auto variantEndPosition = variantRegionPtr->getEndPosition();
+			if ((startPosition <= variantStartPosition && variantStartPosition <= endPosition) ||
+				(startPosition <= variantEndPosition && variantEndPosition <= endPosition))
+			{
+				return true;
+			}
+		}
+		return false;
+		/*
 		auto variantRegionPtrs =  variantPtr->getRegions();
 		for (auto thisRegionPtr : m_region_ptrs)
 		{
@@ -455,6 +483,7 @@ namespace graphite
 			}
 		}
 		return false;
+		*/
 	}
 
 	uint32_t Variant::getReferenceSize()
