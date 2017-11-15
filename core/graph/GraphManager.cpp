@@ -49,7 +49,7 @@ namespace graphite
 			std::vector< IVariant::SharedPtr > variantPtrs;
 			IVariant::SharedPtr nextVariantPtr = nullptr;
 			variantPtrs.emplace_back(variantPtr);
-			while (variantsListPtr->peekNextVariant(nextVariantPtr) && variantPtr->doesOverlap(nextVariantPtr) && (!variantPtr->isStructuralVariant() && !nextVariantPtr->isStructuralVariant()))
+			while (variantsListPtr->peekNextVariant(nextVariantPtr) && variantPtr->doesOverlap(nextVariantPtr, readLength) && (!variantPtr->isStructuralVariant() && !nextVariantPtr->isStructuralVariant()))
 			{
 				variantsListPtr->getNextVariant(nextVariantPtr);
 				variantPtrs.emplace_back(nextVariantPtr);

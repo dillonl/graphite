@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
 	auto gapExtensionValue = params.getGapExtensionValue();
-	auto excludeDuplicates = params.getExcludeDuplicates();
+	auto includeDuplicates = params.getIncludeDuplicates();
 	auto graphSize = params.getGraphSize();
 	graphite::FileType fileType = graphite::FileType::ASCII;
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
 
 		// load bam alignments
-		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, excludeDuplicates);
+		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, includeDuplicates);
 		bamAlignmentManager->loadAlignments(variantManagerPtr);
 
 		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
@@ -142,10 +142,7 @@ int main(int argc, char** argv)
 
 		// create an adjudicator for the graph
 		auto gsswAdjudicator = std::make_shared< graphite::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
-
-		// the gsswGraphManager adjudicates on the variantManager's variants
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		// auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, alignmentManager, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);

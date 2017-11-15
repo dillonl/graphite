@@ -23,7 +23,7 @@ namespace graphite
 		static uint32_t s_adj_count;
 
 	private:
-		bool mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool checkAllelePrefix, bool checkAlleleSuffix, bool referenceSWScoreIdentical);
+		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool referenceSWScoreIdentical, float swPercent);
 
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;

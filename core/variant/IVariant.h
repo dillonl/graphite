@@ -37,7 +37,7 @@ namespace graphite
 			virtual bool shouldSkip() = 0;
 			virtual void setSkip(bool) = 0;
 			virtual std::vector< Region::SharedPtr > getRegions() = 0;
-			virtual bool doesOverlap(IVariant::SharedPtr variantPtr) = 0;
+			virtual bool doesOverlap(IVariant::SharedPtr variantPtr, uint32_t readLength) = 0;
 			virtual uint32_t getReferenceSize() = 0;
 			virtual void addRegion(Region::SharedPtr regionPtr) = 0;
 			virtual uint32_t getVariantSize() = 0;

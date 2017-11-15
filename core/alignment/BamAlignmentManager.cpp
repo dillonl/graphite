@@ -11,18 +11,18 @@
 
 namespace graphite
 {
-	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, bool excludeDuplicateReads) :
+	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, bool includeDuplicateReads) :
 		m_sample_manager_ptr(sampleManagerPtr),
 		m_loaded(false),
-        m_exclude_duplicate_reads(excludeDuplicateReads)
+        m_include_duplicate_reads(includeDuplicateReads)
 	{
 		m_region_ptr = regionPtr;
     }
 
-	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool excludeDuplicateReads) :
+	BamAlignmentManager::BamAlignmentManager(SampleManager::SharedPtr sampleManagerPtr, Region::SharedPtr regionPtr, AlignmentReaderManager< BamAlignmentReader >::SharedPtr alignmentReaderManagerPtr, bool includeDuplicateReads) :
 		m_sample_manager_ptr(sampleManagerPtr),
 		m_loaded(false),
-        m_exclude_duplicate_reads(excludeDuplicateReads),
+        m_include_duplicate_reads(includeDuplicateReads),
 		m_alignment_reader_manager(alignmentReaderManagerPtr)
 	{
 		m_region_ptr = regionPtr;
@@ -67,7 +67,7 @@ namespace graphite
 					bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
 					lastPositionSet = true;
 				}
-				auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, m_sample_manager_ptr, this->m_exclude_duplicate_reads);
+				auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, m_sample_manager_ptr, this->m_include_duplicate_reads);
 				auto future = ThreadPool::Instance()->enqueue(funct);
 				futureFunctions.push_back(future);
 				bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
@@ -144,7 +144,7 @@ namespace graphite
 		{
 			auto bamAlignmentReaderPtr = m_alignment_reader_manager->getReader(bamPath);
 			position bamLastPosition = BamAlignmentReader::GetLastPositionInBam(bamPath, regionPtr);
-			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, m_sample_manager_ptr, this->m_exclude_duplicate_reads);
+			auto funct = std::bind(&BamAlignmentReader::loadAlignmentsInRegion, bamAlignmentReaderPtr, regionPtr, m_sample_manager_ptr, this->m_include_duplicate_reads);
 			auto future = ThreadPool::Instance()->enqueue(funct);
 			futureFunctions.push_back(future);
 			bamAlignmentReaders.push_back(bamAlignmentReaderPtr);
