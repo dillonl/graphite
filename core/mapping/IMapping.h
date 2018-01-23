@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <vector>
+#include <tuple>
 
 namespace graphite
 {
@@ -33,6 +34,9 @@ namespace graphite
 		virtual bool getMapped() = 0;
 		virtual void addAlleleCountCallback(std::function< void () > functor) = 0;
 		virtual void printMapping() = 0;
+		virtual void setTracebackSequenceAndID(std::string& sequence, std::string& id) = 0;
+		virtual std::vector< std::tuple< char, uint32_t > > getCigarData() = 0;
+		virtual position getAlignmentMappedPosition() = 0;
 
 		uint32_t m_id;
 	};

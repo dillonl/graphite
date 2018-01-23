@@ -18,8 +18,6 @@ namespace graphite
 		size_t getCount() override;
 		void sort() override;
 		bool getNextAlignment(IAlignment::SharedPtr& alignmentPtr) override;
-		void loadAlignmentSequences() override;
-		void unloadAlignmentSequences() override;
 		std::vector< IAlignment::SharedPtr > getAlignmentPtrs() override { return this->m_alignment_ptrs; }
 	private:
 		Region::SharedPtr m_region;

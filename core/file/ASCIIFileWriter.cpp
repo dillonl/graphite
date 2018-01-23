@@ -13,29 +13,45 @@ namespace graphite
 	{
 		if (m_opened)
 		{
+			std::cout << "close ascii file writer" << std::endl;
 			close();
 		}
 	}
 
 	bool ASCIIFileWriter::write(const char* data, size_t dataLength)
 	{
-		if (!m_opened) { return false; }
-		this->m_out_stream.write(data, dataLength);
-		m_opened = true;
+		if (m_opened)
+		{
+			this->m_out_stream.write(data, dataLength);
+			m_opened = true;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	bool ASCIIFileWriter::open()
 	{
-		if (m_opened) { return false; }
-		this->m_out_stream.open(this->m_file_path);
-		m_opened = true;
-		return true;
+		if (!m_opened)
+		{
+			this->m_out_stream.open(this->m_file_path);
+			m_opened = true;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void ASCIIFileWriter::close()
 	{
-		if (!m_opened) { return; }
-		this->m_out_stream.close();
-		m_opened = false;
+		if (m_opened)
+		{
+			this->m_out_stream.close();
+			m_opened = false;
+		}
 	}
 }

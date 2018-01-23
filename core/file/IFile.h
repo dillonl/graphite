@@ -66,6 +66,21 @@ namespace graphite
 			return false;
 		}
 
+		static std::string getBaseName(const std::string& path)
+		{
+			return path.substr(path.find_last_of("/") + 1);
+		}
+
+		static std::string getBaseNameWithoutExtension(const std::string& path)
+		{
+			return path.substr(path.find_last_of("/") + 1, path.find_last_of("."));
+		}
+
+		static std::string getExtension(const std::string& path)
+		{
+			return path.substr(path.find_last_of(".") + 1);
+		}
+
 	protected:
 		inline bool fileExists(const std::string& filename)
 		{

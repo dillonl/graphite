@@ -20,7 +20,7 @@ namespace graphite
 		bool write(const char* data, size_t dataLength) override;
 		std::string getFilePath() override { return m_file_path; }
 
-	private:
+	protected:
 		std::ofstream m_out_stream;
 		std::string m_file_path;
 		bool m_opened;

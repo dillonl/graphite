@@ -35,6 +35,7 @@ namespace graphite
 			("a,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("g,graph_size", "The size of the graph [optional - default is 3000]", cxxopts::value< uint32_t >()->default_value("3000"))
+			("i,igv_visualization_output", "Output IGV input for visualization [optional - default is false]")
 			("t,number_threads", "Thread count [optional - default is number of cores x 2]", cxxopts::value< uint32_t >()->default_value(std::to_string(std::thread::hardware_concurrency() * 2)));
 		this->m_options.parse(argc, argv);
 	}
@@ -162,6 +163,11 @@ namespace graphite
 	int Params::getGapExtensionValue()
 	{
 		return m_options["e"].as< uint32_t >();
+	}
+
+	bool Params::outputVisualizationFiles()
+	{
+		return m_options["i"].as< bool >();
 	}
 
 	void Params::validateFolderPaths(const std::vector< std::string >& paths, bool exitOnFailure)

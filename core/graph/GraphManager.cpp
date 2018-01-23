@@ -23,7 +23,7 @@ namespace graphite
 	{
 	}
 
-	void GraphManager::buildGraphs(Region::SharedPtr regionPtr, uint32_t readLength)
+	void GraphManager::buildGraphs(Region::SharedPtr regionPtr, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr)
 	{
 		auto variantsListPtr = this->m_variant_manager_ptr->getVariantsInRegion(regionPtr);
 		if (variantsListPtr->getCount() == 0) // if we don't have variants or alignments in the region, then return
@@ -102,7 +102,7 @@ namespace graphite
 				}
 				auto variantListPtr = std::make_shared< VariantList >(variantPtrs, this->m_reference_ptr);
 				auto alignmentListPtr = std::make_shared< AlignmentList >(alignmentPtrs);
-				constructAndAdjudicateGraph(variantListPtr, alignmentListPtr, graphAlignmentRegion, readLength);
+				constructAndAdjudicateGraph(variantListPtr, alignmentListPtr, graphAlignmentRegion, readLength, vtkPtr);
 			}
 		}
 
@@ -117,10 +117,10 @@ namespace graphite
 		}
 	}
 
-	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength)
+	void GraphManager::constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr)
 	{
 		// uint32_t numGraphCopies = (alignmentListPtr->getCount() < ThreadPool::Instance()->getThreadCount()) ? alignmentListPtr->getCount() : ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
-		uint32_t numGraphCopies = ThreadPool::Instance()->getThreadCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
+		uint32_t numGraphCopies = (ThreadPool::Instance()->getThreadCount() < alignmentListPtr->getCount()) ? ThreadPool::Instance()->getThreadCount() : alignmentListPtr->getCount();  // get the min of threadcount and alignment count, this is the num of simultanious threads processing this graph
 		std::deque< std::shared_ptr< std::future< void > > > futureFunctions;
 
 		auto gsswGraphPtr = std::make_shared< GSSWGraph >(this->m_reference_ptr, variantsListPtr, regionPtr, this->m_adjudicator_ptr->getMatchValue(), this->m_adjudicator_ptr->getMisMatchValue(), this->m_adjudicator_ptr->getGapOpenValue(), this->m_adjudicator_ptr->getGapExtensionValue(), numGraphCopies);
@@ -171,15 +171,15 @@ namespace graphite
 			*/
 			auto gsswGraphContainer = gsswGraphPtr->getGraphContainer();
 			auto refGraphContainer = referenceGraphPtr->getGraphContainer();
-			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, this]()
+			auto funct = [gsswGraphContainer, refGraphContainer, gsswGraphPtr, referenceGraphPtr, alignmentPtr, vtkPtr, this]()
 			{
 				auto refTraceback = referenceGraphPtr->traceBackAlignment(alignmentPtr, refGraphContainer);
-				auto referenceMappingPtr = std::make_shared< GSSWMapping >(refTraceback, alignmentPtr);
+				auto referenceMappingPtr = std::make_shared< GSSWMapping >(refTraceback, alignmentPtr, referenceGraphPtr->getStartPosition());
 				auto referenceSWScore = referenceMappingPtr->getMappingScore();
 				uint32_t referenceSWPercent = ((referenceSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);
 
 				auto tracebackPtr = gsswGraphPtr->traceBackAlignment(alignmentPtr, gsswGraphContainer);
-				auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackPtr, alignmentPtr);
+				auto gsswMappingPtr = std::make_shared< GSSWMapping >(tracebackPtr, alignmentPtr, gsswGraphPtr->getStartPosition());
 
 				auto gsswSWScore = referenceMappingPtr->getMappingScore();
 				uint32_t gsswSWPercent = ((gsswSWScore / (double)(alignmentPtr->getLength() * this->m_adjudicator_ptr->getMatchValue())) * 100);
@@ -187,6 +187,10 @@ namespace graphite
 				if (this->m_adjudicator_ptr->adjudicateMapping(gsswMappingPtr, referenceSWPercent))
 				{
 					MappingManager::Instance()->registerMapping(gsswMappingPtr);
+					if (vtkPtr != nullptr)
+					{
+						vtkPtr->setAlignmentAndMapping(alignmentPtr, gsswGraphPtr, referenceMappingPtr, gsswMappingPtr);
+					}
 				}
 		    };
 

@@ -120,8 +120,11 @@ namespace graphite
 		int8_t* nt_table = graphContainer->nt_table;
 		int8_t* mat = graphContainer->mat;
 
-		gssw_graph_fill(g, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(g, alignmentPtr->getSequence(), alignmentPtr->getLength(),m_match,m_mismatch,m_gap_open,m_gap_extension);
+		// DHL - readd this one
+		// gssw_graph_fill(g, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+		// gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 15, 2);
+		gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
+		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(g,alignmentPtr->getSequence(),alignmentPtr->getLength(),nt_table,mat,m_gap_open,m_gap_extension,0,0);
 
 		{
 			std::unique_lock< std::mutex > lock(m_traceback_lock);
@@ -132,7 +135,8 @@ namespace graphite
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
-			nc->node->cigar = nc->cigar;
+			// DHL - readd this one
+			// nc->node->cigar = nc->cigar;
 		}
 
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm)

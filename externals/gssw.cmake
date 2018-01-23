@@ -32,20 +32,26 @@ SET(GSSW_PROJECT gssw_project CACHE INTERNAL "gssw project name")
 SET(GSSW_DIR ${CMAKE_BINARY_DIR}/externals/gssw CACHE INTERNAL "gssw project directory")
 SET(GSSW_LIB)
 ExternalProject_Add(${GSSW_PROJECT}
-	GIT_REPOSITORY https://github.com/dillonl/gssw.git
-	GIT_TAG 88e1e5b12e8a138985fe5bbfcaf5ed4dcf36c7d2 #lock in the commit id so we don't this doesn't break in the future
+	GIT_REPOSITORY https://github.com/vgteam/gssw.git
+	GIT_TAG b3e029fadadef52e667f998032a0bf8d45ca6af6 #lock in the commit id so we don't this doesn't break in the future
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND "make"
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
+	BUILD_IN_SOURCE 1
 	PREFIX ${GSSW_DIR}
-    CMAKE_CACHE_ARGS
-        -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
-        -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
+    LOG_DOWNLOAD 0
+	LOG_UPDATE 0
+    LOG_CONFIGURE 0
+    LOG_BUILD 0
+    LOG_TEST 0
+    LOG_INSTALL 0
 )
 
 ExternalProject_Get_Property(${GSSW_PROJECT} INSTALL_DIR)
 ExternalProject_Get_Property(${GSSW_PROJECT} SOURCE_DIR)
 ExternalProject_Get_Property(${GSSW_PROJECT} BINARY_DIR)
 
-SET(GSSW_LIB ${BINARY_DIR}/libgssw_lib.a CACHE INTERNAL "GSSW Lib")
-SET(GSSW_INCLUDE ${SOURCE_DIR}/ CACHE INTERNAL "GSSW Include")
+SET(GSSW_LIB ${BINARY_DIR}/lib/libgssw.a CACHE INTERNAL "GSSW Lib")
+SET(GSSW_INCLUDE ${SOURCE_DIR}/src/ CACHE INTERNAL "GSSW Include")
 

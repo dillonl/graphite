@@ -3,6 +3,7 @@
 
 #include "api/BamReader.h"
 #include "api/BamAlignment.h"
+#include "api/BamAux.h"
 
 #include "core/region/Region.h"
 
@@ -25,9 +26,11 @@ namespace graphite
 		void open() override;
 		void close() override;
 
-        std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool includeDuplicateReads = false) override;
+        std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool unmappedOnly, bool includeDuplicateReads = false) override;
 
         static std::vector< Sample::SharedPtr > GetBamReaderSamples(const std::string& bamPath);
+		static BamTools::SamHeader GetBamReaderHeader(const std::string& bamPath);
+		static std::vector< BamTools::RefData > GetBamReaderRefVector(const std::string& bamPath);
 		static position GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr);
 		static uint32_t GetReadLength(const std::string& bamPath);
 

@@ -16,6 +16,7 @@
 #include "core/file/IFile.h"
 #include "core/file/BGZFFileWriter.h"
 #include "core/file/ASCIIFileWriter.h"
+#include "core/util/VisualizationToolKit.h"
 
 #include <thread>
 #include <unordered_set>
@@ -48,6 +49,7 @@ int main(int argc, char** argv)
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto includeDuplicates = params.getIncludeDuplicates();
 	auto graphSize = params.getGraphSize();
+	auto outputVisualizationFiles = params.outputVisualizationFiles();
 	graphite::FileType fileType = graphite::FileType::ASCII;
 
 	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
@@ -101,6 +103,12 @@ int main(int argc, char** argv)
 		vcfoutPaths[vcfPath] = fileWriterPtr;
 	}
 
+	graphite::VisualizationToolKit::SharedPtr vtkPtr = nullptr;
+	if (outputVisualizationFiles)
+	{
+		vtkPtr = std::make_shared< graphite::VisualizationToolKit >(outputDirectory, bamPaths, matchValue);
+	}
+
 	std::unordered_set< std::string > outputPaths;
 	bool firstTime = true;
 
@@ -143,7 +151,7 @@ int main(int argc, char** argv)
 		// create an adjudicator for the graph
 		auto gsswAdjudicator = std::make_shared< graphite::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
-		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength);
+		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength, vtkPtr);
 
 		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
 		graphite::MappingManager::Instance()->clearRegisteredMappings();
@@ -183,6 +191,10 @@ int main(int argc, char** argv)
 	{
 		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
 		fileWriter->close();
+	}
+	if (vtkPtr != nullptr)
+	{
+		vtkPtr->closeResources();
 	}
 
 	return 0;

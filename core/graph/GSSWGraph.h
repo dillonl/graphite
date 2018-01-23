@@ -19,15 +19,34 @@ namespace graphite
 	class GSSWGraphContainer
 	{
 	public:
-	GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr) :
-		nt_table(NTtable), mat(mat), graph_ptr(graphPtr)
+	    GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr) :
+		    nt_table(NTtable), mat(mat), graph_ptr(graphPtr)
 		{
 			lock.unlock();
 		}
 
 		~GSSWGraphContainer()
 		{
-			gssw_graph_destroy(this->graph_ptr);
+			// we have to do our own special magic when deleting the nodes
+			static bool nodesDestroyed = false;
+			{
+				if (!nodesDestroyed)
+				{
+					static std::mutex nodeDestroyMutex;
+					std::lock_guard< std::mutex > l(nodeDestroyMutex);
+					for (uint32_t i = 0; i < this->graph_ptr->size; ++i)
+					{
+						free(this->graph_ptr->nodes[i]->num);
+						free(this->graph_ptr->nodes[i]);
+					}
+					nodesDestroyed = true;
+				}
+			}
+			this->graph_ptr->max_node = NULL;
+			free(this->graph_ptr->nodes);
+			this->graph_ptr->nodes = NULL;
+			free(this->graph_ptr);
+
 			free(this->nt_table);
 			free(this->mat);
 		}
@@ -99,10 +118,10 @@ namespace graphite
 										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
-			n->ref_len = referenceLength;
-			n->ref_seq = (char*)referenceSeq;
-			n->position = position;
-			// if this node is reference then the id is even otherwise it is odd
+			/* n->ref_len = referenceLength; */
+			/* n->ref_seq = (char*)referenceSeq; */
+			/* n->position = position; */
+			/* if this node is reference then the id is even otherwise it is odd */
 			{
 				std::lock_guard< std::mutex > l(s_lock);
 				if (isReference)
@@ -124,29 +143,32 @@ namespace graphite
 			n->len = allelePtr->getLength();
 			n->seq = (char*)allelePtr->getSequence();
 			n->data = (void*)allelePtr.get();
+			allelePtr->setPosition(position);
 			n->num = gssw_create_num(n->seq, n->len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
-			n->cigar = NULL;
+			/* n->cigar = NULL; */
 			return n;
 		}
 
 		gssw_node* gssw_node_copy(gssw_node* node, int8_t* nt_table)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
+			/*
 			n->ref_len = node->ref_len;
 			n->ref_seq = node->ref_seq;
 			n->position = node->position;
+			*/
 			n->id = node->id;
-			n->len = node->len;
 			n->seq = node->seq;
+			n->len = node->len;
 			n->data = node->data;
 			n->num = gssw_create_num(n->seq, n->len, nt_table);
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
-			n->cigar = NULL;
+			/* n->cigar = NULL; */
 			return n;
 		}
 

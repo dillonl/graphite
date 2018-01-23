@@ -13,11 +13,10 @@ namespace graphite
 	{
     public:
 		typedef std::shared_ptr< GSSWMapping > SharedPtr;
-        GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr);
+        GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr, position startPosition);
 		~GSSWMapping();
 
 		int getMappingScore() override;
-		/* MappingAlignmentInfo::SharedPtr getMappingAlignmentInfo(IAllele::SharedPtr allelePtr, IAdjudicator::SharedPtr adjudicatorPtr) override; */
 		IAlignment::SharedPtr getAlignmentPtr() override;
 		std::vector< IAllele::SharedPtr > getAllelePtrs() override;
 		position getPosition() override { return m_position; }
@@ -26,6 +25,9 @@ namespace graphite
 		void setMapped(bool mapped) override;
 		bool getMapped() override { return m_mapped; }
 		void addAlleleCountCallback(std::function< void () > functor) override;
+		void setTracebackSequenceAndID(std::string& sequence, std::string& id) override;
+		std::vector< std::tuple< char, uint32_t > > getCigarData() override;
+		position getAlignmentMappedPosition() override { return m_offset; }
 
 		void printMapping() override;
 		void printSimpleMapping();
@@ -39,6 +41,7 @@ namespace graphite
 		position m_position;
 		std::vector< std::function< void () > > m_allele_incrementor_callback_list;
 		bool m_mapped;
+		position m_offset;
 	};
 
 }

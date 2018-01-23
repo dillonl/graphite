@@ -16,6 +16,7 @@ static uint32_t test_mismatch = 4;
 static uint32_t gapOpen = 6;
 static uint32_t gapExtension = 1;
 
+/*
 void runTestsViaLambda(const std::string& alignment, const std::vector< gssw_node* >& nodes, int8_t* nt_table, int8_t* mat, std::function< void(gssw_graph_mapping* gm) > funct)
 {
 	gssw_graph* graph = gssw_graph_create(4);
@@ -163,6 +164,7 @@ TEST(GSSWTests, GSSWSingleton)
 		};
 	runTestsViaLambda(alignment, nodes, nt_table, mat, funct);
 }
+*/
 
 /*
 TEST(GSSWTests, TestPaths)

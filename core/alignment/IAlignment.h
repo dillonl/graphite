@@ -6,6 +6,8 @@
 #include "core/allele/IAllele.h"
 #include "core/sample/Sample.h"
 
+#include "api/BamAlignment.h"
+
 #include <memory>
 #include <unordered_map>
 #include <mutex>
@@ -41,10 +43,8 @@ namespace graphite
 		}
 		std::recursive_mutex* getMappingMutex() { return this->m_mapping_mutex; }
 		const Sample::SharedPtr getSample() { return m_sample_ptr; }
+		virtual const std::shared_ptr< BamTools::BamAlignment > getBamToolsAlignmentPtr() = 0;
 
-		virtual const void setSequence(char* seq, uint32_t len) = 0;
-		virtual const void removeSequence() = 0;
-		virtual const void incrementReferenceCount() = 0;
 
 	protected:
 		std::mutex m_mutex;

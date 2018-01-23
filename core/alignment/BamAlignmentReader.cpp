@@ -47,7 +47,7 @@ namespace graphite
 		this->m_bam_reader->Close();
 	}
 
-	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool includeDuplicateReads)
+	std::vector< IAlignment::SharedPtr > BamAlignmentReader::loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool unmappedOnly, bool includeDuplicateReads)
 	{
 		std::string bamFileName = this->m_bam_path.substr(this->m_bam_path.find_last_of("/") + 1);
 		if (!m_is_open)
@@ -66,12 +66,17 @@ namespace graphite
 		// add 1 to the start and end positions because this is 0 based
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 
-		BamTools::BamAlignment bamAlignment;
-		while(this->m_bam_reader->GetNextAlignment(bamAlignment))
+		// BamTools::BamAlignment bamAlignment;
+		while (true) // while true is never a good answer, maybe I'll rethink this in the future
 		{
-            if (bamAlignment.IsDuplicate() && !includeDuplicateReads) { continue; }
+			auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
+			if (!this->m_bam_reader->GetNextAlignment(*bamAlignmentPtr))
+			{
+				break;
+			}
+            if ((bamAlignmentPtr->IsDuplicate() && !includeDuplicateReads) || (unmappedOnly && bamAlignmentPtr->IsMapped())) { continue; }
 			std::string sampleName;
-			bamAlignment.GetTag("RG", sampleName);
+			bamAlignmentPtr->GetTag("RG", sampleName);
 			if (sampleName.size() == 0)
 			{
 				sampleName = bamFileName;
@@ -81,7 +86,7 @@ namespace graphite
 			{
 				throw "There was an error in the sample name for: " + sampleName;
 			}
-			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignment, samplePtr));
+			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr, samplePtr));
 		}
 		if (m_alignment_reader_manager_ptr != nullptr)
 		{
@@ -107,6 +112,30 @@ namespace graphite
 		}
 		bamReader.Close();
 		return samplePtrs;
+	}
+
+	BamTools::SamHeader BamAlignmentReader::GetBamReaderHeader(const std::string& bamPath)
+	{
+		BamTools::BamReader bamReader;
+		if (!bamReader.Open(bamPath))
+		{
+			throw "Unable to open bam file";
+		}
+		auto headerText = bamReader.GetHeader();
+		bamReader.Close();
+		return headerText;
+	}
+
+	std::vector< BamTools::RefData > BamAlignmentReader::GetBamReaderRefVector(const std::string& bamPath)
+	{
+		BamTools::BamReader bamReader;
+		if (!bamReader.Open(bamPath))
+		{
+			throw "Unable to open bam file";
+		}
+		auto refData = bamReader.GetReferenceData();
+		bamReader.Close();
+		return refData;
 	}
 
 	position BamAlignmentReader::GetLastPositionInBam(const std::string& bamPath, Region::SharedPtr regionPtr)

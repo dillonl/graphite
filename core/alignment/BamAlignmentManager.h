@@ -26,7 +26,6 @@ namespace graphite
 		~BamAlignmentManager();
 
 		void loadAlignments(IVariantManager::SharedPtr variantManagerPtr);
-		void asyncLoadAlignments(IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
 		void waitForAlignmentsToLoad();
 		void releaseResources() override;
 		/* void processMappingStatistics() override; */
@@ -34,7 +33,7 @@ namespace graphite
 		static std::vector< Sample::SharedPtr > GetSamplePtrs(std::vector< std::string >& bamPaths);
 		static uint32_t GetReadLength(std::vector< std::string >& bamPaths);
 	private:
-		void loadBam(const std::string bamPath, IVariantManager::SharedPtr variantManagerPtr, uint32_t variantPadding);
+		void loadAlignmentsHelper(const std::string& bamPath, std::vector< BamAlignmentReader::SharedPtr >& bamAlignmentReaders, std::deque< std::shared_ptr< std::future< std::vector< IAlignment::SharedPtr > > > >& futureFunctions, bool lastPositionSet, position bamLastPosition, Region::SharedPtr regionPtr, bool onlyUnmappedReads);
 
 		std::mutex m_loaded_mutex;
 		bool m_loaded;

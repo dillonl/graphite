@@ -24,7 +24,7 @@ namespace graphite
 		virtual void open() = 0;
 		virtual void close() = 0;
 
-		virtual std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool excludeDuplicateReads) = 0;
+		virtual std::vector< IAlignment::SharedPtr > loadAlignmentsInRegion(Region::SharedPtr regionPtr, SampleManager::SharedPtr sampleManagerPtr, bool unmappedOnly, bool excludeDuplicateReads) = 0;
 
 		uint32_t getID() { return m_id; }
 

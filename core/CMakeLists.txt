@@ -20,6 +20,7 @@ set(GRAPHITE_UTIL_SOURCES
   util/Params.cpp
   util/Utility.cpp
   util/gzstream.cpp
+  util/VisualizationToolKit.cpp
   )
 
 set(GRAPHITE_SEQUENCE_SOURCES
@@ -31,6 +32,8 @@ set(GRAPHITE_FILE_SOURCES
   file/ASCIIFileWriter.cpp
   file/ASCIIFileReader.cpp
   file/ASCIIGZFileReader.cpp
+  file/FastaFileWriter.cpp
+  file/BamFileWriter.cpp
   )
 
 set(GRAPHITE_CORE_REFERENCE_SOURCES
@@ -56,8 +59,6 @@ set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
   alignment/BamAlignmentManager.cpp
   alignment/BamAlignmentReader.cpp
-  alignment/AlignmentReporter.cpp
-  alignment/AlignmentReport.cpp
   )
 
 set(GRAPHITE_CORE_SAMPLE_SOURCES

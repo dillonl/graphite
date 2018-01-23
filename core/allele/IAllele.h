@@ -22,7 +22,8 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
 	    IAllele() :
-		    m_id(-1)
+		    m_id(-1),
+			m_position(0)
 		{
 		}
 
@@ -57,11 +58,14 @@ namespace graphite
 
 		void setID(int32_t id) { m_id = id; }
 		int32_t getID() { return m_id; }
+		position getPosition() { return m_position; }
+		void setPosition(position pos) { m_position = pos; }
 
 	protected:
 
 		std::weak_ptr< IVariant > m_variant_wptr;
 		int32_t m_id;
+		position m_position;
 
 	};
 }

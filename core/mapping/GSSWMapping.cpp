@@ -7,24 +7,31 @@
 
 namespace graphite
 {
-    GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr) :
+    GSSWMapping::GSSWMapping(std::shared_ptr< gssw_graph_mapping > gsswMappingPtr, IAlignment::SharedPtr alignmentPtr, position startPosition) :
 		m_gssw_mapping_ptr(gsswMappingPtr),
 		m_alignment_ptr(alignmentPtr),
-		m_position(0),
+		m_position(startPosition),
 		m_mapped(false)
 	{
-		uint32_t offset = m_gssw_mapping_ptr->position;
+		uint32_t softclipCount = 0;
 		gssw_node_cigar* nc = m_gssw_mapping_ptr->cigar.elements;
 		for (int i = 0; i < m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
-			if (i == 0)
+			// the first softclip contributes to the offset
+			for (int j = 0; j < nc->cigar->length; ++j)
 			{
-				this->m_position = nc->node->position + m_gssw_mapping_ptr->position;
+				switch (nc->cigar->elements[j].type)
+				{
+				case 'S':
+					softclipCount = nc->cigar->elements[j].length;
+				}
+				break;
 			}
 			auto allelePtr = ((IAllele*)nc->node->data)->getSharedPtr();
 			m_allele_ptrs.push_back(allelePtr);
 			m_allele_gssw_nodes_map[allelePtr.get()] = nc->node;
 		}
+		m_offset = (m_alignment_ptr->getPosition() - m_position) + (1 + softclipCount);
 	}
 
 	GSSWMapping::~GSSWMapping()
@@ -112,6 +119,25 @@ namespace graphite
 		this->m_allele_incrementor_callback_list.emplace_back(functor);
 	}
 
+	void GSSWMapping::setTracebackSequenceAndID(std::string& sequence, std::string& id)
+	{
+		sequence = "";
+		id = "";
+		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+
+		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+		{
+			gssw_node* nodePtr = this->m_gssw_mapping_ptr->cigar.elements[i].node;
+			sequence += std::string(nodePtr->seq, nodePtr->len);
+			if (id.size() == 0)
+			{
+				IAllele* allelePtr = (IAllele*)nc->node->data;
+				id += std::to_string(allelePtr->getPosition());
+			}
+			id += (nc->node->id % 2 == 0) ? "|R" : "|A";
+		}
+	}
+
 	void GSSWMapping::printSimpleMapping()
 	{
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
@@ -124,10 +150,15 @@ namespace graphite
 		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
 		{
 			std::string nodeAlignmentSequence = std::string(nc->node->seq, nc->node->len);
-			std::string nodeReferenceSequence = std::string(nc->node->ref_seq, nc->node->ref_len);
-			positions += std::to_string(nc->node->position) + " ";
+
+			// DHL - readd this one
+			// std::string nodeReferenceSequence = std::string(nc->node->ref_seq, nc->node->ref_len);
+			// positions += std::to_string(nc->node->position) + " ";
+			// DHL - readd this one
+
 			size_t tracebackOffset = 0;
-			int refSizeDiff = nc->node->ref_len - nc->node->len;
+			// DHL - readd this one
+			// int refSizeDiff = nc->node->ref_len - nc->node->len;
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
 				uint32_t cigLen = nc->cigar->elements[j].length;
@@ -161,8 +192,27 @@ namespace graphite
 		std::cout << "----------------------------" << std::endl;
 	}
 
+	std::vector< std::tuple< char, uint32_t > > GSSWMapping::getCigarData()
+	{
+		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;
+		auto cigarLen = this->m_gssw_mapping_ptr->cigar.length;
+		std::vector< std::tuple< char, uint32_t > > cigarData;
+		for (int i = 0; i < this->m_gssw_mapping_ptr->cigar.length; ++i, ++nc)
+		{
+			gssw_cigar* gsswCigarPtr = this->m_gssw_mapping_ptr->cigar.elements[i].cigar;
+			for (int j = 0; j < gsswCigarPtr->length; ++j)
+			{
+				gssw_cigar_element elem = gsswCigarPtr->elements[j];
+				cigarData.emplace_back(std::make_tuple(elem.type, elem.length));
+			}
+		}
+		return cigarData;
+	}
+
 	void GSSWMapping::printMapping()
 	{
+		// DHL - readd this one
+		/*
 		position startPosition = 0;
 		size_t startSoftClipLength = 0;
 		size_t endSoftClipLength = 0;
@@ -234,7 +284,8 @@ namespace graphite
 			}
 			if (startPosition == 0)
 			{
-				startPosition = nc->node->position;
+				// DHL - readd this one
+				// startPosition = nc->node->position;
 			}
 			std::string nodeTypeString = (nc->node->id % 2 == 0) ? "R" : "V";
 			nodeIDString += std::to_string(nc->node->id) + "||";
@@ -305,6 +356,7 @@ namespace graphite
 		reportString += "---------------------------------------------------------" + eol;
 
 		std::cout << reportString;
+		*/
 	}
 
 }

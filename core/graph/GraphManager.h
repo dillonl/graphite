@@ -4,6 +4,7 @@
 #include "core/alignment/IAlignmentManager.h"
 #include "core/variant/IVariantManager.h"
 #include "core/adjudicator/IAdjudicator.h"
+#include "core/util/VisualizationToolKit.h"
 
 #include "core/graph/GSSWGraph.h"
 
@@ -27,10 +28,10 @@ namespace graphite
 		 *
 		 * overlap: The number of base pairs that will overlap between graphs.
 		 */
-		void buildGraphs(Region::SharedPtr region, uint32_t readLength);
+		void buildGraphs(Region::SharedPtr region, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr);
 
 	private:
-		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength);
+		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
 		std::mutex m_gssw_graph_mutex;

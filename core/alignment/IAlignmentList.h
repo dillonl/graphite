@@ -19,8 +19,6 @@ namespace graphite
 		virtual size_t getCount() = 0;
 		virtual void sort() = 0;
 		virtual bool getNextAlignment(IAlignment::SharedPtr& alignmentPtr) = 0;
-		virtual void loadAlignmentSequences() = 0;
-		virtual void unloadAlignmentSequences() = 0;
 		virtual std::vector< IAlignment::SharedPtr > getAlignmentPtrs() = 0;
 	protected:
 
