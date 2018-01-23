@@ -1,5 +1,6 @@
 #include "Params.h"
 #include "Utility.h"
+#include "config/GraphiteConfig.hpp"
 #include "core/file/IFile.h"
 
 #include <string.h>
@@ -52,6 +53,7 @@ namespace graphite
 
 	void Params::printHelp()
 	{
+		std::cout << "Graphite Version: V" << GRAPHITE_VERSION_MAJOR << "." << GRAPHITE_VERSION_MINOR << "." << GRAPHITE_VERSION_PATCH << std::endl;
 		std::cout << this->m_options.help() << std::endl;
 	}
 
