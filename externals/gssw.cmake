@@ -32,8 +32,8 @@ SET(GSSW_PROJECT gssw_project CACHE INTERNAL "gssw project name")
 SET(GSSW_DIR ${CMAKE_BINARY_DIR}/externals/gssw CACHE INTERNAL "gssw project directory")
 SET(GSSW_LIB)
 ExternalProject_Add(${GSSW_PROJECT}
-	GIT_REPOSITORY https://github.com/vgteam/gssw.git
-	GIT_TAG b3e029fadadef52e667f998032a0bf8d45ca6af6 #lock in the commit id so we don't this doesn't break in the future
+	GIT_REPOSITORY https://github.com/dillonl/gssw-1.git
+	GIT_TAG db7e38552538ce703c98cee803e79df84cd2b148 #lock in the commit id so we don't this doesn't break in the future
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND "make"
 	INSTALL_COMMAND ""

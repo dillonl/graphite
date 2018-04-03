@@ -1,4 +1,5 @@
 #include "SampleManager.h"
+#include "core/alignment/BamAlignmentReader.h"
 
 namespace graphite
 {
@@ -7,6 +8,18 @@ namespace graphite
 		for (auto samplePtr : samplePtrs)
 		{
 			addSamplePtr(samplePtr);
+		}
+	}
+
+	SampleManager::SampleManager(const std::vector< std::string >& bamPaths)
+	{
+		for (auto bamPath : bamPaths)
+		{
+			std::vector< Sample::SharedPtr > bamSamplePtrs = BamAlignmentReader::GetBamReaderSamples(bamPath);
+			for (auto bamSamplePtr : bamSamplePtrs)
+			{
+				this->addSamplePtr(bamSamplePtr);
+			}
 		}
 	}
 

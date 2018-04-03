@@ -5,6 +5,7 @@
 #include "core/variant/IVariantManager.h"
 #include "core/adjudicator/IAdjudicator.h"
 #include "core/util/VisualizationToolKit.h"
+#include "core/alignment/BamAlignmentReader.h"
 
 #include "core/graph/GSSWGraph.h"
 
@@ -19,7 +20,8 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< GraphManager > SharedPtr;
 
-		GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IAdjudicator::SharedPtr adjudicatorPtr);
+        // GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, IAlignmentManager::SharedPtr alignmentManagerPtr, IAdjudicator::SharedPtr adjudicatorPtr);
+		GraphManager(IReference::SharedPtr referencePtr, IVariantManager::SharedPtr variantManagerPtr, std::vector< std::string>& bamPaths, SampleManager::SharedPtr sampleManagerPtr, bool unmappedOnly, bool includeDuplicateReads, IAdjudicator::SharedPtr adjudicatorPtr);
 		~GraphManager() {}
 
 		/*
@@ -31,6 +33,7 @@ namespace graphite
 		void buildGraphs(Region::SharedPtr region, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr);
 
 	private:
+		void buildGraph(std::vector< IVariant::SharedPtr > variantPtrs, position startPosition, position endPosition, Region::SharedPtr regionPtr, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr);
 		void constructAndAdjudicateGraph(IVariantList::SharedPtr variantsListPtr, IAlignmentList::SharedPtr alignmentListPtr, Region::SharedPtr regionPtr, uint32_t readLength, VisualizationToolKit::SharedPtr vtkPtr);
 
 		std::vector< GSSWGraph::SharedPtr > m_gssw_graphs;
@@ -40,6 +43,11 @@ namespace graphite
 		IVariantManager::SharedPtr m_variant_manager_ptr;
 		IAlignmentManager::SharedPtr m_alignment_manager_ptr;
 		IAdjudicator::SharedPtr m_adjudicator_ptr;
+		std::vector< std::string> m_bam_paths;
+		std::vector< BamAlignmentReader::SharedPtr > m_bam_readers;
+		SampleManager::SharedPtr m_sample_manager;
+		bool m_unmapped_only;
+		bool m_include_duplicate_reads;
 	};
 }
 

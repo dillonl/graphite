@@ -6,6 +6,7 @@
 #include "core/reference/FastaReference.h"
 #include "core/mapping/MappingManager.h"
 #include "core/variant/VCFHeader.h"
+#include "core/variant/VCFFileWriterManager.hpp"
 #include "core/util/Params.h"
 #include "core/util/ThreadPool.hpp"
 #include "core/graph/GraphManager.h"
@@ -28,7 +29,6 @@
 int main(int argc, char** argv)
 {
 	// graphite::AlignmentManager< HTSLibAlignmentReader > tmp;
-	unsigned long milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	graphite::Params params;
 	params.parseGSSW(argc, argv);
 	if (params.showHelp() || !params.validateRequired())
@@ -52,7 +52,8 @@ int main(int argc, char** argv)
 	auto outputVisualizationFiles = params.outputVisualizationFiles();
 	graphite::FileType fileType = graphite::FileType::ASCII;
 
-	graphite::ThreadPool::Instance()->setThreadCount(threadCount);
+	// graphite::ThreadPool::Instance()->setThreadCount(threadCount);
+	graphite::ThreadPool::Instance()->setThreadCount(1);
 
 	std::vector< graphite::Region::SharedPtr > regionPtrs;
 	if (paramRegionPtr == nullptr)
@@ -65,43 +66,8 @@ int main(int argc, char** argv)
 	}
 
 	uint32_t readLength = graphite::BamAlignmentManager::GetReadLength(bamPaths);
-	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(graphite::BamAlignmentManager::GetSamplePtrs(bamPaths));
-	if (sampleManagerPtr->getSampleCount() == 0)
-	{
-		for (auto bamPath : bamPaths)
-		{
-			std::string bamFileName = bamPath.substr(bamPath.find_last_of("/") + 1);
-			auto samplePtr = std::make_shared< graphite::Sample >(bamFileName, bamFileName, bamPath);
-			sampleManagerPtr->addSamplePtr(samplePtr);
-		}
-	}
-
-	std::unordered_map< std::string, graphite::IFileWriter::SharedPtr > vcfoutPaths;
-	for (auto vcfPath : vcfPaths)
-	{
-		std::string path = vcfPath.substr(vcfPath.find_last_of("/") + 1);
-		std::string filePath = outputDirectory + "/" + path;
-		uint32_t counter = 1;
-		while (graphite::IFile::fileExists(filePath, false))
-		{
-			std::string extension = vcfPath.substr(vcfPath.find_last_of(".") + 1);
-			std::string fileNameWithoutExtension = path.substr(0, path.find_last_of("."));
-			filePath = outputDirectory + "/" + fileNameWithoutExtension + "." + std::to_string(counter) + "." + extension;
-			++counter;
-		}
-		// filePath += ".tmp";
-		graphite::IFileWriter::SharedPtr fileWriterPtr;
-		if (fileType == graphite::FileType::BGZF)
-		{
-			fileWriterPtr = std::make_shared< graphite::BGZFFileWriter >(filePath);
-		}
-		else
-		{
-			fileWriterPtr = std::make_shared< graphite::ASCIIFileWriter >(filePath);
-		}
-		fileWriterPtr->open();
-		vcfoutPaths[vcfPath] = fileWriterPtr;
-	}
+	graphite::SampleManager::SharedPtr sampleManagerPtr = std::make_shared< graphite::SampleManager >(bamPaths);
+	graphite::VCFFileWriterManager::Instance()->addVCFFileWritersForVCFs(vcfPaths, outputDirectory);
 
 	graphite::VisualizationToolKit::SharedPtr vtkPtr = nullptr;
 	if (outputVisualizationFiles)
@@ -109,93 +75,51 @@ int main(int argc, char** argv)
 		vtkPtr = std::make_shared< graphite::VisualizationToolKit >(outputDirectory, bamPaths, matchValue);
 	}
 
-	std::unordered_set< std::string > outputPaths;
-	bool firstTime = true;
-
 	for (uint32_t regionCount = 0; regionCount < regionPtrs.size(); ++regionCount)
 	{
-		auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount); // this used to go above this loop but it caused issues with loading bam regions from out-of-order VCFs
+		// std::cout << "paused" << std::endl;
+		// char tmp[256];
+		// std::cin.getline(tmp, 256);
+
+		// auto alignmentReaderManagerPtr = std::make_shared< graphite::AlignmentReaderManager< graphite::BamAlignmentReader > >(bamPaths, threadCount); // this used to go above this loop but it caused issues with loading bam regions from out-of-order VCFs
 		auto regionPtr = regionPtrs[regionCount];
 		auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath, regionPtr);
 
 		// load variants from vcf
 		auto variantManagerPtr = std::make_shared< graphite::VCFManager >(vcfPaths, regionPtr, fastaReferencePtr, readLength);
 		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-
 		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-
-		// load bam alignments
-		auto bamAlignmentManager = std::make_shared< graphite::BamAlignmentManager >(sampleManagerPtr, regionPtr, alignmentReaderManagerPtr, includeDuplicates);
-		bamAlignmentManager->loadAlignments(variantManagerPtr);
-
-		// bamAlignmentManager->asyncLoadAlignments(variantManagerPtr, graphSize); // begin the process of loading the alignments asynchronously
-		// bamAlignmentManager->waitForAlignmentsToLoad(); // wait for alignments to load into memory
-
 		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
-		bamAlignmentManager->releaseResources(); // release the bam file into memory, we no longer need the file resources
 
 		std::deque< std::shared_ptr< std::future< void > > > variantManagerFutureFunctions;
 		for (auto& iter : variantManagerPtr->getVCFReadersAndVariantListsMap())
 		{
-			auto futureFunct = graphite::ThreadPool::Instance()->enqueue(std::bind(&graphite::IVariantList::processOverlappingAlleles, iter.second));
-			variantManagerFutureFunctions.push_back(futureFunct);
+			iter.second->processOverlappingAlleles();
 		}
-		while (!variantManagerFutureFunctions.empty())
-		{
-			variantManagerFutureFunctions.front()->wait();
-			variantManagerFutureFunctions.pop_front();
-		}
-
-		milliseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
 		// create an adjudicator for the graph
 		auto gsswAdjudicator = std::make_shared< graphite::GSSWAdjudicator >(swPercent, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
-		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamAlignmentManager, gsswAdjudicator);
+		auto gsswGraphManager = std::make_shared< graphite::GraphManager >(fastaReferencePtr, variantManagerPtr, bamPaths, sampleManagerPtr, false, includeDuplicates, gsswAdjudicator);
 		gsswGraphManager->buildGraphs(fastaReferencePtr->getRegion(), readLength, vtkPtr);
 
-		graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
-		graphite::MappingManager::Instance()->clearRegisteredMappings();
+		// graphite::MappingManager::Instance()->evaluateAlignmentMappings(gsswAdjudicator);
+		// graphite::MappingManager::Instance()->clearRegisteredMappings();
 
-		std::vector< std::shared_ptr< std::thread > > fileWriters;
 		auto vcfPathsAndVariantListPtrsMap = variantManagerPtr->getVCFReadersAndVariantListsMap();
-		std::deque< std::shared_ptr< std::future< void > > > vcfWriterFutureFunctions;
 		for (auto& iter : vcfPathsAndVariantListPtrsMap)
 		{
-			auto vcfReaderPtr = iter.first;
-			auto vcfPath = vcfReaderPtr->getFilePath();
-			graphite::IFileWriter::SharedPtr fileWriter = vcfoutPaths[vcfPath];
-			std::string currentVCFOutPath = fileWriter->getFilePath();
-			auto variantListPtr = iter.second;
-			auto vcfHeaderPtr = vcfReaderPtr->getVCFHeader();
-
+			graphite::VCFFileWriter::SharedPtr vcfFileWriterPtr = graphite::VCFFileWriterManager::Instance()->getVCFFileWriter(iter.first->getFilePath());
+			auto vcfHeaderPtr = iter.first->getVCFHeader();
 			vcfHeaderPtr->registerActiveSample(sampleManagerPtr);
-			if (firstTime)
-			{
-				outputPaths.emplace(currentVCFOutPath);
-			}
-			auto funct = std::bind(&graphite::VariantList::writeVariantList, variantListPtr, fileWriter, vcfHeaderPtr, firstTime);
-			auto functFuture = graphite::ThreadPool::Instance()->enqueue(funct);
-			vcfWriterFutureFunctions.push_back(functFuture);
+			vcfFileWriterPtr->writeVariantList(iter.second, vcfHeaderPtr); // iter.second is the VariantList
 		}
-
-		while (!vcfWriterFutureFunctions.empty())
-		{
-			vcfWriterFutureFunctions.front()->wait();
-			vcfWriterFutureFunctions.pop_front();
-		}
-
-		firstTime = false;
 	}
 
-	for (auto& iter : vcfoutPaths)
-	{
-		graphite::IFileWriter::SharedPtr fileWriter = iter.second;
-		fileWriter->close();
-	}
 	if (vtkPtr != nullptr)
 	{
 		vtkPtr->closeResources();
 	}
+	graphite::VCFFileWriterManager::Instance()->closeAllVCFFileWriters();
 
 	return 0;
 }

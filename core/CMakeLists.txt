@@ -72,6 +72,7 @@ set(GRAPHITE_CORE_VARIANT_SOURCES
   variant/VCFManager.cpp
   variant/VCFFileReader.cpp
   variant/VCFHeader.cpp
+  variant/VCFFileWriter.cpp
   )
 
 set(GRAPHITE_CORE_GRAPH_SOURCES

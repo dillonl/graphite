@@ -25,23 +25,30 @@ namespace graphite
 		m_skipped(false),
 		m_num_graph_copies(numGraphCopies)
 	{
+		gssw_sse2_disable();
 		this->m_nt_table = gssw_create_nt_table();
 		this->m_mat = gssw_create_score_matrix(this->m_match, this->m_mismatch);
-		this->m_graph_ptr = gssw_graph_create(100);
+		this->m_graph_ptr = gssw_graph_create(30);
+		// this->m_graph_ptr = gssw_graph_create(4);
 	}
 
 	GSSWGraph::~GSSWGraph()
 	{
+		gssw_graph_destroy(this->m_graph_ptr);
+		free(this->m_nt_table);
+		free(this->m_mat);
 	}
 
 	void GSSWGraph::constructGraph()
 	{
 		int64_t referenceSize;
-		IVariant::SharedPtr variantPtr = nullptr;
+	    // IVariant::SharedPtr variantPtr = nullptr;
 		std::vector< gssw_node* > altAndRefVertices;
 		position currentReferencePosition = this->m_region_ptr->getStartPosition();
 
-		while (this->m_variant_list_ptr->getNextVariant(variantPtr))
+		std::vector< IVariant::SharedPtr > variantPtrs = this->m_variant_list_ptr->getAllVariantPtrs();
+		//while (this->m_variant_list_ptr->getNextVariant(variantPtr))
+		for (IVariant::SharedPtr variantPtr : variantPtrs)
 		{
 			if (variantPtr->shouldSkip())
 			{
@@ -72,7 +79,7 @@ namespace graphite
 			auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
 			addReferenceVertex(currentReferencePosition, referenceAllelePtr, altAndRefVertices);
 		}
-		generateGraphCopies();
+		// generateGraphCopies();
 	}
 
 	gssw_node* GSSWGraph::addReferenceVertex(position position, IAllele::SharedPtr referenceAllelePtr, std::vector< gssw_node* > altAndRefVertices)
@@ -116,28 +123,28 @@ namespace graphite
 
 	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr, std::shared_ptr< GSSWGraphContainer > graphContainer)
 	{
-		gssw_graph* g = graphContainer->graph_ptr;
-		int8_t* nt_table = graphContainer->nt_table;
-		int8_t* mat = graphContainer->mat;
+		// gssw_graph* g = graphContainer->graph_ptr;
+		// int8_t* nt_table = graphContainer->nt_table;
+		// int8_t* mat = graphContainer->mat;
 
 		// DHL - readd this one
-		// gssw_graph_fill(g, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-		// gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 15, 2);
-		gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
-		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(g,alignmentPtr->getSequence(),alignmentPtr->getLength(),nt_table,mat,m_gap_open,m_gap_extension,0,0);
+		// gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
+		gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
+		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr,alignmentPtr->getSequence(),alignmentPtr->getLength(),this->m_nt_table,this->m_mat,m_gap_open,m_gap_extension,0,0);
+		// gssw_graph_mapping* graphMapping = gssw_graph_trace_back(g,alignmentPtr->getSequence(),alignmentPtr->getLength(),nt_table,mat,m_gap_open,m_gap_extension,0,0);
 
-		{
-			std::unique_lock< std::mutex > lock(m_traceback_lock);
-			m_graph_container_ptrs_queue.emplace(graphContainer);
-		}
-		this->m_condition.notify_one();
+		// {
+			// std::unique_lock< std::mutex > lock(m_traceback_lock);
+			// m_graph_container_ptrs_queue.emplace(graphContainer);
+		// }
+		// this->m_condition.notify_one();
 
-		gssw_node_cigar* nc = graphMapping->cigar.elements;
-		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
-		{
+		// gssw_node_cigar* nc = graphMapping->cigar.elements;
+		// for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+		// {
 			// DHL - readd this one
 			// nc->node->cigar = nc->cigar;
-		}
+		// }
 
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm)
 		{
@@ -182,15 +189,28 @@ namespace graphite
 
 	std::shared_ptr< GSSWGraphContainer > GSSWGraph::getGraphContainer()
 	{
+		// std::unique_lock< std::mutex > lock(m_traceback_lock);
+		// this->m_condition.wait(lock, [this]{ return !this->m_graph_container_ptrs_queue.empty(); });
+		// auto graphContainerPtr = this->m_graph_container_ptrs_queue.front();
+		// this->m_graph_container_ptrs_queue.pop();
+		// return graphContainerPtr;
+		return nullptr;
+	}
+
+	/*
+	std::shared_ptr< GSSWGraphContainer > GSSWGraph::getGraphContainer()
+	{
 		std::unique_lock< std::mutex > lock(m_traceback_lock);
 		this->m_condition.wait(lock, [this]{ return !this->m_graph_container_ptrs_queue.empty(); });
 		auto graphContainerPtr = this->m_graph_container_ptrs_queue.front();
 		this->m_graph_container_ptrs_queue.pop();
 		return graphContainerPtr;
 	}
+	*/
 
 	void GSSWGraph::generateGraphCopies()
 	{
+		/*
 		for (uint32_t tc = 0; tc < m_num_graph_copies; ++tc)
 		{
 			int8_t* nt_table = gssw_create_nt_table();
@@ -217,11 +237,12 @@ namespace graphite
 					gssw_nodes_add_edge(newStartNode, newEndNode);
 				}
 			}
-			auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(nt_table, mat, g);
+			auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(nt_table, mat, g, true);
 			m_graph_container_ptrs.emplace_back(graphContainerPtr);
 			m_graph_container_ptrs_queue.emplace(graphContainerPtr);
 		}
-		auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(this->m_nt_table, this->m_mat, this->m_graph_ptr);
+		*/
+		auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(this->m_nt_table, this->m_mat, this->m_graph_ptr, false);
 		m_graph_container_ptrs.emplace_back(graphContainerPtr);
 		m_graph_container_ptrs_queue.emplace(graphContainerPtr);
 	}

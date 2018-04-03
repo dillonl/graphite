@@ -19,15 +19,16 @@ namespace graphite
 	class GSSWGraphContainer
 	{
 	public:
-	    GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr) :
-		    nt_table(NTtable), mat(mat), graph_ptr(graphPtr)
+	    GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr, bool callConstructor) :
+		    nt_table(NTtable), mat(mat), graph_ptr(graphPtr), m_call_constructor(callConstructor)
 		{
-			lock.unlock();
+			// lock.unlock();
 		}
 
 		~GSSWGraphContainer()
 		{
 			// we have to do our own special magic when deleting the nodes
+			/*
 			static bool nodesDestroyed = false;
 			{
 				if (!nodesDestroyed)
@@ -42,15 +43,17 @@ namespace graphite
 					nodesDestroyed = true;
 				}
 			}
-			this->graph_ptr->max_node = NULL;
-			free(this->graph_ptr->nodes);
-			this->graph_ptr->nodes = NULL;
-			free(this->graph_ptr);
-
-			free(this->nt_table);
-			free(this->mat);
+			*/
+			if (m_call_constructor)
+			{
+				this->graph_ptr->max_node = NULL;
+				free(this->graph_ptr);
+				free(this->nt_table);
+				free(this->mat);
+			}
 		}
 
+		bool m_call_constructor;
 		int8_t* nt_table;
 		int8_t* mat;
 		gssw_graph* graph_ptr;
@@ -122,6 +125,8 @@ namespace graphite
 			/* n->ref_seq = (char*)referenceSeq; */
 			/* n->position = position; */
 			/* if this node is reference then the id is even otherwise it is odd */
+			char* tmpSeq = (char*)malloc(allelePtr->getLength() + 1 * sizeof(char));
+			memcpy(tmpSeq, allelePtr->getSequence(), allelePtr->getLength() + 1);
 			{
 				std::lock_guard< std::mutex > l(s_lock);
 				if (isReference)
@@ -141,7 +146,8 @@ namespace graphite
 				m_node_id_to_allele_ptrs.emplace(n->id, allelePtr);
 			}
 			n->len = allelePtr->getLength();
-			n->seq = (char*)allelePtr->getSequence();
+			/* n->seq = (char*)allelePtr->getSequence(); */
+			n->seq = tmpSeq;
 			n->data = (void*)allelePtr.get();
 			allelePtr->setPosition(position);
 			n->num = gssw_create_num(n->seq, n->len, nt_table);

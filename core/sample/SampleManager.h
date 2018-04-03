@@ -16,6 +16,7 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< SampleManager > SharedPtr;
 		SampleManager(const std::vector< Sample::SharedPtr >& samplePtrs);
+		SampleManager(const std::vector< std::string >& bamPaths);
 		~SampleManager();
 
 		Sample::SharedPtr getSamplePtr(const std::string& readGroup);

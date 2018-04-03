@@ -8,6 +8,7 @@
 #include <atomic>
 #include <unordered_map>
 #include <iostream>
+#include <mutex>
 
 namespace graphite
 {
@@ -22,12 +23,14 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< IAllele > SharedPtr;
 	    IAllele() :
-		    m_id(-1),
-			m_position(0)
+		        m_id(-1),
+				m_position(0)
 		{
 		}
 
-		virtual ~IAllele() {}
+		virtual ~IAllele()
+		{
+		}
 		virtual size_t getLength() = 0;
 		virtual const char* getSequence() = 0;
 		virtual std::string getSequenceString() = 0;

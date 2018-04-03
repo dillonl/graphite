@@ -196,7 +196,7 @@ namespace graphite
 
 	uint64_t VCFFileReader::getPositionFromFile(uint64_t seekPosition, uint64_t endSeekPosition, std::shared_ptr< std::atomic< bool > > posFound, Region::SharedPtr regionPtr, std::string path)
 	{
-		static std::mutex l;
+		// static std::mutex l;
 
 		std::ifstream f;
 		f.open(path.c_str(), std::ifstream::in);
@@ -211,8 +211,8 @@ namespace graphite
 			// rewind by one line
 			while (f.unget() && f.peek() != '\n')
 			{
-				std::lock_guard< std::mutex > lock(l);
-				char tmp = f.peek();
+				// std::lock_guard< std::mutex > lock(l);
+				// char tmp = f.peek();
 				// std::cout << tmp << std::endl;
 			}
 		}
@@ -230,7 +230,7 @@ namespace graphite
 		while (std::getline(f, line) && f.tellg() < endSeekPosition)
 		{
 			{
-				std::lock_guard< std::mutex > lock(l);
+				// std::lock_guard< std::mutex > lock(l);
 				// std::cout << line << std::endl;
 			}
 			if (line.size() > 0 && line[0] == '#') { continue; }
@@ -244,7 +244,7 @@ namespace graphite
 					f.seekg(returnFilePos, std::ifstream::beg);
 					std::getline(f, line); // get the partial line
 					{
-						std::lock_guard< std::mutex > lock(l);
+						// std::lock_guard< std::mutex > lock(l);
 						// std::cout << "found position: " << currentPosition << " " << returnFilePos << std::endl;
 						// std::cout << "found line: " << line << std::endl;
 					}
@@ -256,7 +256,7 @@ namespace graphite
 		}
 		f.close();
 		{
-			std::lock_guard< std::mutex > lock(l);
+			// std::lock_guard< std::mutex > lock(l);
 			// std::cout << "finished: " << returnFilePos << std::endl;
 		}
 		return returnFilePos;

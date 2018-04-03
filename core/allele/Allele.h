@@ -72,8 +72,6 @@ namespace graphite
 			auto iter = m_alignment_sample_forward_count_map.find(samplePtr->getName());
 			if (iter == m_alignment_sample_forward_count_map.end())
 			{
-				/* m_alignment_sample_forward_count_map.emplace(samplePtr->getName(), 1); */
-				/* iter = m_alignment_sample_forward_count_map.find(samplePtr->getName()); */
 				auto scoreCounterPtr = std::make_shared< ScoreCounter >();
 				scoreCounterPtr->incrementScoreCount(alleleCountType);
 				m_alignment_sample_forward_count_map.emplace(samplePtr->getName(), scoreCounterPtr);
@@ -81,7 +79,6 @@ namespace graphite
 			else
 			{
 				iter->second->incrementScoreCount(alleleCountType);
-				/* ++iter->second; */
 			}
 		}
 

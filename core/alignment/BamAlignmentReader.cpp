@@ -69,11 +69,17 @@ namespace graphite
 		// BamTools::BamAlignment bamAlignment;
 		while (true) // while true is never a good answer, maybe I'll rethink this in the future
 		{
-			auto bamAlignmentPtr = std::make_shared< BamTools::BamAlignment >();
-			if (!this->m_bam_reader->GetNextAlignment(*bamAlignmentPtr))
+			BamTools::BamAlignment* bamtoolsAlignmentPtr = new BamTools::BamAlignment();
+
+			if (!this->m_bam_reader->GetNextAlignment(*bamtoolsAlignmentPtr))
 			{
+				delete bamtoolsAlignmentPtr; // delete the ptr if the ptr isn't added to the alignmentPtrs
 				break;
 			}
+			std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr(bamtoolsAlignmentPtr, [](BamTools::BamAlignment* btPtr)
+																	  {
+																		  delete btPtr;
+																	  });
             if ((bamAlignmentPtr->IsDuplicate() && !includeDuplicateReads) || (unmappedOnly && bamAlignmentPtr->IsMapped())) { continue; }
 			std::string sampleName;
 			bamAlignmentPtr->GetTag("RG", sampleName);
@@ -84,6 +90,7 @@ namespace graphite
 			Sample::SharedPtr samplePtr = sampleManagerPtr->getSamplePtr(sampleName);
 			if (samplePtr == nullptr)
 			{
+				std::cout << "trying to get sample: " << sampleName << std::endl;
 				throw "There was an error in the sample name for: " + sampleName;
 			}
 			alignmentPtrs.push_back(std::make_shared< BamAlignment >(bamAlignmentPtr, samplePtr));

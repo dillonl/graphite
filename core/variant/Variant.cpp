@@ -381,13 +381,11 @@ namespace graphite
 	 */
 	void Variant::processOverlappingAlleles()
 	{
-		std::weak_ptr< IVariant > weakPtr = shared_from_this();
 		uint32_t alleleCount = 1;
 		m_max_prefix_match_length = 0;
 		m_max_suffix_match_length = 0;
 		for (auto& allelePtr1 : this->m_all_allele_ptrs)
 		{
-			allelePtr1->setVariantWPtr(weakPtr);
 			for (uint32_t i = alleleCount; i < this->m_all_allele_ptrs.size(); ++i)
 			{
 				auto allelePtr2 = this->m_all_allele_ptrs[i];
@@ -404,11 +402,13 @@ namespace graphite
 
 	void Variant::setRefAndAltAlleles(const std::string& ref, const std::vector< std::string >& alts)
 	{
+		std::weak_ptr< IVariant > weakPtr = shared_from_this();
 		int id = 0;
 		this->m_all_allele_ptrs.clear();
 		std::string upperRef = ref;
 		std::transform(upperRef.begin(), upperRef.begin(), upperRef.end(), ::toupper);
 		this->m_ref_allele_ptr = std::make_shared< Allele >(upperRef);
+		this->m_ref_allele_ptr->setVariantWPtr(weakPtr);
 		this->m_ref_allele_ptr->setID(id);
 		this->m_all_allele_ptrs.reserve(alts.size() + 1);
 		this->m_all_allele_ptrs.emplace_back(this->m_ref_allele_ptr);
@@ -420,6 +420,7 @@ namespace graphite
 			std::transform(upperAlt.begin(), upperAlt.begin(), upperAlt.end(), ::toupper);
 			auto altAllelePtr = std::make_shared< Allele >(upperAlt);
 			altAllelePtr->setID(id);
+			altAllelePtr->setVariantWPtr(weakPtr);
 			this->m_alt_allele_ptrs.emplace_back(altAllelePtr);
 			this->m_all_allele_ptrs.emplace_back(altAllelePtr);
 			id += 2;
@@ -624,7 +625,6 @@ namespace graphite
 				totalCount += (forwardCount + reverseCount);
 			}
 			std::string totalCountString = (m_skip) ? "." : std::to_string(totalCount);
-			// alleleCountString += "DP<" + alleleTypeCountString + ">=" + totalCountString + ";DP4<" + alleleTypeCountString + ">=" + sampleString + ";";
 			alleleCountString += totalCountString + ":" + sampleString + suffix;
 		}
 		return alleleCountString;

@@ -88,9 +88,10 @@ namespace graphite
 	{
 		bool isAlt = allelePtr->getID() % 2 != 0;
 		AlleleCountType alleleCountType = (referenceSWScoreIdentical && isAlt) ? AlleleCountType::Ambiguous : scoreToAlleleCountType(swPercent);
-		mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr->isReverseStrand(), alignmentPtr->getSample(), alleleCountType));
-		alignmentPtr->addMapping(mappingPtr);
-		mappingPtr->setMapped(true);
+		allelePtr->incrementCount(alignmentPtr->isReverseStrand(), alignmentPtr->getSample(), alleleCountType);
+		// mappingPtr->addAlleleCountCallback(std::bind(&IAllele::incrementCount, allelePtr, alignmentPtr->isReverseStrand(), alignmentPtr->getSample(), alleleCountType));
+		// alignmentPtr->addMapping(mappingPtr);
+		// mappingPtr->setMapped(true);
 	}
 
 	int GSSWAdjudicator::getMatchValue()
