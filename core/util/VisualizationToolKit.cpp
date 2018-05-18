@@ -37,7 +37,7 @@ namespace graphite
 		}
 	}
 
-	void VisualizationToolKit::setAlignmentAndMapping(IAlignment::SharedPtr alignmentPtr, GSSWGraph::SharedPtr gsswGraphPtr, IMapping::SharedPtr refMapping, IMapping::SharedPtr altMapping)
+	void VisualizationToolKit::setAlignmentAndMapping(IAlignment::SharedPtr alignmentPtr, GSSWGraph::SharedPtr gsswGraphPtr, GSSWMapping::SharedPtr refMapping, GSSWMapping::SharedPtr altMapping)
 	{
 		std::string refTracebackSequence = "";
 		std::string refTracebackID = std::to_string(gsswGraphPtr->getStartPosition()) + "-" + std::to_string(gsswGraphPtr->getEndPosition());

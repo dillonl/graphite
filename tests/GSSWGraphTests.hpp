@@ -7,17 +7,6 @@
 #include "core/reference/FastaReference.h"
 #include "core/graph/GSSWGraph.h"
 
-/*
-TEST(GSSWGraphTests, GetBaseOneRegion)
-{
-	auto fastaRegionPtr = std::make_shared< graphite::Region >("1", graphite::Region::BASED::ONE);
-	auto referencePtr = std::make_shared< graphite::FastaReference >(TEST_FASTA_FILE, fastaRegionPtr);
-	auto regionPtr = std::make_shared< graphite::Region >("1:1-10", graphite::Region::BASED::ONE);
-	std::string regionString = referencePtr->getSequenceFromRegion(regionPtr);
-	ASSERT_STREQ(regionString.c_str(), "CTATGATGTT");
-}
-*/
-
 TEST(GSSWGraphTests, GSSWSimpleGraph)
 {
     uint32_t readLength = 6;
@@ -30,7 +19,7 @@ TEST(GSSWGraphTests, GSSWSimpleGraph)
 	auto variantListPtr = std::make_shared< graphite::VariantList >(variantPtrs, referencePtr);
 
     auto gsswRegionPtr = std::make_shared< graphite::Region >("1", variantPtr->getPosition() - readLength, variantPtr->getPosition() + readLength, graphite::Region::BASED::ONE);
-	auto gsswGraphPtr = std::make_shared< graphite::GSSWGraph >(referencePtr, variantListPtr, gsswRegionPtr, 1, 1, 1, 1, 1);
+	auto gsswGraphPtr = std::make_shared< graphite::GSSWGraph >(referencePtr, variantListPtr, gsswRegionPtr, 1, 1, 1, 1);
 	gsswGraphPtr->constructGraph();
 
 	gssw_graph* gsswPtr = gsswGraphPtr->getGSSWGraph();
@@ -54,7 +43,7 @@ TEST(GSSWGraphTests, GSSWSimpleLargeVariant)
 	auto variantListPtr = std::make_shared< graphite::VariantList >(variantPtrs, referencePtr);
 
 	auto gsswRegionPtr = std::make_shared< graphite::Region >("1", variantPtr->getPosition() - readLength, variantPtr->getPosition() + 29 + readLength, graphite::Region::BASED::ONE);
-	auto gsswGraphPtr = std::make_shared< graphite::GSSWGraph >(referencePtr, variantListPtr, gsswRegionPtr, 1, 1, 1, 1, 1);
+	auto gsswGraphPtr = std::make_shared< graphite::GSSWGraph >(referencePtr, variantListPtr, gsswRegionPtr, 1, 1, 1, 1);
 	gsswGraphPtr->constructGraph();
 
 	gssw_graph* gsswPtr = gsswGraphPtr->getGSSWGraph();

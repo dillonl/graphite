@@ -8,71 +8,25 @@
 
 #include "gssw.h"
 
-#include "core/graph/IGraph.h"
 #include "core/reference/IReference.h"
-#include "core/variant/IVariantList.h"
+#include "core/variant/VariantList.h"
 #include "core/allele/Allele.h"
-#include "core/util/ThreadPool.hpp"
 
 namespace graphite
 {
-	class GSSWGraphContainer
-	{
-	public:
-	    GSSWGraphContainer(int8_t* NTtable, int8_t* mat, gssw_graph* graphPtr, bool callConstructor) :
-		    nt_table(NTtable), mat(mat), graph_ptr(graphPtr), m_call_constructor(callConstructor)
-		{
-			// lock.unlock();
-		}
 
-		~GSSWGraphContainer()
-		{
-			// we have to do our own special magic when deleting the nodes
-			/*
-			static bool nodesDestroyed = false;
-			{
-				if (!nodesDestroyed)
-				{
-					static std::mutex nodeDestroyMutex;
-					std::lock_guard< std::mutex > l(nodeDestroyMutex);
-					for (uint32_t i = 0; i < this->graph_ptr->size; ++i)
-					{
-						free(this->graph_ptr->nodes[i]->num);
-						free(this->graph_ptr->nodes[i]);
-					}
-					nodesDestroyed = true;
-				}
-			}
-			*/
-			if (m_call_constructor)
-			{
-				this->graph_ptr->max_node = NULL;
-				free(this->graph_ptr);
-				free(this->nt_table);
-				free(this->mat);
-			}
-		}
-
-		bool m_call_constructor;
-		int8_t* nt_table;
-		int8_t* mat;
-		gssw_graph* graph_ptr;
-		std::mutex lock;
-	};
-
-	class GSSWGraph : public IGraph
+	class GSSWGraph : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< GSSWGraph > SharedPtr;
 		typedef std::shared_ptr< gssw_graph > GSSWGraphPtr;
 		typedef std::shared_ptr< gssw_graph_mapping > GSSWGraphMappingPtr;
 
-		GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, Region::SharedPtr regionPtr, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue, uint32_t numGraphCopies);
+		GSSWGraph(IReference::SharedPtr referencePtr, VariantList::SharedPtr variantListPtr, Region::SharedPtr regionPtr, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		virtual ~GSSWGraph();
 
-		virtual void constructGraph() override;
-		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr, std::shared_ptr< GSSWGraphContainer > graphContainer);
-		/* GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr); */
+		virtual void constructGraph();
+		GSSWGraphMappingPtr traceBackAlignment(IAlignment::SharedPtr alignmentPtr);
 		IVariant::SharedPtr getVariantFromNodeID(const uint32_t nodeID);
 		void recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr);
 		gssw_graph* getGSSWGraph() { return this->m_graph_ptr; }
@@ -81,15 +35,13 @@ namespace graphite
 		size_t getTotalGraphLength() { return m_total_graph_length; }
 		std::string getSkipped() { return (m_skipped) ? "skipped" : "not skipped"; }
 
-		position getStartPosition() override { this->m_region_ptr->getStartPosition(); }
-		position getEndPosition() override {  this->m_region_ptr->getEndPosition(); }
-		std::shared_ptr< GSSWGraphContainer > getGraphContainer();
+		position getStartPosition() { this->m_region_ptr->getStartPosition(); }
+		position getEndPosition() {  this->m_region_ptr->getEndPosition(); }
 
 		std::vector< std::tuple< std::string, std::string > > generateAllPaths();
 
 	protected:
 
-		void generateGraphCopies();
 		std::vector< gssw_node* > addAlternateVertices(const std::vector< gssw_node* >& altAndRefVertices, IVariant::SharedPtr variantPtr);
 		gssw_node* addReferenceVertex(position position, IAllele::SharedPtr refAllelePtr, std::vector< gssw_node* > altAndRefVertices);
 
@@ -104,10 +56,7 @@ namespace graphite
 		Region::SharedPtr m_region_ptr;
 		static uint32_t s_next_id;
 		static std::mutex s_lock;
-		uint32_t m_num_graph_copies;
-		std::map< uint32_t, std::tuple< INode::SharedPtr, uint32_t, std::vector< IAlignment::SharedPtr > > > m_variant_counter;
 		std::map< uint32_t, IVariant::SharedPtr > m_variants_map;
-		std::vector< std::shared_ptr< GSSWGraphContainer > > m_graph_container_ptrs;
 
 		size_t m_total_graph_length;
 		bool m_skipped;
@@ -121,9 +70,6 @@ namespace graphite
 										const int8_t* score_matrix)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
-			/* n->ref_len = referenceLength; */
-			/* n->ref_seq = (char*)referenceSeq; */
-			/* n->position = position; */
 			/* if this node is reference then the id is even otherwise it is odd */
 			char* tmpSeq = (char*)malloc(allelePtr->getLength() + 1 * sizeof(char));
 			memcpy(tmpSeq, allelePtr->getSequence(), allelePtr->getLength() + 1);
@@ -146,7 +92,6 @@ namespace graphite
 				m_node_id_to_allele_ptrs.emplace(n->id, allelePtr);
 			}
 			n->len = allelePtr->getLength();
-			/* n->seq = (char*)allelePtr->getSequence(); */
 			n->seq = tmpSeq;
 			n->data = (void*)allelePtr.get();
 			allelePtr->setPosition(position);
@@ -154,18 +99,12 @@ namespace graphite
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
-			/* n->cigar = NULL; */
 			return n;
 		}
 
 		gssw_node* gssw_node_copy(gssw_node* node, int8_t* nt_table)
 		{
 			gssw_node* n = (gssw_node*)calloc(1, sizeof(gssw_node));
-			/*
-			n->ref_len = node->ref_len;
-			n->ref_seq = node->ref_seq;
-			n->position = node->position;
-			*/
 			n->id = node->id;
 			n->seq = node->seq;
 			n->len = node->len;
@@ -174,19 +113,16 @@ namespace graphite
 			n->count_prev = 0;
 			n->count_next = 0;
 			n->alignment = NULL;
-			/* n->cigar = NULL; */
 			return n;
 		}
 
+		IReference::SharedPtr m_reference_ptr;
+
 	private:
 		void graphConstructed();
-		IVariantList::SharedPtr m_variant_list_ptr;
+		VariantList::SharedPtr m_variant_list_ptr;
 		std::vector< IAllele::SharedPtr > m_reference_fragments; // contains the reference fragments so they are deleted when the graph is deleted
 		std::unordered_map< uint32_t, IAllele::SharedPtr > m_node_id_to_allele_ptrs;
-
-		std::mutex m_traceback_lock;
-		std::condition_variable m_condition;
-		std::queue< std::shared_ptr< GSSWGraphContainer > > m_graph_container_ptrs_queue;
 
 	};
 

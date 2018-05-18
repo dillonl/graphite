@@ -38,7 +38,7 @@ namespace graphite
 	{
 	}
 
-	std::vector< MappingAlignmentInfo::SharedPtr > GSSWMapping::getMappingAlignmentInfoPtrs(IAdjudicator::SharedPtr adjudicatorPtr)
+	std::vector< MappingAlignmentInfo::SharedPtr > GSSWMapping::getMappingAlignmentInfoPtrs(GSSWAdjudicator::SharedPtr adjudicatorPtr)
 	{
 		std::vector< MappingAlignmentInfo::SharedPtr > mappingAlignmentInfoPtrs;
 		gssw_node_cigar* nc = this->m_gssw_mapping_ptr->cigar.elements;

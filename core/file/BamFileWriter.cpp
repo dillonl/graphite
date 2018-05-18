@@ -1,5 +1,4 @@
 #include "BamFileWriter.h"
-#include "core/util/ThreadPool.hpp"
 
 #include "api/BamReader.h"
 // #include "api/Sort.h"

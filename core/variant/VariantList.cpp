@@ -83,7 +83,7 @@ namespace graphite
 	{
 	}
 
-	void VariantList::printToCompressedVCF(IHeader::SharedPtr headerPtr, bool printHeader, int out)
+	void VariantList::printToCompressedVCF(VCFHeader::SharedPtr headerPtr, bool printHeader, int out)
 	{
 		BGZF* fp = bgzf_dopen(out, "w");
 		if (printHeader)
@@ -300,7 +300,7 @@ namespace graphite
 		}
 	}
 
-	void VariantList::writeVariantList(IFileWriter::SharedPtr fileWriter, IHeader::SharedPtr headerPtr, bool printHeader)
+	void VariantList::writeVariantList(IFileWriter::SharedPtr fileWriter, VCFHeader::SharedPtr headerPtr, bool printHeader)
 	{
 		if (printHeader)
 		{

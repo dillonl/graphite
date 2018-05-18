@@ -9,7 +9,6 @@
 
 namespace graphite
 {
-	class IAdjudicator;
 	class MappingAlignmentInfo : private Noncopyable
 	{
 	public:

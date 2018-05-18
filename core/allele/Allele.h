@@ -1,7 +1,6 @@
 #ifndef GRAPHITE_ALLELE_H
 #define GRAPHITE_ALLELE_H
 
-/* #include "core/sequence/SequenceManager.h" */
 #include "IAllele.h"
 #include "AlleleMetaData.h"
 #include "core/alignment/IAlignment.h"
@@ -90,8 +89,7 @@ namespace graphite
 			{
 				auto scoreCounterPtr = std::make_shared< ScoreCounter >();
 				scoreCounterPtr->incrementScoreCount(alleleCountType);
-				m_alignment_sample_reverse_count_map.emplace(samplePtr->getName(), std::make_shared< ScoreCounter >());
-				/* iter = m_alignment_sample_reverse_count_map.find(samplePtr->getName()); */
+				m_alignment_sample_reverse_count_map.emplace(samplePtr->getName(), scoreCounterPtr);
 			}
 			else
 			{
@@ -168,7 +166,6 @@ namespace graphite
 			std::unordered_map< AlleleCountType, uint32_t, AlleleCountTypeHash > m_score_map;
 		};
 
-		/* Sequence::SharedPtr m_sequence_ptr; */
 		std::string m_sequence;
 		AlleleMetaData::SharedPtr m_allele_meta_data_ptr;
 		std::mutex m_alignment_count_mutex;

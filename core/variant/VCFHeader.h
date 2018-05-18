@@ -1,8 +1,9 @@
 #ifndef GRAPHITE_VCFHEADER_H
 #define GRAPHITE_VCFHEADER_H
 
-#include "IHeader.h"
+#include "core/sample/SampleManager.h"
 #include "core/util/Types.h"
+#include "core/util/Noncopyable.hpp"
 
 #include <memory>
 #include <vector>
@@ -12,23 +13,22 @@
 namespace graphite
 {
 	class IAlignmentReader;
-	class VCFHeader : public IHeader
+	class VCFHeader : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< VCFHeader > SharedPtr;
 		VCFHeader(const std::vector< std::string >& vcfHeaderLines);
 		~VCFHeader();
 
-		std::string getHeader() override;
+		std::string getHeader();
 		void registerReferencePath(const std::string& referencePath);
-		void registerActiveSample(SampleManager::SharedPtr sampleManagerPtr) override;
-		std::vector< std::string > getSampleNames() override;
-		int32_t getColumnPosition(const std::string& columnTitle) override;
-		void setColumn(const std::string& column) override;
-		std::vector< std::string > getColumnNames() override;
-		/* bool isActiveSampleColumnName(const std::string& headerName) override; */
-		bool isActiveSampleColumnName(const std::string& headerName) override;
-		bool isSampleColumnName(const std::string& headerName) override;
+		void registerActiveSample(SampleManager::SharedPtr sampleManagerPtr);
+		std::vector< std::string > getSampleNames();
+		int32_t getColumnPosition(const std::string& columnTitle);
+		void setColumn(const std::string& column);
+		std::vector< std::string > getColumnNames();
+		bool isActiveSampleColumnName(const std::string& headerName);
+		bool isSampleColumnName(const std::string& headerName);
 	private:
 		void setColumns(const std::string& headerString);
 		std::string getColumnsString();

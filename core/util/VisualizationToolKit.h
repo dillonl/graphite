@@ -2,7 +2,7 @@
 #define GRAPHITE_VISUALIZATIONTOOLKIT_H
 
 #include "core/alignment/IAlignment.h"
-#include "core/mapping/IMapping.h"
+#include "core/mapping/GSSWMapping.h"
 #include "core/file/FastaFileWriter.h"
 #include "core/file/BamFileWriter.h"
 #include "core/graph/GSSWGraph.h"
@@ -17,7 +17,7 @@ namespace graphite
 		VisualizationToolKit(const std::string& outputPath, const std::vector< std::string >& bamPaths, int matchValue);
 		virtual ~VisualizationToolKit();
 
-		void setAlignmentAndMapping(IAlignment::SharedPtr alignmentPtr, GSSWGraph::SharedPtr gsswGraphPtr, IMapping::SharedPtr refMapping, IMapping::SharedPtr altMapping);
+		void setAlignmentAndMapping(IAlignment::SharedPtr alignmentPtr, GSSWGraph::SharedPtr gsswGraphPtr, GSSWMapping::SharedPtr refMapping, GSSWMapping::SharedPtr altMapping);
 		void closeResources();
 
 	private:

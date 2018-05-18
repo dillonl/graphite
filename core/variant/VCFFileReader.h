@@ -1,7 +1,7 @@
 #ifndef GRAPHITE_VCFFILEREADER_H
 #define GRAPHITE_VCFFILEREADER_H
 
-#include "core/variant/IVariantList.h"
+#include "core/variant/VariantList.h"
 #include "core/file/IFile.h"
 
 #include "core/region/Region.h"

@@ -1,7 +1,6 @@
 #ifndef GRAPHITE_ALIGNMENTREADERMANAGER_HPP
 #define GRAPHITE_ALIGNMENTREADERMANAGER_HPP
 
-#include "IAlignmentReader.h"
 #include "core/util/Noncopyable.hpp"
 
 #include <string.h>
@@ -10,6 +9,8 @@
 #include <chrono>
 #include <thread>
 #include <deque>
+#include <mutex>
+#include <unordered_map>
 
 namespace graphite
 {

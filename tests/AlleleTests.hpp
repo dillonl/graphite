@@ -4,10 +4,7 @@
 #include "TestConfig.h"
 
 #include "core/reference/IReference.h"
-#include "core/variant/IVariantList.h"
 #include "core/variant/IVariant.h"
-#include "core/adjudicator/IAdjudicator.h"
-#include "core/mapping/MappingManager.h"
 
 #include "core/graph/GSSWGraph.h"
 #include "core/adjudicator/GSSWAdjudicator.h"

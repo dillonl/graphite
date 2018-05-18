@@ -42,8 +42,6 @@ namespace graphite
 		virtual uint32_t getReverseCount(const std::string& sampleName, AlleleCountType alleleCountType) = 0;
 		virtual uint32_t getTotalCount(AlleleCountType alleleCountType) = 0;
 
-		/* virtual void incrementForwardCount(std::shared_ptr< IAlignment > alignmentPtr) = 0; */
-		/* virtual void incrementReverseCount(std::shared_ptr< IAlignment > alignmentPtr) = 0; */
 		virtual void incrementForwardCount(std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;
 		virtual void incrementReverseCount(std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;
 		virtual void incrementCount(bool isReverseStrand, std::shared_ptr< Sample > alignmentPtr, AlleleCountType alleleCountType) = 0;

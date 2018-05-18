@@ -2,7 +2,7 @@
 #define GRAPHITE_INTEGRATIONTESTS_HPP
 
 #include "TestConfig.h"
-
+/*
 #include "core/reference/IReference.h"
 #include "core/variant/IVariantList.h"
 #include "core/variant/IVariant.h"
@@ -12,7 +12,7 @@
 #include "core/graph/GSSWGraph.h"
 #include "core/adjudicator/GSSWAdjudicator.h"
 #include "core/mapping/GSSWMapping.h"
-
+*/
 
 #include <vector>
 

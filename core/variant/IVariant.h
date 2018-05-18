@@ -5,7 +5,7 @@
 #include "core/allele/IAllele.h"
 #include "core/util/Noncopyable.hpp"
 #include "core/region/Region.h"
-#include "IHeader.h"
+#include "VCFHeader.h"
 
 #include <vector>
 #include <memory>
@@ -33,7 +33,7 @@ namespace graphite
 			virtual void processOverlappingAlleles() = 0; // set all allele variantwptrs to be this
 			virtual uint32_t getAllelePrefixOverlapMaxCount(IAllele::SharedPtr allelePtr) = 0;
 			virtual uint32_t getAlleleSuffixOverlapMaxCount(IAllele::SharedPtr allelePtr) = 0;
-			virtual std::string getVariantLine(IHeader::SharedPtr headerPtr) = 0;
+			virtual std::string getVariantLine(VCFHeader::SharedPtr headerPtr) = 0;
 			virtual bool shouldSkip() = 0;
 			virtual void setSkip(bool) = 0;
 			virtual std::vector< Region::SharedPtr > getRegions() = 0;

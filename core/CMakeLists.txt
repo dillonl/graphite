@@ -23,10 +23,6 @@ set(GRAPHITE_UTIL_SOURCES
   util/VisualizationToolKit.cpp
   )
 
-set(GRAPHITE_SEQUENCE_SOURCES
-  sequence/SequenceManager.cpp
-  )
-
 set(GRAPHITE_FILE_SOURCES
   file/BGZFFileWriter.cpp
   file/ASCIIFileWriter.cpp
@@ -47,7 +43,6 @@ set(GRAPHITE_CORE_REGION_SOURCES
   )
 
 set(GRAPHITE_CORE_MAPPING_SOURCES
-  mapping/MappingManager.cpp
   mapping/GSSWMapping.cpp
   )
 
@@ -57,7 +52,6 @@ set(GRAPHITE_CORE_ADJUDICATOR_SOURCES
 
 set(GRAPHITE_CORE_ALIGNMENT_SOURCES
   alignment/AlignmentList.cpp
-  alignment/BamAlignmentManager.cpp
   alignment/BamAlignmentReader.cpp
   )
 

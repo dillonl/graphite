@@ -1,12 +1,13 @@
 #ifndef GRAPHITE_ALIGNMENTLIST_H
 #define GRAPHITE_ALIGNMENTLIST_H
 
+#include "core/util/Noncopyable.hpp"
+#include "core/region/Region.h"
 #include "IAlignment.h"
-#include "IAlignmentList.h"
 
 namespace graphite
 {
-	class AlignmentList : public IAlignmentList
+	class AlignmentList : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< AlignmentList > SharedPtr;
@@ -15,10 +16,10 @@ namespace graphite
 		AlignmentList(std::vector< IAlignment::SharedPtr > alignmentPtrs, std::shared_ptr< std::unordered_map< std::string, IAlignment::SharedPtr > > nameAlignmentPtrMapPtr, Region::SharedPtr regionPtr);
 		~AlignmentList();
 
-		size_t getCount() override;
-		void sort() override;
-		bool getNextAlignment(IAlignment::SharedPtr& alignmentPtr) override;
-		std::vector< IAlignment::SharedPtr > getAlignmentPtrs() override { return this->m_alignment_ptrs; }
+		size_t getCount();
+		void sort();
+		bool getNextAlignment(IAlignment::SharedPtr& alignmentPtr);
+		std::vector< IAlignment::SharedPtr > getAlignmentPtrs() { return this->m_alignment_ptrs; }
 	private:
 		Region::SharedPtr m_region;
 		std::vector< IAlignment::SharedPtr > m_alignment_ptrs;

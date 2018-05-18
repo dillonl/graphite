@@ -4,7 +4,6 @@
 #include "core/region/Region.h"
 #include "VariantList.h"
 #include "VCFFileReader.h"
-#include "IVariantManager.h"
 #include "IVariant.h"
 #include "VCFHeader.h"
 
@@ -16,7 +15,7 @@
 
 namespace graphite
 {
-	class VCFManager : public IVariantManager
+	class VCFManager : private Noncopyable
 	{
 	public:
 		typedef std::shared_ptr< VCFManager > SharedPtr;
@@ -25,15 +24,12 @@ namespace graphite
 		VCFManager(const std::vector< std::string >& vcfFilePaths, Region::SharedPtr regionPtr, IReference::SharedPtr referencePtr, uint32_t readLength);
 		~VCFManager();
 
-		IVariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr) override;
+		VariantList::SharedPtr getVariantsInRegion(Region::SharedPtr regionPtr);
 
-		void asyncLoadVCFs();
-		void waitForVCFsToLoadAndProcess();
-		IVariantList::SharedPtr getCompleteVariantList() override;
-		void releaseResources() override;
+		void loadVariants(); // a blocking call that waits for all vcfs to load and then combines them
+		VariantList::SharedPtr getCompleteVariantList();
 		std::unordered_map< VCFFileReader::SharedPtr, VariantList::SharedPtr > getVCFReadersAndVariantListsMap();
 	private:
-		void processVCFs(); // a blocking call that waits for all vcfs to load and then combines them
 
 		VariantList::SharedPtr m_variant_list_ptr;
 		std::vector< VCFFileReader::SharedPtr > m_vcf_file_reader_ptrs;

@@ -508,7 +508,7 @@ namespace graphite
 		return (this->m_info_fields.size() > 0) ? infoFields : ".";
 	}
 
-	std::string Variant::getVariantLine(IHeader::SharedPtr headerPtr)
+	std::string Variant::getVariantLine(VCFHeader::SharedPtr headerPtr)
 	{
 		std::vector< std::string > lineSplit;
 		split(this->m_line, '\t', lineSplit);

@@ -33,15 +33,8 @@ namespace graphite
 	{
 	}
 
-	void VCFManager::asyncLoadVCFs()
-	{
-		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
-		if (this->m_loaded_vcfs) { return; }
-		this->m_loading_thread_ptr = std::make_shared< std::thread >(&VCFManager::processVCFs, this);
-	}
-
 	// the intention of this function is to process the vcfs in a blocking way
-	void VCFManager::processVCFs()
+	void VCFManager::loadVariants()
 	{
 		std::lock_guard< std::mutex > lock(this->m_loaded_mutex);
 		std::vector< std::thread > vcfLoadThreads;
@@ -78,22 +71,13 @@ namespace graphite
 		return this->m_path_vcf_variant_list_ptrs_map;
 	}
 
-	void VCFManager::waitForVCFsToLoadAndProcess()
-	{
-		this->m_loading_thread_ptr->join();
-	}
-
-	IVariantList::SharedPtr VCFManager::getVariantsInRegion(Region::SharedPtr regionPtr)
+	VariantList::SharedPtr VCFManager::getVariantsInRegion(Region::SharedPtr regionPtr)
 	{
 		return this->m_variant_list_ptr->getVariantsInRegion(regionPtr);
 	}
 
-	IVariantList::SharedPtr VCFManager::getCompleteVariantList()
+	VariantList::SharedPtr VCFManager::getCompleteVariantList()
 	{
 		return this->m_variant_list_ptr;
-	}
-
-	void VCFManager::releaseResources()
-	{
 	}
 }

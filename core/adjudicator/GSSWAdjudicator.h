@@ -1,29 +1,34 @@
 #ifndef GRAPHITE_ADJUDICATOR_GSSWADJUDICATOR_H
 #define GRAPHITE_ADJUDICATOR_GSSWADJUDICATOR_H
 
-#include "core/adjudicator/IAdjudicator.h"
+#include "core/util/Noncopyable.hpp"
+#include "core/mapping/GSSWMapping.h"
+#include "core/mapping/MappingAlignmentInfo.h"
+#include "core/allele/IAllele.h"
 
 #include <mutex>
+#include <memory>
 
 namespace graphite
 {
-	class GSSWAdjudicator : public IAdjudicator
+	class GSSWMapping;
+    class GSSWAdjudicator : private Noncopyable, public std::enable_shared_from_this< GSSWAdjudicator >
 	{
 	public:
 		typedef std::shared_ptr< GSSWAdjudicator > SharedPtr;
 		GSSWAdjudicator(uint32_t swPercent, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue);
 		~GSSWAdjudicator();
 
-		bool adjudicateMapping(IMapping::SharedPtr mappingPtr, uint32_t referenceSWPercent) override;
-		int getMatchValue() override;
-		int getMisMatchValue() override;
-		int getGapOpenValue() override;
-		int getGapExtensionValue() override;
+		bool adjudicateMapping(std::shared_ptr< GSSWMapping > mappingPtr, uint32_t referenceSWPercent);
+		int getMatchValue();
+		int getMisMatchValue();
+		int getGapOpenValue();
+		int getGapExtensionValue();
 
 		static uint32_t s_adj_count;
 
 	private:
-		void mapAllele(IAllele::SharedPtr allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, IMapping::SharedPtr mappingPtr, IAlignment::SharedPtr alignmentPtr, bool referenceSWScoreIdentical, float swPercent);
+        void mapAllele(std::shared_ptr< IAllele > allelePtr, MappingAlignmentInfo::SharedPtr mappingAlignmentInfoPtr, std::shared_ptr< GSSWMapping > mappingPtr, IAlignment::SharedPtr alignmentPtr, bool referenceSWScoreIdentical, float swPercent);
 
 		std::mutex m_adjudication_lock;
 		uint32_t m_sw_percent;

@@ -8,7 +8,6 @@
 #include "core/variant/Variant.h"
 #include "core/variant/VCFHeader.h"
 #include "core/variant/VCFFileReader.h"
-#include "core/graph/IGraph.h"
 
 
 namespace

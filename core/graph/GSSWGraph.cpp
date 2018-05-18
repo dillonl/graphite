@@ -13,8 +13,8 @@ namespace graphite
 
 	uint32_t GSSWGraph::s_next_id = 0;
 	std::mutex GSSWGraph::s_lock;
-	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, Region::SharedPtr regionPtr, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue, uint32_t numGraphCopies) :
-		IGraph(referencePtr, variantListPtr),
+	GSSWGraph::GSSWGraph(IReference::SharedPtr referencePtr, VariantList::SharedPtr variantListPtr, Region::SharedPtr regionPtr, int matchValue, int misMatchValue, int gapOpenValue, int gapExtensionValue) :
+		m_reference_ptr(referencePtr),
 		m_match(matchValue),
 		m_mismatch(misMatchValue),
 		m_gap_open(gapOpenValue),
@@ -22,14 +22,12 @@ namespace graphite
 		m_variant_list_ptr(variantListPtr),
 		m_region_ptr(regionPtr),
 		m_total_graph_length(0),
-		m_skipped(false),
-		m_num_graph_copies(numGraphCopies)
+		m_skipped(false)
 	{
 		gssw_sse2_disable();
 		this->m_nt_table = gssw_create_nt_table();
 		this->m_mat = gssw_create_score_matrix(this->m_match, this->m_mismatch);
 		this->m_graph_ptr = gssw_graph_create(30);
-		// this->m_graph_ptr = gssw_graph_create(4);
 	}
 
 	GSSWGraph::~GSSWGraph()
@@ -42,12 +40,10 @@ namespace graphite
 	void GSSWGraph::constructGraph()
 	{
 		int64_t referenceSize;
-	    // IVariant::SharedPtr variantPtr = nullptr;
 		std::vector< gssw_node* > altAndRefVertices;
 		position currentReferencePosition = this->m_region_ptr->getStartPosition();
 
 		std::vector< IVariant::SharedPtr > variantPtrs = this->m_variant_list_ptr->getAllVariantPtrs();
-		//while (this->m_variant_list_ptr->getNextVariant(variantPtr))
 		for (IVariant::SharedPtr variantPtr : variantPtrs)
 		{
 			if (variantPtr->shouldSkip())
@@ -79,7 +75,6 @@ namespace graphite
 			auto referenceAllelePtr = std::make_shared< Allele >(referenceSequenceString);
 			addReferenceVertex(currentReferencePosition, referenceAllelePtr, altAndRefVertices);
 		}
-		// generateGraphCopies();
 	}
 
 	gssw_node* GSSWGraph::addReferenceVertex(position position, IAllele::SharedPtr referenceAllelePtr, std::vector< gssw_node* > altAndRefVertices)
@@ -121,30 +116,10 @@ namespace graphite
 		return vertices;
 	}
 
-	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr, std::shared_ptr< GSSWGraphContainer > graphContainer)
+	GSSWGraph::GSSWGraphMappingPtr GSSWGraph::traceBackAlignment(IAlignment::SharedPtr alignmentPtr)
 	{
-		// gssw_graph* g = graphContainer->graph_ptr;
-		// int8_t* nt_table = graphContainer->nt_table;
-		// int8_t* mat = graphContainer->mat;
-
-		// DHL - readd this one
-		// gssw_graph_fill(g, alignmentPtr->getSequence(), nt_table, mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
 		gssw_graph_fill(this->m_graph_ptr, alignmentPtr->getSequence(), this->m_nt_table, this->m_mat, this->m_gap_open, this->m_gap_extension, 0, 0, 15, 2, true);
 		gssw_graph_mapping* graphMapping = gssw_graph_trace_back(this->m_graph_ptr,alignmentPtr->getSequence(),alignmentPtr->getLength(),this->m_nt_table,this->m_mat,m_gap_open,m_gap_extension,0,0);
-		// gssw_graph_mapping* graphMapping = gssw_graph_trace_back(g,alignmentPtr->getSequence(),alignmentPtr->getLength(),nt_table,mat,m_gap_open,m_gap_extension,0,0);
-
-		// {
-			// std::unique_lock< std::mutex > lock(m_traceback_lock);
-			// m_graph_container_ptrs_queue.emplace(graphContainer);
-		// }
-		// this->m_condition.notify_one();
-
-		// gssw_node_cigar* nc = graphMapping->cigar.elements;
-		// for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
-		// {
-			// DHL - readd this one
-			// nc->node->cigar = nc->cigar;
-		// }
 
 		auto graphMappingDeletor = [](gssw_graph_mapping* gm)
 		{
@@ -155,8 +130,7 @@ namespace graphite
 
 	void GSSWGraph::recordAlignmentVariants(std::shared_ptr< gssw_graph_mapping > graphMapping, IAlignment::SharedPtr alignmentPtr)
 	{
-		 // this->m_variant_list_ptr->rewind();
-		throw "you will need to implement IVariantList::rewind";
+		throw "you will need to implement VariantList::rewind";
 		auto alignmentReport = std::make_shared< AlignmentReport >(this->m_reference_ptr, this->m_variant_list_ptr, alignmentPtr, graphMapping, this->m_region_ptr->getStartPosition());
 		AlignmentReporter::Instance()->addAlignmentReport(alignmentReport);
 	}
@@ -185,66 +159,6 @@ namespace graphite
 		{
 			return nullptr;
 		}
-	}
-
-	std::shared_ptr< GSSWGraphContainer > GSSWGraph::getGraphContainer()
-	{
-		// std::unique_lock< std::mutex > lock(m_traceback_lock);
-		// this->m_condition.wait(lock, [this]{ return !this->m_graph_container_ptrs_queue.empty(); });
-		// auto graphContainerPtr = this->m_graph_container_ptrs_queue.front();
-		// this->m_graph_container_ptrs_queue.pop();
-		// return graphContainerPtr;
-		return nullptr;
-	}
-
-	/*
-	std::shared_ptr< GSSWGraphContainer > GSSWGraph::getGraphContainer()
-	{
-		std::unique_lock< std::mutex > lock(m_traceback_lock);
-		this->m_condition.wait(lock, [this]{ return !this->m_graph_container_ptrs_queue.empty(); });
-		auto graphContainerPtr = this->m_graph_container_ptrs_queue.front();
-		this->m_graph_container_ptrs_queue.pop();
-		return graphContainerPtr;
-	}
-	*/
-
-	void GSSWGraph::generateGraphCopies()
-	{
-		/*
-		for (uint32_t tc = 0; tc < m_num_graph_copies; ++tc)
-		{
-			int8_t* nt_table = gssw_create_nt_table();
-			int8_t* mat = mat = gssw_create_score_matrix(this->m_match, this->m_mismatch);
-			gssw_graph* g = gssw_graph_create(100);
-
-			std::unordered_map< int, gssw_node* > oldToNewNodeMap;
-			for (auto i = 0; i < m_graph_ptr->size; ++i)
-			{
-				auto node = gssw_node_copy(this->m_graph_ptr->nodes[i], nt_table);
-				gssw_graph_add_node(g, node);
-
-				oldToNewNodeMap.emplace(this->m_graph_ptr->nodes[i]->id, node);
-			}
-			for (auto i = 0; i < m_graph_ptr->size; ++i)
-			{
-				gssw_node* oldStartNode = this->m_graph_ptr->nodes[i];
-				for (auto nextIdx = 0; nextIdx < this->m_graph_ptr->nodes[i]->count_next; ++nextIdx)
-				{
-					gssw_node* oldEndNode = this->m_graph_ptr->nodes[i]->next[nextIdx];
-					if (oldToNewNodeMap.find(oldStartNode->id) == oldToNewNodeMap.end() || oldToNewNodeMap.find(oldEndNode->id) == oldToNewNodeMap.end()) { std::cout << "skipping!!!" << std::endl; }
-					gssw_node* newStartNode = oldToNewNodeMap[oldStartNode->id];
-					gssw_node* newEndNode = oldToNewNodeMap[oldEndNode->id];
-					gssw_nodes_add_edge(newStartNode, newEndNode);
-				}
-			}
-			auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(nt_table, mat, g, true);
-			m_graph_container_ptrs.emplace_back(graphContainerPtr);
-			m_graph_container_ptrs_queue.emplace(graphContainerPtr);
-		}
-		*/
-		auto graphContainerPtr = std::make_shared< GSSWGraphContainer >(this->m_nt_table, this->m_mat, this->m_graph_ptr, false);
-		m_graph_container_ptrs.emplace_back(graphContainerPtr);
-		m_graph_container_ptrs_queue.emplace(graphContainerPtr);
 	}
 
 	void getAllPaths(gssw_node* node, std::string currentPath, std::string nodeIDs, int numberOfSibs, std::vector< std::tuple< std::string, std::string > >& paths)

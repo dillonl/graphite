@@ -18,9 +18,7 @@ TEST(VCFFileReaderTests, ReadAllChrom20)
 	uint32_t totalCount = 181;
 	std::string path = TEST_VCF_FILE;
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
@@ -44,9 +42,7 @@ TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingAndEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
@@ -74,9 +70,7 @@ TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingNonExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
@@ -104,9 +98,7 @@ TEST(VCFFileReaderTests, ReadRegionAtStartNonExactBeginingExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
@@ -134,9 +126,7 @@ TEST(VCFFileReaderTests, ReadRegionAtStartExactBeginingExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 1;
@@ -162,9 +152,7 @@ TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -185,9 +173,7 @@ TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginningExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -208,9 +194,7 @@ TEST(VCFFileReaderTests, ReadRegionAtEndExactBeginingNonExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -232,9 +216,7 @@ TEST(VCFFileReaderTests, ReadRegionAtEndNonExactBeginingNonExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -256,9 +238,7 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -282,9 +262,7 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -308,9 +286,7 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleExactBeginingNonExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -334,9 +310,7 @@ TEST(VCFFileReaderTests, ReadRegionAtMiddleNonExactBeginingNonExactEnd)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	graphite::position tmpPosition;
@@ -357,9 +331,7 @@ TEST(VCFFileReaderTests, ReadRegionNonExistantChrom)
     std::string regionString = chrom;
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
@@ -382,9 +354,7 @@ TEST(VCFFileReaderTests, ReadRegionWithNoVariants)
     std::string regionString = chrom + ":" + std::to_string(startPosition) + "-" + std::to_string(endPosition);
 	auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 	auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-	variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-	variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-	variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+	variantManagerPtr->loadVariants();
 	auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 	graphite::IVariant::SharedPtr variantPtr;
 	uint32_t count = 0;
@@ -407,9 +377,7 @@ TEST(VCFFileReaderTests, ReadAllRegionsCheckCount)
 		std::string regionString = chrom;
 		auto regionPtr = std::make_shared< graphite::Region >(regionString, graphite::Region::BASED::ONE);
 		auto variantManagerPtr = std::make_shared< graphite::VCFManager >(path, regionPtr, nullptr, 3000);
-		variantManagerPtr->asyncLoadVCFs(); // begin the process of loading the vcfs asynchronously
-		variantManagerPtr->waitForVCFsToLoadAndProcess(); // wait for vcfs to load into memory
-		variantManagerPtr->releaseResources(); // releases the vcf file memory, we no longer need the file resources
+		variantManagerPtr->loadVariants();
 		auto variantListPtr = variantManagerPtr->getCompleteVariantList();
 		graphite::IVariant::SharedPtr variantPtr;
 		graphite::position tmpPosition;

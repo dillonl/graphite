@@ -4,7 +4,7 @@
 
 namespace graphite
 {
-	AlignmentReport::AlignmentReport(IReference::SharedPtr referencePtr, IVariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingPtr, position graphStartPosition) :
+	AlignmentReport::AlignmentReport(IReference::SharedPtr referencePtr, VariantList::SharedPtr variantListPtr, IAlignment::SharedPtr alignmentPtr, std::shared_ptr< gssw_graph_mapping > graphMappingPtr, position graphStartPosition) :
 		m_reference_ptr(referencePtr),
 		m_variant_list_ptr(variantListPtr),
 		m_alignment_ptr(alignmentPtr),

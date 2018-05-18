@@ -84,14 +84,6 @@ namespace graphite
 			}
 		}
 
-		/*
-		void addCommonPrefixInformation(uint32_t prefixSize, IAllele::SharedPtr allelePtrs) override
-		{
-		}
-		void addCommonSuffixInformation(uint32_t suffixSize, IAllele::SharedPtr allelePtrs) override
-		{
-		}
-		*/
 	private:
 		std::vector< IAllele::SharedPtr > m_allele_ptrs;
 	};

@@ -10,7 +10,6 @@
 #include "core/allele/EquivalentAllele.h"
 #include "core/variant/Variant.h"
 #include "core/variant/VCFFileReader.h"
-#include "core/graph/IGraph.h"
 
 namespace
 {
