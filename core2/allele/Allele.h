@@ -7,6 +7,7 @@
 
 namespace graphite
 {
+	class Node;
 	class Allele : private Noncopyable
 	{
 	public:
@@ -15,9 +16,12 @@ namespace graphite
 		~Allele();
 
 		std::string getSequence() { return this->m_sequence; }
+		void registerNodePtr(std::shared_ptr< Node > nodePtr);
+		std::shared_ptr< Node > getNodePtr();
 
 	private:
 		std::string m_sequence;
+		std::shared_ptr< Node > m_node_ptr;
 
 	};
 }

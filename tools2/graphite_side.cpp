@@ -25,7 +25,6 @@ int main(int argc, char** argv)
 	auto vcfPaths = params.getInVCFPaths();
 	auto outputDirectory = params.getOutputDirectory();
 	auto paramRegionPtr = params.getRegion();
-	auto threadCount = params.getThreadCount();
 	auto matchValue = params.getMatchValue();
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
@@ -54,15 +53,14 @@ int main(int argc, char** argv)
 	std::vector< graphite::VCFReader::SharedPtr > vcfReaderPtrs;
 	for (auto vcfPath : vcfPaths)
 	{
-		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr);
 		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, outputDirectory);
-		vcfReaderPtr->registerVCFWriter(vcfWriterPtr);
+		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr, vcfWriterPtr);
 		vcfReaderPtrs.emplace_back(vcfReaderPtr);
 	}
 
 	// create graph processor
 	// call process on processor
-	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs);
+	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue);
 	graphProcessorPtr->processVariants();
 
 	return 0;

@@ -18,7 +18,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< GraphProcessor > SharedPtr;
-		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs);
+		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue);
 		~GraphProcessor();
 
 		void processVariants();
@@ -30,6 +30,10 @@ namespace graphite
 		std::vector< BamReader::SharedPtr > m_bam_reader_ptrs;
 		std::vector< VCFReader::SharedPtr > m_vcf_reader_ptrs;
 		uint32_t m_flanking_padding;
+		uint32_t m_match_value;
+		uint32_t m_mismatch_value;
+		uint32_t m_gap_open_value;
+		uint32_t m_gap_extension_value;
 	};
 }
 

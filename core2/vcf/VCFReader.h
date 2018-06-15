@@ -19,10 +19,8 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< VCFReader > SharedPtr;
-		VCFReader(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, Region::SharedPtr regionPtr);
+		VCFReader(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, Region::SharedPtr regionPtr, VCFWriter::SharedPtr vcfWriter);
 		~VCFReader();
-
-		void registerVCFWriter(VCFWriter::SharedPtr vcfWriter);
 		bool getNextVariants(std::vector< Variant::SharedPtr >& variantPtrs, uint32_t spacing);
 
 	private:

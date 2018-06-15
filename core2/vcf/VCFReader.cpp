@@ -9,11 +9,12 @@
 
 namespace graphite
 {
-	VCFReader::VCFReader(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, Region::SharedPtr regionPtr) :
+	VCFReader::VCFReader(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, Region::SharedPtr regionPtr, VCFWriter::SharedPtr vcfWriter) :
 		m_filename(filename),
 		m_region_ptr(nullptr),
 		m_file_stream_ptr(nullptr),
-		m_preloaded_variant(nullptr)
+		m_preloaded_variant(nullptr),
+		m_vcf_writer(vcfWriter)
 	{
 		openFile(); // open the vcf
 		processHeader(bamSamplePtrs); // read the header
@@ -97,11 +98,6 @@ namespace graphite
 		return variantPtrs.size() > 0;
 	}
 
-	void VCFReader::registerVCFWriter(VCFWriter::SharedPtr vcfWriter)
-	{
-		this->m_vcf_writer = vcfWriter;
-	}
-
 	void VCFReader::getRegionsFromVCF(std::vector< Region::SharedPtr >& regionPtrs)
 	{
 
@@ -115,7 +111,7 @@ namespace graphite
 		std::string headerColumns = "";
 		while (getNextLine(line) && line.c_str()[0] == '#')
 		{
-			if (line.find("#CHROM") == 0)
+			if (line.find("#CHROM") == std::string::npos)
 			{
 				headerLines.emplace_back(line);
 			}
@@ -124,7 +120,7 @@ namespace graphite
 				headerColumns = line;
 			}
 		}
-		std::string columnLine = setSamplePtrs(line, bamSamplePtrs);
+		std::string columnLine = setSamplePtrs(headerColumns, bamSamplePtrs);
 		headerLines.emplace_back(columnLine);
 		this->m_vcf_writer->writeHeader(headerLines);
 		this->m_vcf_writer->setSamples(columnLine, this->m_sample_ptrs_map);
@@ -140,7 +136,7 @@ namespace graphite
 		std::vector< std::string > sampleNames;
 		std::vector< std::string > columns;
 		split(columnLine, '\t', columns);
-		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"};
+		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"};
 		for (auto column : columns)
 		{
 			std::string upperColumn;

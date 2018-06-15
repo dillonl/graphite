@@ -25,7 +25,7 @@ namespace graphite
 		bool formatWritten = false;
 		for (auto line : headerLines)
 		{
-			if ((line.find("##FORMAT") == !formatWritten) || (line.find("#CHROM") == !formatWritten))
+			if ((line.find("##FORMAT") != std::string::npos && !formatWritten) || (line.find("#CHROM") != std::string::npos && !formatWritten))
 			{
 				for (auto formatTuple : this->m_format)
 				{
@@ -57,7 +57,7 @@ namespace graphite
 	{
 		this->m_sample_ptrs.clear();
 		this->m_sample_ptrs_map.clear();
-		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"};
+		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"};
 		std::vector< std::string > columns;
 		split(columnHeaderLine, '\t', columns);
 		for (auto column : columns)

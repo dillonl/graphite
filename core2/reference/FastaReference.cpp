@@ -36,7 +36,7 @@ namespace graphite
 			endPosition += 1;
 		}
 		position length = endPosition - startPosition;
-		return std::string(this->m_reference_sequence.c_str()[startPosition], length);
+		return std::string(this->m_reference_sequence.c_str() + startPosition, length);
 	}
 
 	const char* FastaReference::getSequenceFromRegion(Region::SharedPtr regionPtr)

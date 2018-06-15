@@ -61,6 +61,10 @@ namespace graphite
 
 	uint32_t BamReader::getReadLength()
 	{
-		return 0;
+		BamTools::BamAlignment* bamtoolsAlignmentPtr = new BamTools::BamAlignment();
+		this->m_bam_reader->GetNextAlignment(*bamtoolsAlignmentPtr);
+		uint32_t readLength = bamtoolsAlignmentPtr->Length;
+		delete bamtoolsAlignmentPtr;
+		return readLength;
 	}
 }
