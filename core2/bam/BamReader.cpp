@@ -1,5 +1,7 @@
 #include "BamReader.h"
 
+#include <unordered_map>
+
 namespace graphite
 {
 	BamReader::BamReader(const std::string& filename) : m_bam_path(filename)
@@ -10,6 +12,7 @@ namespace graphite
 			throw "Unable to open bam file";
 		}
 		this->m_bam_reader->LocateIndex();
+		initializeSamplePtrs();
 	}
 
 	BamReader::~BamReader()
@@ -17,17 +20,20 @@ namespace graphite
 		this->m_bam_reader->Close();
 	}
 
-	std::vector< Sample::SharedPtr > BamReader::getSamplePtrs()
+	void BamReader::initializeSamplePtrs()
 	{
-		std::vector< Sample::SharedPtr > samplePtrs;
 		auto readGroups = this->m_bam_reader->GetHeader().ReadGroups;
 		auto iter = readGroups.Begin();
 		for (; iter != readGroups.End(); ++iter)
 		{
 			auto samplePtr = std::make_shared< Sample >((*iter).Sample, (*iter).ID, this->m_bam_path);
-			samplePtrs.emplace_back(samplePtr);
+			this->m_sample_ptrs.emplace(samplePtr);
 		}
-		return samplePtrs;
+	}
+
+	std::unordered_set< Sample::SharedPtr > BamReader::getSamplePtrs()
+	{
+		return this->m_sample_ptrs;
 	}
 
 	/*

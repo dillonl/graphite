@@ -34,7 +34,8 @@ namespace graphite
 		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
 		{
 			std::string sep = (!m_columns[samplePtrs[i]->getName()].empty()) ? ":" : "";
-			vcfLine += "\t" + m_columns[samplePtrs[i]->getName()] + sep + getGraphiteCounts(samplePtrs[i]->getName());
+			// vcfLine += "\t" + m_columns[samplePtrs[i]->getName()] + sep + getGraphiteCounts(samplePtrs[i]->getName());
+			vcfLine += "\t" + getGraphiteCounts(samplePtrs[i]->getName());
 		}
 
 		this->m_vcf_writer_ptr->writeLine(vcfLine);
@@ -83,6 +84,7 @@ namespace graphite
 		}
 	}
 
+	/*
 	std::vector< Node::SharedPtr > Variant::getReferenceNodePtrs()
 	{
 		std::vector< Node::SharedPtr > referenceNodePtrs;
@@ -115,6 +117,7 @@ namespace graphite
 		} while (!altNodePtrs.empty());
 		return referenceNodePtrs;
 	}
+	*/
 
 	std::string Variant::getGraphiteCounts(const std::string& sampleName)
 	{
@@ -123,26 +126,27 @@ namespace graphite
 		while (alleleCountType != AlleleCountType::EndEnum)
 		{
 			uint32_t totalCounter = 0;
-			auto referenceNodePtrs = getReferenceNodePtrs();
 			std::unordered_set< std::string > forwardScoreCount;
 			std::unordered_set< std::string > reverseScoreCount;
-			for (auto referenceNodePtr : referenceNodePtrs)
-			{
-				std::unordered_set< std::string > forwardScoreCountTmp = referenceNodePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
-				std::unordered_set< std::string > reverseScoreCountTmp = referenceNodePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
-				forwardScoreCount.insert(forwardScoreCountTmp.begin(), forwardScoreCountTmp.end());
-				reverseScoreCount.insert(reverseScoreCountTmp.begin(), reverseScoreCountTmp.end());
-			}
+			std::unordered_set< std::string > forwardScoreCountTmp = this->m_reference_allele_ptr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
+			std::unordered_set< std::string > reverseScoreCountTmp = this->m_reference_allele_ptr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
+			forwardScoreCount.insert(forwardScoreCountTmp.begin(), forwardScoreCountTmp.end());
+			reverseScoreCount.insert(reverseScoreCountTmp.begin(), reverseScoreCountTmp.end());
 			totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
 			std::string tmpCountsString = std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
-			for (auto i = 0; i < this->m_alternate_allele_ptrs.size(); ++i)
+			for (auto allelePtr : this->m_alternate_allele_ptrs)
 			{
 				tmpCountsString += ",";
-				auto allelePtr = this->m_alternate_allele_ptrs[i];
-				auto nodePtr = allelePtr->getNodePtr();
-				forwardScoreCount = nodePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
-				reverseScoreCount = nodePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
+				forwardScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
+				reverseScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
 				tmpCountsString += std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
+				/*
+				auto tmpCount123 = forwardScoreCount.size() + reverseScoreCount.size();
+				if (tmpCount123 > 0)
+				{
+					std::cout << "alt count found" << std::endl;
+				}
+				*/
 				totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
 			}
 			if (!graphiteCountsString.empty())

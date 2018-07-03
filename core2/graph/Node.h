@@ -4,6 +4,7 @@
 #include "core2/util/Noncopyable.hpp"
 #include "core2/util/Types.h"
 #include "core2/allele/Allele.h"
+#include "core2/sample/Sample.h"
 
 #include "api/BamAlignment.h"
 
@@ -42,8 +43,7 @@ namespace graphite
 
 		void addOverlappingAllelePtr(Allele::SharedPtr allelePtr);
 		std::unordered_set< Allele::SharedPtr > getOverlappingAllelePtrs();
-		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, bool isForwardStrand, int score);
-		std::unordered_set< std::string > getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount);
+		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score);
 
 		static Node::SharedPtr mergeNodes(Node::SharedPtr firstNodePtr, Node::SharedPtr secondNodePtr);
 
@@ -60,8 +60,6 @@ namespace graphite
 		std::unordered_set< Node::SharedPtr > m_out_nodes;
 		uint32_t m_identical_prefix_length; // the length of sequence that is identical to adjacent sequences
 		uint32_t m_identical_suffix_length; // the length of sequence that is identical to adjacent sequences
-		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > > m_forward_counts; // map keyed by read SampleName then they are indexed via the AlleleCountType enum value, then add readName to the the unordered set so we are properly counting the reads
-		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > > m_reverse_counts; // map keyed by read SampleName then they are indexed via the AlleleCountType enum value, then add readName to the the unordered set so we are properly counting the reads
 
 	};
 }

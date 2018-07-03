@@ -12,10 +12,11 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 namespace graphite
 {
-	typedef BamTools::BamAlignment BamAlignment;
+    typedef BamTools::BamAlignment BamAlignment;
 	class BamReader : private Noncopyable
 	{
 	public:
@@ -25,11 +26,13 @@ namespace graphite
 
 		void fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads);
 
-        std::vector< Sample::SharedPtr > getSamplePtrs();
+        std::unordered_set< Sample::SharedPtr > getSamplePtrs();
 		uint32_t getReadLength();
 
 	private:
+		void initializeSamplePtrs();
 		std::shared_ptr< BamTools::BamReader > m_bam_reader;
+		std::unordered_set< Sample::SharedPtr > m_sample_ptrs;
 		std::string m_bam_path;
 	};
 }

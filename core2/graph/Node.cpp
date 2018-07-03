@@ -146,39 +146,27 @@ namespace graphite
 		return nodePtr;
 	}
 
-	std::unordered_set< std::string > Node::getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount)
+	void Node::incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score)
 	{
-		if (forwardCount)
+		bool nodeSkipped = true;
+		for (auto allelePtr : this->m_overlapping_allele_ptr_map)
 		{
-			return this->m_forward_counts[sampleName][(size_t)alleleCountType];
+			nodeSkipped = false;
+			allelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, score);
+		}
+		/*
+		std::string nodeType = (this->getAlleleType() == Node::ALLELE_TYPE::REF) ? "REF" : "ALT";
+		if (nodeSkipped)
+		{
+			// std::cout << "node skipped: " << this->m_id << std::endl;
+			std::cout << "node skipped: " << nodeType << std::endl;
 		}
 		else
 		{
-			return this->m_reverse_counts[sampleName][(size_t)alleleCountType];
+			// std::cout << nodeType << " " << score << " " << AlleleCountTypeToString(scoreToAlleleCountType(score)) << std::endl;
+			std::cout << "node not skipped: " << nodeType << std::endl;
 		}
-	}
-
-	void Node::incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, bool isForwardStrand, int score)
-	{
-		std::string sampleName;
-		std::string readName = bamAlignmentPtr->Name;
-		bamAlignmentPtr->GetTag("RG", sampleName);
-		size_t act = (size_t)scoreToAlleleCountType(score);
-		if (score < 0)
-		{
-			act = (size_t)AlleleCountType::Ambiguous;
-		}
-		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > >* counts = (isForwardStrand) ? &m_forward_counts : &m_reverse_counts;
-		auto iter = counts->find(sampleName);
-		if (iter != counts->end())
-		{
-			auto readCounts = iter->second;
-			if (readCounts.size() == 0)
-			{
-				readCounts.resize((uint32_t)AlleleCountType::EndEnum);
-			}
-			readCounts[act].emplace(readName); // we are using readname so reads aren't counted more than once when we do the traceback and trackback through more than one reference node
-		}
+		*/
 	}
 
 

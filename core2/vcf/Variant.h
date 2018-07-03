@@ -6,7 +6,7 @@
 #include "core2/util/Types.h"
 #include "core2/sample/Sample.h"
 #include "core2/allele/Allele.h"
-#include "core2/graph/Node.h"
+// #include "core2/graph/Node.h"
 
 #include <vector>
 #include <memory>
@@ -31,7 +31,7 @@ namespace graphite
 		void parseColumns();
 		void setAlleles();
 		std::string getGraphiteCounts(const std::string& sampleName);
-		std::vector< Node::SharedPtr > getReferenceNodePtrs();
+		/* std::vector< Node::SharedPtr > getReferenceNodePtrs(); */
 
 		VCFWriter::SharedPtr m_vcf_writer_ptr;
 		std::unordered_map< std::string, std::string > m_columns;

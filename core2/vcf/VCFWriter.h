@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <vector>
 #include <tuple>
+#include <iostream>
+#include <fstream>
 
 namespace graphite
 {
@@ -25,6 +27,7 @@ namespace graphite
 		std::vector< Sample::SharedPtr > getSamplePtrs();
 
 	private:
+		std::ofstream m_out_file;
 		std::vector< Sample::SharedPtr > m_sample_ptrs;
 		std::unordered_map< std::string, Sample::SharedPtr > m_sample_ptrs_map;
         std::vector< std::tuple< std::string, std::string > > m_format = {std::make_tuple("ID=DP_NFP", "##FORMAT=<ID=DP_NFP,Number=1,Type=Integer,Description=\"Read count at 95 percent Smith Waterman score or above\">"),

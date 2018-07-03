@@ -1,5 +1,6 @@
 #include "VCFWriter.h"
 #include "core2/util/Utility.h"
+#include "core2/util/Types.h"
 
 #include <algorithm>
 
@@ -7,14 +8,19 @@ namespace graphite
 {
 	VCFWriter::VCFWriter(const std::string& filename, const std::string& outputDirectory)
 	{
+		std::string base_filename = filename.substr(filename.find_last_of("/\\") + 1);
+		std::string path(outputDirectory + "/" + base_filename);
+		this->m_out_file.open(path);
 	}
 
 	VCFWriter::~VCFWriter()
 	{
+		this->m_out_file.close();
 	}
 
 	void VCFWriter::writeLine(const std::string& line)
 	{
+		this->m_out_file << line.c_str() << std::endl;
 	}
 
 	void VCFWriter::writeHeader(const std::vector< std::string >& headerLines)
@@ -51,20 +57,30 @@ namespace graphite
 		{
 			writeLine(line);
 		}
+		std::string headerLine = "";
+		for (auto column : STANDARD_VCF_COLUMN_NAMES)
+		{
+			headerLine += column + "\t";
+		}
+		for (uint32_t i = 0; i < this->m_sample_ptrs.size(); ++i)
+		{
+			headerLine += (i == 0) ? "" : "\t";
+			headerLine += this->m_sample_ptrs[i]->getName();
+		}
+		writeLine(headerLine);
 	}
 
 	void VCFWriter::setSamples(const std::string& columnHeaderLine, std::unordered_map< std::string, Sample::SharedPtr >& samplePtrsMap)
 	{
 		this->m_sample_ptrs.clear();
 		this->m_sample_ptrs_map.clear();
-		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"};
 		std::vector< std::string > columns;
 		split(columnHeaderLine, '\t', columns);
 		for (auto column : columns)
 		{
 			std::string upperColumn;
 			std::transform(column.begin(), column.end(), std::back_inserter(upperColumn), ::toupper);
-			if (std::find(standardColumnNames.begin(), standardColumnNames.end(), upperColumn) == standardColumnNames.end())
+			if (std::find(STANDARD_VCF_COLUMN_NAMES.begin(), STANDARD_VCF_COLUMN_NAMES.end(), upperColumn) == STANDARD_VCF_COLUMN_NAMES.end())
 			{
 				auto iter = samplePtrsMap.find(column);
 				if (iter == samplePtrsMap.end())

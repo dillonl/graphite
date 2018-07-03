@@ -1,6 +1,7 @@
 #ifndef GRAPHITE_VCFREADER_H
 #define GRAPHITE_VCFREADER_H
 
+#include "core2/util/Types.h"
 #include "core2/util/Noncopyable.hpp"
 #include "core2/util/gzstream.h"
 #include "core2/region/Region.h"
@@ -25,7 +26,6 @@ namespace graphite
 
 	private:
 		void openFile();
-		void getRegionsFromVCF(std::vector< Region::SharedPtr >& regionPtrs);
 		void processHeader(std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs);
 		Variant::SharedPtr getNextVariant();
 		void setRegion(Region::SharedPtr regionPtr);

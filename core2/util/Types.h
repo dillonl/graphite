@@ -10,7 +10,7 @@ namespace graphite
 {
 	typedef uint32_t position;
 	static position MAX_POSITION = std::numeric_limits< position >::max();
-	static std::vector< std::string > STANDARD_VCF_COLUMN_NAMES = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"};
+	static std::vector< std::string > STANDARD_VCF_COLUMN_NAMES = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"};
 	enum class AlleleCountType { NinteyFivePercent = 0, NinteyPercent = 1, EightyPercent = 2, SeventyPercent = 3, LowPercent = 4, Ambiguous = 5, EndEnum = 6 };
 	static const std::vector< AlleleCountType > AllAlleleCountTypes = { AlleleCountType::NinteyFivePercent, AlleleCountType::NinteyPercent, AlleleCountType::EightyPercent, AlleleCountType::SeventyPercent, AlleleCountType::LowPercent, AlleleCountType::Ambiguous };
 	struct AlleleCountTypeHash

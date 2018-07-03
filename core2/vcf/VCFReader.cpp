@@ -79,14 +79,18 @@ namespace graphite
 		std::string nextLine;
 		while (this->m_preloaded_variant != nullptr)
 		{
-			// if we are outside the region then break out
-			if (this->m_region_ptr != nullptr &&
+			bool inTheZone = !(this->m_region_ptr != nullptr &&
 				!(this->m_region_ptr->getReferenceID() == this->m_preloaded_variant->getChromosome() &&
 				  this->m_region_ptr->getStartPosition() <= this->m_preloaded_variant->getPosition() &&
-				  this->m_preloaded_variant->getPosition() <= this->m_region_ptr->getEndPosition()))
+				  this->m_preloaded_variant->getPosition() <= this->m_region_ptr->getEndPosition()));
+
+			bool isNextVariantCloseEnough = (variantPtrs.size() == 0) ? true : ((this->m_preloaded_variant->getChromosome() ==  variantPtrs[variantPtrs.size()-1]->getChromosome()) && (this->m_preloaded_variant->getPosition() -  variantPtrs[variantPtrs.size()-1]->getPosition()) < spacing); // if we are outside the region then break out
+
+			if (!inTheZone || !isNextVariantCloseEnough)
 			{
 				break;
 			}
+
 			variantPtrs.emplace_back(this->m_preloaded_variant);
 			if (!getNextLine(nextLine)) // if we are at the eof then set the variant to nullptr
 			{
@@ -96,11 +100,6 @@ namespace graphite
 			this->m_preloaded_variant = std::make_shared< Variant >(nextLine, this->m_vcf_writer);
 		}
 		return variantPtrs.size() > 0;
-	}
-
-	void VCFReader::getRegionsFromVCF(std::vector< Region::SharedPtr >& regionPtrs)
-	{
-
 	}
 
 	void VCFReader::processHeader(std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs)
@@ -122,8 +121,8 @@ namespace graphite
 		}
 		std::string columnLine = setSamplePtrs(headerColumns, bamSamplePtrs);
 		headerLines.emplace_back(columnLine);
-		this->m_vcf_writer->writeHeader(headerLines);
 		this->m_vcf_writer->setSamples(columnLine, this->m_sample_ptrs_map);
+		this->m_vcf_writer->writeHeader(headerLines);
 		if (line.size() > 0)
 		{
 			this->m_preloaded_variant = std::make_shared< Variant >(line, m_vcf_writer);
@@ -136,12 +135,11 @@ namespace graphite
 		std::vector< std::string > sampleNames;
 		std::vector< std::string > columns;
 		split(columnLine, '\t', columns);
-		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"};
 		for (auto column : columns)
 		{
 			std::string upperColumn;
 			std::transform(column.begin(), column.end(), std::back_inserter(upperColumn), ::toupper);
-			if (std::find(standardColumnNames.begin(), standardColumnNames.end(), upperColumn) == standardColumnNames.end())
+			if (std::find(STANDARD_VCF_COLUMN_NAMES.begin(), STANDARD_VCF_COLUMN_NAMES.end(), upperColumn) == STANDARD_VCF_COLUMN_NAMES.end())
 			{
 				Sample::SharedPtr samplePtr = std::make_shared< Sample >(column, "", "");
 				for (auto bamSamplePtr : bamSamplePtrs)
@@ -170,69 +168,4 @@ namespace graphite
 		return newLine;
 	}
 
-	/*
-	std::string VCFWriter::getVCFColumns(const std::string& line, std::vector< Sample::SharedPtr >& samplePtrs)
-	{
-		std::string newLine = "";
-		std::vector< std::string > sampleNames;
-		std::vector< std::string > columns;
-		split(line, '\t', columns);
-		std::vector< std::string > standardColumnNames = {"#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"};
-		for (auto column : columns)
-		{
-			std::string upperColumn;
-			std::transform(column.begin(), column.end(), std::back_inserter(upperColumn), ::toupper);
-			if (std::find(standardColumnNames.begin(), standardColumnNames.end(), upperColumn) == standardColumnNames.end())
-			{
-				sampleNames.emplace_back(column);
-			}
-			newLine += column + "\t";
-		}
-
-		std::vector< Sample::SharedPtr > newSamplePtrs;
-		for (auto sampleName : sampleNames)
-		{
-			for (auto samplePtr : samplePtrs)
-			{
-				if (sampleName == samplePtr->getName())
-				{
-					newSamplePtrs.emplace_back(samplePtr);
-				}
-				else
-				{
-					auto tmpSamplePtr = std::make_shared< Sample >(sampleName, "", "");
-					newSamplePtrs.emplace_back(tmpSamplePtr);
-				}
-			}
-		}
-		newLine.pop_back();
-		setSamplePtrs(newSamplePtrs);
-	}
-
-	void VCFWriter::setSamplePtrs(std::vector< Sample::SharedPtr >& samplePtrs)
-	{
-		this->m_sample_ptrs_map.clear();
-		for (auto samplePtr : samplePtrs)
-		{
-			if (this->m_sample_ptrs_map.find(samplePtr->getName()) != this->m_sample_ptrs_map.end())
-			{
-				std::cout << "duplicate sample name: " << samplePtr->getName() << std::endl;
-			}
-			this->m_sample_ptrs_map.emplace(samplePtr->getName(), samplePtr);
-		}
-	}
-
-	Sample::SharedPtr VCFWriter::getSamplePtr(const std::string& sampleName)
-	{
-		auto iter = this->m_sample_ptrs_map.find(sampleName);
-		if (iter != this->m_sample_ptrs_map.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-	*/
 }

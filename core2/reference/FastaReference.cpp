@@ -32,8 +32,8 @@ namespace graphite
 		position endPosition = regionPtr->getEndPosition();
 		if (regionPtr->getBased() == Region::BASED::ONE)
 		{
-			startPosition += 1;
-			endPosition += 1;
+			startPosition -= 1;
+			endPosition -= 1;
 		}
 		position length = endPosition - startPosition;
 		return std::string(this->m_reference_sequence.c_str() + startPosition, length);
@@ -45,7 +45,7 @@ namespace graphite
 		position startPosition = regionPtr->getStartPosition();
 		if (regionPtr->getBased() == Region::BASED::ONE)
 		{
-			startPosition += 1;
+			startPosition -= 1;
 		}
 		return &this->m_reference_sequence.c_str()[startPosition];
 	}

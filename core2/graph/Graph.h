@@ -25,16 +25,18 @@ namespace graphite
 		~Graph();
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
-		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, uint32_t  m_match_value, uint32_t m_mismatch_value, uint32_t m_gap_open_value, uint32_t m_gap_extension_value);
+		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  m_match_value, uint32_t m_mismatch_value, uint32_t m_gap_open_value, uint32_t m_gap_extension_value);
+		std::vector< std::tuple< std::string, std::string > > generateAllPaths(gssw_graph* graph);
 
 	private:
+		void setRegionPtrs();
 		void generateGraph();
 		void getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr);
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
 		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
-		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue);
+		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue);
 
 		FastaReference::SharedPtr m_fasta_reference_ptr;
 		std::vector< Variant::SharedPtr > m_variant_ptrs;
