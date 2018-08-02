@@ -2,6 +2,7 @@
 #define GRAPHITE_GRAPH_H
 
 #include "core2/util/Noncopyable.hpp"
+#include "core2/util/GraphPrinter.h"
 #include "core2/region/Region.h"
 #include "core2/reference/FastaReference.h"
 #include "core2/vcf/Variant.h"
@@ -21,12 +22,12 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< Graph > SharedPtr;
-		Graph(FastaReference::SharedPtr fastaReferencePtr, std::vector< Variant::SharedPtr > variantPtrs, uint32_t graphSpacing);
+		Graph(FastaReference::SharedPtr fastaReferencePtr, std::vector< Variant::SharedPtr > variantPtrs, uint32_t graphSpacing, bool printGraph);
 		~Graph();
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
 		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  m_match_value, uint32_t m_mismatch_value, uint32_t m_gap_open_value, uint32_t m_gap_extension_value);
-		std::vector< std::tuple< std::string, std::string > > generateAllPaths(gssw_graph* graph);
+        std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 
 	private:
 		void setRegionPtrs();
@@ -45,6 +46,8 @@ namespace graphite
 		uint32_t m_graph_spacing;
 		Node::SharedPtr m_first_node;
 		uint32_t m_score_threshold;
+		std::unordered_set< Node::SharedPtr > m_all_created_nodes;
+        GraphPrinter::SharedPtr m_graph_printer_ptr;
 	};
 }
 

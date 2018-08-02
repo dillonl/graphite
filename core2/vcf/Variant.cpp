@@ -28,14 +28,19 @@ namespace graphite
 			{
 				vcfLine += "\t";
 			}
-			vcfLine += m_columns[STANDARD_VCF_COLUMN_NAMES[i]];
+			std::string formatStr = "";
+			if (STANDARD_VCF_COLUMN_NAMES[i].compare("FORMAT") == 0)
+			{
+				formatStr = ":DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP4_AP";
+			}
+			vcfLine += m_columns[STANDARD_VCF_COLUMN_NAMES[i]] + formatStr;
 		}
 		auto samplePtrs = this->m_vcf_writer_ptr->getSamplePtrs();
 		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
 		{
 			std::string sep = (!m_columns[samplePtrs[i]->getName()].empty()) ? ":" : "";
-			// vcfLine += "\t" + m_columns[samplePtrs[i]->getName()] + sep + getGraphiteCounts(samplePtrs[i]->getName());
-			vcfLine += "\t" + getGraphiteCounts(samplePtrs[i]->getName());
+			vcfLine += "\t" + m_columns[samplePtrs[i]->getName()] + sep + getGraphiteCounts(samplePtrs[i]->getName());
+			// vcfLine += "\t" + getGraphiteCounts(samplePtrs[i]->getName());
 		}
 
 		this->m_vcf_writer_ptr->writeLine(vcfLine);
@@ -60,7 +65,8 @@ namespace graphite
 		this->m_position = stoi(m_columns["POS"]);
 		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
 		{
-			m_columns[samplePtrs[i]->getName()] = columns[i];
+			size_t columnIdx = STANDARD_VCF_COLUMN_NAMES.size() + i;
+			m_columns[samplePtrs[i]->getName()] = columns[columnIdx];
 		}
 	}
 

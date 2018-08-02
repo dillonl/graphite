@@ -169,5 +169,13 @@ namespace graphite
 		*/
 	}
 
+	void Node::clearInAndOutNodes()
+	{
+		this->m_in_ref_node = nullptr;
+		this->m_out_ref_node = nullptr;
+		this->m_out_nodes.clear();
+		this->m_in_nodes.clear();
+	}
+
 
 }

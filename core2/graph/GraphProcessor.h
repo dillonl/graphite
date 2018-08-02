@@ -2,11 +2,12 @@
 #define GRAPHITE_GRAPHPROCESSOR_H
 
 #include "core2/util/Noncopyable.hpp"
-#include "core2/util/ThreadPool.hpp"
 #include "core2/region/Region.h"
 #include "core2/reference/FastaReference.h"
 #include "core2/vcf/VCFReader.h"
 #include "core2/bam/BamReader.h"
+#include "core2/util/ThreadPool.hpp"
+#include "core2/util/GraphPrinter.h"
 #include "Graph.h"
 
 #include "api/BamAlignment.h"
@@ -28,7 +29,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< GraphProcessor > SharedPtr;
-		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue);
+		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph);
 		~GraphProcessor();
 
 		void processVariants();
@@ -46,8 +47,8 @@ namespace graphite
 		uint32_t m_mismatch_value;
 		uint32_t m_gap_open_value;
 		uint32_t m_gap_extension_value;
-
-		ThreadPool m_threadpool;
+		ThreadPool m_thread_pool;
+		bool m_print_graphs;
 	};
 }
 

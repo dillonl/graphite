@@ -17,6 +17,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 set(GRAPHITE_UTIL_SOURCES
+  util/GraphPrinter.cpp
   util/Params.cpp
   util/Utility.cpp
   util/gzstream.cpp

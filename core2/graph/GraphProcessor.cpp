@@ -8,7 +8,7 @@
 
 namespace graphite
 {
-	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue) :
+	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph) :
 		m_fasta_reference_ptr(fastaReferencePtr),
 		m_bam_reader_ptrs(bamReaderPtrs),
 		m_vcf_reader_ptrs(vcfReaderPtrs),
@@ -17,7 +17,8 @@ namespace graphite
 		m_mismatch_value(mismatchValue),
 		m_gap_open_value(gapOpenValue),
 		m_gap_extension_value(gapExtensionValue),
-		m_threadpool(std::thread::hardware_concurrency() * 2)
+		m_thread_pool(std::thread::hardware_concurrency()),
+		m_print_graphs(printGraph)
 	{
 		for (auto bamReaderPtr : bamReaderPtrs)
 		{
@@ -50,9 +51,10 @@ namespace graphite
 			if (variantPtrs.size() > 0)
 			{
 				adjudicateVariants(variantPtrs, graphSpacing);
-				for (auto variantPtr : variantPtrs)
+				// for (auto variantPtr : variantPtrs)
+				for (int i = 0; i < variantPtrs.size(); ++i)
 				{
-					// std::cout << "writing variant" << std::endl;
+					auto variantPtr = variantPtrs[i];
 					variantPtr->writeVariant();
 				}
 			}
@@ -66,30 +68,33 @@ namespace graphite
 	void GraphProcessor::adjudicateVariants(std::vector< Variant::SharedPtr >& variantPtrs, uint32_t graphSpacing)
 	{
 		// generate graph
-		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing);
+		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments
 		std::vector< std::shared_ptr< BamAlignment > > bamAlignmentPtrs;
+
 		getAlignmentsInRegion(bamAlignmentPtrs, graphRegionPtrs, true);
 		for (auto bamAlignmentPtr : bamAlignmentPtrs)
 		{
-
 			std::string sampleName;
 			bamAlignmentPtr->GetTag("RG", sampleName);
 			auto iter = this->m_bam_sample_ptrs.find(sampleName);
 			if (iter != this->m_bam_sample_ptrs.end())
 			{
-				graphPtr->adjudicateAlignment(bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
+				// graphPtr->adjudicateAlignment(bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
+				auto funct = std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
+				m_thread_pool.enqueue(funct);
 			}
 		}
+		m_thread_pool.join();
 		bamAlignmentPtrs.clear();
 	}
 
 	void GraphProcessor::adjudicateVariants2(std::vector< Variant::SharedPtr >& variantPtrs, uint32_t graphSpacing)
 	{
 		// generate graph
-		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing);
+		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments
@@ -115,7 +120,7 @@ namespace graphite
 			auto iter = this->m_bam_sample_ptrs.find(sampleName);
 			if (iter != this->m_bam_sample_ptrs.end())
 			{
-				futures.emplace_back(this->m_threadpool.enqueue(std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value)));
+				// futures.emplace_back(this->m_threadpool.enqueue(std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value)));
 			}
 		}
 		for (auto& f : futures)

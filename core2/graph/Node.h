@@ -47,6 +47,8 @@ namespace graphite
 
 		static Node::SharedPtr mergeNodes(Node::SharedPtr firstNodePtr, Node::SharedPtr secondNodePtr);
 
+		void clearInAndOutNodes();
+
 	private:
 		static uint32_t s_id; // the static id counter for all nodes
 		uint32_t m_id;

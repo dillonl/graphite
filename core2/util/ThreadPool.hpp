@@ -22,6 +22,8 @@ namespace graphite
 		auto enqueue(F&& f, Args&&... args)
 			-> std::future<typename std::result_of<F(Args...)>::type>;
 		~ThreadPool();
+
+		void join();
 	private:
 		// need to keep track of threads so we can join them
 		std::vector< std::thread > workers;
@@ -32,11 +34,12 @@ namespace graphite
 		std::mutex queue_mutex;
 		std::condition_variable condition;
 		bool stop;
+		std::atomic< int > m_running_processes;
 	};
 
 // the constructor just launches some amount of workers
 	inline ThreadPool::ThreadPool(size_t threads)
-		:   stop(false)
+		:   stop(false), m_running_processes(0)
 	{
 		for(size_t i = 0;i<threads;++i)
 			workers.emplace_back(
@@ -55,8 +58,9 @@ namespace graphite
 							task = std::move(this->tasks.front());
 							this->tasks.pop();
 						}
-
+						m_running_processes += 1;
 						task();
+						m_running_processes -= 1;
 					}
 				}
 				);
@@ -71,7 +75,30 @@ namespace graphite
 		}
 		condition.notify_all();
 		for(std::thread &worker: workers)
+		{
 			worker.join();
+		}
+		workers.clear();
+	}
+
+	inline void ThreadPool::join()
+	{
+		while (m_running_processes > 0)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		/*
+		{
+			std::unique_lock<std::mutex> lock(queue_mutex);
+			stop = true;
+		}
+		condition.notify_all();
+		for(std::thread &worker: workers)
+		{
+			worker.join();
+		}
+		*/
+		// workers.clear();
 	}
 
 // add new work item to the pool

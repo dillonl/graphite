@@ -44,11 +44,13 @@ namespace graphite
 		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
 		BamTools::BamAlignment* bamtoolsAlignmentPtr = new BamTools::BamAlignment();
+		position startPosition = regionPtr->getStartPosition();
+		position endPosition = regionPtr->getEndPosition();
 		while (this->m_bam_reader->GetNextAlignment(*bamtoolsAlignmentPtr))
 		{
-
+			bool isInRegion = (startPosition < bamtoolsAlignmentPtr->Position && (bamtoolsAlignmentPtr->Position + bamtoolsAlignmentPtr->Length) < endPosition);
 			if ((bamtoolsAlignmentPtr->IsDuplicate() && !includeDuplicateReads) ||
-				(unmappedOnly && bamtoolsAlignmentPtr->IsMapped()))
+				(unmappedOnly && bamtoolsAlignmentPtr->IsMapped()) || !isInRegion)
 			{
 				delete bamtoolsAlignmentPtr; // delete the ptr if the ptr isn't added to the alignmentPtrs
 			}
