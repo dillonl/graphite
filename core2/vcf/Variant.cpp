@@ -51,7 +51,7 @@ namespace graphite
 		auto samplePtrs = this->m_vcf_writer_ptr->getSamplePtrs();
 		std::vector< std::string > columns;
 		split(this->m_variant_line, '\t', columns);
-		if (columns.size() != (STANDARD_VCF_COLUMN_NAMES.size() + samplePtrs.size()))
+		if (columns.size() > (STANDARD_VCF_COLUMN_NAMES.size() + samplePtrs.size()))
 		{
 			std::cout << "Invalid VCF at line: " << this->m_variant_line << std::endl;
 			exit(EXIT_FAILURE);
@@ -65,6 +65,7 @@ namespace graphite
 		this->m_position = stoi(m_columns["POS"]);
 		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
 		{
+			if (m_columns.find(samplePtrs[i]->getName()) == m_columns.end()) { continue; }
 			size_t columnIdx = STANDARD_VCF_COLUMN_NAMES.size() + i;
 			m_columns[samplePtrs[i]->getName()] = columns[columnIdx];
 		}

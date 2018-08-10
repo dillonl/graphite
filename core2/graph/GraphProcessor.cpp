@@ -1,4 +1,5 @@
 #include "GraphProcessor.h"
+#include "ReferenceGraph.h"
 
 #include <unordered_set>
 #include <thread>
@@ -69,6 +70,7 @@ namespace graphite
 	{
 		// generate graph
 		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
+		auto refGraphPtr = std::make_shared< ReferenceGraph >(this->m_fasta_reference_ptr, graphPtr->getGraphRegion());
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments
@@ -82,8 +84,19 @@ namespace graphite
 			auto iter = this->m_bam_sample_ptrs.find(sampleName);
 			if (iter != this->m_bam_sample_ptrs.end())
 			{
+				Sample::SharedPtr samplePtr = iter->second;
+				uint32_t matchValue = m_match_value;
+				uint32_t mismatchValue = m_mismatch_value;
+				uint32_t gapOpenValue = m_gap_open_value;
+				uint32_t gapExtensionValue = m_gap_extension_value;
+				auto funct = [graphPtr, refGraphPtr, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+				{
+					float referenceSWScore = refGraphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
+					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceSWScore);
+				};
+
 				// graphPtr->adjudicateAlignment(bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
-				auto funct = std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
+				// auto funct = std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value, false, 0);
 				m_thread_pool.enqueue(funct);
 			}
 		}

@@ -22,13 +22,14 @@ namespace graphite
 		GraphPrinter(Graph* graphPtr);
 		~GraphPrinter();
 
-		void registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr);
+		void registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore);
 		void printGraph();
 
 	private:
 		struct MappingContainer
 		{
 			/* std::shared_ptr< BamTools::BamAlignment > m_bam_alignment_ptr; */
+			uint32_t m_ssw_score;
 			std::string m_sequence;
 			std::string m_read_name;
 			std::string m_cigar_str;

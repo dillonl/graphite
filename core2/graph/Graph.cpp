@@ -281,7 +281,7 @@ namespace graphite
 		}
 	}
 
-	void Graph::adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue)
+	void Graph::adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
 		gssw_sse2_disable();
 		int8_t* nt_table = gssw_create_nt_table();
@@ -326,7 +326,7 @@ namespace graphite
 
 		gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
 		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-		processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
+		processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well
@@ -336,8 +336,17 @@ namespace graphite
 		free(mat);
 	}
 
-	void Graph::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue)
+	void Graph::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
+		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		{
+			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
+			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
+			{
+				return;
+			}
+			this->m_aligned_read_names.emplace(alignmentName);
+		}
 		std::vector< std::tuple< Node*, uint32_t > > nodePtrScoreTuples;
 		uint32_t prefixMatch = 0;
 		uint32_t suffixMatch = 0;
@@ -347,11 +356,13 @@ namespace graphite
 		uint32_t softclipLength = 0;
 		std::string fullCigarString = "";
 		uint32_t softclipCount = 0;
+		bool hasAlternate = false;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			std::string cigarString = "";
 			gssw_node* gsswNode = graphMapping->cigar.elements[i].node;
 			Node* nodePtr = (Node*)gsswNode->data;
+			hasAlternate |= (nodePtr->getAlleleType() == Node::ALLELE_TYPE::ALT);
 			int32_t score = 0;
 			uint32_t length = 0;
 			uint32_t tmpSofclipLength = 0;
@@ -402,12 +413,11 @@ namespace graphite
 		}
 
 		float totalScorePercent = ((float)(totalScore))/((float)(bamAlignmentPtr->Length - softclipLength)) * 100;
-
 		for (auto nodePtrScoreTuple : nodePtrScoreTuples)
 		{
 			Node* nodePtr = std::get< 0 >(nodePtrScoreTuple);
 			uint32_t nodeScore = std::get< 1 >(nodePtrScoreTuple);
-			if ((nodePtr->getIdenticalPrefixLength() <= prefixMatch || nodePtr->getIdenticalSuffixLength() <= suffixMatch) && false) // disable this for now
+			if (totalScorePercent == referenceTotalScorePercent && hasAlternate)
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, -1);
 			}
@@ -420,7 +430,7 @@ namespace graphite
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
 				if (m_graph_printer_ptr != nullptr)
 				{
-					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr);
+					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr, totalScorePercent);
 				}
 			}
 		}
@@ -450,5 +460,30 @@ namespace graphite
 		std::vector< Node::SharedPtr > path;
 		getAllPaths(firstNode, path, 0, paths);
 		return paths;
+	}
+
+	Region::SharedPtr Graph::getGraphRegion()
+	{
+		Region::BASED based;
+		int startPosition = -1;
+		int endPosition = -1;
+		std::string referenceID = "";
+		for (auto regionPtr : m_graph_regions)
+		{
+			if (referenceID.size() == 0)
+			{
+				referenceID = regionPtr->getReferenceID();
+				based = regionPtr->getBased();
+			}
+			if (startPosition < 0 || startPosition > regionPtr->getStartPosition())
+			{
+				startPosition = regionPtr->getStartPosition();
+			}
+			if (endPosition < 0 || endPosition > regionPtr->getEndPosition())
+			{
+				endPosition = regionPtr->getEndPosition();
+			}
+		}
+		return std::make_shared< Region >(referenceID, startPosition, endPosition, based);
 	}
 }

@@ -25,7 +25,7 @@ namespace graphite
 	{
 	}
 
-	void GraphPrinter::registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr)
+	void GraphPrinter::registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore)
 	{
 		static std::mutex l;
 		l.lock();
@@ -69,6 +69,7 @@ namespace graphite
 				// cigar.emplace_back(std::make_tuple< uint32_t, char >(nc->cigar->elements[j].length, nc->cigar->elements[j].type));
 			}
 		}
+		mappingContainerPtr->m_ssw_score = sswScore;
 		mappingContainerPtr->m_cigar_str += std::to_string(prevLength) + std::string(1, prevType);
 		std::shared_ptr< std::unordered_set< uint32_t > > pathKey = getKey(nodeIDs);
 		uint32_t startPosition = getGraphOffset(firstNodePtr);
@@ -82,6 +83,7 @@ namespace graphite
 
 		mappingContainerPtr->m_sequence = bamAlignmentPtr->QueryBases;
 		mappingContainerPtr->m_read_name = bamAlignmentPtr->Name;
+		std::cout << bamAlignmentPtr->Name << std::endl;
 		if (softclipOffset >= 0)
 		{
 
@@ -147,7 +149,6 @@ namespace graphite
 	// create print all paths function that prints all paths with the metadata of each alignment
 	void GraphPrinter::printGraph()
 	{
-
 		for (auto iter : m_graph_path_node_ids)
 		{
 			std::vector< std::string > output;
@@ -174,29 +175,34 @@ namespace graphite
 				graphPath += data;
 				graphNodeID += (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF) ? "REF|" : "ALT|";
 			}
-			output.emplace_back(graphNodeID);
-			output.emplace_back(graphPath);
+			std::cout << graphNodeID << std::endl;
+			std::cout << graphPath << std::endl;
 			std::vector< std::shared_ptr< MappingContainer > > graphMappingContainerPtrs = graphContainerIter->second;
 			sort(graphMappingContainerPtrs.begin(), graphMappingContainerPtrs.end(), [](const std::shared_ptr< MappingContainer > lhs, const std::shared_ptr< MappingContainer > rhs) {
 					return lhs->m_position_offset < rhs->m_position_offset;
 				});
+
 			for (auto graphMappingContainerPtr : graphMappingContainerPtrs)
 			{
 				std::string line = std::string(graphMappingContainerPtr->m_position_offset, ' ');
 				line += graphMappingContainerPtr->m_sequence;
-				if (graphPath.size() - line.size() > 0)
-				{
-					line += std::string((graphPath.size() - line.size()) + 10, ' ');
-					line += graphMappingContainerPtr->m_cigar_str + " " + graphMappingContainerPtr->m_read_name;
-				}
-				output.emplace_back(line);
-			}
-			for (auto line : output)
-			{
+				line += "\t";
+				line += std::to_string(graphMappingContainerPtr->m_ssw_score) + "\t" + graphMappingContainerPtr->m_cigar_str + "\t" + graphMappingContainerPtr->m_read_name;
+
+				// output.emplace_back(line);
 				std::cout << line << std::endl;
+
 			}
-			std::cout << std::string(graphPath.size(), '-')<< std::endl;
-			std::cout << std::string(graphPath.size(), '-')<< std::endl;
+			// for (auto line : output)
+			// {
+				// std::cout << line << std::endl;
+			// }
+			// std::cout << std::string(graphPath.size(), '-')<< std::endl;
+			// std::cout << std::string(graphPath.size(), '-')<< std::endl;
+
+			std::cout << std::string(400, '-')<< std::endl;
+			std::cout << std::string(400, '-')<< std::endl;
+
 		}
 	}
 }

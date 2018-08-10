@@ -7,7 +7,6 @@
 #include "core2/reference/FastaReference.h"
 #include "core2/vcf/Variant.h"
 
-#include "core2/util/Noncopyable.hpp"
 #include "Node.h"
 
 #include "api/BamAlignment.h"
@@ -23,21 +22,24 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< Graph > SharedPtr;
 		Graph(FastaReference::SharedPtr fastaReferencePtr, std::vector< Variant::SharedPtr > variantPtrs, uint32_t graphSpacing, bool printGraph);
+		Graph(FastaReference::SharedPtr fastaReferencePtr, Region::SharedPtr regionPtr);
 		~Graph();
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
-		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  m_match_value, uint32_t m_mismatch_value, uint32_t m_gap_open_value, uint32_t m_gap_extension_value);
+		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
+		Region::SharedPtr getGraphRegion();
 
 	private:
 		void setRegionPtrs();
 		void generateGraph();
+		void generateReferenceGraph(Region::SharedPtr regionPtr);
 		void getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr);
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
 		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
-		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue);
+		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 
 		FastaReference::SharedPtr m_fasta_reference_ptr;
 		std::vector< Variant::SharedPtr > m_variant_ptrs;
@@ -47,6 +49,8 @@ namespace graphite
 		Node::SharedPtr m_first_node;
 		uint32_t m_score_threshold;
 		std::unordered_set< Node::SharedPtr > m_all_created_nodes;
+		std::unordered_set< std::string > m_aligned_read_names;
+		std::mutex m_aligned_read_names_mutex;
         GraphPrinter::SharedPtr m_graph_printer_ptr;
 	};
 }
