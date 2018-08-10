@@ -6,9 +6,9 @@
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/)
 
-# set header and source files
-set(GRAPHITE_TOOLS_SOURCES
-	graphite.cpp
+
+set(GRAPHITE_SIDE_TOOLS_SOURCES
+	graphite_side.cpp
 )
 
 # set header and source files
@@ -35,17 +35,19 @@ endif()
 
 set(CMAKE_BUILD_TYPE Debug) # uncomment this when you need a debug build
 
-#create binary
-add_executable(graphite
-  ${GRAPHITE_TOOLS_SOURCES}
+add_executable(graphite_side
+  ${GRAPHITE_SIDE_TOOLS_SOURCES}
 )
 
-
 # link libraries to executables
-target_link_libraries(graphite
+target_link_libraries(graphite_side
   ${CORE_LIB}
   ${GRAPHITE_ADJUDICATOR}
 )
 
-add_dependencies(graphite ${GRAPHITE_EXTERNAL_PROJECT})
-install(TARGETS graphite DESTINATION bin)
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+target_link_libraries(graphite_side ${PYTHON_LIBRARIES})
+
+add_dependencies(graphite_side ${GRAPHITE_EXTERNAL_PROJECT})
+#install(TARGETS graphite DESTINATION bin)

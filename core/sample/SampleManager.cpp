@@ -1,5 +1,5 @@
 #include "SampleManager.h"
-#include "core/alignment/BamAlignmentReader.h"
+//#include "core/alignment/BamAlignmentReader.h"
 
 namespace graphite
 {
@@ -11,6 +11,7 @@ namespace graphite
 		}
 	}
 
+	/*
 	SampleManager::SampleManager(const std::vector< std::string >& bamPaths)
 	{
 		for (auto bamPath : bamPaths)
@@ -22,6 +23,7 @@ namespace graphite
 			}
 		}
 	}
+	*/
 
 	SampleManager::~SampleManager() {}
 

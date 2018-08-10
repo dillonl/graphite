@@ -1,4 +1,12 @@
-#include <Python.h>
+//#include <Python.h>
+#include "core/util/Params.h"
+#include "core/region/Region.h"
+#include "core/reference/FastaReference.h"
+#include "core/vcf/VCFReader.h"
+#include "core/vcf/VCFWriter.h"
+#include "core/bam/BamReader.h"
+#include "core/graph/GraphProcessor.h"
+
 #include <string>
 #include <iostream>
 
@@ -17,54 +25,43 @@ int main(int argc, char** argv)
 	auto vcfPaths = params.getInVCFPaths();
 	auto outputDirectory = params.getOutputDirectory();
 	auto paramRegionPtr = params.getRegion();
-	auto swPercent = params.getPercent();
-	auto threadCount = params.getThreadCount();
 	auto matchValue = params.getMatchValue();
 	auto misMatchValue = params.getMisMatchValue();
 	auto gapOpenValue = params.getGapOpenValue();
 	auto gapExtensionValue = params.getGapExtensionValue();
 	auto includeDuplicates = params.getIncludeDuplicates();
-	auto graphSize = params.getGraphSize();
 	auto outputVisualizationFiles = params.outputVisualizationFiles();
 
-	// create reference reader
+    // create reference reader
+	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath);
+
+	// track samples from bams
+	std::vector< graphite::Sample::SharedPtr > bamSamplePtrs;
+
+	// create bam readers
+	std::vector< graphite::BamReader::SharedPtr > bamReaderPtrs;
+	for (auto bamPath : bamPaths)
+	{
+		auto bamReaderPtr = std::make_shared< graphite::BamReader >(bamPath);
+        auto samplePtrs = bamReaderPtr->getSamplePtrs();
+		bamSamplePtrs.insert(bamSamplePtrs.begin(), samplePtrs.begin(), samplePtrs.end());
+		bamReaderPtrs.emplace_back(bamReaderPtr);
+	}
+
 	// create VCF readers
 	// create VCF writers
-	// create bam readers
-	// for each region:
+	std::vector< graphite::VCFReader::SharedPtr > vcfReaderPtrs;
+	for (auto vcfPath : vcfPaths)
+	{
+		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, outputDirectory);
+		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr, vcfWriterPtr);
+		vcfReaderPtrs.emplace_back(vcfReaderPtr);
+	}
+
 	// create graph processor
 	// call process on processor
-	// close reference reader
-	// close VCF writers
-	// close bam readers
-	// close VCF readers
-	// exit
+	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles);
+	graphProcessorPtr->processVariants();
 
-	/*
-	// Py_SetProgramName(std::string("PyTest"));
-	setenv("PYTHONPATH","/uufs/chpc.utah.edu/common/home/u0105808/Projects/graphite_side_graph/scripts/",1);
-	PyObject *pName, *pModule, *pDict, *pFunc, *pValue, *presult, *pArgs;
-	Py_Initialize();
-	pName = PyString_FromString((char*)"parseVCF");
-	pModule = PyImport_Import(pName);
-	pFunc = PyObject_GetAttrString(pModule, "someFunction");
-	if (PyCallable_Check(pFunc))
-	{
-		// auto pArg = PyString_FromString("jimmer");
-		auto pArg=Py_BuildValue("(z)",(char*)"jimmer");
-		pArgs = PyTuple_New(1);
-		PyTuple_SetItem(pArgs, 0, pArg);
-		presult = PyObject_CallObject(pFunc, pArg);
-	}
-	else
-	{
-		PyErr_Print();
-	}
-	std::string result = PyString_AsString(presult);
-	std::cout << result << std::endl;
-	// Py_XDECREF(repr);
-	// Py_XDECREF(str);
-	Py_Finalize();
-	*/
 	return 0;
 }

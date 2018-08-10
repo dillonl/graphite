@@ -17,77 +17,54 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 set(GRAPHITE_UTIL_SOURCES
+  util/GraphPrinter.cpp
   util/Params.cpp
   util/Utility.cpp
   util/gzstream.cpp
-  util/VisualizationToolKit.cpp
-  )
-
-set(GRAPHITE_FILE_SOURCES
-  file/BGZFFileWriter.cpp
-  file/ASCIIFileWriter.cpp
-  file/ASCIIFileReader.cpp
-  file/ASCIIGZFileReader.cpp
-  file/FastaFileWriter.cpp
-  file/BamFileWriter.cpp
   )
 
 set(GRAPHITE_CORE_REFERENCE_SOURCES
-  reference/Reference.cpp
   reference/FastaReference.cpp
-  reference/FastaWriter.cpp
   )
 
 set(GRAPHITE_CORE_REGION_SOURCES
   region/Region.cpp
   )
 
-set(GRAPHITE_CORE_MAPPING_SOURCES
-  mapping/GSSWMapping.cpp
+set(GRAPHITE_CORE_VCF_SOURCES
+  vcf/VCFReader.cpp
+  vcf/VCFWriter.cpp
+  vcf/Variant.cpp
   )
 
-set(GRAPHITE_CORE_ADJUDICATOR_SOURCES
-  adjudicator/GSSWAdjudicator.cpp
+set(GRAPHITE_CORE_BAM_SOURCES
+  bam/BamReader.cpp
   )
 
-set(GRAPHITE_CORE_ALIGNMENT_SOURCES
-  alignment/AlignmentList.cpp
-  alignment/BamAlignmentReader.cpp
+set(GRAPHITE_CORE_GRAPH_PROCESSOR_SOURCES
+  graph/GraphProcessor.cpp
+  graph/ReferenceGraph.cpp
+  graph/Graph.cpp
+  graph/Node.cpp
   )
 
 set(GRAPHITE_CORE_SAMPLE_SOURCES
   sample/Sample.cpp
-  sample/SampleManager.cpp
   )
 
-set(GRAPHITE_CORE_VARIANT_SOURCES
-  variant/Variant.cpp
-  variant/VariantList.cpp
-  variant/VCFManager.cpp
-  variant/VCFFileReader.cpp
-  variant/VCFHeader.cpp
-  variant/VCFFileWriter.cpp
-  )
-
-set(GRAPHITE_CORE_GRAPH_SOURCES
-  graph/ReferenceGraph.cpp
-  graph/GSSWGraph.cpp
-  graph/GraphManager.cpp
+set(GRAPHITE_CORE_ALLELE_SOURCES
+  allele/Allele.cpp
   )
 
 add_library(graphite_core STATIC
   ${GRAPHITE_UTIL_SOURCES}
-  ${GRAPHITE_SEQUENCE_SOURCES}
-  ${GRAPHITE_FILE_SOURCES}
   ${GRAPHITE_CORE_REFERENCE_SOURCES}
   ${GRAPHITE_CORE_REGION_SOURCES}
-  ${GRAPHITE_CORE_ALIGNMENT_SOURCES}
+  ${GRAPHITE_CORE_VCF_SOURCES}
+  ${GRAPHITE_CORE_BAM_SOURCES}
+  ${GRAPHITE_CORE_GRAPH_PROCESSOR_SOURCES}
   ${GRAPHITE_CORE_SAMPLE_SOURCES}
-  ${GRAPHITE_CORE_VARIANT_SOURCES}
-  ${GRAPHITE_CORE_PATH_SOURCES}
-  ${GRAPHITE_CORE_MAPPING_SOURCES}
-  ${GRAPHITE_CORE_ADJUDICATOR_SOURCES}
-  ${GRAPHITE_CORE_GRAPH_SOURCES}
+  ${GRAPHITE_CORE_ALLELE_SOURCES}
   )
 
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs

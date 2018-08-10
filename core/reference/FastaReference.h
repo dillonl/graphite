@@ -1,32 +1,31 @@
-#ifndef GRAPHITE_FASTA_REFERENCE_H
-#define GRAPHITE_FASTA_REFERENCE_H
+#ifndef GRAPHITE_FASTAREFERENCE_H
+#define GRAPHITE_FASTAREFERENCE_H
 
-#include "IReference.h"
-
+#include "core/util/Noncopyable.hpp"
 #include "core/region/Region.h"
+
 #include "Fasta.h"
 
-#include <map>
 #include <memory>
 
 namespace graphite
 {
-	class FastaReference : public IReference
+	class FastaReference : private Noncopyable
 	{
 	public:
-		FastaReference(const std::string& path, Region::SharedPtr region);
+		typedef std::shared_ptr< FastaReference > SharedPtr;
+        FastaReference(const std::string& fastaPath);
 		~FastaReference();
 
-		const char* getSequence() override { return m_sequence.c_str(); }
-		size_t getSequenceSize() override { return m_sequence.size();  }
+		std::string getSequenceStringFromRegion(Region::SharedPtr regionPtr);
+		const char* getSequenceFromRegion(Region::SharedPtr regionPtr);
 
 	private:
-		void setSequence(Region::SharedPtr region);
-
-		std::string m_fasta_path;
+		void setReferenceIDAndSequence(Region::SharedPtr regionPtr);
 		std::shared_ptr< ::FastaReference > m_fasta_reference;
-
+		std::string m_current_reference_id;
+		std::string m_reference_sequence;
 	};
-} // end namespace graphite
+}
 
-#endif // GRAPHITE_FASTA_REFERENCE_H
+#endif //GRAPHITE_FASTAREFERENCE_H

@@ -3,6 +3,12 @@
 // #include <regex>
 #include <string>
 #include <iostream>
+#include <memory>
+#include <fstream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 namespace graphite
 {
@@ -24,18 +30,38 @@ namespace graphite
 		}
 	}
 
-
-	/*
-	void split(const std::string& s, std::vector< std::string >& v)
+	bool fileExists(const std::string& name, bool exitOnFailure)
 	{
-		std::regex re("\\s+");
-		std::sregex_token_iterator it(s.begin(), s.end(), re, -1);
-		std::sregex_token_iterator reg_end;
-		for (; it != reg_end; ++it)
-		{
-			std::cout << "s: " << it->str() << std::endl;
-			v.emplace_back(it->str());
+	    std::ifstream f(name.c_str());
+	    if (!f)
+	    {
+			if (exitOnFailure)
+			{
+				std::cout << "File not found: " << name << std::endl;
+				exit(EXIT_FAILURE);
+			}
+			return false;
 		}
+		return true;
 	}
-	*/
+
+	bool folderExists(const std::string& path, bool exitOnFailure)
+	{
+		if(!path.empty())
+		{
+			struct stat sb;
+
+			if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			{
+				return true;
+			}
+		}
+		if (exitOnFailure)
+		{
+			std::cout << "Folder not found: " << path << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		return false;
+	}
+
 }

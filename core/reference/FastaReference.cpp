@@ -1,53 +1,52 @@
 #include "FastaReference.h"
 
-
 namespace graphite
 {
-
-	FastaReference::FastaReference(const std::string& path, Region::SharedPtr region) :
-		m_fasta_path(path),
-		IReference()
+	FastaReference::FastaReference(const std::string& path) :
+		m_current_reference_id(""),
+		m_reference_sequence("")
 	{
 		m_fasta_reference = std::make_shared< ::FastaReference >();
-		m_fasta_reference->open(this->m_fasta_path);
-		setSequence(region);
+		m_fasta_reference->open(path);
 	}
 
 	FastaReference::~FastaReference()
 	{
+		// m_fasta_reference is closed when its destructor is called so we don't worry about it
 	}
 
-	void FastaReference::setSequence(Region::SharedPtr regionPtr)
+	void FastaReference::setReferenceIDAndSequence(Region::SharedPtr regionPtr)
 	{
-		std::string seqName = regionPtr->getReferenceID();
-		this->m_sequence = this->m_fasta_reference->getSequence(seqName);
-
-		this->m_region = std::make_shared< Region >(seqName, Region::BASED::ONE);
-		this->m_region->setBased(Region::BASED::ZERO);
-		this->m_region->setStartPosition(0);
-		this->m_region->setEndPosition(this->m_region->getStartPosition() + this->m_sequence.size());
-
-		/*
-		if (this->m_region->getStartPosition() == 0 || this->m_region->getEndPosition() == 0)
+		std::string referenceID = regionPtr->getReferenceID();
+		if (strcmp(referenceID.c_str(), this->m_current_reference_id.c_str()) != 0)
 		{
-			this->m_sequence = this->m_fasta_reference->getSequence(seqName);
-			this->m_region->setStartPosition(0);
-			this->m_region->setEndPosition(this->m_region->getStartPosition() + this->m_sequence.size());
+			this->m_current_reference_id = referenceID;
+			this->m_reference_sequence = this->m_fasta_reference->getSequence(referenceID);
 		}
-		else
-		{
-			if (regionPtr->getBased() == Region::BASED::ONE) // fastahack is one based so we just provide the start position as is, length we must add one because of math!
-			{
-				this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, this->m_region->getStartPosition(), (this->m_region->getEndPosition() - this->m_region->getStartPosition()) + 1);
-				this->m_region->setStartPosition(this->m_region->getStartPosition() - 1);
-				this->m_region->setEndPosition(this->m_region->getEndPosition() - 1);
-			}
-			else
-			{
-				this->m_sequence = this->m_fasta_reference->getSubSequence(seqName, this->m_region->getStartPosition() + 1, (this->m_region->getEndPosition() - this->m_region->getStartPosition()) + 1);
-			}
-		}
-		*/
 	}
 
-} // end namespace graphite
+	std::string FastaReference::getSequenceStringFromRegion(Region::SharedPtr regionPtr)
+	{
+		setReferenceIDAndSequence(regionPtr);
+		position startPosition = regionPtr->getStartPosition();
+		position endPosition = regionPtr->getEndPosition();
+		if (regionPtr->getBased() == Region::BASED::ONE)
+		{
+			startPosition -= 1;
+			endPosition -= 1;
+		}
+		position length = endPosition - startPosition;
+		return std::string(this->m_reference_sequence.c_str() + startPosition, length);
+	}
+
+	const char* FastaReference::getSequenceFromRegion(Region::SharedPtr regionPtr)
+	{
+		setReferenceIDAndSequence(regionPtr);
+		position startPosition = regionPtr->getStartPosition();
+		if (regionPtr->getBased() == Region::BASED::ONE)
+		{
+			startPosition -= 1;
+		}
+		return &this->m_reference_sequence.c_str()[startPosition];
+	}
+}

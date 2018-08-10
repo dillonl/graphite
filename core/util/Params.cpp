@@ -1,7 +1,6 @@
 #include "Params.h"
 #include "Utility.h"
 #include "config/GraphiteConfig.hpp"
-#include "core/file/IFile.h"
 
 #include <string.h>
 #include <thread>
@@ -33,11 +32,9 @@ namespace graphite
 			("p,percent_match", "Smith-Waterman Percent [optional - default is 90]", cxxopts::value< uint32_t >()->default_value("90"))
 			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("s,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
-			("a,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
+			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
-			("g,graph_size", "The size of the graph [optional - default is 3000]", cxxopts::value< uint32_t >()->default_value("3000"))
-			("i,igv_visualization_output", "Output IGV input for visualization [optional - default is false]")
-			("t,number_threads", "Thread count [optional - default is number of cores x 2]", cxxopts::value< uint32_t >()->default_value(std::to_string(std::thread::hardware_concurrency() * 2)));
+			("i,igv_visualization_output", "Output IGV input for visualization [optional - default is false]");
 		this->m_options.parse(argc, argv);
 	}
 
@@ -71,6 +68,10 @@ namespace graphite
 		if (!m_options.count("f"))
 		{
 			errorMessages.emplace_back("fasta path required");
+		}
+		if (!m_options.count("o"))
+		{
+			errorMessages.emplace_back("output path required");
 		}
 		if (errorMessages.size() > 0)
 		{
@@ -132,19 +133,9 @@ namespace graphite
 		return nullptr;
 	}
 
-	uint32_t Params::getPercent()
-	{
-		return m_options["p"].as< uint32_t >();
-	}
-
 	uint32_t Params::getThreadCount()
 	{
 		return m_options["t"].as< uint32_t >();
-	}
-
-	uint32_t Params::getGraphSize()
-	{
-		return m_options["g"].as< uint32_t >();
 	}
 
 	int Params::getMatchValue()
@@ -159,7 +150,7 @@ namespace graphite
 
 	int Params::getGapOpenValue()
 	{
-		return m_options["a"].as< uint32_t >();
+		return m_options["g"].as< uint32_t >();
 	}
 
 	int Params::getGapExtensionValue()
@@ -176,7 +167,7 @@ namespace graphite
 	{
 		for (auto path : paths)
 		{
-			IFile::folderExists(path, exitOnFailure);
+			folderExists(path, exitOnFailure);
 		}
 	}
 
@@ -184,7 +175,7 @@ namespace graphite
 	{
 		for (auto path : paths)
 		{
-			IFile::fileExists(path, exitOnFailure);
+			fileExists(path, exitOnFailure);
 		}
 	}
 

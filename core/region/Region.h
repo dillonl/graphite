@@ -41,8 +41,6 @@ namespace graphite
 		position m_start_position;
 		position m_end_position;
 		BASED m_based;
-
-		/* RegionParser< const char* > m_region_parser; */
 	};
 
 }

@@ -1,3 +1,4 @@
+/*
 #include "core/alignment/BamAlignmentReader.h"
 #include "core/file/IFile.h"
 
@@ -119,3 +120,4 @@ namespace graphite
 		}
 	}
 }
+*/

@@ -1,5 +1,5 @@
-#ifndef GRAPHITE_THREADPOOL_HPP
-#define GRAPHITE_THREADPOOL_HPP
+#ifndef THREAD_POOL_H
+#define THREAD_POOL_H
 
 #include <vector>
 #include <queue>
@@ -11,141 +11,122 @@
 #include <functional>
 #include <stdexcept>
 
-#include "core/util/Noncopyable.hpp"
-
 namespace graphite
 {
 
-    class ThreadPool : private Noncopyable
-    {
+	class ThreadPool
+	{
 	public:
-		static ThreadPool* Instance()
-		{
-			static ThreadPool* s_threadpool = new ThreadPool(); // lazy initialization
-			return s_threadpool;
-		}
-
-		uint32_t getThreadCount()
-		{
-			return m_thread_count;
-		}
-
-		void joinAll()
-		{
-			stop();
-			start();
-		}
-
-		void start()
-		{
-			if (this->m_stopped)
-			{
-				{
-					std::unique_lock<std::mutex> lock(m_tasks_mutex);
-					this->m_stopped = false;
-					this->m_workers.clear();
-				}
-				init();
-			}
-		}
-
-		void stop()
-		{
-			{
-				std::unique_lock<std::mutex> lock(m_tasks_mutex);
-				this->m_stopped = true;
-			}
-			this->m_condition.notify_all();
-			for (std::thread& worker : this->m_workers)
-			{
-				worker.join();
-			}
-		}
-
+		ThreadPool(size_t);
 		template<class F, class... Args>
-		auto enqueue(F&& funct, Args&&... args)
-			-> std::shared_ptr< std::future< typename std::result_of< F(Args...) >::type > >
-		{
-			using return_type = typename std::result_of< F(Args...) >::type;
+		auto enqueue(F&& f, Args&&... args)
+			-> std::future<typename std::result_of<F(Args...)>::type>;
+		~ThreadPool();
 
-			auto task = std::make_shared< std::packaged_task< return_type() > >(
-				std::bind(std::forward< F >(funct), std::forward< Args >(args)...)
-				);
-			std::shared_ptr< std::future< return_type > > res = std::make_shared< std::future< return_type > >(task->get_future());
-			{
-				std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
-				if (this->m_stopped)
-				{
-					throw std::runtime_error("enqueue on stopped ThreadPool");
-				}
-				this->m_tasks.emplace([task](){(*task)();});
-			}
-			this->m_condition.notify_one();
-			return res;
-		}
-
-		void setThreadCount(uint32_t threadCount)
-		{
-			this->m_thread_count = threadCount;
-			stop();
-			start();
-		}
-
-		int getTaskCount()
-		{
-			std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
-			return this->m_tasks.size();
-		}
-
+		void join();
 	private:
+		// need to keep track of threads so we can join them
+		std::vector< std::thread > workers;
+		// the task queue
+		std::queue< std::function<void()> > tasks;
 
-		ThreadPool() :
-			m_thread_count(std::thread::hardware_concurrency() * 2),
-			m_stopped(false)
-		{
-			init();
-		}
+		// synchronization
+		std::mutex queue_mutex;
+		std::condition_variable condition;
+		bool stop;
+		std::atomic< int > m_running_processes;
+	};
 
-		~ThreadPool()
-		{
-			stop();
-		}
-
-		void init()
-		{
-			for (size_t i = 0; i < this->m_thread_count; ++i)
-			{
-				this->m_workers.emplace_back(
-					[this]
+// the constructor just launches some amount of workers
+	inline ThreadPool::ThreadPool(size_t threads)
+		:   stop(false), m_running_processes(0)
+	{
+		for(size_t i = 0;i<threads;++i)
+			workers.emplace_back(
+				[this]
+				{
+					for(;;)
 					{
-						for (;;)
+						std::function<void()> task;
+
 						{
-							std::function< void() > task;
-							{
-								std::unique_lock< std::mutex > lock(this->m_tasks_mutex);
-								this->m_condition.wait(lock,
-													   [this]{ return this->m_stopped || !this->m_tasks.empty(); });
-								if (this->m_stopped && this->m_tasks.empty()) { return; }
-								task = std::move(this->m_tasks.front());
-								this->m_tasks.pop();
-							}
-							task();
+							std::unique_lock<std::mutex> lock(this->queue_mutex);
+							this->condition.wait(lock,
+												 [this]{ return this->stop || !this->tasks.empty(); });
+							if(this->stop && this->tasks.empty())
+								return;
+							task = std::move(this->tasks.front());
+							this->tasks.pop();
 						}
+						m_running_processes += 1;
+						task();
+						m_running_processes -= 1;
 					}
-					);
-			}
+				}
+				);
+	}
+
+	// the destructor joins all threads
+	inline ThreadPool::~ThreadPool()
+	{
+		{
+			std::unique_lock<std::mutex> lock(queue_mutex);
+			stop = true;
 		}
+		condition.notify_all();
+		for(std::thread &worker: workers)
+		{
+			worker.join();
+		}
+		workers.clear();
+	}
 
-		static ThreadPool* s_threadpool;
-		std::vector< std::thread > m_workers;
-		std::queue< std::function< void() > > m_tasks;
+	inline void ThreadPool::join()
+	{
+		while (m_running_processes > 0)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		/*
+		{
+			std::unique_lock<std::mutex> lock(queue_mutex);
+			stop = true;
+		}
+		condition.notify_all();
+		for(std::thread &worker: workers)
+		{
+			worker.join();
+		}
+		*/
+		// workers.clear();
+	}
 
-		std::mutex m_tasks_mutex;
-		std::condition_variable m_condition;
-		bool m_stopped;
-		uint32_t m_thread_count;
-    };
+// add new work item to the pool
+	template<class F, class... Args>
+	auto ThreadPool::enqueue(F&& f, Args&&... args)
+		-> std::future<typename std::result_of<F(Args...)>::type>
+	{
+		using return_type = typename std::result_of<F(Args...)>::type;
+
+		auto task = std::make_shared< std::packaged_task<return_type()> >(
+			std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+			);
+
+		std::future<return_type> res = task->get_future();
+		{
+			std::unique_lock<std::mutex> lock(queue_mutex);
+
+			// don't allow enqueueing after stopping the pool
+			if(stop)
+				throw std::runtime_error("enqueue on stopped ThreadPool");
+
+			tasks.emplace([task](){ (*task)(); });
+		}
+		condition.notify_one();
+		return res;
+	}
+
 
 }
 
-#endif //GRAPHITE_THREADPOOL_HPP
+#endif
