@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	std::vector< graphite::VCFReader::SharedPtr > vcfReaderPtrs;
 	for (auto vcfPath : vcfPaths)
 	{
-		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, outputDirectory);
+		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, bamSamplePtrs, outputDirectory);
 		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr, vcfWriterPtr);
 		vcfReaderPtrs.emplace_back(vcfReaderPtr);
 	}

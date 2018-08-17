@@ -28,9 +28,10 @@ namespace graphite
 		void writeVariant();
 
 	private:
+		void processSampleColumns();
 		void parseColumns();
 		void setAlleles();
-		std::string getGraphiteCounts(const std::string& sampleName);
+		std::string getSampleCounts(const std::string& sampleName);
 		/* std::vector< Node::SharedPtr > getReferenceNodePtrs(); */
 
 		VCFWriter::SharedPtr m_vcf_writer_ptr;
@@ -38,6 +39,7 @@ namespace graphite
 		std::string m_variant_line;
 		std::string m_chrom;
 		position m_position;
+		std::string m_blank_graphite_format = ".:.:.:.:.:.:.:.:.:.:.:.";
 		Allele::SharedPtr m_reference_allele_ptr; // make sure to figure out  a way to keep track of breaking up the alleles
 		std::vector< Allele::SharedPtr > m_alternate_allele_ptrs;
 		bool m_skip_adjudication;

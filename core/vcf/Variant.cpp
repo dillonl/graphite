@@ -2,6 +2,8 @@
 #include "core/util/Utility.h"
 #include "core/util/Types.h"
 
+#include <algorithm>
+
 namespace graphite
 {
 
@@ -20,55 +22,72 @@ namespace graphite
 
 	void Variant::writeVariant()
 	{
-		std::string vcfLine;
-
-		for (uint32_t i = 0; i < STANDARD_VCF_COLUMN_NAMES.size(); ++i)
+		std::string vcfLine = "";
+		auto columnNames = m_vcf_writer_ptr->getColumnNames();
+		processSampleColumns();
+		for (auto i = 0; i < columnNames.size(); ++i)
 		{
 			if (i > 0)
 			{
 				vcfLine += "\t";
 			}
-			std::string formatStr = "";
-			if (STANDARD_VCF_COLUMN_NAMES[i].compare("FORMAT") == 0)
-			{
-				formatStr = ":DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP4_AP";
-			}
-			vcfLine += m_columns[STANDARD_VCF_COLUMN_NAMES[i]] + formatStr;
+			auto columnName = columnNames[i];
+			vcfLine += m_columns[columnName];
 		}
-		auto samplePtrs = this->m_vcf_writer_ptr->getSamplePtrs();
-		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
-		{
-			std::string sep = (!m_columns[samplePtrs[i]->getName()].empty()) ? ":" : "";
-			vcfLine += "\t" + m_columns[samplePtrs[i]->getName()] + sep + getGraphiteCounts(samplePtrs[i]->getName());
-			// vcfLine += "\t" + getGraphiteCounts(samplePtrs[i]->getName());
-		}
-
 		this->m_vcf_writer_ptr->writeLine(vcfLine);
+	}
+
+	void Variant::processSampleColumns()
+	{
+		std::string formatSpacing = "";
+		if (m_columns["FORMAT"].size() > 0)
+		{
+			formatSpacing = ":";
+		}
+		m_columns["FORMAT"] += formatSpacing + "DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP4_AP";
+
+		for (auto& sampleName : this->m_vcf_writer_ptr->getSampleNames())
+		{
+			if (this->m_vcf_writer_ptr->isSampleNameInBam(sampleName))
+			{
+				m_columns[sampleName] += formatSpacing + getSampleCounts(sampleName);
+			}
+			else
+			{
+				m_columns[sampleName] += formatSpacing + m_blank_graphite_format;
+			}
+		}
 	}
 
 	void Variant::parseColumns()
 	{
-		auto samplePtrs = this->m_vcf_writer_ptr->getSamplePtrs();
+		m_columns.clear();
 		std::vector< std::string > columns;
 		split(this->m_variant_line, '\t', columns);
-		if (columns.size() > (STANDARD_VCF_COLUMN_NAMES.size() + samplePtrs.size()))
+		auto columnNames = this->m_vcf_writer_ptr->getColumnNames();
+		int columnDiff = columns.size() - columnNames.size();
+		for (auto i = 0; i < columnNames.size(); ++i)
 		{
-			std::cout << "Invalid VCF at line: " << this->m_variant_line << std::endl;
-			exit(EXIT_FAILURE);
+			if (columnNames[i].compare("FORMAT") == 0 && this->m_vcf_writer_ptr->getBlankFormatStringPtr() == nullptr)
+			{
+				auto formatCol = columns[i];
+				size_t n = std::count(formatCol.begin(), formatCol.end(), ':');
+				std::string blankSampleFormat = (formatCol.size() > 0) ? "." : "";
+				for (int i = 0; i < n; ++i) { blankSampleFormat += ":."; }
+				this->m_vcf_writer_ptr->setBlankFormatString(blankSampleFormat);
+			}
+			if (i > columns.size() - 1)
+			{
+				m_columns.emplace(columnNames[i], *this->m_vcf_writer_ptr->getBlankFormatStringPtr());
+			}
+			else
+			{
+				m_columns.emplace(columnNames[i], columns[i]);
+			}
 		}
-		for (uint32_t i = 0; i < STANDARD_VCF_COLUMN_NAMES.size(); ++i)
-		{
-			auto standardColumn = STANDARD_VCF_COLUMN_NAMES[i];
-			m_columns[standardColumn] = columns[i];
-		}
+
 		this->m_chrom = m_columns["#CHROM"];
 		this->m_position = stoi(m_columns["POS"]);
-		for (uint32_t i = 0; i < samplePtrs.size(); ++i)
-		{
-			if (m_columns.find(samplePtrs[i]->getName()) == m_columns.end()) { continue; }
-			size_t columnIdx = STANDARD_VCF_COLUMN_NAMES.size() + i;
-			m_columns[samplePtrs[i]->getName()] = columns[columnIdx];
-		}
 	}
 
 	void Variant::setAlleles()
@@ -91,42 +110,7 @@ namespace graphite
 		}
 	}
 
-	/*
-	std::vector< Node::SharedPtr > Variant::getReferenceNodePtrs()
-	{
-		std::vector< Node::SharedPtr > referenceNodePtrs;
-		std::unordered_set< Node::SharedPtr > altNodePtrs;
-		for (auto altAllelePtr : this->m_alternate_allele_ptrs)
-		{
-			altNodePtrs.emplace(altAllelePtr->getNodePtr());
-		}
-		Node::SharedPtr refNodePtr = this->m_alternate_allele_ptrs[0]->getNodePtr()->getReferenceInNode();
-		// std::vector< Node::SharedPtr > inNodePtrs = this->m_alternate_allele_ptrs[0]->getNodePtr()->getInNodes();
-		// Node::SharedPtr refNodePtr = inNodePtrs[0];
-		do
-		{
-			for (auto nodePtr : refNodePtr->getOutNodes())
-			{
-				if (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF)
-				{
-					refNodePtr = nodePtr;
-					break;
-				}
-			}
-			for (auto nodePtr : refNodePtr->getInNodes())
-			{
-				if (altNodePtrs.count(nodePtr) > 0)
-				{
-					altNodePtrs.erase(nodePtr);
-				}
-			}
-			referenceNodePtrs.emplace_back(refNodePtr);
-		} while (!altNodePtrs.empty());
-		return referenceNodePtrs;
-	}
-	*/
-
-	std::string Variant::getGraphiteCounts(const std::string& sampleName)
+	std::string Variant::getSampleCounts(const std::string& sampleName)
 	{
 		std::string graphiteCountsString = "";
 		AlleleCountType alleleCountType = AlleleCountType::NinteyFivePercent;
@@ -147,13 +131,6 @@ namespace graphite
 				forwardScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
 				reverseScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
 				tmpCountsString += std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
-				/*
-				auto tmpCount123 = forwardScoreCount.size() + reverseScoreCount.size();
-				if (tmpCount123 > 0)
-				{
-					std::cout << "alt count found" << std::endl;
-				}
-				*/
 				totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
 			}
 			if (!graphiteCountsString.empty())

@@ -121,7 +121,7 @@ namespace graphite
 		}
 		std::string columnLine = setSamplePtrs(headerColumns, bamSamplePtrs);
 		headerLines.emplace_back(columnLine);
-		this->m_vcf_writer->setSamples(columnLine, this->m_sample_ptrs_map);
+		// this->m_vcf_writer->setSamples(columnLine, this->m_sample_ptrs_map);
 		this->m_vcf_writer->writeHeader(headerLines);
 		if (line.size() > 0)
 		{

@@ -17,19 +17,29 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< VCFWriter > SharedPtr;
-		VCFWriter(const std::string& filename, const std::string& outputDirectory);
+		VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory);
 		~VCFWriter();
 
 		void writeLine(const std::string& line);
         void writeHeader(const std::vector< std::string >& headerLines);
-		void setSamples(const std::string& columnHeaderLine, std::unordered_map< std::string, Sample::SharedPtr >& samplePtrsMap);
+		/* void setSamples(const std::string& columnHeaderLine, std::unordered_map< std::string, Sample::SharedPtr >& samplePtrsMap); */
 		Sample::SharedPtr getSamplePtr(const std::string& sampleName);
-		std::vector< Sample::SharedPtr > getSamplePtrs();
+		/* std::vector< Sample::SharedPtr > getSamplePtrs(); */
+		std::vector< std::string > getSampleNames();
+		std::vector< std::string > getColumnNames();
+		bool isSampleNameInOriginalVCF(const std::string& sampleName);
+		bool isSampleNameInBam(const std::string& sampleName);
+		void setBlankFormatString(const std::string& blankFormatString);
+		std::shared_ptr< std::string > getBlankFormatStringPtr();
 
 	private:
+		std::vector< Sample::SharedPtr > m_bam_sample_ptrs;
+		std::unordered_map< std::string, bool > m_sample_name_in_vcf;
+		std::vector< std::string > m_vcf_column_names;
+		std::vector< std::string > m_sample_names;
 		std::ofstream m_out_file;
-		std::vector< Sample::SharedPtr > m_sample_ptrs;
-		std::unordered_map< std::string, Sample::SharedPtr > m_sample_ptrs_map;
+		std::shared_ptr< std::string > m_black_format_string;
+		std::unordered_map< std::string, Sample::SharedPtr > m_bam_sample_ptrs_map;
         std::vector< std::tuple< std::string, std::string > > m_format = {std::make_tuple("ID=DP_NFP", "##FORMAT=<ID=DP_NFP,Number=1,Type=Integer,Description=\"Read count at 95 percent Smith Waterman score or above\">"),
 																		  std::make_tuple("ID=DP_NP", "##FORMAT=<ID=DP_NP,Number=1,Type=Integer,Description=\"Read count between 90 and 94 percent Smith Waterman score\">"),
 																		  std::make_tuple("ID=DP_EP", "##FORMAT=<ID=DP_EP,Number=1,Type=Integer,Description=\"Read count between 80 and 89 percent Smith Waterman score\">"),

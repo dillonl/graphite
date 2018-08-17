@@ -370,7 +370,6 @@ namespace graphite
 			// std::unordered_map< gssw_node*, uint32_t > nodeSuffixMatchMap;
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
-				// std::cout << nc->cigar->elements[j].length << nc->cigar->elements[j].type;
 				switch (nc->cigar->elements[j].type)
 				{
 				case 'M':
@@ -402,7 +401,6 @@ namespace graphite
 				length += nc->cigar->elements[j].length;
 				fullCigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
 			}
-			// std::cout << std::endl;
 			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
 			softclipLength += tmpSofclipLength;
 			float tmpScore = score;

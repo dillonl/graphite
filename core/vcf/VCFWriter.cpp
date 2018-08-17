@@ -6,8 +6,14 @@
 
 namespace graphite
 {
-	VCFWriter::VCFWriter(const std::string& filename, const std::string& outputDirectory)
+	VCFWriter::VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory) :
+		m_bam_sample_ptrs(bamSamplePtrs),
+		m_black_format_string(nullptr)
 	{
+		for (auto samplePtr : m_bam_sample_ptrs)
+		{
+			m_bam_sample_ptrs_map.emplace(samplePtr->getName(), samplePtr);
+		}
 		std::string base_filename = filename.substr(filename.find_last_of("/\\") + 1);
 		std::string path(outputDirectory + "/" + base_filename);
 		this->m_out_file.open(path);
@@ -25,12 +31,18 @@ namespace graphite
 
 	void VCFWriter::writeHeader(const std::vector< std::string >& headerLines)
 	{
+		m_vcf_column_names.clear();
+		m_sample_names.clear();
 		// we need to add the graphite format rows in the header.
 		// The code below ensures that we only write the format columns once and in the write place.
 		std::vector< std::string > lines;
 		bool formatWritten = false;
 		for (auto line : headerLines)
 		{
+			if (line.find("#CHROM") != std::string::npos)
+			{
+				split(line, '\t', this->m_vcf_column_names);
+			}
 			if ((line.find("##FORMAT") != std::string::npos && !formatWritten) || (line.find("#CHROM") != std::string::npos && !formatWritten))
 			{
 				for (auto formatTuple : this->m_format)
@@ -39,37 +51,60 @@ namespace graphite
 				}
 				formatWritten = true;
 			}
-			bool addLine = true;
-			for (auto formatTuple : this->m_format) // remove all rows that are in the m_format vector
-			{
-				if (line.find(std::get< 0 >(formatTuple)) == std::string::npos)
-				{
-					addLine = false;
-					break;
-				}
-			}
-			if (addLine)
-			{
-				lines.emplace_back(line);
-			}
+			lines.emplace_back(line);
 		}
+		std::unordered_set< std::string > writtenLines;
 		for (auto line : lines)
 		{
-			writeLine(line);
+			if (writtenLines.find(line) == writtenLines.end())
+			{
+				writeLine(line);
+				writtenLines.emplace(line);
+			}
 		}
 		std::string headerLine = "";
-		for (auto column : STANDARD_VCF_COLUMN_NAMES)
+		bool first = true;
+		for (auto headerName : this->m_vcf_column_names)
 		{
-			headerLine += column + "\t";
+			if (!first)
+			{
+				headerLine += "\t";
+			}
+			headerLine += headerName;
+			first = false;
+			if (STANDARD_VCF_COLUMN_NAMES_SET.find(headerName) == STANDARD_VCF_COLUMN_NAMES_SET.end())
+			{
+				this->m_sample_names.emplace(this->m_sample_names.end(), headerName);
+			}
 		}
-		for (uint32_t i = 0; i < this->m_sample_ptrs.size(); ++i)
+		first = true;
+		for (auto bamSamplePtr : this->m_bam_sample_ptrs)
 		{
-			headerLine += (i == 0) ? "" : "\t";
-			headerLine += this->m_sample_ptrs[i]->getName();
+			auto sampleName = bamSamplePtr->getName();
+			auto iter = std::find_if(this->m_vcf_column_names.begin(), this->m_vcf_column_names.end(), [&sampleName](const std::string& columnName)
+									 {
+										 return columnName.compare(sampleName) == 0;
+									 });
+			if (iter == this->m_vcf_column_names.end()) // if sample not in vcf
+			{
+				if (!first)
+				{
+					headerLine += "\t";
+				}
+				headerLine += sampleName;
+				this->m_vcf_column_names.emplace(this->m_vcf_column_names.end(), sampleName);
+				this->m_sample_names.emplace(this->m_sample_names.end(), sampleName);
+			}
+			else
+			{
+				this->m_sample_name_in_vcf.emplace(sampleName, true);
+			}
+			first = false;
 		}
 		writeLine(headerLine);
 	}
 
+	/*
 	void VCFWriter::setSamples(const std::string& columnHeaderLine, std::unordered_map< std::string, Sample::SharedPtr >& samplePtrsMap)
 	{
 		this->m_sample_ptrs.clear();
@@ -95,14 +130,43 @@ namespace graphite
 			}
 		}
 	}
+	*/
 
 	Sample::SharedPtr VCFWriter::getSamplePtr(const std::string& sampleName)
 	{
-		return this->m_sample_ptrs_map.find(sampleName)->second;
+		return this->m_bam_sample_ptrs_map.find(sampleName)->second;
 	}
 
-	std::vector< Sample::SharedPtr > VCFWriter::getSamplePtrs()
+	std::vector< std::string > VCFWriter::getSampleNames()
 	{
-		return m_sample_ptrs;
+		return m_sample_names;
+	}
+
+	bool VCFWriter::isSampleNameInOriginalVCF(const std::string& sampleName)
+	{
+		return (m_sample_name_in_vcf.find(sampleName) != m_sample_name_in_vcf.end());
+	}
+
+	bool VCFWriter::isSampleNameInBam(const std::string& sampleName)
+	{
+		return (m_bam_sample_ptrs_map.find(sampleName) != m_bam_sample_ptrs_map.end());
+	}
+
+	std::vector< std::string > VCFWriter::getColumnNames()
+	{
+		return this->m_vcf_column_names;
+	}
+
+	void VCFWriter::setBlankFormatString(const std::string& blankFormatString)
+	{
+		if (this->m_black_format_string == nullptr)
+		{
+			this->m_black_format_string = std::make_shared< std::string >(blankFormatString);
+		}
+	}
+
+	std::shared_ptr< std::string > VCFWriter::getBlankFormatStringPtr()
+	{
+		return this->m_black_format_string;
 	}
 }
