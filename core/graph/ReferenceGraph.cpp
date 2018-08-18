@@ -3,11 +3,10 @@
 
 namespace graphite
 {
-	ReferenceGraph::ReferenceGraph(FastaReference::SharedPtr fastaReferencePtr, Region::SharedPtr regionPtr) :
-		m_region_ptr(regionPtr)
+
+	ReferenceGraph::ReferenceGraph(const std::string& refSequence, position startPosition)
 	{
-		std::string referenceSequence = fastaReferencePtr->getSequenceStringFromRegion(regionPtr);
-		this->m_node = std::make_shared< Node >(referenceSequence, regionPtr->getStartPosition(), Node::ALLELE_TYPE::REF);
+		this->m_node = std::make_shared< Node >(refSequence, startPosition, Node::ALLELE_TYPE::REF);
 	}
 
 	ReferenceGraph::~ReferenceGraph()

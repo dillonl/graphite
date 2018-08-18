@@ -32,7 +32,9 @@ namespace graphite
 		ALLELE_TYPE getAlleleType();
 		position getPosition();
 		std::string getSequence();
+		void setCompressedSequence(const std::string& sequence);
 		Node::SharedPtr getReferenceInNode();
+		Node::SharedPtr getReferenceOutNode();
 		uint32_t getIdenticalPrefixLength();
 		uint32_t getIdenticalSuffixLength();
 
@@ -44,6 +46,8 @@ namespace graphite
 		void addOverlappingAllelePtr(Allele::SharedPtr allelePtr);
 		std::unordered_set< Allele::SharedPtr > getOverlappingAllelePtrs();
 		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score);
+		std::string getOriginalSequence();
+		uint32_t getOriginalSequenceSize();
 
 		static Node::SharedPtr mergeNodes(Node::SharedPtr firstNodePtr, Node::SharedPtr secondNodePtr);
 
@@ -54,6 +58,7 @@ namespace graphite
 		uint32_t m_id;
 		std::unordered_set< Allele::SharedPtr > m_overlapping_allele_ptr_map;
 		std::string m_sequence;
+		std::string m_original_sequence;
 		position m_position;
 		ALLELE_TYPE m_allele_type;
 		Node::SharedPtr m_in_ref_node;

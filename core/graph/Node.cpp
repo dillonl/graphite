@@ -10,7 +10,8 @@ namespace graphite
 		m_in_ref_node(nullptr),
 		m_identical_prefix_length(0),
 		m_identical_suffix_length(0),
-		m_id(s_id)
+		m_id(s_id),
+		m_original_sequence("")
 	{
 		s_id += 1;
 	}
@@ -22,7 +23,8 @@ namespace graphite
 		m_in_ref_node(nullptr),
 		m_identical_prefix_length(0),
 		m_identical_suffix_length(0),
-		m_id(s_id)
+		m_id(s_id),
+		m_original_sequence("")
 	{
 		s_id += 1;
 	}
@@ -48,6 +50,11 @@ namespace graphite
 	Node::SharedPtr Node::getReferenceInNode()
 	{
 		return this->m_in_ref_node;
+	}
+
+	Node::SharedPtr Node::getReferenceOutNode()
+	{
+		return this->m_out_ref_node;
 	}
 
 	std::unordered_set< Node::SharedPtr > Node::getInNodes()
@@ -175,6 +182,36 @@ namespace graphite
 		this->m_out_ref_node = nullptr;
 		this->m_out_nodes.clear();
 		this->m_in_nodes.clear();
+	}
+
+	void Node::setCompressedSequence(const std::string& sequence)
+	{
+		this->m_original_sequence = this->m_sequence;
+		this->m_sequence = sequence;
+	}
+
+	std::string Node::getOriginalSequence()
+	{
+		if (this->m_original_sequence.size() > 0)
+		{
+			return this->m_original_sequence;
+		}
+		else
+		{
+			return this->m_sequence;
+		}
+	}
+
+	uint32_t Node::getOriginalSequenceSize()
+	{
+		if (this->m_original_sequence.size() > 0)
+		{
+			return this->m_original_sequence.size();
+		}
+		else
+		{
+			return this->m_sequence.size();
+		}
 	}
 
 

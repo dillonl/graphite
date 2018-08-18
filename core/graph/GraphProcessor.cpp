@@ -18,7 +18,7 @@ namespace graphite
 		m_mismatch_value(mismatchValue),
 		m_gap_open_value(gapOpenValue),
 		m_gap_extension_value(gapExtensionValue),
-		m_thread_pool(std::thread::hardware_concurrency()*2),
+		m_thread_pool(4),
 		m_print_graphs(printGraph)
 	{
 		for (auto bamReaderPtr : bamReaderPtrs)
@@ -70,7 +70,7 @@ namespace graphite
 	{
 		// generate graph
 		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
-		auto refGraphPtr = std::make_shared< ReferenceGraph >(this->m_fasta_reference_ptr, graphPtr->getGraphRegion());
+		auto refGraphPtr = std::make_shared< ReferenceGraph >(graphPtr->getReferenceSequence(), graphPtr->getGraphRegion()->getStartPosition());
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments

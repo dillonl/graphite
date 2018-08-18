@@ -49,6 +49,7 @@ namespace graphite
 		firstNodePtr = condenseGraph(lastNodePtr);
 		setPrefixAndSuffix(firstNodePtr); // calculate prefix and suffix matching sequences
 		this->m_first_node = firstNodePtr;
+		compressLargeNodes();
 		setRegionPtrs();
 	}
 
@@ -57,6 +58,76 @@ namespace graphite
 		return this->m_graph_regions;
 	}
 
+	void Graph::compressLargeNodes()
+	{
+		std::deque< Node::SharedPtr > nodes;
+		nodes.emplace_back(this->m_first_node);
+		while (!nodes.empty())
+		{
+			Node::SharedPtr nodePtr = nodes.front();
+			nodes.pop_front();
+			if (nodePtr->getSequence().size() > (this->m_graph_spacing * 2))
+			{
+				std::string newSequence = nodePtr->getSequence().substr(0, this->m_graph_spacing);
+				newSequence += std::string(this->m_graph_spacing, 'N');
+				newSequence += nodePtr->getSequence().substr(this->m_graph_spacing);
+				nodePtr->setCompressedSequence(newSequence);
+			}
+			for (auto outNodePtr : nodePtr->getOutNodes())
+			{
+				nodes.emplace_back(outNodePtr);
+			}
+		}
+	}
+
+	void Graph::setRegionPtrs()
+	{
+		this->m_graph_regions.clear();
+		std::string referenceID = this->m_variant_ptrs[0]->getChromosome();
+		Node::SharedPtr currentRefNode = this->m_first_node;
+		position startPosition = currentRefNode->getPosition();
+		position endPosition = currentRefNode->getPosition() + currentRefNode->getOriginalSequenceSize();
+		Region::SharedPtr currentRegionPtr = nullptr;
+		while (currentRefNode != nullptr)
+		{
+			if (currentRefNode->getSequence().size() != currentRefNode->getOriginalSequenceSize())
+			{
+				endPosition = currentRefNode->getPosition() + this->m_graph_spacing;
+				this->m_graph_regions.emplace_back(std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE));
+				startPosition = currentRefNode->getPosition() +  currentRefNode->getOriginalSequenceSize() - this->m_graph_spacing;
+			}
+			else
+			{
+				endPosition = currentRefNode->getPosition() + currentRefNode->getSequence().size();
+			}
+			currentRefNode = currentRefNode->getReferenceOutNode();
+		}
+		this->m_graph_regions.emplace_back(std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE));
+
+/*
+		std::string referenceID = this->m_variant_ptrs[0]->getChromosome();
+		position startPosition = MAX_POSITION;
+		position endPosition = 0;
+		for (auto variantPtr : this->m_variant_ptrs)
+		{
+			if (variantPtr->getPosition() < startPosition)
+			{
+				startPosition = variantPtr->getPosition();
+			}
+			position variantEndPosition = variantPtr->getPosition() + variantPtr->getReferenceAllelePtr()->getSequence().size();
+			if (endPosition < variantEndPosition)
+			{
+				endPosition = variantEndPosition;
+			}
+		}
+		startPosition -= this->m_graph_spacing;
+		endPosition += this->m_graph_spacing;
+		auto regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
+		this->m_graph_regions.emplace_back(regionPtr);
+*/
+	}
+
+	/*
 	void Graph::setRegionPtrs()
 	{
 		this->m_graph_regions.clear();
@@ -80,6 +151,7 @@ namespace graphite
 		auto regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
 		this->m_graph_regions.emplace_back(regionPtr);
 	}
+	*/
 
 	void Graph::getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr)
 	{
@@ -98,7 +170,8 @@ namespace graphite
 				endPosition = variantEndPosition;
 			}
 		}
-		startPosition -= this->m_graph_spacing;
+		int tmpStartPos = startPosition - this->m_graph_spacing;
+		startPosition = (tmpStartPos < 0) ? 1 : startPosition -= this->m_graph_spacing;
 		endPosition += this->m_graph_spacing;
 		regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
 		sequence = this->m_fasta_reference_ptr->getSequenceStringFromRegion(regionPtr);
@@ -483,5 +556,17 @@ namespace graphite
 			}
 		}
 		return std::make_shared< Region >(referenceID, startPosition, endPosition, based);
+	}
+
+	std::string Graph::getReferenceSequence()
+	{
+		std::string refSequence = "";
+		Node::SharedPtr currentRefNode = this->m_first_node;
+		while (currentRefNode != nullptr)
+		{
+			refSequence += currentRefNode->getSequence();
+			currentRefNode = currentRefNode->getReferenceOutNode();
+		}
+		return refSequence;
 	}
 }

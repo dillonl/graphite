@@ -29,8 +29,10 @@ namespace graphite
 		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 		Region::SharedPtr getGraphRegion();
+		std::string getReferenceSequence();
 
 	private:
+		void compressLargeNodes();
 		void setRegionPtrs();
 		void generateGraph();
 		void generateReferenceGraph(Region::SharedPtr regionPtr);

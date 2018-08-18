@@ -20,7 +20,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< ReferenceGraph > SharedPtr;
-		ReferenceGraph(FastaReference::SharedPtr fastaReferencePtr, Region::SharedPtr regionPtr);
+		ReferenceGraph(const std::string& refSequence, position startPosition);
 		~ReferenceGraph();
 
 float adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue);
