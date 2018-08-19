@@ -39,9 +39,11 @@ namespace graphite
 		bool formatWritten = false;
 		for (auto line : headerLines)
 		{
+			bool isHeaderCols = false;
 			if (line.find("#CHROM") != std::string::npos)
 			{
 				split(line, '\t', this->m_vcf_column_names);
+				isHeaderCols = true;
 			}
 			if ((line.find("##FORMAT") != std::string::npos && !formatWritten) || (line.find("#CHROM") != std::string::npos && !formatWritten))
 			{
@@ -51,7 +53,10 @@ namespace graphite
 				}
 				formatWritten = true;
 			}
-			lines.emplace_back(line);
+			if (!isHeaderCols)
+			{
+				lines.emplace_back(line);
+			}
 		}
 		std::unordered_set< std::string > writtenLines;
 		for (auto line : lines)
