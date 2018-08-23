@@ -18,7 +18,7 @@ namespace graphite
 		m_mismatch_value(mismatchValue),
 		m_gap_open_value(gapOpenValue),
 		m_gap_extension_value(gapExtensionValue),
-		m_thread_pool(4),
+		m_thread_pool(std::thread::hardware_concurrency() * 2),
 		m_print_graphs(printGraph)
 	{
 		for (auto bamReaderPtr : bamReaderPtrs)

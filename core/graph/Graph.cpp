@@ -49,7 +49,7 @@ namespace graphite
 		firstNodePtr = condenseGraph(lastNodePtr);
 		setPrefixAndSuffix(firstNodePtr); // calculate prefix and suffix matching sequences
 		this->m_first_node = firstNodePtr;
-		compressLargeNodes();
+		// compressLargeNodes();
 		setRegionPtrs();
 	}
 
@@ -501,6 +501,12 @@ namespace graphite
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
 				if (m_graph_printer_ptr != nullptr)
 				{
+					if (!bamAlignmentPtr->IsMapped())
+					{
+						static std::mutex lock;
+						std::lock_guard< std::mutex > l(lock);
+						std::cout << "mapped an unmapped read" << std::endl;
+					}
 					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr, totalScorePercent);
 				}
 			}
