@@ -103,55 +103,7 @@ namespace graphite
 			currentRefNode = currentRefNode->getReferenceOutNode();
 		}
 		this->m_graph_regions.emplace_back(std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE));
-
-/*
-		std::string referenceID = this->m_variant_ptrs[0]->getChromosome();
-		position startPosition = MAX_POSITION;
-		position endPosition = 0;
-		for (auto variantPtr : this->m_variant_ptrs)
-		{
-			if (variantPtr->getPosition() < startPosition)
-			{
-				startPosition = variantPtr->getPosition();
-			}
-			position variantEndPosition = variantPtr->getPosition() + variantPtr->getReferenceAllelePtr()->getSequence().size();
-			if (endPosition < variantEndPosition)
-			{
-				endPosition = variantEndPosition;
-			}
-		}
-		startPosition -= this->m_graph_spacing;
-		endPosition += this->m_graph_spacing;
-		auto regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
-		this->m_graph_regions.emplace_back(regionPtr);
-*/
 	}
-
-	/*
-	void Graph::setRegionPtrs()
-	{
-		this->m_graph_regions.clear();
-		std::string referenceID = this->m_variant_ptrs[0]->getChromosome();
-		position startPosition = MAX_POSITION;
-		position endPosition = 0;
-		for (auto variantPtr : this->m_variant_ptrs)
-		{
-			if (variantPtr->getPosition() < startPosition)
-			{
-				startPosition = variantPtr->getPosition();
-			}
-			position variantEndPosition = variantPtr->getPosition() + variantPtr->getReferenceAllelePtr()->getSequence().size();
-			if (endPosition < variantEndPosition)
-			{
-				endPosition = variantEndPosition;
-			}
-		}
-		startPosition -= this->m_graph_spacing;
-		endPosition += this->m_graph_spacing;
-		auto regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
-		this->m_graph_regions.emplace_back(regionPtr);
-	}
-	*/
 
 	void Graph::getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr)
 	{
@@ -216,7 +168,8 @@ namespace graphite
 			}
 		} while (nodePtr->getOutNodes().size() > 0);
 
-
+		position previousPosition = 0;
+		std::vector< Node::SharedPtr > previousNodes;
 		for (auto variantPtr : this->m_variant_ptrs)
 		{
 			position variantPosition = variantPtr->getPosition() - 1;
@@ -236,6 +189,7 @@ namespace graphite
 				std::cout << "Invalid Graph: addVariantsToGraph, position: " << variantPtr->getPosition() << std::endl;
 				exit(EXIT_FAILURE);
 			}
+			std::vector< Node::SharedPtr > tmpPreviousNodes;
 			for (auto altAllelePtr : variantPtr->getAlternateAllelePtrs())
 			{
 				auto altNodePtr = std::make_shared< Node >(altAllelePtr->getSequence(), variantPosition, Node::ALLELE_TYPE::ALT);
@@ -245,7 +199,20 @@ namespace graphite
 				altNodePtr->addOutNode(outReferenceIter->second);
 				(inReferenceIter->second)->addOutNode(altNodePtr);
 				(outReferenceIter->second)->addInNode(altNodePtr);
+				if (previousPosition == (variantPtr->getPosition() - 1))
+				{
+					for (auto prevNode : previousNodes)
+					{
+						prevNode->addOutNode(altNodePtr);
+						altNodePtr->addInNode(prevNode);
+					}
+				}
+				tmpPreviousNodes.emplace_back(altNodePtr);
 			}
+			previousNodes.clear();
+			previousNodes = tmpPreviousNodes;
+			previousPosition = variantPtr->getPosition();
+
 		}
 	}
 	Node::SharedPtr Graph::condenseGraph(Node::SharedPtr lastNodePtr)
