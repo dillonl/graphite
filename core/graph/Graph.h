@@ -40,8 +40,12 @@ namespace graphite
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
-		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
 		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		std::vector< std::string > generateAllPathsFromNodesOfLength(Node::SharedPtr nodePtr);
+		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
+
+		bool isNodePrefixAmbiguous(std::string& nodeSequence, Node* comparatorNode, std::unordered_set< Node::SharedPtr >& nodePtrs);
+		bool isNodeSuffixAmbiguous(std::string& nodeSequence, Node* comparatorNode, std::unordered_set< Node::SharedPtr >& nodePtrs);
 
 		FastaReference::SharedPtr m_fasta_reference_ptr;
 		std::vector< Variant::SharedPtr > m_variant_ptrs;
@@ -54,6 +58,7 @@ namespace graphite
 		std::unordered_set< std::string > m_aligned_read_names;
 		std::mutex m_aligned_read_names_mutex;
         GraphPrinter::SharedPtr m_graph_printer_ptr;
+		/* std::unordered_map< Node::SharedPtr, std::vector< std::string > m_paths_from_node; */
 	};
 }
 

@@ -8,10 +8,9 @@ namespace graphite
 		m_position(pos),
 		m_allele_type(alleleType),
 		m_in_ref_node(nullptr),
-		m_identical_prefix_length(0),
-		m_identical_suffix_length(0),
 		m_id(s_id),
-		m_original_sequence("")
+		m_original_sequence(""),
+		m_allele_ptr(nullptr)
 	{
 		s_id += 1;
 	}
@@ -21,10 +20,9 @@ namespace graphite
 		m_position(pos),
 		m_allele_type(alleleType),
 		m_in_ref_node(nullptr),
-		m_identical_prefix_length(0),
-		m_identical_suffix_length(0),
 		m_id(s_id),
-		m_original_sequence("")
+		m_original_sequence(""),
+		m_allele_ptr(nullptr)
 	{
 		s_id += 1;
 	}
@@ -150,17 +148,32 @@ namespace graphite
 		{
 			nodePtr->m_overlapping_allele_ptr_map.emplace(allelePtr);
 		}
+		if (firstNodePtr->getAllelePtr() != nullptr)
+		{
+			nodePtr->setAllelePtr(firstNodePtr->getAllelePtr());
+		}
+		else if (secondNodePtr->getAllelePtr() != nullptr)
+		{
+			nodePtr->setAllelePtr(secondNodePtr->getAllelePtr());
+		}
 		return nodePtr;
 	}
 
 	void Node::incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score)
 	{
-		bool nodeSkipped = true;
+		if (this->m_allele_ptr != nullptr)
+		{
+			this->m_allele_ptr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, score);
+		}
+		// bool nodeSkipped = true;
+
+		/*
 		for (auto allelePtr : this->m_overlapping_allele_ptr_map)
 		{
 			nodeSkipped = false;
 			allelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, score);
 		}
+		*/
 		/*
 		std::string nodeType = (this->getAlleleType() == Node::ALLELE_TYPE::REF) ? "REF" : "ALT";
 		if (nodeSkipped)

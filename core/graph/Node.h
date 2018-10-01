@@ -35,19 +35,21 @@ namespace graphite
 		void setCompressedSequence(const std::string& sequence);
 		Node::SharedPtr getReferenceInNode();
 		Node::SharedPtr getReferenceOutNode();
+		void setIdenticalPrefixLength(uint32_t prefixLength);
+		void setIdenticalSuffixLength(uint32_t suffixLength);
 		uint32_t getIdenticalPrefixLength();
 		uint32_t getIdenticalSuffixLength();
 
 		void addInNode(Node::SharedPtr node);
 		void addOutNode(Node::SharedPtr node);
-		void setIdenticalPrefixLength(uint32_t prefixLength);
-		void setIdenticalSuffixLength(uint32_t suffixLength);
 
 		void addOverlappingAllelePtr(Allele::SharedPtr allelePtr);
 		std::unordered_set< Allele::SharedPtr > getOverlappingAllelePtrs();
 		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score);
 		std::string getOriginalSequence();
 		uint32_t getOriginalSequenceSize();
+		void setAllelePtr(Allele::SharedPtr allelePtr) { this->m_allele_ptr = allelePtr; }
+		Allele::SharedPtr getAllelePtr() { return this->m_allele_ptr; }
 
 		static Node::SharedPtr mergeNodes(Node::SharedPtr firstNodePtr, Node::SharedPtr secondNodePtr);
 
@@ -57,6 +59,7 @@ namespace graphite
 		static uint32_t s_id; // the static id counter for all nodes
 		uint32_t m_id;
 		std::unordered_set< Allele::SharedPtr > m_overlapping_allele_ptr_map;
+		Allele::SharedPtr m_allele_ptr;
 		std::string m_sequence;
 		std::string m_original_sequence;
 		position m_position;

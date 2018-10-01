@@ -3,6 +3,7 @@
 #include "core/util/Types.h"
 
 #include <algorithm>
+#include <iostream>
 
 namespace graphite
 {
@@ -115,6 +116,7 @@ namespace graphite
 		std::string graphiteCountsString = "";
 		AlleleCountType alleleCountType = AlleleCountType::NinteyFivePercent;
 		while (alleleCountType != AlleleCountType::EndEnum)
+		// for (auto alleleCountType : AllAlleleCountTypes)
 		{
 			uint32_t totalCounter = 0;
 			std::unordered_set< std::string > forwardScoreCount;

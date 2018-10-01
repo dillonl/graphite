@@ -179,7 +179,8 @@ namespace graphite
 				auto iter = referenceNodePtrPositionMap.find(i);
 				if (iter != referenceNodePtrPositionMap.end())
 				{
-					iter->second->addOverlappingAllelePtr(variantPtr->getReferenceAllelePtr());
+					iter->second->setAllelePtr(variantPtr->getReferenceAllelePtr());
+					// iter->second->addOverlappingAllelePtr(variantPtr->getReferenceAllelePtr());
 				}
 			}
 			auto inReferenceIter = referenceNodePtrPositionMap.find(variantPosition);
@@ -194,7 +195,8 @@ namespace graphite
 			{
 				auto altNodePtr = std::make_shared< Node >(altAllelePtr->getSequence(), variantPosition, Node::ALLELE_TYPE::ALT);
 				this->m_all_created_nodes.emplace(altNodePtr);
-				altNodePtr->addOverlappingAllelePtr(altAllelePtr);
+				// altNodePtr->addOverlappingAllelePtr(altAllelePtr);
+				altNodePtr->setAllelePtr(altAllelePtr);
 				altNodePtr->addInNode(inReferenceIter->second);
 				altNodePtr->addOutNode(outReferenceIter->second);
 				(inReferenceIter->second)->addOutNode(altNodePtr);
@@ -330,6 +332,7 @@ namespace graphite
 
 		unordered_map< uint32_t, gssw_node* > gsswNodePtrsMap;
 		Node::SharedPtr nodePtr = m_first_node;
+		// std::cout << "node from graph: " << nodePtr->getAllelePtr() << std::endl;
 		gssw_node* gsswNode = (gssw_node*)gssw_node_create(nodePtr.get(), nodePtr->getID(), nodePtr->getSequence().c_str(), nt_table, mat);
 		gsswNodePtrsMap.emplace(nodePtr->getID(), gsswNode);
 		gssw_graph_add_node(graph, gsswNode);
@@ -388,15 +391,14 @@ namespace graphite
 			this->m_aligned_read_names.emplace(alignmentName);
 		}
 		std::vector< std::tuple< Node*, uint32_t > > nodePtrScoreTuples;
-		uint32_t prefixMatch = 0;
-		uint32_t suffixMatch = 0;
-		bool setPrefix = true;
 		uint32_t totalScore = 0;
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		uint32_t softclipLength = 0;
 		std::string fullCigarString = "";
 		uint32_t softclipCount = 0;
 		bool hasAlternate = false;
+		uint32_t firstNodeAlignmentOverlapSize = 0;
+		uint32_t lastNodeAlignmentOverlapSize = 0;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			std::string cigarString = "";
@@ -406,29 +408,22 @@ namespace graphite
 			int32_t score = 0;
 			uint32_t length = 0;
 			uint32_t tmpSofclipLength = 0;
-			// std::unordered_map< gssw_node*, uint32_t > nodePrefixMatchMap;
-			// std::unordered_map< gssw_node*, uint32_t > nodeSuffixMatchMap;
+			uint32_t nodeLengthAccumulator = 0;
 			for (int j = 0; j < nc->cigar->length; ++j)
 			{
 				switch (nc->cigar->elements[j].type)
 				{
 				case 'M':
-					suffixMatch += nc->cigar->elements[j].length;
-					if (setPrefix)
-					{
-						prefixMatch += nc->cigar->elements[j].length;
-					}
+					nodeLengthAccumulator += nc->cigar->elements[j].length;
 					score += (matchValue * nc->cigar->elements[j].length);
 					break;
 				case 'X':
-					setPrefix = false;
-					suffixMatch = 0;
+					nodeLengthAccumulator += nc->cigar->elements[j].length;
 					score -= (mismatchValue * nc->cigar->elements[j].length);
 					break;
 				case 'I': // I and D are treated the same
 				case 'D':
-					setPrefix = false;
-					suffixMatch = 0;
+					nodeLengthAccumulator += nc->cigar->elements[j].length;
 					score -= gapOpenValue;
 					score -= (gapExtensionValue * (nc->cigar->elements[j].length -1));
 					break;
@@ -441,6 +436,14 @@ namespace graphite
 				length += nc->cigar->elements[j].length;
 				fullCigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
 			}
+			if (i == 0)
+			{
+				firstNodeAlignmentOverlapSize = nodeLengthAccumulator;
+			}
+			if (i == graphMapping->cigar.length - 1)
+			{
+				lastNodeAlignmentOverlapSize = nodeLengthAccumulator;
+			}
 			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
 			softclipLength += tmpSofclipLength;
 			float tmpScore = score;
@@ -451,11 +454,77 @@ namespace graphite
 		}
 
 		float totalScorePercent = ((float)(totalScore))/((float)(bamAlignmentPtr->Length - softclipLength)) * 100;
+		uint32_t count = 0;
+		// static std::mutex lo;
+		// std::lock_guard< std::mutex > lock(lo);
 		for (auto nodePtrScoreTuple : nodePtrScoreTuples)
 		{
+			bool isFirstNode = count == 0;
+			bool isPenultimateNode = count == (nodePtrScoreTuples.size() - 2);
+			bool isLastNode = count == (nodePtrScoreTuples.size() - 1);
 			Node* nodePtr = std::get< 0 >(nodePtrScoreTuple);
 			uint32_t nodeScore = std::get< 1 >(nodePtrScoreTuple);
-			if (totalScorePercent == referenceTotalScorePercent && hasAlternate)
+			bool isAmbiguous = false;
+			if (nodePtrScoreTuples.size() > 1)
+			{
+				if (isFirstNode) // if nodePtr is a candidate for identifying repeats at the beginning of the graph
+				{
+					std::string firstNodeSequence = nodePtr->getSequence().substr(nodePtr->getSequence().size() - firstNodeAlignmentOverlapSize);
+					Node* nextNodePtr = std::get< 0 >(nodePtrScoreTuples[1]);
+					std::string concatSequence = nodePtr->getSequence() + nextNodePtr->getSequence();
+					for (auto potentialPathNode : nextNodePtr->getInNodes())
+					{
+						if (nodePtr == potentialPathNode.get()) { continue; }
+						std::string potentialConcatSequence = std::string(firstNodeSequence + nextNodePtr->getSequence(), 0, concatSequence.size());
+						if (potentialConcatSequence.compare(concatSequence) == 0)
+						{
+							isAmbiguous = true;
+							break;
+						}
+					}
+				}
+				else if (isPenultimateNode) // if nodePtr the node before the last node
+				{
+					Node* lastNodePtr = std::get< 0 >(nodePtrScoreTuples[nodePtrScoreTuples.size() - 1]);
+					std::string lastNodeSequence = lastNodePtr->getSequence().substr(0, lastNodeAlignmentOverlapSize);
+					if (lastNodePtr->getInNodes().size() > 1 && lastNodePtr->getAlleleType() == Node::ALLELE_TYPE::REF) // if nodePtr is a ref backbone
+					{
+						std::string concatSequence = nodePtr->getSequence() + lastNodeSequence;
+						for (auto potentialPrevPathNode : lastNodePtr->getInNodes())
+						{
+							if (potentialPrevPathNode.get() == nodePtr) { continue; }
+							std::string potentialConcatSequence = std::string(potentialPrevPathNode->getSequence() + lastNodePtr->getSequence(),0, concatSequence.size());
+							if (potentialConcatSequence.compare(concatSequence) == 0)
+							{
+								isAmbiguous = true;
+								break;
+							}
+						}
+					}
+				}
+				else if (isLastNode && nodePtr->getReferenceOutNode() != nullptr && nodePtr->getReferenceOutNode()->getInNodes().size() > 1)
+				{
+					for (auto potentialNodePtr : nodePtr->getReferenceOutNode()->getInNodes())
+					{
+						if (nodePtr == potentialNodePtr.get()) { continue; }
+						if (nodePtr->getSequence().size() > potentialNodePtr->getSequence().size())
+						{
+							for (auto nextPotentialNodePtr : potentialNodePtr->getOutNodes())
+							{
+
+								std::string potentialSequence = std::string(potentialNodePtr->getSequence() + nextPotentialNodePtr->getSequence(), 0, nodePtr->getSequence().size());
+								if (potentialSequence.compare(nodePtr->getSequence()) == 0)
+								{
+									isAmbiguous = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if ((totalScorePercent == referenceTotalScorePercent && hasAlternate) || isAmbiguous)
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, -1);
 			}
@@ -465,18 +534,21 @@ namespace graphite
 			}
 			else
 			{
+				/*
+				if (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF && nodePtr->getSequence().size() < 50)
+				{
+					std::cout << "---" << std::endl;
+					std::cout << "a: " << bamAlignmentPtr->QueryBases << " " << bamAlignmentPtr->Name << std::endl;
+					std::cout << "---" << std::endl;
+				}
+				*/
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
 				if (m_graph_printer_ptr != nullptr)
 				{
-					if (!bamAlignmentPtr->IsMapped())
-					{
-						static std::mutex lock;
-						std::lock_guard< std::mutex > l(lock);
-						std::cout << "mapped an unmapped read" << std::endl;
-					}
 					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr, totalScorePercent);
 				}
 			}
+			++count;
 		}
 	}
 
@@ -541,5 +613,76 @@ namespace graphite
 			currentRefNode = currentRefNode->getReferenceOutNode();
 		}
 		return refSequence;
+	}
+
+	void getAllPathsOfLength(Node::SharedPtr nodePtr, std::string currentPath, std::vector< std::string >& paths, uint32_t len)
+	{
+		if (nodePtr->getSequence().size() < len)
+		{
+			currentPath += nodePtr->getSequence().substr(len);
+			paths.emplace_back(currentPath);
+		}
+		else
+		{
+			currentPath += nodePtr->getSequence();
+			for (auto nextNodePtr : nodePtr->getOutNodes())
+			{
+				getAllPathsOfLength(nextNodePtr, currentPath, paths, (nodePtr->getSequence().size() - len));
+			}
+		}
+	}
+
+	std::vector< std::string > Graph::generateAllPathsFromNodesOfLength(Node::SharedPtr nodePtr)
+	{
+		Node::SharedPtr maxSizeNodePtr = *std::max_element(nodePtr->getOutNodes().begin(), nodePtr->getOutNodes().end(),[](Node::SharedPtr iterNode1,  Node::SharedPtr iterNode2) {
+				return iterNode1->getOriginalSequenceSize() < iterNode2->getOriginalSequenceSize();
+			});
+		std::vector< std::string > paths;
+		for (auto outNodePtr : nodePtr->getOutNodes())
+		{
+			if (maxSizeNodePtr == outNodePtr)
+			{
+				paths.emplace_back(outNodePtr->getOriginalSequence());
+			}
+			else
+			{
+				getAllPathsOfLength(outNodePtr, "", paths, maxSizeNodePtr->getOriginalSequenceSize());
+			}
+		}
+		return paths;
+	}
+
+	bool Graph::isNodePrefixAmbiguous(std::string& nodeSequence, Node* comparatorNode, std::unordered_set< Node::SharedPtr >& nodePtrs)
+	{
+		for (auto nodePtr : nodePtrs)
+		{
+			auto testNodeSequence = nodePtr->getSequence();
+			if (nodePtr.get() == comparatorNode || testNodeSequence.size() < nodeSequence.size())
+			{
+				continue;
+			}
+			else if (testNodeSequence.substr(nodeSequence.size()).compare(nodeSequence) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool Graph::isNodeSuffixAmbiguous(std::string& nodeSequence, Node* comparatorNode, std::unordered_set< Node::SharedPtr >& nodePtrs)
+	{
+		for (auto nodePtr : nodePtrs)
+		{
+			auto testNodeSequence = nodePtr->getSequence();
+			if (nodePtr.get() == comparatorNode || testNodeSequence.size() < nodeSequence.size())
+			{
+				continue;
+			}
+			else if (testNodeSequence.substr(0, nodeSequence.size()).compare(nodeSequence) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
