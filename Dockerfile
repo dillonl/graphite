@@ -12,8 +12,10 @@ RUN apt-get update && apt-get -y install \
 		libpng-dev
         
 ## Pull repo
-RUN git clone https://github.com/dillonl/graphite.git
+RUN git clone https://github.com/srynobio/graphite.git
 RUN mkdir graphite/bin
 RUN cd graphite/bin && cmake ../
 RUN cd graphite/bin && make
+RUN cp graphite/bin/graphite /usr/bin/
+RUN graphite -h
 
