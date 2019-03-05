@@ -23,6 +23,7 @@ namespace graphite
 		~GraphPrinter();
 
 		void registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore);
+		void registerUnalignedRead(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, std::string graphCigarString, float sswScore);
 		void printGraph();
 
 	private:
@@ -34,15 +35,26 @@ namespace graphite
 			std::string m_read_name;
 			std::string m_cigar_str;
 			std::string m_graph_cigar;
-			std::vector< std::tuple< uint32_t, char > > m_cigar;
+			/* std::vector< std::tuple< uint32_t, char > > m_cigar; */
 			uint32_t m_position_offset;
+		};
+		struct UnMappedContainer
+		{
+			uint32_t m_ssw_score;
+			std::string m_sequence;
+			std::string m_read_name;
+			std::string m_cigar_str;
+			std::string m_graph_cigar;
+			uint32_t m_position;
 		};
 		std::shared_ptr< std::unordered_set< uint32_t > > getKey(std::unordered_set< uint32_t >& set);
 		uint32_t getGraphOffset(Node* nodePtr);
 
-		Graph* m_graph_ptr;
+		/* Graph* m_graph_ptr; */
 		std::unordered_map< std::shared_ptr< std::unordered_set< uint32_t > >, std::vector< Node::SharedPtr > > m_graph_path_node_ids;
 		std::unordered_map< std::shared_ptr< std::unordered_set< uint32_t > >, std::vector< std::shared_ptr< MappingContainer > > > m_graph_mapping_container_ptrs;
+		std::unordered_set< std::string > m_alignment_readname_tracker_map;
+		std::vector< std::shared_ptr< UnMappedContainer > > m_unmapped_read_containers;
 	};
 }
 

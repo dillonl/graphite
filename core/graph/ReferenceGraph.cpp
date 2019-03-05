@@ -47,6 +47,16 @@ namespace graphite
 			}
 			this->m_aligned_read_names.emplace(alignmentName);
 		}
+
+		static std::mutex lo;
+		std::lock_guard< std::mutex > lock(lo);
+		int count = 0;
+		if (bamAlignmentPtr->Name.find("60797") != std::string::npos || bamAlignmentPtr->Name.find("50444") != std::string::npos)
+		{
+			count += 1;
+			count = 0;
+		}
+
 		std::vector< std::tuple< Node*, uint32_t > > nodePtrScoreTuples;
 		uint32_t prefixMatch = 0;
 		uint32_t suffixMatch = 0;

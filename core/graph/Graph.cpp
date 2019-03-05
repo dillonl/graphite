@@ -493,8 +493,18 @@ namespace graphite
 						for (auto potentialPrevPathNode : lastNodePtr->getInNodes())
 						{
 							if (potentialPrevPathNode.get() == nodePtr) { continue; }
-							std::string potentialConcatSequence = std::string(potentialPrevPathNode->getSequence() + lastNodePtr->getSequence(),0, concatSequence.size());
-							if (potentialConcatSequence.compare(concatSequence) == 0)
+							std::string potentialPathSequence = std::string(potentialPrevPathNode->getSequence() + lastNodePtr->getSequence(), 0, concatSequence.size());
+							/*
+							static std::mutex lo;
+							lo.lock();
+							std::cout << "--------------------" << std::endl;
+							std::cout << bamAlignmentPtr->Name << std::endl;
+							std::cout << concatSequence << std::endl;
+							std::cout << potentialPathSequence << std::endl;
+							std::cout << "--------------------" << std::endl;
+							lo.unlock();
+							*/
+							if (concatSequence.compare(potentialPathSequence) == 0)
 							{
 								isAmbiguous = true;
 								break;
@@ -524,7 +534,9 @@ namespace graphite
 				}
 			}
 
-			if ((totalScorePercent == referenceTotalScorePercent && hasAlternate) || isAmbiguous)
+			bool printed = false;
+			// if ((totalScorePercent == referenceTotalScorePercent && hasAlternate) || isAmbiguous)
+			if (isAmbiguous)
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, -1);
 			}
@@ -534,19 +546,16 @@ namespace graphite
 			}
 			else
 			{
-				/*
-				if (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF && nodePtr->getSequence().size() < 50)
-				{
-					std::cout << "---" << std::endl;
-					std::cout << "a: " << bamAlignmentPtr->QueryBases << " " << bamAlignmentPtr->Name << std::endl;
-					std::cout << "---" << std::endl;
-				}
-				*/
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
 				if (m_graph_printer_ptr != nullptr)
 				{
 					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr, totalScorePercent);
+					printed = true;
 				}
+			}
+			if (!printed && m_graph_printer_ptr != nullptr)
+			{
+				m_graph_printer_ptr->registerUnalignedRead(bamAlignmentPtr, fullCigarString, totalScorePercent);
 			}
 			++count;
 		}

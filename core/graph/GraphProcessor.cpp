@@ -91,12 +91,10 @@ namespace graphite
 				uint32_t gapExtensionValue = m_gap_extension_value;
 				auto funct = [graphPtr, refGraphPtr, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
 				{
-					float referenceSWScore = refGraphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
-					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceSWScore);
+					// float referenceSWScore = refGraphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
+					// graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceSWScore);
+					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
 				};
-
-				// graphPtr->adjudicateAlignment(bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value);
-				// auto funct = std::bind(&Graph::adjudicateAlignment, graphPtr, bamAlignmentPtr, iter->second, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value, false, 0);
 				m_thread_pool.enqueue(funct);
 			}
 		}

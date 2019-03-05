@@ -14,8 +14,20 @@ namespace graphite
 		{
 			m_bam_sample_ptrs_map.emplace(samplePtr->getName(), samplePtr);
 		}
-		std::string base_filename = filename.substr(filename.find_last_of("/\\") + 1);
-		std::string path(outputDirectory + "/" + base_filename);
+
+		// let's remove any gz from the filename
+		std::string baseFilename = filename.substr(filename.find_last_of("/\\") + 1);
+		std::string filenameExtension = baseFilename.substr(baseFilename.find_last_of(".") + 1);
+		if (filenameExtension.compare("gz") == 0)
+		{
+			baseFilename = baseFilename.substr(0, baseFilename.size() - filenameExtension.size() - 1);
+			filenameExtension = baseFilename.substr(baseFilename.find_last_of(".") + 1);
+			if (filenameExtension.compare("vcf") != 0)
+			{
+				baseFilename += ".vcf";
+			}
+		}
+		std::string path(outputDirectory + "/" + baseFilename);
 		this->m_out_file.open(path);
 	}
 

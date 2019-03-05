@@ -6,8 +6,8 @@
 
 namespace graphite
 {
-	GraphPrinter::GraphPrinter(Graph* graphPtr) :
-		m_graph_ptr(graphPtr)
+	GraphPrinter::GraphPrinter(Graph* graphPtr)// :
+		// m_graph_ptr(graphPtr)
 	{
 		auto paths = graphPtr->generateAllPaths();
 		for (auto path : paths)
@@ -28,7 +28,13 @@ namespace graphite
 	void GraphPrinter::registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore)
 	{
 		static std::mutex l;
-		l.lock();
+
+		std::lock_guard< std::mutex > lock(l);
+		if (this->m_alignment_readname_tracker_map.find(bamAlignmentPtr->Name) != this->m_alignment_readname_tracker_map.end())
+		{
+			return;
+		}
+		this->m_alignment_readname_tracker_map.emplace(bamAlignmentPtr->Name);
 		std::shared_ptr< MappingContainer > mappingContainerPtr = std::make_shared< MappingContainer >();
 		std::vector< std::string > pathNodeIDs;
 		std::vector< std::tuple< uint32_t, char > > cigar;
@@ -83,7 +89,7 @@ namespace graphite
 
 		mappingContainerPtr->m_sequence = bamAlignmentPtr->QueryBases;
 		mappingContainerPtr->m_read_name = bamAlignmentPtr->Name;
-		std::cout << bamAlignmentPtr->Name << std::endl;
+		// std::cout << bamAlignmentPtr->Name << std::endl;
 		if (softclipOffset >= 0)
 		{
 
@@ -103,7 +109,19 @@ namespace graphite
 			std::vector< std::shared_ptr< MappingContainer > >* tmp = &iter->second;
 			tmp->emplace_back(mappingContainerPtr);
 		}
-		l.unlock();
+	}
+
+	void GraphPrinter::registerUnalignedRead(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, std::string graphCigarString, float sswScore)
+	{
+		static std::mutex l;
+		std::lock_guard< std::mutex > lock(l);
+		std::shared_ptr< UnMappedContainer > mappingContainerPtr = std::make_shared< UnMappedContainer >();
+		mappingContainerPtr->m_ssw_score = sswScore;
+		mappingContainerPtr->m_graph_cigar = graphCigarString;
+		mappingContainerPtr->m_position = bamAlignmentPtr->Position;
+		mappingContainerPtr->m_sequence = bamAlignmentPtr->QueryBases;
+		mappingContainerPtr->m_read_name = bamAlignmentPtr->Name;
+		m_unmapped_read_containers.push_back(mappingContainerPtr);
 	}
 
 	uint32_t GraphPrinter::getGraphOffset(Node* nodePtr)
@@ -199,6 +217,16 @@ namespace graphite
 			// }
 			// std::cout << std::string(graphPath.size(), '-')<< std::endl;
 			// std::cout << std::string(graphPath.size(), '-')<< std::endl;
+
+			std::cout << std::string(400, '=')<< std::endl;
+			std::cout << "Unmapped Reads" << std::endl;
+			for (auto unmappedContainerPtr : m_unmapped_read_containers)
+			{
+				std::string line = unmappedContainerPtr->m_sequence +"\t" + std::to_string(unmappedContainerPtr->m_ssw_score) + "\t" + unmappedContainerPtr->m_graph_cigar + "\t" + unmappedContainerPtr->m_read_name;
+
+				std::cout << line << std::endl;
+			}
+			std::cout << std::string(400, '=')<< std::endl;
 
 			std::cout << std::string(400, '-')<< std::endl;
 			std::cout << std::string(400, '-')<< std::endl;
