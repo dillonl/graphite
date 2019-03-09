@@ -168,8 +168,8 @@ namespace graphite
 			}
 		} while (nodePtr->getOutNodes().size() > 0);
 
-		position previousPosition = 0;
-		std::vector< Node::SharedPtr > previousNodes;
+		// std::vector< Node::SharedPtr > previousNodes;
+		std::unordered_map< position, std::vector< Node::SharedPtr > > endPositionNodePtrs;
 		for (auto variantPtr : this->m_variant_ptrs)
 		{
 			position variantPosition = variantPtr->getPosition() - 1;
@@ -180,7 +180,6 @@ namespace graphite
 				if (iter != referenceNodePtrPositionMap.end())
 				{
 					iter->second->setAllelePtr(variantPtr->getReferenceAllelePtr());
-					// iter->second->addOverlappingAllelePtr(variantPtr->getReferenceAllelePtr());
 				}
 			}
 			auto inReferenceIter = referenceNodePtrPositionMap.find(variantPosition);
@@ -190,30 +189,42 @@ namespace graphite
 				std::cout << "Invalid Graph: addVariantsToGraph, position: " << variantPtr->getPosition() << std::endl;
 				exit(EXIT_FAILURE);
 			}
-			std::vector< Node::SharedPtr > tmpPreviousNodes;
 			for (auto altAllelePtr : variantPtr->getAlternateAllelePtrs())
 			{
 				auto altNodePtr = std::make_shared< Node >(altAllelePtr->getSequence(), variantPosition, Node::ALLELE_TYPE::ALT);
 				this->m_all_created_nodes.emplace(altNodePtr);
-				// altNodePtr->addOverlappingAllelePtr(altAllelePtr);
 				altNodePtr->setAllelePtr(altAllelePtr);
+
+				position endPosition = altNodePtr->getPosition() + altNodePtr->getSequence().size();
+				if (endPositionNodePtrs.find(endPosition) == endPositionNodePtrs.end())
+				{
+					endPositionNodePtrs[endPosition];
+					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
+					std::cout << "adding alt at Pos (start, end)1: " << altNodePtr->getPosition() << " " << endPosition << std::endl;
+				}
+				else
+				{
+					std::cout << "adding alt at Pos (start, end)2: " << altNodePtr->getPosition() << " " << endPosition << std::endl;
+					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
+				}
+
 				altNodePtr->addInNode(inReferenceIter->second);
 				altNodePtr->addOutNode(outReferenceIter->second);
 				(inReferenceIter->second)->addOutNode(altNodePtr);
 				(outReferenceIter->second)->addInNode(altNodePtr);
-				if (previousPosition == (variantPtr->getPosition() - 1))
+
+				auto iter = endPositionNodePtrs.find(altNodePtr->getPosition());
+				std::cout << "considering alt at Pos (start, lookup)2: " << altNodePtr->getPosition() << " " << altNodePtr->getPosition() << std::endl;
+				if (iter != endPositionNodePtrs.end()) // we subtract one because we want to connect nodes that bump up against us
 				{
-					for (auto prevNode : previousNodes)
+					std::cout << "found alt at Pos (start, lookup)2: " << altNodePtr->getPosition() << " " << altNodePtr->getPosition() << std::endl;
+					for (auto nodePtrs : iter->second)
 					{
-						prevNode->addOutNode(altNodePtr);
-						altNodePtr->addInNode(prevNode);
+						altNodePtr->addInNode(nodePtrs);
+						nodePtrs->addOutNode(altNodePtr);
 					}
 				}
-				tmpPreviousNodes.emplace_back(altNodePtr);
 			}
-			previousNodes.clear();
-			previousNodes = tmpPreviousNodes;
-			previousPosition = variantPtr->getPosition();
 
 		}
 	}
@@ -693,5 +704,32 @@ namespace graphite
 			}
 		}
 		return false;
+	}
+
+	void getFullPathFromNode(std::vector< std::string >& paths, std::string currentPath, Node::SharedPtr currentNodePtr)
+	{
+		currentPath += currentNodePtr->getSequence();
+		auto outNodePtrs = currentNodePtr->getOutNodes();
+		if (outNodePtrs.size() == 0)
+		{
+			paths.emplace_back(currentPath);
+		}
+		else
+		{
+			for (auto nextNodePtr : outNodePtrs)
+			{
+				getFullPathFromNode(paths, currentPath, nextNodePtr);
+			}
+		}
+	}
+
+	std::vector< std::string > Graph::getAllPathsAsStrings()
+	{
+		std::vector< std::string > paths;
+		if (this->m_first_node != nullptr)
+		{
+			getFullPathFromNode(paths, "", this->m_first_node);
+		}
+		return paths;
 	}
 }

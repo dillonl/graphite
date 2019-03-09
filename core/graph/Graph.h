@@ -30,6 +30,7 @@ namespace graphite
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 		Region::SharedPtr getGraphRegion();
 		std::string getReferenceSequence();
+		std::vector< std::string > getAllPathsAsStrings();
 
 	private:
 		void compressLargeNodes();
