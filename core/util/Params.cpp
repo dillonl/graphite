@@ -34,6 +34,7 @@ namespace graphite
 			("s,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
+			("q,mapping_quality", "Mapping Quality Filter - (0 - 255) Filter reads that are less than or equal to this value [optional - default is no filter (-1)]", cxxopts::value< int32_t >()->default_value("-1"))
 			("i,igv_visualization_output", "Output IGV input for visualization [optional - default is false]");
 		this->m_options.parse(argc, argv);
 	}
@@ -72,6 +73,10 @@ namespace graphite
 		if (!m_options.count("o"))
 		{
 			errorMessages.emplace_back("output path required");
+		}
+		if (m_options["q"].as< int32_t >() < -1 || m_options["q"].as< int32_t >() > 255)
+		{
+			errorMessages.emplace_back("invalid mapping quality, please proved a value between 0 and 255");
 		}
 		if (errorMessages.size() > 0)
 		{
@@ -151,6 +156,11 @@ namespace graphite
 	int Params::getGapOpenValue()
 	{
 		return m_options["g"].as< uint32_t >();
+	}
+
+	int32_t Params::getMappingQualityFilter()
+	{
+		return m_options["q"].as< int32_t >();
 	}
 
 	int Params::getGapExtensionValue()

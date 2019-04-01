@@ -121,34 +121,6 @@ namespace graphite
 		writeLine(headerLine);
 	}
 
-	/*
-	void VCFWriter::setSamples(const std::string& columnHeaderLine, std::unordered_map< std::string, Sample::SharedPtr >& samplePtrsMap)
-	{
-		this->m_sample_ptrs.clear();
-		this->m_sample_ptrs_map.clear();
-		std::vector< std::string > columns;
-		split(columnHeaderLine, '\t', columns);
-		for (auto column : columns)
-		{
-			std::string upperColumn;
-			std::transform(column.begin(), column.end(), std::back_inserter(upperColumn), ::toupper);
-			if (std::find(STANDARD_VCF_COLUMN_NAMES.begin(), STANDARD_VCF_COLUMN_NAMES.end(), upperColumn) == STANDARD_VCF_COLUMN_NAMES.end())
-			{
-				auto iter = samplePtrsMap.find(column);
-				if (iter == samplePtrsMap.end())
-				{
-					std::cout << "error in VCFWriter::setSamples sample: " << column << " not found" << std::endl;
-				}
-				else
-				{
-					this->m_sample_ptrs.emplace_back(iter->second);
-					this->m_sample_ptrs_map.emplace(iter->first, iter->second);
-				}
-			}
-		}
-	}
-	*/
-
 	Sample::SharedPtr VCFWriter::getSamplePtr(const std::string& sampleName)
 	{
 		return this->m_bam_sample_ptrs_map.find(sampleName)->second;

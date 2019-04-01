@@ -37,6 +37,7 @@ namespace graphite
 		int getGapOpenValue();
 		int getGapExtensionValue();
 		uint32_t getGraphSize();
+		int32_t getMappingQualityFilter();
 		bool outputVisualizationFiles();
 	private:
 		void validateFolderPaths(const std::vector< std::string >& paths, bool exitOnFailure);

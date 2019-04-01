@@ -39,7 +39,7 @@ namespace graphite
 	/*
 	 * Concat new bamAlignments to the passed in list, bamAlignmentPtrs.
 	 */
-	void BamReader::fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads)
+	void BamReader::fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads, int32_t mappingQuality)
 	{
 		int refID = this->m_bam_reader->GetReferenceID(regionPtr->getReferenceID());
 		this->m_bam_reader->SetRegion(refID, regionPtr->getStartPosition(), refID, regionPtr->getEndPosition());
@@ -49,8 +49,9 @@ namespace graphite
 		while (this->m_bam_reader->GetNextAlignment(*bamtoolsAlignmentPtr))
 		{
 			bool isInRegion = (startPosition < bamtoolsAlignmentPtr->Position && (bamtoolsAlignmentPtr->Position + bamtoolsAlignmentPtr->Length) < endPosition);
+			bool shouldFilter = (bamtoolsAlignmentPtr->MapQuality <= mappingQuality); // remove mapping quality less than param value (default is -1 aka no filter)
 			if ((bamtoolsAlignmentPtr->IsDuplicate() && !includeDuplicateReads) ||
-				(unmappedOnly && bamtoolsAlignmentPtr->IsMapped()) || !isInRegion)
+				(unmappedOnly && bamtoolsAlignmentPtr->IsMapped()) || !isInRegion || shouldFilter)
 			{
 				delete bamtoolsAlignmentPtr; // delete the ptr if the ptr isn't added to the alignmentPtrs
 			}

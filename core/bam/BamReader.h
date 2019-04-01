@@ -24,7 +24,7 @@ namespace graphite
 		BamReader(const std::string& filename);
 		~BamReader();
 
-		void fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads);
+		void fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads, int32_t mappingQuality);
 
         std::unordered_set< Sample::SharedPtr > getSamplePtrs();
 		uint32_t getReadLength();

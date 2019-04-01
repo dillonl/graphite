@@ -29,14 +29,13 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< GraphProcessor > SharedPtr;
-		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph);
+		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality);
 		~GraphProcessor();
 
 		void processVariants();
 
 	private:
 		void adjudicateVariants(std::vector< Variant::SharedPtr >& variantPtrs, uint32_t graphSpacing);
-		void adjudicateVariants2(std::vector< Variant::SharedPtr >& variantPtrs, uint32_t graphSpacing);
         void getAlignmentsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs, std::vector< Region::SharedPtr > regionPtrs, bool getFlankingUnalignedReads);
 		FastaReference::SharedPtr m_fasta_reference_ptr;
 		std::vector< BamReader::SharedPtr > m_bam_reader_ptrs;
@@ -49,6 +48,7 @@ namespace graphite
 		uint32_t m_gap_extension_value;
 		ThreadPool m_thread_pool;
 		bool m_print_graphs;
+		int32_t m_mapping_quality;
 	};
 }
 

@@ -135,6 +135,7 @@ namespace graphite
 		std::vector< std::string > sampleNames;
 		std::vector< std::string > columns;
 		split(columnLine, '\t', columns);
+		std::string lastColumnName = "";
 		for (auto column : columns)
 		{
 			std::string upperColumn;
@@ -153,6 +154,11 @@ namespace graphite
 				this->m_sample_ptrs_map.emplace(samplePtr->getName(), samplePtr);
 			}
 			newLine += column + "\t";
+			lastColumnName = column;
+		}
+		if (lastColumnName.compare("INFO") == 0)
+		{
+			newLine += "FORMAT\t";
 		}
 
 		// add in the rest of the bam samples that aren't in the header already

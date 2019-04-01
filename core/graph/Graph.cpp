@@ -200,11 +200,9 @@ namespace graphite
 				{
 					endPositionNodePtrs[endPosition];
 					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
-					std::cout << "adding alt at Pos (start, end)1: " << altNodePtr->getPosition() << " " << endPosition << std::endl;
 				}
 				else
 				{
-					std::cout << "adding alt at Pos (start, end)2: " << altNodePtr->getPosition() << " " << endPosition << std::endl;
 					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
 				}
 
@@ -214,10 +212,8 @@ namespace graphite
 				(outReferenceIter->second)->addInNode(altNodePtr);
 
 				auto iter = endPositionNodePtrs.find(altNodePtr->getPosition());
-				std::cout << "considering alt at Pos (start, lookup)2: " << altNodePtr->getPosition() << " " << altNodePtr->getPosition() << std::endl;
 				if (iter != endPositionNodePtrs.end()) // we subtract one because we want to connect nodes that bump up against us
 				{
-					std::cout << "found alt at Pos (start, lookup)2: " << altNodePtr->getPosition() << " " << altNodePtr->getPosition() << std::endl;
 					for (auto nodePtrs : iter->second)
 					{
 						altNodePtr->addInNode(nodePtrs);

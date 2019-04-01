@@ -71,7 +71,11 @@ namespace graphite
 		{
 			if (columnNames[i].compare("FORMAT") == 0 && this->m_vcf_writer_ptr->getBlankFormatStringPtr() == nullptr)
 			{
-				auto formatCol = columns[i];
+				std::string formatCol = "";
+				if (columns.size() < i)
+				{
+					formatCol = columns[i];
+				}
 				size_t n = std::count(formatCol.begin(), formatCol.end(), ':');
 				std::string blankSampleFormat = (formatCol.size() > 0) ? "." : "";
 				for (int i = 0; i < n; ++i) { blankSampleFormat += ":."; }
