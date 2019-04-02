@@ -20,7 +20,7 @@ mkdir bin/
 cd bin
 cmake ../
 make
-sudo make install
+make install #optional
 ```
 
 Usage
