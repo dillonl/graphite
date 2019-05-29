@@ -29,7 +29,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< GraphProcessor > SharedPtr;
-		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality);
+		GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs, uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit);
 		~GraphProcessor();
 
 		void processVariants();
@@ -49,6 +49,7 @@ namespace graphite
 		ThreadPool m_thread_pool;
 		bool m_print_graphs;
 		int32_t m_mapping_quality;
+		int32_t m_read_sample_limit;
 	};
 }
 

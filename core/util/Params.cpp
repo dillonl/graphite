@@ -31,6 +31,7 @@ namespace graphite
 			("f,fasta", "Path to input FASTA file", cxxopts::value< std::string >())
 			("p,percent_match", "Smith-Waterman Percent [optional - default is 90]", cxxopts::value< uint32_t >()->default_value("90"))
 			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
+			("n,sample_limit", "If the number of reads exceed this number then Graphite will randomly sample n reads [optional - default is no sample limit]", cxxopts::value< int32_t >()->default_value("-1"))
 			("s,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
@@ -187,6 +188,10 @@ namespace graphite
 		{
 			fileExists(path, exitOnFailure);
 		}
+	}
+	int32_t Params::getReadSampleNumber()
+	{
+		return m_options["n"].as< int32_t >();
 	}
 
 }

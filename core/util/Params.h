@@ -39,6 +39,7 @@ namespace graphite
 		uint32_t getGraphSize();
 		int32_t getMappingQualityFilter();
 		bool outputVisualizationFiles();
+		int32_t getReadSampleNumber();
 	private:
 		void validateFolderPaths(const std::vector< std::string >& paths, bool exitOnFailure);
 		void validateFilePaths(const std::vector< std::string >& paths, bool exitOnFailure);

@@ -9,7 +9,7 @@
 
 namespace graphite
 {
-	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality) :
+	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit) :
 		m_fasta_reference_ptr(fastaReferencePtr),
 		m_bam_reader_ptrs(bamReaderPtrs),
 		m_vcf_reader_ptrs(vcfReaderPtrs),
@@ -20,7 +20,8 @@ namespace graphite
 		m_gap_extension_value(gapExtensionValue),
 		m_thread_pool(std::thread::hardware_concurrency() * 2),
 		m_print_graphs(printGraph),
-		m_mapping_quality(mappingQuality)
+		m_mapping_quality(mappingQuality),
+		m_read_sample_limit(readSampleLimit)
 	{
 		for (auto bamReaderPtr : bamReaderPtrs)
 		{
@@ -136,6 +137,11 @@ namespace graphite
 				bamAlignmentPtrs.emplace_back(bamAlignmentPtr);
 				bamIDTracker.emplace(bamID);
 			}
+		}
+		if (this->m_read_sample_limit > 0)
+		{
+			std::shuffle(bamAlignmentPtrs.begin(), bamAlignmentPtrs.end(), default_random_engine(0));
+			bamAlignmentPtrs.resize(this->m_read_sample_limit);
 		}
 	}
 }

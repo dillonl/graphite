@@ -32,6 +32,7 @@ int main(int argc, char** argv)
 	auto includeDuplicates = params.getIncludeDuplicates();
 	auto outputVisualizationFiles = params.outputVisualizationFiles();
 	auto mappingQuality = params.getMappingQualityFilter();
+	auto readSampleLimit = params.getReadSampleNumber();
 
     // create reference reader
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath);
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
 
 	// create graph processor
 	// call process on processor
-	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality);
+	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality, readSampleLimit);
 	graphProcessorPtr->processVariants();
 
 	return 0;
