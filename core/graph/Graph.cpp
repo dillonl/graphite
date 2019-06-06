@@ -406,6 +406,7 @@ namespace graphite
 		bool hasAlternate = false;
 		uint32_t firstNodeAlignmentOverlapSize = 0;
 		uint32_t lastNodeAlignmentOverlapSize = 0;
+		bool mismatchesAtInternalNodeEdges = false;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			std::string cigarString = "";
@@ -427,15 +428,39 @@ namespace graphite
 				case 'X':
 					nodeLengthAccumulator += nc->cigar->elements[j].length;
 					score -= (mismatchValue * nc->cigar->elements[j].length);
+					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
+					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
 					break;
 				case 'I': // I and D are treated the same
 				case 'D':
 					nodeLengthAccumulator += nc->cigar->elements[j].length;
 					score -= gapOpenValue;
 					score -= (gapExtensionValue * (nc->cigar->elements[j].length -1));
+					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
+					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
 					break;
 				case 'S':
 					tmpSofclipLength += nc->cigar->elements[j].length;
+					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
+					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
+					{
+						mismatchesAtInternalNodeEdges = true;
+					}
 					++softclipCount;
 				default:
 					break;
@@ -551,7 +576,7 @@ namespace graphite
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, 0);
 			}
-			else
+			else if (!mismatchesAtInternalNodeEdges)
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
 				if (m_graph_printer_ptr != nullptr)
