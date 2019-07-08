@@ -6,7 +6,6 @@
 #include "core/util/Types.h"
 #include "core/sample/Sample.h"
 #include "core/allele/Allele.h"
-// #include "core/graph/Node.h"
 
 #include <vector>
 #include <memory>

@@ -33,6 +33,7 @@ int main(int argc, char** argv)
 	auto outputVisualizationFiles = params.outputVisualizationFiles();
 	auto mappingQuality = params.getMappingQualityFilter();
 	auto readSampleLimit = params.getReadSampleNumber();
+	auto overwriteSampleName = params.getOverwrittenSampleName();
 
     // create reference reader
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath);
@@ -45,8 +46,17 @@ int main(int argc, char** argv)
 	for (auto bamPath : bamPaths)
 	{
 		auto bamReaderPtr = std::make_shared< graphite::BamReader >(bamPath);
-        auto samplePtrs = bamReaderPtr->getSamplePtrs();
-		bamSamplePtrs.insert(bamSamplePtrs.begin(), samplePtrs.begin(), samplePtrs.end());
+		if (overwriteSampleName.length() == 0)
+		{
+			auto samplePtrs = bamReaderPtr->getSamplePtrs();
+			bamSamplePtrs.insert(bamSamplePtrs.begin(), samplePtrs.begin(), samplePtrs.end());
+		}
+		else
+		{
+			auto samplePtr = std::make_shared< graphite::Sample >(overwriteSampleName, "1", bamPath);
+			bamSamplePtrs.emplace_back(samplePtr);
+			bamReaderPtr->overwriteSample(samplePtr);
+		}
 		bamReaderPtrs.emplace_back(bamReaderPtr);
 	}
 

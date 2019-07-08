@@ -4,7 +4,8 @@
 
 namespace graphite
 {
-	BamReader::BamReader(const std::string& filename) : m_bam_path(filename)
+	BamReader::BamReader(const std::string& filename) : m_bam_path(filename),
+														m_overwrite_sample(false)
 	{
 		this->m_bam_reader = std::make_shared< BamTools::BamReader >();
 		if (!this->m_bam_reader->Open(filename))
@@ -31,6 +32,13 @@ namespace graphite
 		}
 	}
 
+	void BamReader::overwriteSample(Sample::SharedPtr samplePtr)
+	{
+		this->m_sample_ptrs.empty();
+		this->m_sample_ptrs.emplace(samplePtr);
+		this->m_overwrite_sample = true;
+	}
+
 	std::unordered_set< Sample::SharedPtr > BamReader::getSamplePtrs()
 	{
 		return this->m_sample_ptrs;
@@ -48,6 +56,8 @@ namespace graphite
 		position endPosition = regionPtr->getEndPosition();
 		while (this->m_bam_reader->GetNextAlignment(*bamtoolsAlignmentPtr))
 		{
+			std::string sampleName;
+			bamtoolsAlignmentPtr->GetTag("RG", sampleName);
 			bool isInRegion = (startPosition < bamtoolsAlignmentPtr->Position && (bamtoolsAlignmentPtr->Position + bamtoolsAlignmentPtr->Length) < endPosition);
 			bool shouldFilter = (bamtoolsAlignmentPtr->MapQuality <= mappingQuality); // remove mapping quality less than param value (default is -1 aka no filter)
 			if ((bamtoolsAlignmentPtr->IsDuplicate() && !includeDuplicateReads) ||

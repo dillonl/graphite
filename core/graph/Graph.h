@@ -32,7 +32,11 @@ namespace graphite
 		std::string getReferenceSequence();
 		std::vector< std::string > getAllPathsAsStrings();
 
+		void printGraphVisOutput();
+		void clearResources();
+
 	private:
+		void addAdditionalNodeEdges();
 		void compressLargeNodes();
 		void setRegionPtrs();
 		void generateGraph();
@@ -42,6 +46,7 @@ namespace graphite
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
 		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void processTraceback2(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 		std::vector< std::string > generateAllPathsFromNodesOfLength(Node::SharedPtr nodePtr);
 		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
 

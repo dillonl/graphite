@@ -25,8 +25,11 @@ namespace graphite
 		std::string getSequence() { return this->m_sequence; }
 		/* void registerNodePtr(std::shared_ptr< Node > nodePtr); */
 		/* std::shared_ptr< Node > getNodePtr(); */
-		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score);
+		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, int score);
         std::unordered_set< std::string > getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount);
+		void registerNodePtr(std::shared_ptr< Node > nodePtr) { this->m_node_ptrs.emplace(nodePtr); }
+		std::unordered_set< std::shared_ptr< Node > > getNodePtrs() { return this->m_node_ptrs; }
+		void clearNodePtrs() { this->m_node_ptrs.clear(); }
 
 	private:
 		std::string m_sequence;
@@ -34,6 +37,7 @@ namespace graphite
         std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > > m_forward_counts; // map keyed by read SampleName then they are indexed via the AlleleCountType enum value, then add readName to the the unordered set so we are properly counting the reads
         std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > > m_reverse_counts; // map keyed by read SampleName then they are indexed via the AlleleCountType enum value, then add readName to the the unordered set so we are properly counting the reads
 		std::mutex m_counts_lock;
+		std::unordered_set< std::shared_ptr< Node > > m_node_ptrs; // you have to make sure to clear this otherwise you will have hanging shared ptrs
 	};
 }
 

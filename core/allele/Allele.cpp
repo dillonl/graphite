@@ -13,8 +13,9 @@ namespace graphite
 	{
 	}
 
-	void Allele::incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score)
+	void Allele::incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, int score)
 	{
+		bool isForwardStrand = !bamAlignmentPtr->IsReverseStrand();
 		// static std::mutex slock;
 		// std::lock_guard< std::mutex > lg(slock);
 		size_t alleleCountType = (size_t)scoreToAlleleCountType(score);

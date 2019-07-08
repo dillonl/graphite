@@ -28,6 +28,7 @@ namespace graphite
 		std::vector< std::string > getInVCFPaths();
 		std::vector< std::string > getBAMPaths();
 		std::string getOutputDirectory();
+		std::string getOverwrittenSampleName();
 		Region::SharedPtr getRegion();
         bool getIncludeDuplicates();
 		uint32_t getPercent();

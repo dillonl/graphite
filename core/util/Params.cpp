@@ -28,11 +28,12 @@ namespace graphite
 			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("r,region", "Region information", cxxopts::value< std::string >())
 			("o,output_directory", "Path to output directory", cxxopts::value< std::string >())
+			("s,sample_name", "Ignore the BAM file's samples and use this passed in value as the sample name", cxxopts::value< std::string >()->default_value(""))
 			("f,fasta", "Path to input FASTA file", cxxopts::value< std::string >())
 			("p,percent_match", "Smith-Waterman Percent [optional - default is 90]", cxxopts::value< uint32_t >()->default_value("90"))
 			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("n,sample_limit", "If the number of reads exceed this number then Graphite will randomly sample n reads [optional - default is no sample limit]", cxxopts::value< int32_t >()->default_value("-1"))
-			("s,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
+			("x,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("q,mapping_quality", "Mapping Quality Filter - (0 - 255) Filter reads that are less than or equal to this value [optional - default is no filter (-1)]", cxxopts::value< int32_t >()->default_value("-1"))
@@ -130,6 +131,11 @@ namespace graphite
 		return outputDir;
 	}
 
+	std::string Params::getOverwrittenSampleName()
+	{
+		return m_options["s"].as< std::string >();
+	}
+
 	Region::SharedPtr Params::getRegion()
 	{
 		if (m_options.count("r"))
@@ -151,7 +157,7 @@ namespace graphite
 
 	int Params::getMisMatchValue()
 	{
-		return m_options["s"].as< uint32_t >();
+		return m_options["x"].as< uint32_t >();
 	}
 
 	int Params::getGapOpenValue()

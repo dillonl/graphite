@@ -50,6 +50,7 @@ namespace graphite
 		bool m_print_graphs;
 		int32_t m_mapping_quality;
 		int32_t m_read_sample_limit;
+		Sample::SharedPtr m_override_shared_ptr;
 	};
 }
 

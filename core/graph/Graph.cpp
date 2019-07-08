@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include "Traceback.h"
 
 #include "core/util/Types.h"
 #include <deque>
@@ -49,8 +50,8 @@ namespace graphite
 		firstNodePtr = condenseGraph(lastNodePtr);
 		setPrefixAndSuffix(firstNodePtr); // calculate prefix and suffix matching sequences
 		this->m_first_node = firstNodePtr;
-		// compressLargeNodes();
 		setRegionPtrs();
+		addAdditionalNodeEdges();
 	}
 
 	std::vector< Region::SharedPtr > Graph::getRegionPtrs()
@@ -133,24 +134,24 @@ namespace graphite
 	{
 		firstNodePtr = nullptr;
 		position nodePosition = regionPtr->getStartPosition();
-		Node::SharedPtr prevNode = nullptr;
+		Node::SharedPtr prevNodePtr = nullptr;
 		static bool firstTime = false;
 		for (auto i = 0; i < referenceSequence.size(); ++i)
 		{
-			Node::SharedPtr node = std::make_shared< Node >(referenceSequence.c_str() + i, 1, nodePosition, Node::ALLELE_TYPE::REF);
-			this->m_all_created_nodes.emplace(node);
+			Node::SharedPtr nodePtr = std::make_shared< Node >(referenceSequence.c_str() + i, 1, nodePosition, Node::ALLELE_TYPE::REF);
+			this->m_all_created_nodes.emplace(nodePtr);
 			if (firstNodePtr == nullptr)
 			{
-				firstNodePtr = node;
+				firstNodePtr = nodePtr;
 			}
-			if (prevNode != nullptr)
+			if (prevNodePtr != nullptr)
 			{
-				node->addInNode(prevNode);
-				prevNode->addOutNode(node);
+				nodePtr->addInNode(prevNodePtr);
+				prevNodePtr->addOutNode(nodePtr);
 			}
-			prevNode = node;
+			prevNodePtr = nodePtr;
 			nodePosition += 1;
-			lastNodePtr = node;
+			lastNodePtr = nodePtr;
 		}
 		firstTime = false;
 	}
@@ -172,77 +173,100 @@ namespace graphite
 		std::unordered_map< position, std::vector< Node::SharedPtr > > endPositionNodePtrs;
 		for (auto variantPtr : this->m_variant_ptrs)
 		{
-			position variantPosition = variantPtr->getPosition() - 1;
-			position inPosition = variantPosition + variantPtr->getReferenceAllelePtr()->getSequence().size() + 1;
-			for (uint32_t i = variantPosition + 1; i < inPosition; ++i)
+			position variantNodeStartPosition = variantPtr->getPosition();
+			position variantNodeEndPosition = variantPtr->getPosition() + variantPtr->getReferenceAllelePtr()->getSequence().size() - 1;
+			position leftAdjacentNodeEndPosition = variantNodeStartPosition - 1;
+			position rightAdjacentNodeStartPosition = variantNodeEndPosition + 1;
+			for (uint32_t i = variantNodeStartPosition; i <= variantNodeEndPosition; ++i)
 			{
 				auto iter = referenceNodePtrPositionMap.find(i);
 				if (iter != referenceNodePtrPositionMap.end())
 				{
-					iter->second->setAllelePtr(variantPtr->getReferenceAllelePtr());
+					iter->second->registerAllelePtr(variantPtr->getReferenceAllelePtr());
 				}
 			}
-			auto inReferenceIter = referenceNodePtrPositionMap.find(variantPosition);
-			auto outReferenceIter = referenceNodePtrPositionMap.find(inPosition);
-			if (inReferenceIter == referenceNodePtrPositionMap.end() || outReferenceIter == referenceNodePtrPositionMap.end())
+			auto leftAdjacentReferenceNodeIter = referenceNodePtrPositionMap.find(leftAdjacentNodeEndPosition);
+			auto rightAdjacentReferenceNodeIter = referenceNodePtrPositionMap.find(rightAdjacentNodeStartPosition);
+			if (leftAdjacentReferenceNodeIter == referenceNodePtrPositionMap.end() || rightAdjacentReferenceNodeIter == referenceNodePtrPositionMap.end())
 			{
-				std::cout << "Invalid Graph: addVariantsToGraph, position: " << variantPtr->getPosition() << std::endl;
+				std::cout << "Invalid Graph: addVariantsToGraph, position: " << leftAdjacentNodeEndPosition << " - "  << rightAdjacentNodeStartPosition << std::endl;
 				exit(EXIT_FAILURE);
 			}
 			for (auto altAllelePtr : variantPtr->getAlternateAllelePtrs())
 			{
-				auto altNodePtr = std::make_shared< Node >(altAllelePtr->getSequence(), variantPosition, Node::ALLELE_TYPE::ALT);
-				this->m_all_created_nodes.emplace(altNodePtr);
-				altNodePtr->setAllelePtr(altAllelePtr);
-
-				position endPosition = altNodePtr->getPosition() + altNodePtr->getSequence().size();
-				if (endPositionNodePtrs.find(endPosition) == endPositionNodePtrs.end())
+				bool duplicateVariantFound = false;
+				for (auto siblingNodePtr : leftAdjacentReferenceNodeIter->second->getOutNodes())
 				{
-					endPositionNodePtrs[endPosition];
-					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
-				}
-				else
-				{
-					endPositionNodePtrs[endPosition].emplace_back(altNodePtr);
-				}
-
-				altNodePtr->addInNode(inReferenceIter->second);
-				altNodePtr->addOutNode(outReferenceIter->second);
-				(inReferenceIter->second)->addOutNode(altNodePtr);
-				(outReferenceIter->second)->addInNode(altNodePtr);
-
-				auto iter = endPositionNodePtrs.find(altNodePtr->getPosition());
-				if (iter != endPositionNodePtrs.end()) // we subtract one because we want to connect nodes that bump up against us
-				{
-					for (auto nodePtrs : iter->second)
+					if (siblingNodePtr->getAlleleType() == Node::ALLELE_TYPE::ALT && siblingNodePtr->getSequence().compare(altAllelePtr->getSequence()) == 0) // if we find an exact match then just register the node and move on
 					{
-						altNodePtr->addInNode(nodePtrs);
-						nodePtrs->addOutNode(altNodePtr);
+						duplicateVariantFound = true;
+						siblingNodePtr->registerAllelePtr(altAllelePtr);
+						altAllelePtr->registerNodePtr(siblingNodePtr);
+						break;
 					}
 				}
-			}
+				if (!duplicateVariantFound)
+				{
+					auto altNodePtr = std::make_shared< Node >(altAllelePtr->getSequence(), variantNodeStartPosition, Node::ALLELE_TYPE::ALT);
+					this->m_all_created_nodes.emplace(altNodePtr);
+					altNodePtr->registerAllelePtr(altAllelePtr);
+					altAllelePtr->registerNodePtr(altNodePtr);
 
+					altNodePtr->addInNode(leftAdjacentReferenceNodeIter->second);
+					altNodePtr->addOutNode(rightAdjacentReferenceNodeIter->second);
+					(leftAdjacentReferenceNodeIter->second)->addOutNode(altNodePtr);
+					(rightAdjacentReferenceNodeIter->second)->addInNode(altNodePtr);
+				}
+			}
 		}
 	}
+
+	void Graph::addAdditionalNodeEdges()
+	{
+		Node::SharedPtr nodePtr = this->m_first_node;
+		while (nodePtr->getOutNodes().size() > 0)
+		{
+			for (auto siblingNodePtr : nodePtr->getReferenceOutNode()->getInNodes())
+			{
+				for (auto rightAdjacentNodePtr : nodePtr->getOutNodes())
+				{
+					siblingNodePtr->addOutNode(rightAdjacentNodePtr);
+					rightAdjacentNodePtr->addInNode(siblingNodePtr);
+				}
+			}
+			nodePtr = nodePtr->getReferenceOutNode();
+		}
+		nodePtr = this->m_first_node;
+		while (nodePtr != nullptr)
+		{
+			// std::cout << nodePtr->getSequence() << std::endl;
+			for (auto allelePtr : nodePtr->getAllelePtrs())
+			{
+				allelePtr->registerNodePtr(nodePtr);
+			}
+			nodePtr = nodePtr->getReferenceOutNode();
+		}
+	}
+
 	Node::SharedPtr Graph::condenseGraph(Node::SharedPtr lastNodePtr)
 	{
 		Node::SharedPtr nodePtr = lastNodePtr;
 		do
 		{
-			Node::SharedPtr refNodePtr = nodePtr->getReferenceInNode();
-			this->m_all_created_nodes.emplace(refNodePtr);
-			if (refNodePtr == nullptr)
+			Node::SharedPtr leftAdjacentNodePtr = nodePtr->getReferenceInNode();
+			this->m_all_created_nodes.emplace(leftAdjacentNodePtr);
+			if (leftAdjacentNodePtr == nullptr)
 			{
 				std::cout << "Invalid Graph: condenseGraph, position: " << nodePtr->getPosition() << std::endl;
 				exit(EXIT_FAILURE);
 			}
-			if ((nodePtr->getInNodes().size() > 1) || (refNodePtr->getOutNodes().size() > 1))
+			if ((leftAdjacentNodePtr->getOutNodes().size() > 1) || (nodePtr->getInNodes().size() > 1))
 			{
-				nodePtr = refNodePtr;
+				nodePtr = leftAdjacentNodePtr;
 			}
 			else
 			{
-				nodePtr = Node::mergeNodes(refNodePtr, nodePtr);
+				nodePtr = Node::mergeNodes(leftAdjacentNodePtr, nodePtr);
 			}
 			this->m_all_created_nodes.emplace(nodePtr);
 		} while (nodePtr->getInNodes().size() > 0);
@@ -332,6 +356,16 @@ namespace graphite
 
 	void Graph::adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
+		// check if we have already processed this alignment
+		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		{
+			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
+			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
+			{
+				return;
+			}
+			this->m_aligned_read_names.emplace(alignmentName);
+		}
 		gssw_sse2_disable();
 		int8_t* nt_table = gssw_create_nt_table();
 		int8_t* mat = gssw_create_score_matrix(matchValue, mismatchValue);
@@ -376,7 +410,9 @@ namespace graphite
 
 		gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
 		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-		processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
+		auto tracebackPtr = std::make_shared< Traceback >();
+		tracebackPtr->processTraceback(gm, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
+		// processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well
@@ -386,7 +422,31 @@ namespace graphite
 		free(mat);
 	}
 
+
 	void Graph::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	{
+		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		{
+			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
+			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
+			{
+				return;
+			}
+			this->m_aligned_read_names.emplace(alignmentName);
+		}
+		uint32_t totalScore = 0;
+		/*
+		  What are all the things we want to check:
+		  1. total score is high enough
+		  2. individual node score is high enough
+		  3. make sure traceback travels through all nodes in the allele being considered (if it's at the beginning or end of traceback maybe mark as ambiguous)
+		  4. no more than 1 softclip region
+		  5. make sure flanking nodes don't have mismatches at the edges
+		  6. if first or last node check for ambiguousness
+		 */
+	}
+
+	void Graph::processTraceback2(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
 		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
 		{
@@ -568,6 +628,15 @@ namespace graphite
 
 			bool printed = false;
 			// if ((totalScorePercent == referenceTotalScorePercent && hasAlternate) || isAmbiguous)
+			/*
+			static std::mutex l;
+			l.lock();
+			std::cout << "percent: " << totalScorePercent << " " << samplePtr << std::endl;
+			l.unlock();
+			*/
+
+			std::cout << "incrementing allele read counts is disabled for now: Graph.cpp: 797" << std::endl;
+			/*
 			if (isAmbiguous)
 			{
 				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, -1);
@@ -585,6 +654,7 @@ namespace graphite
 					printed = true;
 				}
 			}
+			*/
 			if (!printed && m_graph_printer_ptr != nullptr)
 			{
 				m_graph_printer_ptr->registerUnalignedRead(bamAlignmentPtr, fullCigarString, totalScorePercent);
@@ -752,5 +822,83 @@ namespace graphite
 			getFullPathFromNode(paths, "", this->m_first_node);
 		}
 		return paths;
+	}
+
+	void Graph::printGraphVisOutput()
+	{
+		std::unordered_set< Node::SharedPtr > printedNodeList;
+		std::unordered_set< Node::SharedPtr > printedNodeEdgeList;
+		std::cout << "digraph {" << std::endl;
+		std::cout << "  rankdir=LR;" << std::endl;
+		std::cout << "  splines=ortho;" << std::endl;
+		std::vector< Node::SharedPtr > nodePtrs;
+		nodePtrs.emplace_back(this->m_first_node);
+		char nextNodeID = 'A';
+		std::unordered_map< Node::SharedPtr, char > nodePtrToID;
+		while (nodePtrs.size() > 0) // print nodes first
+		{
+			Node::SharedPtr nodePtr = nodePtrs.back();
+			nodePtrs.pop_back();
+			if (printedNodeList.find(nodePtr) != printedNodeList.end())
+			{
+				continue;
+			}
+			printedNodeList.emplace(nodePtr);
+			std::string nodeShape = (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF) ? "box" : "circle";
+			auto iter = nodePtrToID.find(nodePtr);
+			if (iter == nodePtrToID.end())
+			{
+				nodePtrToID[nodePtr] = nextNodeID;
+				++nextNodeID;
+			}
+			char nodeID = (char)nodePtrToID.find(nodePtr)->second;
+			std::string label = nodePtr->getSequence() + "\n";
+			for (auto allelePtr : nodePtr->getAllelePtrs())
+			{
+				label += std::to_string(reinterpret_cast<std::uintptr_t>(allelePtr.get())) + " [" + std::to_string(allelePtr->getNodePtrs().size()) + "]\n";
+			}
+			std::cout << "  " << nodeID << " [label=\"" << label << "\" fontname=Arial shape=" << nodeShape << " ]" << std::endl;
+			for (auto outNodePtr : nodePtr->getOutNodes())
+			{
+				nodePtrs.emplace_back(outNodePtr);
+			}
+		}
+		std::cout << std::endl;
+		nodePtrs.emplace_back(this->m_first_node);
+		while (nodePtrs.size() > 0)
+		{
+			Node::SharedPtr nodePtr = nodePtrs.back();
+			nodePtrs.pop_back();
+			if (printedNodeEdgeList.find(nodePtr) != printedNodeEdgeList.end())
+			{
+				continue;
+			}
+			printedNodeEdgeList.emplace(nodePtr);
+			char nodeID = (char)nodePtrToID.find(nodePtr)->second;
+			std::cout << "  " << nodeID << " -> { ";
+			int count = 0;
+			for (auto outNodePtr : nodePtr->getOutNodes())
+			{
+				std::string comma = (count++ < nodePtr->getOutNodes().size() - 1) ? "," : "";
+				char outNodeID = (char)nodePtrToID.find(outNodePtr)->second;
+				std::cout << outNodeID << comma << " ";
+				nodePtrs.emplace_back(outNodePtr);
+			}
+			std::cout << "};" << std::endl;
+		}
+		std::cout << "}" << std::endl;
+	}
+
+	void Graph::clearResources()
+	{
+		for (auto nodePtr : m_all_created_nodes)
+		{
+			for (auto allelePtr : nodePtr->getAllelePtrs())
+			{
+				allelePtr->clearNodePtrs();
+			}
+			nodePtr->clearAllelePtrs();
+			nodePtr->clearInAndOutNodes();
+		}
 	}
 }

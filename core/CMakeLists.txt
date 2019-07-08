@@ -45,6 +45,7 @@ set(GRAPHITE_CORE_GRAPH_PROCESSOR_SOURCES
   graph/GraphProcessor.cpp
   graph/ReferenceGraph.cpp
   graph/Graph.cpp
+  graph/Traceback.cpp
   graph/Node.cpp
   )
 

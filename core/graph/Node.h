@@ -45,12 +45,14 @@ namespace graphite
 
 		void addOverlappingAllelePtr(Allele::SharedPtr allelePtr);
 		std::unordered_set< Allele::SharedPtr > getOverlappingAllelePtrs();
-		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score);
+		/* void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score); */
 		std::string getOriginalSequence();
 		uint32_t getOriginalSequenceSize();
-		void setAllelePtr(Allele::SharedPtr allelePtr) { this->m_allele_ptr = allelePtr; }
-		Allele::SharedPtr getAllelePtr() { return this->m_allele_ptr; }
-
+		void registerAllelePtr(Allele::SharedPtr allelePtr);
+		/* void setAllelePtr(Allele::SharedPtr allelePtr) { this->m_allele_ptr = allelePtr; } */
+		std::unordered_set< Allele::SharedPtr > getAllelePtrs() { return this->m_allele_ptrs; }
+		bool hasAllelePtr(Allele::SharedPtr allelePtr) { return (this->m_allele_ptrs.find(allelePtr) != this->m_allele_ptrs.end()); }
+		void clearAllelePtrs() { this->m_allele_ptrs.clear(); };
 		static Node::SharedPtr mergeNodes(Node::SharedPtr firstNodePtr, Node::SharedPtr secondNodePtr);
 
 		void clearInAndOutNodes();
@@ -59,7 +61,8 @@ namespace graphite
 		static uint32_t s_id; // the static id counter for all nodes
 		uint32_t m_id;
 		std::unordered_set< Allele::SharedPtr > m_overlapping_allele_ptr_map;
-		Allele::SharedPtr m_allele_ptr;
+		/* Allele::SharedPtr m_allele_ptr; */
+		std::unordered_set< Allele::SharedPtr > m_allele_ptrs;
 		std::string m_sequence;
 		std::string m_original_sequence;
 		position m_position;

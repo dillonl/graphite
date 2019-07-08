@@ -24,6 +24,8 @@ namespace graphite
 		BamReader(const std::string& filename);
 		~BamReader();
 
+		void overwriteSample(Sample::SharedPtr samplePtr);
+		bool shouldOverwriteSample() { return m_overwrite_sample; }
 		void fetchBamAlignmentPtrsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs,  Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads, int32_t mappingQuality);
 
         std::unordered_set< Sample::SharedPtr > getSamplePtrs();
@@ -35,6 +37,7 @@ namespace graphite
 		std::unordered_set< Sample::SharedPtr > m_sample_ptrs;
 		std::unordered_set< std::string > m_sample_names;
 		std::string m_bam_path;
+		bool m_overwrite_sample;
 	};
 }
 
