@@ -59,6 +59,7 @@ namespace graphite
 
 	private:
 		static uint32_t s_id; // the static id counter for all nodes
+		static std::mutex s_id_lock; // the static id counter lock for all nodes
 		uint32_t m_id;
 		std::unordered_set< Allele::SharedPtr > m_overlapping_allele_ptr_map;
 		/* Allele::SharedPtr m_allele_ptr; */

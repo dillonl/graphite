@@ -79,7 +79,7 @@ namespace graphite
 		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
 
 		/*
-		  graphPtr->printGraphVisOutput();
+		graphPtr->printGraphVisOutput();
 		auto graphPaths = graphPtr->getAllPathsAsStrings();
 		std::cout << "[GraphProcessor.cpp] ------------"<< std::endl;
 		for (auto path : graphPaths)

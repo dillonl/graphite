@@ -54,7 +54,6 @@ namespace graphite
 			}
 			nodeScore = (nodeScore < 0) ? 0 : nodeScore; // the floor of the mapping score is 0
 			totalSoftclipLength += nodeSoftclipLength;
-			// int32_t nodeScorePercent = ((float)nodeScore / (float)((nodeLength - nodeSoftclipLength) * matchValue)) * 100;
 			int32_t nodeScorePercent = (nodeLength > 0) ? ((float)nodeScore / ((float)(nodeLength - nodeSoftclipLength) * matchValue)) * 100 : 0;
 			totalScore += nodeScore;
 			tracebackNodePtr->setNodePtr(nodePtr);
@@ -72,19 +71,9 @@ namespace graphite
 		{
 			this->m_total_score = ((float)totalScore / (float)((bamAlignmentPtr->QueryBases.size() - totalSoftclipLength) * matchValue)) * 100;
 		}
-		if (this->m_total_score >= 90 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.1) && this->m_traceback_nodes.size() > 1)
+		if (this->m_total_score >= 90 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
 		{
 			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr);
-		}
-		else
-		{
-			/*
-			std::lock_guard< std::mutex > l(s_traceback_mutex);
-			std::cout << "----------" << std::endl;
-			std::cout << bamAlignmentPtr->QueryBases << std::endl;
-			std::cout << "failed score and/or softclips: score: " << this->m_total_score << " sc: " << this->m_number_of_softclips << " scl: " << totalSoftclipLength << std::endl;
-			std::cout << "----------" << std::endl;
-			*/
 		}
 	}
 
@@ -92,15 +81,14 @@ namespace graphite
 	{
 		for (auto tracebackNodePtr : this->m_traceback_nodes)
 		{
-			if (tracebackNodePtr->getScore() >= 90 &&
-				!nodeHasFlankingMismatches(tracebackNodePtr, bamAlignmentPtr) &&
-				!isNodeSequenceAmbiguous(tracebackNodePtr))
+			if (tracebackNodePtr->getScore() >= 70)// && !nodeHasFlankingMismatches(tracebackNodePtr, bamAlignmentPtr))
 			{
+				auto nodeScore = (isNodeSequenceAmbiguous(tracebackNodePtr)) ? -1 : tracebackNodePtr->getScore();
 				for (auto nodeAllelePtr : tracebackNodePtr->getNodePtr()->getAllelePtrs())
 				{
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
 					{
-						nodeAllelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, tracebackNodePtr->getScore());
+						nodeAllelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, nodeScore);
 					}
 				}
 			}
@@ -116,14 +104,6 @@ namespace graphite
 			auto cigar = prevTracebackNodePtr->getCigar();
 			if (cigar.size() > 0 && std::get< 1 >(cigar[cigar.size() - 1]) != 'M')
 			{
-				/*
-				std::lock_guard< std::mutex > l(s_traceback_mutex);
-				std::cout << "----------" << std::endl;
-				std::cout << bamAlignmentPtr->QueryBases << std::endl;
-				std::cout << "has left flanking mismatches" << std::endl;
-				std::cout << prevTracebackNodePtr->printCigarString() << std::endl;
-				std::cout << "----------" << std::endl;
-				*/
 				return true;
 			}
 		}
@@ -132,14 +112,6 @@ namespace graphite
 			auto cigar = nextTracebackNodePtr->getCigar();
 			if (cigar.size() > 0 && std::get< 1 >(cigar[0]) != 'M')
 			{
-				/*
-				std::lock_guard< std::mutex > l(s_traceback_mutex);
-				std::cout << "----------" << std::endl;
-				std::cout << bamAlignmentPtr->QueryBases << std::endl;
-				std::cout << "has right flanking mismatches" << std::endl;
-				std::cout << nextTracebackNodePtr->printCigarString() << std::endl;
-				std::cout << "----------" << std::endl;
-				*/
 				return true;
 			}
 		}
@@ -162,14 +134,6 @@ namespace graphite
 					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(siblingNodePtr->getSequence().size() - matchCount);
 					if (nodeSequence.compare(siblingNodeSequence) == 0)
 					{
-						/*
-						std::lock_guard< std::mutex > l(s_traceback_mutex);
-						std::cout << "----------" << std::endl;
-						std::cout << "node sequence: " << nodeSequence << std::endl;
-						std::cout << "sib node seq : " << siblingNodePtr->getSequence() << std::endl;
-						std::cout << "beginning node sequence is ambiguous" << std::endl;
-						std::cout << "----------" << std::endl;
-						*/
 						return true;
 					}
 				}
@@ -186,12 +150,6 @@ namespace graphite
 					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(0, siblingNodePtr->getSequence().size());
 					if (nodeSequence.compare(siblingNodeSequence) == 0)
 					{
-						/*
-						std::lock_guard< std::mutex > l(s_traceback_mutex);
-						std::cout << "----------" << std::endl;
-						std::cout << "ending node sequence is ambiguous" << std::endl;
-						std::cout << "----------" << std::endl;
-						*/
 						return true;
 					}
 				}
@@ -219,15 +177,6 @@ namespace graphite
 				}
 			}
 			bool isFullAllelePresent = (nodeSequence.compare(allelePtr->getSequence()) == 0);
-			if (!isFullAllelePresent)
-			{
-				/*
-				std::lock_guard< std::mutex > l(s_traceback_mutex);
-				std::cout << "----------" << std::endl;
-				std::cout << "full allele not present" << std::endl;
-				std::cout << "----------" << std::endl;
-				*/
-			}
 			return isFullAllelePresent; // after we have constructed the whole sequence then they should be equal if the traceback goes through the entire allele
 		}
 		return true;

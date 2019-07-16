@@ -3,15 +3,18 @@
 namespace graphite
 {
 	uint32_t Node::s_id = 0;
+	std::mutex Node::s_id_lock;
 	Node::Node(const std::string& sequence, position pos, ALLELE_TYPE alleleType) :
 		m_sequence(sequence),
 		m_position(pos),
 		m_allele_type(alleleType),
 		m_in_ref_node(nullptr),
-		m_id(s_id),
 		m_original_sequence("")
 	{
+		s_id_lock.lock();
+		m_id = s_id;
 		s_id += 1;
+		s_id_lock.unlock();
 	}
 
 	Node::Node(char* sequence, uint32_t length, position pos, ALLELE_TYPE alleleType) :
@@ -19,10 +22,12 @@ namespace graphite
 		m_position(pos),
 		m_allele_type(alleleType),
 		m_in_ref_node(nullptr),
-		m_id(s_id),
 		m_original_sequence("")
 	{
+		s_id_lock.lock();
+		m_id = s_id;
 		s_id += 1;
+		s_id_lock.unlock();
 	}
 
 	Node::Node()
