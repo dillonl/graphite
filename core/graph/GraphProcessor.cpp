@@ -165,7 +165,7 @@ namespace graphite
 				bamIDTracker.emplace(bamID);
 			}
 		}
-		if (this->m_read_sample_limit > 0)
+		if (this->m_read_sample_limit > 0 && bamAlignmentPtrs.size() > this->m_read_sample_limit)
 		{
 			std::shuffle(bamAlignmentPtrs.begin(), bamAlignmentPtrs.end(), default_random_engine(0));
 			bamAlignmentPtrs.resize(this->m_read_sample_limit);
