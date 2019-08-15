@@ -2,27 +2,48 @@
 
 namespace graphite
 {
-	Traceback::Traceback()
+	Traceback::Traceback(gssw_graph* graph, gssw_graph_mapping* gm, int8_t* nt_table, int8_t* mat, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent) :
+		m_graph(graph),
+		m_gm(gm),
+		m_nt_table(nt_table),
+		m_mat(mat),
+		m_bam_alignment_ptr(bamAlignmentPtr),
+		m_sample_ptr(samplePtr),
+		m_match_value(matchValue),
+		m_mismatch_value(mismatchValue),
+		m_gap_open_value(gapOpenValue),
+		m_gap_extension_value(gapExtensionValue),
+		m_reference_total_score_percent(referenceTotalScorePercent)
 	{
 	}
 
 	Traceback::~Traceback()
 	{
+		gssw_graph_mapping_destroy(m_gm);
+
+		// note that nodes which are referred to in this graph are destroyed as well
+		gssw_graph_destroy(m_graph);
+
+		free(m_nt_table);
+		free(m_mat);
 	}
 
-	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Traceback::processTraceback()
 	{
+		gssw_graph_fill(m_graph, m_bam_alignment_ptr->QueryBases.c_str(), m_nt_table, m_mat, m_gap_open_value, m_gap_extension_value, 0, 0, 15, 2, true);
+		this->m_gm = gssw_graph_trace_back(m_graph, m_bam_alignment_ptr->QueryBases.c_str(), m_bam_alignment_ptr->QueryBases.size(), m_nt_table, m_mat, m_gap_open_value, m_gap_extension_value, 0, 0);
+
 		this->m_total_score = 0;
 		this->m_traceback_nodes.clear();
 		this->m_number_of_softclips = 0;
 		uint32_t totalSoftclipLength = 0;
 		int32_t totalScore = 0;
-		gssw_node_cigar* nc = graphMapping->cigar.elements;
+		gssw_node_cigar* nc = this->m_gm->cigar.elements;
 		TracebackNode::SharedPtr prevTracebackNodePtr = nullptr;
-		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+		for (int i = 0; i < this->m_gm->cigar.length; ++i, ++nc)
 		{
 			auto tracebackNodePtr = std::make_shared< TracebackNode >();
-			gssw_node* gsswNode = graphMapping->cigar.elements[i].node;
+			gssw_node* gsswNode = this->m_gm->cigar.elements[i].node;
 			Node* nodePtr = (Node*)gsswNode->data;
 			int32_t nodeScore = 0;
 			uint32_t nodeLength = 0;
@@ -35,15 +56,15 @@ namespace graphite
 				switch (nc->cigar->elements[j].type)
 				{
 				case 'M':
-					nodeScore += (matchValue * nc->cigar->elements[j].length);
+					nodeScore += (this->m_match_value * nc->cigar->elements[j].length);
 					break;
 				case 'X':
-					nodeScore -= (mismatchValue * nc->cigar->elements[j].length);
+					nodeScore -= (m_mismatch_value * nc->cigar->elements[j].length);
 					break;
 				case 'I': // I and D are treated the same
 				case 'D':
-					nodeScore -= gapOpenValue;
-					nodeScore -= (gapExtensionValue * (nc->cigar->elements[j].length -1));
+					nodeScore -= m_gap_open_value;
+					nodeScore -= (m_gap_extension_value * (nc->cigar->elements[j].length -1));
 					break;
 				case 'S':
 					nodeSoftclipLength += nc->cigar->elements[j].length;
@@ -54,7 +75,7 @@ namespace graphite
 			}
 			nodeScore = (nodeScore < 0) ? 0 : nodeScore; // the floor of the mapping score is 0
 			totalSoftclipLength += nodeSoftclipLength;
-			int32_t nodeScorePercent = (nodeLength > 0) ? ((float)nodeScore / ((float)(nodeLength - nodeSoftclipLength) * matchValue)) * 100 : 0;
+			int32_t nodeScorePercent = (nodeLength > 0) ? ((float)nodeScore / ((float)(nodeLength - nodeSoftclipLength) * m_match_value)) * 100 : 0;
 			totalScore += nodeScore;
 			tracebackNodePtr->setNodePtr(nodePtr);
 			tracebackNodePtr->setPrevTracebackNodePtr(prevTracebackNodePtr);
@@ -67,13 +88,13 @@ namespace graphite
 			tracebackNodePtr->setNextTracebackNodePtr(nullptr); // this will get set on the next time around unless it's the last node, then we want it nullptr
 			this->m_traceback_nodes.emplace_back(tracebackNodePtr);
 		}
-		if (bamAlignmentPtr->QueryBases.size() > 0)
+		if (m_bam_alignment_ptr->QueryBases.size() > 0)
 		{
-			this->m_total_score = ((float)totalScore / (float)((bamAlignmentPtr->QueryBases.size() - totalSoftclipLength) * matchValue)) * 100;
+			this->m_total_score = ((float)totalScore / (float)((this->m_bam_alignment_ptr->QueryBases.size() - totalSoftclipLength) * m_match_value)) * 100;
 		}
-		if (this->m_total_score >= 90 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
+		if (this->m_total_score >= 90 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (this->m_bam_alignment_ptr->QueryBases.size() * 0.3))
 		{
-			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr);
+			this->incrementAlleleCounts(this->m_bam_alignment_ptr, this->m_sample_ptr);
 		}
 	}
 

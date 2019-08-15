@@ -96,10 +96,13 @@ namespace graphite
 		std::vector< std::shared_ptr< BamAlignment > > bamAlignmentPtrs;
 
 		getAlignmentsInRegion(bamAlignmentPtrs, graphRegionPtrs, true);
+
+		std::unordered_map< std::string, Sample::SharedPtr > samplePtrMap;
 		for (auto bamAlignmentPtr : bamAlignmentPtrs)
 		{
 			std::string sampleName;
 			Sample::SharedPtr samplePtr = m_override_shared_ptr;
+			std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
 			if (m_override_shared_ptr == nullptr)
 			{
 				bamAlignmentPtr->GetTag("RG", sampleName);
@@ -115,16 +118,19 @@ namespace graphite
 				{
 					samplePtr = iter->second;
 				}
-				uint32_t matchValue = m_match_value;
-				uint32_t mismatchValue = m_mismatch_value;
-				uint32_t gapOpenValue = m_gap_open_value;
-				uint32_t gapExtensionValue = m_gap_extension_value;
-				auto funct = [graphPtr,bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
-				{
-					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
-				};
-				m_thread_pool.enqueue(funct);
 			}
+			samplePtrMap[alignmentName] = samplePtr;
+		}
+
+		auto tracebackPtrs = graphPtr->getTracebackObjects(bamAlignmentPtrs, samplePtrMap, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value, 0);
+
+		for (auto tracebackPtr : tracebackPtrs)
+		{
+			auto funct = [tracebackPtr]()
+			{
+				tracebackPtr->processTraceback();
+			};
+			m_thread_pool.enqueue(funct);
 		}
 		m_thread_pool.join();
 		bamAlignmentPtrs.clear();

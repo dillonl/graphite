@@ -27,6 +27,7 @@ namespace graphite
 	public:
 		typedef std::shared_ptr< TracebackNode > SharedPtr;
 	    TracebackNode() {}
+
 		~TracebackNode() {}
 
 		void setPrevTracebackNodePtr(TracebackNode::SharedPtr tracebackNodePtr) { this->m_prev_tracebacknode_ptr = tracebackNodePtr; }
@@ -70,10 +71,10 @@ namespace graphite
 	{
 	public:
         typedef std::shared_ptr< Traceback > SharedPtr;
-		Traceback();
+		Traceback(gssw_graph* graph, gssw_graph_mapping* gm, int8_t* nt_table, int8_t* mat, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 		~Traceback();
 
-		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void processTraceback();
 		void printTraceback();
 
 	private:
@@ -81,10 +82,21 @@ namespace graphite
 		bool nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr);
 		bool isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr);
 		bool fullAlleleInTraceback(Allele::SharedPtr allelePtr, Node* nodePtr);
-		std::shared_ptr< BamTools::BamAlignment > m_bam_alignment_ptr;
-		Sample::SharedPtr m_sample_ptr;
 		int32_t m_total_score;
 		uint32_t m_number_of_softclips; // this is not a count of the bases but rather the number of times a sc occurres in the traceback
 		std::vector< TracebackNode::SharedPtr > m_traceback_nodes;
+
+
+		gssw_graph* m_graph;
+		gssw_graph_mapping* m_gm;
+		int8_t* m_nt_table;
+		int8_t* m_mat;
+		std::shared_ptr< BamTools::BamAlignment > m_bam_alignment_ptr;
+		Sample::SharedPtr m_sample_ptr;
+		uint32_t m_match_value;
+		uint32_t m_mismatch_value;
+		uint32_t m_gap_open_value;
+		uint32_t m_gap_extension_value;
+		uint32_t m_reference_total_score_percent;
 	};
 }
