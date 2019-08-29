@@ -9,16 +9,16 @@
 
 namespace graphite
 {
-	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit) :
+	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit, uint32_t numberOfThreads) :
 		m_fasta_reference_ptr(fastaReferencePtr),
 		m_bam_reader_ptrs(bamReaderPtrs),
 		m_vcf_reader_ptrs(vcfReaderPtrs),
-		m_flanking_padding(500),
+		m_flanking_padding(1),
 		m_match_value(matchValue),
 		m_mismatch_value(mismatchValue),
 		m_gap_open_value(gapOpenValue),
 		m_gap_extension_value(gapExtensionValue),
-		m_thread_pool(std::thread::hardware_concurrency() * 2),
+		m_thread_pool(numberOfThreads),
 		m_print_graphs(printGraph),
 		m_mapping_quality(mappingQuality),
 		m_read_sample_limit(readSampleLimit),
@@ -96,13 +96,10 @@ namespace graphite
 		std::vector< std::shared_ptr< BamAlignment > > bamAlignmentPtrs;
 
 		getAlignmentsInRegion(bamAlignmentPtrs, graphRegionPtrs, true);
-
-		std::unordered_map< std::string, Sample::SharedPtr > samplePtrMap;
 		for (auto bamAlignmentPtr : bamAlignmentPtrs)
 		{
 			std::string sampleName;
 			Sample::SharedPtr samplePtr = m_override_shared_ptr;
-			std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
 			if (m_override_shared_ptr == nullptr)
 			{
 				bamAlignmentPtr->GetTag("RG", sampleName);
@@ -118,19 +115,16 @@ namespace graphite
 				{
 					samplePtr = iter->second;
 				}
+				uint32_t matchValue = m_match_value;
+				uint32_t mismatchValue = m_mismatch_value;
+				uint32_t gapOpenValue = m_gap_open_value;
+				uint32_t gapExtensionValue = m_gap_extension_value;
+				auto funct = [graphPtr,bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+				{
+					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
+				};
+				m_thread_pool.enqueue(funct);
 			}
-			samplePtrMap[alignmentName] = samplePtr;
-		}
-
-		auto tracebackPtrs = graphPtr->getTracebackObjects(bamAlignmentPtrs, samplePtrMap, m_match_value, m_mismatch_value, m_gap_open_value, m_gap_extension_value, 0);
-
-		for (auto tracebackPtr : tracebackPtrs)
-		{
-			auto funct = [tracebackPtr]()
-			{
-				tracebackPtr->processTraceback();
-			};
-			m_thread_pool.enqueue(funct);
 		}
 		m_thread_pool.join();
 		bamAlignmentPtrs.clear();
@@ -171,7 +165,7 @@ namespace graphite
 				bamIDTracker.emplace(bamID);
 			}
 		}
-		if (this->m_read_sample_limit > 0 && bamAlignmentPtrs.size() > this->m_read_sample_limit)
+		if (this->m_read_sample_limit < bamAlignmentPtrs.size())
 		{
 			std::shuffle(bamAlignmentPtrs.begin(), bamAlignmentPtrs.end(), default_random_engine(0));
 			bamAlignmentPtrs.resize(this->m_read_sample_limit);

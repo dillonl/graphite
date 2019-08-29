@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include "Traceback.h"
 
 #include "core/util/Types.h"
 #include <deque>
@@ -376,7 +377,6 @@ namespace graphite
 		gssw_node* gsswNode = (gssw_node*)gssw_node_create(nodePtr.get(), nodePtr->getID(), nodePtr->getSequence().c_str(), nt_table, mat);
 		gsswNodePtrsMap.emplace(nodePtr->getID(), gsswNode);
 		gssw_graph_add_node(graph, gsswNode);
-		std::unordered_set< Node::SharedPtr > nodePtrs;
 		while (nodePtr != nullptr)
 		{
 			Node::SharedPtr nextRefNodePtr = nullptr;
@@ -389,15 +389,19 @@ namespace graphite
 				gsswNode = (gssw_node*)gssw_node_create(outNodePtr.get(), outNodePtr->getID(), outNodePtr->getSequence().c_str(), nt_table, mat);
 				gssw_graph_add_node(graph, gsswNode);
 				gsswNodePtrsMap.emplace(outNodePtr->getID(), gsswNode);
-				nodePtrs.emplace(outNodePtr);
 			}
 			nodePtr = nextRefNodePtr;
 		}
-		//for (auto iter : this->m_node_ptrs_map)
-		for (Node::SharedPtr nodePtr : nodePtrs)
+
+		for (auto iter : this->m_node_ptrs_map)
 		{
-			// Node::SharedPtr nodePtr = iter.second;
-			gssw_node* gsswNode = gsswNodePtrsMap[nodePtr->getID()];
+			Node::SharedPtr nodePtr = iter.second;
+			auto gsswIter = gsswNodePtrsMap.find(nodePtr->getID());
+			if (gsswIter == gsswNodePtrsMap.end())
+			{
+				continue;
+			}
+			gssw_node* gsswNode = gsswIter->second;
 			for (auto outNodePtr : nodePtr->getOutNodes())
 			{
 				auto iter = gsswNodePtrsMap.find(outNodePtr->getID());
@@ -411,10 +415,9 @@ namespace graphite
 
 		gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
 		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-
-		// auto tracebackPtr = std::make_shared< Traceback >();
-		// tracebackPtr->processTraceback(gm, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
-
+		auto tracebackPtr = std::make_shared< Traceback >();
+		tracebackPtr->processTraceback(gm, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
+		// processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well
@@ -422,74 +425,6 @@ namespace graphite
 
 		free(nt_table);
 		free(mat);
-	}
-
-	std::vector< Traceback::SharedPtr > Graph::getTracebackObjects(std::vector< std::shared_ptr< BamTools::BamAlignment > > bamAlignmentPtrs, std::unordered_map< std::string, Sample::SharedPtr > samplePtrMap, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
-	{
-		gssw_sse2_disable();
-		std::vector< Traceback::SharedPtr > tracebackPtrs;
-		for (auto bamAlignmentPtr : bamAlignmentPtrs)
-		{
-			std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
-			auto samplePtrIter = samplePtrMap.find(alignmentName);
-			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end() || samplePtrIter == samplePtrMap.end())
-			{
-				continue;
-			}
-			this->m_aligned_read_names.emplace(alignmentName);
-			Sample::SharedPtr samplePtr = samplePtrIter->second;
-
-			int8_t* nt_table = gssw_create_nt_table();
-			int8_t* mat = gssw_create_score_matrix(matchValue, mismatchValue);
-			gssw_graph* graph = gssw_graph_create(this->m_node_ptrs_map.size());
-
-			unordered_map< uint32_t, gssw_node* > gsswNodePtrsMap;
-			Node::SharedPtr nodePtr = m_first_node;
-			// std::cout << "node from graph: " << nodePtr->getAllelePtr() << std::endl;
-			gssw_node* gsswNode = (gssw_node*)gssw_node_create(nodePtr.get(), nodePtr->getID(), nodePtr->getSequence().c_str(), nt_table, mat);
-			gsswNodePtrsMap.emplace(nodePtr->getID(), gsswNode);
-			gssw_graph_add_node(graph, gsswNode);
-			while (nodePtr != nullptr)
-			{
-				Node::SharedPtr nextRefNodePtr = nullptr;
-				for (auto outNodePtr : nodePtr->getOutNodes())
-				{
-					if (outNodePtr->getAlleleType() == Node::ALLELE_TYPE::REF)
-					{
-						nextRefNodePtr = outNodePtr;
-					}
-					gsswNode = (gssw_node*)gssw_node_create(outNodePtr.get(), outNodePtr->getID(), outNodePtr->getSequence().c_str(), nt_table, mat);
-					gssw_graph_add_node(graph, gsswNode);
-					gsswNodePtrsMap.emplace(outNodePtr->getID(), gsswNode);
-				}
-				nodePtr = nextRefNodePtr;
-			}
-
-			for (auto iter : this->m_node_ptrs_map)
-			{
-				Node::SharedPtr nodePtr = iter.second;
-				gssw_node* gsswNode = gsswNodePtrsMap[nodePtr->getID()];
-				for (auto outNodePtr : nodePtr->getOutNodes())
-				{
-					auto iter = gsswNodePtrsMap.find(outNodePtr->getID());
-					if (iter != gsswNodePtrsMap.end())
-					{
-						gssw_node* gsswOutNode = iter->second;
-						gssw_nodes_add_edge(gsswNode, gsswOutNode);
-					}
-				}
-			}
-
-			/*
-			gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
-			gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-			*/
-			gssw_graph_mapping* gm = NULL;
-			auto tracebackPtr = std::make_shared< Traceback >(graph, gm, nt_table, mat, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
-			tracebackPtrs.emplace_back(tracebackPtr);
-		}
-
-		return tracebackPtrs;
 	}
 
 

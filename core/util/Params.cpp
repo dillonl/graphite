@@ -36,6 +36,7 @@ namespace graphite
 			("x,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
+			("t,number_of_threads", "Number of threads to consume [optional - default is 2*number of cores]", cxxopts::value< int32_t >()->default_value("-1"))
 			("q,mapping_quality", "Mapping Quality Filter - (0 - 255) Filter reads that are less than or equal to this value [optional - default is no filter (-1)]", cxxopts::value< int32_t >()->default_value("-1"))
 			("i,igv_visualization_output", "Output IGV input for visualization [optional - default is false]");
 		this->m_options.parse(argc, argv);
@@ -147,7 +148,12 @@ namespace graphite
 
 	uint32_t Params::getThreadCount()
 	{
-		return m_options["t"].as< uint32_t >();
+		auto numberOfThreads = m_options["t"].as< int32_t >();
+		if (numberOfThreads <= 0)
+		{
+			numberOfThreads = (std::thread::hardware_concurrency() * 2);
+		}
+		return numberOfThreads;
 	}
 
 	int Params::getMatchValue()

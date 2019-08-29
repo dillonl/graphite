@@ -6,7 +6,6 @@
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
 #include "core/vcf/Variant.h"
-#include "Traceback.h"
 
 #include "Node.h"
 
@@ -28,7 +27,6 @@ namespace graphite
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
 		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
-		std::vector< Traceback::SharedPtr > getTracebackObjects(std::vector< std::shared_ptr< BamTools::BamAlignment > > bamAlignmentPtrs, std::unordered_map< std::string, Sample::SharedPtr > samplePtrMap, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 		Region::SharedPtr getGraphRegion();
 		std::string getReferenceSequence();
