@@ -42,12 +42,33 @@ namespace graphite
 			}
 			std::cout << std::endl;
 		}
-		uint32_t getMatchCount()
+
+		uint32_t getMatchCountFromStart()
 		{
 			uint32_t count = 0;
 			for (auto iter : this->m_cigar)
 			{
+				char cigarElem = std::get< 1 >(iter);
+				if (cigarElem != 'M') // once we stop matching then break
+				{
+					break;
+				}
 				count += std::get< 0 >(iter);
+			}
+			return count;
+		}
+
+		uint32_t getMatchCountFromEnd()
+		{
+			uint32_t count = 0;
+			for (auto iter = this->m_cigar.rbegin(); iter != this->m_cigar.rend(); ++iter)
+			{
+				char cigarElem = std::get< 1 >(*iter);
+				if (cigarElem != 'M') // once we stop matching then break
+				{
+					break;
+				}
+				count += std::get< 0 >(*iter);
 			}
 			return count;
 		}

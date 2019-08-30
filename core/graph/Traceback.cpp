@@ -19,6 +19,11 @@ namespace graphite
 		int32_t totalScore = 0;
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		TracebackNode::SharedPtr prevTracebackNodePtr = nullptr;
+		int x = 0;
+		if (bamAlignmentPtr->Name.find("18536:63794") != std::string::npos)
+		{
+			x++;
+		}
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			auto tracebackNodePtr = std::make_shared< TracebackNode >();
@@ -71,7 +76,7 @@ namespace graphite
 		{
 			this->m_total_score = ((float)totalScore / (float)((bamAlignmentPtr->QueryBases.size() - totalSoftclipLength) * matchValue)) * 100;
 		}
-		if (this->m_total_score >= 90 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
+		if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
 		{
 			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr);
 		}
@@ -120,6 +125,85 @@ namespace graphite
 
 	bool Traceback::isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr)
 	{
+		bool recordedRef = false;
+		auto prevTracebackNodePtr = tracebackNodePtr->getPrevTracebackNodePtr();
+		auto nextTracebackNodePtr = tracebackNodePtr->getNextTracebackNodePtr();
+		// if (prevTracebackNodePtr == nullptr && nextTracebackNodePtr != nullptr)
+		if (nextTracebackNodePtr != nullptr)
+		{
+			auto matchCount = tracebackNodePtr->getMatchCountFromStart();
+			std::string nodeSequence;
+			if (matchCount > tracebackNodePtr->getNodePtr()->getSequence().size())
+			{
+				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence();
+			}
+			else
+			{
+				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(tracebackNodePtr->getNodePtr()->getSequence().size() - matchCount);
+			}
+			for (auto siblingNodePtr : nextTracebackNodePtr->getNodePtr()->getInNodes())
+			{
+				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get()) { continue; } // we don't want to compare ourselves!
+				if ((siblingNodePtr->getSequence().size() < nodeSequence.size()) &&
+					(siblingNodePtr->getReferenceInNode() != nullptr && (siblingNodePtr->getSequence().size() + siblingNodePtr->getReferenceInNode()->getSequence().size()) >= nodeSequence.size()))
+				{
+					std::string compareSequence = siblingNodePtr->getReferenceInNode()->getSequence() + siblingNodePtr->getSequence();
+					auto minSeqSize = (nodeSequence.size() < compareSequence.size()) ? nodeSequence.size() : compareSequence.size();
+					if (strncmp(compareSequence.substr(minSeqSize).c_str(), nodeSequence.c_str(), nodeSequence.size()) == 0)
+					{
+						return true;
+					}
+				}
+				else if (siblingNodePtr->getSequence().size() >= nodeSequence.size())
+				{
+					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(siblingNodePtr->getSequence().size() - matchCount);
+					if (nodeSequence.compare(siblingNodeSequence) == 0)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	    if (prevTracebackNodePtr != nullptr)
+		{
+			auto matchCount = tracebackNodePtr->getMatchCountFromEnd();
+			std::string nodeSequence;
+			if (matchCount > tracebackNodePtr->getNodePtr()->getSequence().size())
+			{
+				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence();
+			}
+			else
+			{
+				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(0, matchCount);
+			}
+			for (auto siblingNodePtr : prevTracebackNodePtr->getNodePtr()->getOutNodes())
+			{
+				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get()) { continue; } // we don't want to compare ourselves!
+				if ((siblingNodePtr->getSequence().size() < nodeSequence.size()) &&
+					(siblingNodePtr->getReferenceOutNode() != nullptr && (siblingNodePtr->getSequence().size() + siblingNodePtr->getReferenceOutNode()->getSequence().size()) >= nodeSequence.size()))
+				{
+					std::string compareSequence = siblingNodePtr->getSequence() + siblingNodePtr->getReferenceOutNode()->getSequence();
+					if (strncmp(compareSequence.c_str(), nodeSequence.c_str(), nodeSequence.size()) == 0)
+					{
+						return true;
+					}
+				}
+				else if (siblingNodePtr->getSequence().size() >= nodeSequence.size())
+				{
+					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(0, siblingNodePtr->getSequence().size());
+					if (nodeSequence.compare(siblingNodeSequence) == 0)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/*
+	bool Traceback::isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr)
+	{
 		auto prevTracebackNodePtr = tracebackNodePtr->getPrevTracebackNodePtr();
 		auto nextTracebackNodePtr = tracebackNodePtr->getNextTracebackNodePtr();
 		auto matchCount = tracebackNodePtr->getMatchCount();
@@ -161,6 +245,7 @@ namespace graphite
 		}
 		return false;
 	}
+	*/
 	bool Traceback::fullAlleleInTraceback(Allele::SharedPtr allelePtr, Node* nodePtr)
 	{
 		std::string nodeSequence = nodePtr->getSequence();
