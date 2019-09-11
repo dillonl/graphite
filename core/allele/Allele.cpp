@@ -25,6 +25,10 @@ namespace graphite
 		}
 		// std::cout << "ambiguous type: " << AlleleCountTypeToString((AlleleCountType)alleleCountType) << std::endl;
 		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > >* counts = (isForwardStrand) ? &this->m_forward_counts : &this->m_reverse_counts;
+		for (auto allelePtr : this->m_paired_allele_ptrs)
+		{
+			allelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, score);
+		}
 
 		std::lock_guard< std::mutex > l(m_counts_lock);
 		auto iter = counts->find(samplePtr->getName());
@@ -37,7 +41,6 @@ namespace graphite
 		std::string bamID = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
 		auto readCounts = iter->second;
 		(*counts)[samplePtr->getName()][alleleCountType].emplace(bamID); // we are using readname so reads aren't counted more than once when we do the traceback and trackback through more than one reference node
-		// std::cout << "adding: " << AlleleCountTypeToString((AlleleCountType)alleleCountType) <<  " " << (*counts)[samplePtr->getName()][alleleCountType].size() << std::endl;
 	}
 
 	std::unordered_set< std::string > Allele::getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount)
@@ -60,5 +63,24 @@ namespace graphite
 		}
 		std::unordered_set< std::string > emptyValue;
 		return emptyValue;
+	}
+
+	void Allele::pairAllele(Allele::SharedPtr allelePtr)
+	{
+		this->m_paired_allele_ptrs.emplace(allelePtr);
+	}
+
+	void Allele::addSemanticLoci(position pos, const std::string& refSequence, const std::string& altSequence)
+	{
+		auto iter = this->m_semantic_locations.find(pos);
+		if (iter == this->m_semantic_locations.end())
+		{
+			std::unordered_set< std::string > sequences = {refSequence + ":" + altSequence};
+			this->m_semantic_locations.emplace(pos, sequences);
+		}
+		else
+		{
+			iter->second.emplace(refSequence + ":" + altSequence);
+		}
 	}
 }

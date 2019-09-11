@@ -51,7 +51,9 @@ namespace graphite
 																		  std::make_tuple("ID=DP4_EP", "##FORMAT=<ID=DP4_EP,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles, 2) reverse ref, 3) forward non-ref, 4) reverse non-ref alleles, used in variant calling between 80 and 89 percent Smith Waterman score.\">"),
 																		  std::make_tuple("ID=DP4_SP", "##FORMAT=<ID=DP4_SP,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles, 2) reverse ref, 3) forward non-ref, 4) reverse non-ref alleles, used in variant calling between 70 and 79 percent Smith Waterman score.\">"),
 																		  std::make_tuple("ID=DP4_LP", "##FORMAT=<ID=DP4_LP,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles, 2) reverse ref, 3) forward non-ref, 4) reverse non-ref alleles, used in variant calling at 69 percent or less Smith Waterman score.\">"),
-		                                                                  std::make_tuple("ID=DP4_AP", "##FORMAT=<ID=DP4_AP,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles, 2) reverse ref, 3) forward non-ref, 4) reverse non-ref alleles, used in variant calling for reads which map equally well into (or out of) reference and the alt. Not resolvable but a valid mapping.\">")};
+		                                                                  std::make_tuple("ID=DP4_AP", "##FORMAT=<ID=DP4_AP,Number=.,Type=Integer,Description=\"Number of 1) forward ref alleles, 2) reverse ref, 3) forward non-ref, 4) reverse non-ref alleles, used in variant calling for reads which map equally well into (or out of) reference and the alt. Not resolvable but a valid mapping.\">"),
+																		  std::make_tuple("ID=SEM", "##FORMAT=<ID=SEM,Number=1,Type=String,Description=\"The position and alleles of variants that describe the same events within this VCF if any exist.\">")};
+
 	};
 }
 

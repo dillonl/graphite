@@ -36,12 +36,13 @@ namespace graphite
 		void clearResources();
 
 	private:
+		std::vector< Variant::SharedPtr > reconcileVariantSemantics(std::vector< Variant::SharedPtr >& variantPtrs);
 		void addAdditionalNodeEdges();
 		void compressLargeNodes();
 		void setRegionPtrs();
 		void generateGraph();
 		void generateReferenceGraph(Region::SharedPtr regionPtr);
-		void getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr);
+		void getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr, std::vector< Variant::SharedPtr >& variantPtrs);
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);

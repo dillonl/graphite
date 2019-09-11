@@ -8,11 +8,12 @@ namespace graphite
 {
 	Graph::Graph(FastaReference::SharedPtr fastaReferencePtr, std::vector< Variant::SharedPtr > variantPtrs, uint32_t graphSpacing, bool printGraph) :
 		m_fasta_reference_ptr(fastaReferencePtr),
-		m_variant_ptrs(variantPtrs),
+		// m_variant_ptrs(variantPtrs),
 		m_graph_spacing(graphSpacing),
 		m_score_threshold(70),
 		m_graph_printer_ptr(nullptr)
 	{
+		m_variant_ptrs = reconcileVariantSemantics(variantPtrs);
 		generateGraph();
 		if (printGraph)
 		{
@@ -42,7 +43,7 @@ namespace graphite
 	{
 		std::string referenceSequence;
 		Region::SharedPtr referenceRegionPtr;
-		getGraphReference(referenceSequence, referenceRegionPtr);
+		getGraphReference(referenceSequence, referenceRegionPtr, this->m_variant_ptrs);
 		Node::SharedPtr firstNodePtr;
 		Node::SharedPtr lastNodePtr;
 		generateReferenceGraphNode(firstNodePtr, lastNodePtr, referenceSequence, referenceRegionPtr);
@@ -52,6 +53,54 @@ namespace graphite
 		this->m_first_node = firstNodePtr;
 		setRegionPtrs();
 		addAdditionalNodeEdges();
+	}
+
+	std::vector< Variant::SharedPtr > Graph::reconcileVariantSemantics(std::vector< Variant::SharedPtr >& variantPtrs)
+	{
+		std::vector< Variant::SharedPtr > uniqueVariantPtrs;
+		std::string referenceSequence;
+		Region::SharedPtr referenceRegionPtr;
+		getGraphReference(referenceSequence, referenceRegionPtr, variantPtrs);
+
+		std::unordered_map< std::string, Allele::SharedPtr > variantSequenceMap;
+		std::unordered_map< std::string, Variant::SharedPtr > variantPtrMap;
+		std::unordered_set< Variant::SharedPtr > variantPtrSet;
+		// variantSequences.emplace_back(referenceSequence); // we aren't putting in the reference allele because there are many ref alleles and they all have the same equence so they will be over counted
+		for (auto variantPtr : variantPtrs)
+		{
+			int prefixSize = variantPtr->getPosition() - referenceRegionPtr->getStartPosition();
+			int suffixSize = (prefixSize + variantPtr->getReferenceAllelePtr()->getSequence().size());
+			std::string prefix = referenceSequence.substr(0, prefixSize);
+			std::string suffix = referenceSequence.substr(suffixSize);
+			Allele::SharedPtr refAllelePtr = variantPtr->getReferenceAllelePtr();
+			for (auto altAllelePtr : variantPtr->getAlternateAllelePtrs())
+			{
+				std::string sequence = prefix + altAllelePtr->getSequence() + suffix;
+				auto variantIter = variantSequenceMap.find(sequence);
+				if (variantIter != variantSequenceMap.end()) // if there is a dup sequence that means there is a semantic sequence match so pair the alleles
+				{
+					auto variantPtrIter = variantPtrMap.find(sequence);
+					if (variantPtrIter == variantPtrMap.end()) { std::cout << "there was a problem in Graph.cpp." << std::endl; }
+					Variant::SharedPtr queryVariantPtr = variantPtrIter->second;
+					Allele::SharedPtr allelePtr = variantIter->second;
+					Allele::SharedPtr queryRefAllelePtr = queryVariantPtr->getReferenceAllelePtr();
+					queryRefAllelePtr->pairAllele(refAllelePtr); // pair the ref allele so they are both counted when there is a SW match
+					allelePtr->pairAllele(altAllelePtr); // pair the allele so they are both counted when there is a SW match
+					allelePtr->addSemanticLoci(variantPtr->getPosition(), refAllelePtr->getSequence(), altAllelePtr->getSequence());
+					altAllelePtr->addSemanticLoci(queryVariantPtr->getPosition(), queryRefAllelePtr->getSequence(), allelePtr->getSequence());
+				}
+				else
+				{
+					variantPtrMap.emplace(sequence, variantPtr);
+					variantSequenceMap.emplace(sequence, altAllelePtr);
+					if (variantPtrSet.find(variantPtr) == variantPtrSet.end()) // we don't want to add the variant more than once on multi-allelics
+					{
+						uniqueVariantPtrs.emplace_back(variantPtr);
+					}
+				}
+			}
+		}
+		return uniqueVariantPtrs;
 	}
 
 	std::vector< Region::SharedPtr > Graph::getRegionPtrs()
@@ -106,12 +155,12 @@ namespace graphite
 		this->m_graph_regions.emplace_back(std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE));
 	}
 
-	void Graph::getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr)
+	void Graph::getGraphReference(std::string& sequence, Region::SharedPtr& regionPtr, std::vector< Variant::SharedPtr >& variantPtrs)
 	{
-		std::string referenceID = this->m_variant_ptrs[0]->getChromosome();
+		std::string referenceID = variantPtrs[0]->getChromosome();
 		position startPosition = MAX_POSITION;
 		position endPosition = 0;
-		for (auto variantPtr : this->m_variant_ptrs)
+		for (auto variantPtr : variantPtrs)
 		{
 			if (variantPtr->getPosition() < startPosition)
 			{

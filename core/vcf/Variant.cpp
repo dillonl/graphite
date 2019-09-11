@@ -45,7 +45,7 @@ namespace graphite
 		{
 			formatSpacing = ":";
 		}
-		m_columns["FORMAT"] += formatSpacing + "DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP4_AP";
+		m_columns["FORMAT"] += formatSpacing + "DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP4_AP:SEM";
 
 		for (auto& sampleName : this->m_vcf_writer_ptr->getSampleNames())
 		{
@@ -117,10 +117,10 @@ namespace graphite
 
 	std::string Variant::getSampleCounts(const std::string& sampleName)
 	{
+		std::string semanticString = "{";
 		std::string graphiteCountsString = "";
 		AlleleCountType alleleCountType = AlleleCountType::NinteyFivePercent;
 		while (alleleCountType != AlleleCountType::EndEnum)
-		// for (auto alleleCountType : AllAlleleCountTypes)
 		{
 			uint32_t totalCounter = 0;
 			std::unordered_set< std::string > forwardScoreCount;
@@ -138,6 +138,24 @@ namespace graphite
 				reverseScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
 				tmpCountsString += std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
 				totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
+				for (auto semanticIter : allelePtr->getSemanticLocations())
+				{
+					if (this->m_printed_semantics.find(semanticIter.first) != this->m_printed_semantics.end())
+					{
+						continue;
+					}
+					this->m_printed_semantics.emplace(semanticIter.first);
+					semanticString += std::to_string(semanticIter.first) + "(";
+					int semanticCount = 0;
+					for (auto semanticSequenceIter : semanticIter.second)
+					{
+						std::vector< std::string > alleles;
+						split(semanticSequenceIter, ':', alleles);
+						std::string sequences = alleles[0] + "=>" + alleles[1];
+						semanticString += (semanticCount++ == 0) ? sequences : "," + sequences;
+					}
+					semanticString += ")";
+				}
 			}
 			if (!graphiteCountsString.empty())
 			{
@@ -146,7 +164,15 @@ namespace graphite
 			graphiteCountsString += std::to_string(totalCounter) + ":" + tmpCountsString;
 			alleleCountType = (AlleleCountType)((uint32_t)alleleCountType + 1);
 		}
-
+		if (semanticString.size() == 1) // if we didn't set any semantic alleles above
+		{
+			semanticString = ".";
+		}
+		else
+		{
+			semanticString += "}";
+		}
+		graphiteCountsString += ":" + semanticString;
 		return graphiteCountsString;
 	}
 }

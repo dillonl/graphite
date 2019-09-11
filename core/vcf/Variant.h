@@ -42,6 +42,7 @@ namespace graphite
 		Allele::SharedPtr m_reference_allele_ptr; // make sure to figure out  a way to keep track of breaking up the alleles
 		std::vector< Allele::SharedPtr > m_alternate_allele_ptrs;
 		bool m_skip_adjudication;
+		std::unordered_set< int > m_printed_semantics;
 
 	};
 }
