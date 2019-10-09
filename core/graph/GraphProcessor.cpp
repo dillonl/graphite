@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <functional>
+#include <random>
 
 namespace graphite
 {

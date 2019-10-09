@@ -34,7 +34,7 @@ namespace graphite
 
 		inline bool getNextLine(std::string& line)
 		{
-			return std::getline(*this->m_file_stream_ptr, line);
+			return (bool)std::getline(*this->m_file_stream_ptr, line);
 		}
 
 		Variant::SharedPtr m_preloaded_variant;
