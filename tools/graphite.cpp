@@ -1,4 +1,5 @@
 //#include <Python.h>
+#include "core/util/Utility.h"
 #include "core/util/Params.h"
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
@@ -46,6 +47,11 @@ int main(int argc, char** argv)
 	std::vector< graphite::BamReader::SharedPtr > bamReaderPtrs;
 	for (auto bamPath : bamPaths)
 	{
+        if (!graphite::endsWith(bamPath, ".bam"))
+		{
+			std::cout << "Your sample files must be BAMs" << std::endl;
+			return 1;
+		}
 		auto bamReaderPtr = std::make_shared< graphite::BamReader >(bamPath);
 		if (overwriteSampleName.length() == 0)
 		{

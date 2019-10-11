@@ -64,4 +64,10 @@ namespace graphite
 		return false;
 	}
 
+	bool endsWith(const std::string& path, const std::string& ending)
+	{
+		auto iter = path.find_last_of(ending);
+		return (iter != path.size() - ending.size());
+	}
+
 }
