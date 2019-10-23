@@ -83,8 +83,8 @@ namespace graphite
 		{
 			if (tracebackNodePtr->getScore() >= 70)// && !nodeHasFlankingMismatches(tracebackNodePtr, bamAlignmentPtr))
 			{
-				// auto nodeScore = (isNodeSequenceAmbiguous(tracebackNodePtr)) ? -1 : tracebackNodePtr->getScore();
-				auto nodeScore = tracebackNodePtr->getScore();
+				auto nodeScore = (isNodeSequenceAmbiguous(tracebackNodePtr)) ? -1 : tracebackNodePtr->getScore();
+				// auto nodeScore = tracebackNodePtr->getScore();
 				for (auto nodeAllelePtr : tracebackNodePtr->getNodePtr()->getAllelePtrs())
 				{
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
@@ -124,76 +124,38 @@ namespace graphite
 		bool recordedRef = false;
 		auto prevTracebackNodePtr = tracebackNodePtr->getPrevTracebackNodePtr();
 		auto nextTracebackNodePtr = tracebackNodePtr->getNextTracebackNodePtr();
-		// if (prevTracebackNodePtr == nullptr && nextTracebackNodePtr != nullptr)
-		if (nextTracebackNodePtr != nullptr)
+
+		if (prevTracebackNodePtr == nullptr && nextTracebackNodePtr != nullptr) // I am the first node
 		{
-			auto matchCount = tracebackNodePtr->getMatchCountFromStart();
-			std::string nodeSequence;
-			if (matchCount > tracebackNodePtr->getNodePtr()->getSequence().size())
-			{
-				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence();
-			}
-			else
-			{
-				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(tracebackNodePtr->getNodePtr()->getSequence().size() - matchCount);
-			}
+			uint32_t matchCount = tracebackNodePtr->getMatchCountFromEnd();
+			std::string matchSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(tracebackNodePtr->getNodePtr()->getSequence().size() - matchCount);
 			for (auto siblingNodePtr : nextTracebackNodePtr->getNodePtr()->getInNodes())
 			{
-				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get()) { continue; } // we don't want to compare ourselves!
-				if ((siblingNodePtr->getSequence().size() < nodeSequence.size()) &&
-					(siblingNodePtr->getReferenceInNode() != nullptr && (siblingNodePtr->getSequence().size() + siblingNodePtr->getReferenceInNode()->getSequence().size()) >= nodeSequence.size()))
+				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get() || siblingNodePtr->getSequence().size() < matchCount) { continue; } // we don't want to compare ourselves!
+				std::string siblingMatchSequence = siblingNodePtr->getSequence().substr(tracebackNodePtr->getNodePtr()->getSequence().size() - matchCount);
+				if (siblingMatchSequence.compare(matchSequence) == 0)
 				{
-					std::string compareSequence = siblingNodePtr->getReferenceInNode()->getSequence() + siblingNodePtr->getSequence();
-					auto minSeqSize = (nodeSequence.size() < compareSequence.size()) ? nodeSequence.size() : compareSequence.size();
-					if (strncmp(compareSequence.substr(minSeqSize).c_str(), nodeSequence.c_str(), nodeSequence.size()) == 0)
-					{
-						return true;
-					}
-				}
-				else if (siblingNodePtr->getSequence().size() >= nodeSequence.size())
-				{
-					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(siblingNodePtr->getSequence().size() - matchCount);
-					if (nodeSequence.compare(siblingNodeSequence) == 0)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}
-	    if (prevTracebackNodePtr != nullptr)
+		if (nextTracebackNodePtr == nullptr && prevTracebackNodePtr != nullptr) // I am the last node
 		{
-			auto matchCount = tracebackNodePtr->getMatchCountFromEnd();
-			std::string nodeSequence;
-			if (matchCount > tracebackNodePtr->getNodePtr()->getSequence().size())
-			{
-				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence();
-			}
-			else
-			{
-				nodeSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(0, matchCount);
-			}
+			uint32_t matchCount = tracebackNodePtr->getMatchCountFromStart();
+			std::string matchSequence = tracebackNodePtr->getNodePtr()->getSequence().substr(0, matchCount);
 			for (auto siblingNodePtr : prevTracebackNodePtr->getNodePtr()->getOutNodes())
 			{
-				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get()) { continue; } // we don't want to compare ourselves!
-				if ((siblingNodePtr->getSequence().size() < nodeSequence.size()) &&
-					(siblingNodePtr->getReferenceOutNode() != nullptr && (siblingNodePtr->getSequence().size() + siblingNodePtr->getReferenceOutNode()->getSequence().size()) >= nodeSequence.size()))
+				if (tracebackNodePtr->getNodePtr() == siblingNodePtr.get() || siblingNodePtr->getSequence().size() < matchCount) { continue; } // we don't want to compare ourselves!
+				std::string siblingMatchSequence = siblingNodePtr->getSequence().substr(0, matchCount);
+				if (siblingMatchSequence.compare(matchSequence) == 0)
 				{
-					std::string compareSequence = siblingNodePtr->getSequence() + siblingNodePtr->getReferenceOutNode()->getSequence();
-					if (strncmp(compareSequence.c_str(), nodeSequence.c_str(), nodeSequence.size()) == 0)
-					{
-						return true;
-					}
-				}
-				else if (siblingNodePtr->getSequence().size() >= nodeSequence.size())
-				{
-					std::string siblingNodeSequence = siblingNodePtr->getSequence().substr(0, siblingNodePtr->getSequence().size());
-					if (nodeSequence.compare(siblingNodeSequence) == 0)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}
+
+
+
 		return false;
 	}
 
