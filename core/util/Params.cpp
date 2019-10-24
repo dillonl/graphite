@@ -34,6 +34,7 @@ namespace graphite
 			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("n,sample_limit", "If the number of reads exceed this number then Graphite will randomly sample n reads [optional - default is no sample limit]", cxxopts::value< int32_t >()->default_value("-1"))
 			("x,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
+			("a,save_supporting_read", "Save Supporting Read Info [optional - default is false]")
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("t,number_of_threads", "Number of threads to consume [optional - default is 2*number of cores]", cxxopts::value< int32_t >()->default_value("-1"))
@@ -204,6 +205,11 @@ namespace graphite
 	int32_t Params::getReadSampleNumber()
 	{
 		return m_options["n"].as< int32_t >();
+	}
+
+	bool Params::saveSupportingReadInformation()
+	{
+		return m_options["a"].as< bool >();
 	}
 
 }

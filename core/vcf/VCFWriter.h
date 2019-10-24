@@ -19,7 +19,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< VCFWriter > SharedPtr;
-		VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory);
+		VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory, bool saveSupportingReadInfo);
 		~VCFWriter();
 
 		void writeLine(const std::string& line);
@@ -31,13 +31,18 @@ namespace graphite
 		bool isSampleNameInBam(const std::string& sampleName);
 		void setBlankFormatString(const std::string& blankFormatString);
 		std::shared_ptr< std::string > getBlankFormatStringPtr();
+		bool getSaveSupportingReadInfo() { return this->m_save_supporting_read_info; }
+		std::ofstream* getSupportingReadOutputStream() { return &this->m_out_supporting_read_file; }
 
 	private:
+		std::string m_base_output_path;
+		bool m_save_supporting_read_info;
 		std::vector< Sample::SharedPtr > m_bam_sample_ptrs;
 		std::unordered_map< std::string, bool > m_sample_name_in_vcf;
 		std::vector< std::string > m_vcf_column_names;
 		std::vector< std::string > m_sample_names;
 		std::ofstream m_out_file;
+		std::ofstream m_out_supporting_read_file;
 		std::shared_ptr< std::string > m_black_format_string;
 		std::unordered_map< std::string, Sample::SharedPtr > m_bam_sample_ptrs_map;
 		std::vector< std::tuple< std::string, std::string > > m_format = {std::make_tuple("ID=DP_NFP", "##FORMAT=<ID=DP_NFP,Number=1,Type=Integer,Description=\"Read count at 95 percent Smith Waterman score or above\">"),

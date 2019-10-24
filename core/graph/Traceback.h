@@ -34,13 +34,18 @@ namespace graphite
 		void setNodePtr(Node* nodePtr) { this->m_node_ptr = nodePtr; }
 		void setNodeScore(int32_t score) {this->m_score = score;}
 		void addCigarComponent(std::tuple< uint32_t, char > cigarComponent) { this->m_cigar.emplace_back(cigarComponent); }
-		uint32_t printCigarString()
+		std::string getCigarString()
 		{
+			std::string cigar = "";
 			for (auto iter : this->m_cigar)
 			{
-				std::cout << std::to_string(std::get< 0 >(iter)) << std::get< 1 >(iter);
+				cigar += std::to_string(std::get< 0 >(iter)) + std::get< 1 >(iter);
 			}
-			std::cout << std::endl;
+			return cigar;
+		}
+		uint32_t printCigarString()
+		{
+			std::cout << this->getCigarString() << std::endl;
 		}
 
 		uint32_t getMatchCountFromStart()
@@ -98,7 +103,7 @@ namespace graphite
 		void printTraceback();
 
 	private:
-		void incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr);
+		void incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString);
 		bool nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr);
 		bool isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr);
 		bool fullAlleleInTraceback(Allele::SharedPtr allelePtr, Node* nodePtr);

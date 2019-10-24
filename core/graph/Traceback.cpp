@@ -17,6 +17,7 @@ namespace graphite
 		this->m_number_of_softclips = 0;
 		uint32_t totalSoftclipLength = 0;
 		int32_t totalScore = 0;
+		std::string graphCigarString = "";
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		TracebackNode::SharedPtr prevTracebackNodePtr = nullptr;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
@@ -32,6 +33,7 @@ namespace graphite
 				std::tuple< uint32_t, char > cigarComponent = std::make_tuple(nc->cigar->elements[j].length, nc->cigar->elements[j].type);
 				tracebackNodePtr->addCigarComponent(cigarComponent);
 				nodeLength += nc->cigar->elements[j].length;
+				graphCigarString += nc->cigar->elements[j].type + std::to_string(nc->cigar->elements[j].length);
 				switch (nc->cigar->elements[j].type)
 				{
 				case 'M':
@@ -73,11 +75,11 @@ namespace graphite
 		}
 		if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
 		{
-			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr);
+			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr, graphCigarString);
 		}
 	}
 
-	void Traceback::incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr)
+	void Traceback::incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString)
 	{
 		for (auto tracebackNodePtr : this->m_traceback_nodes)
 		{
@@ -90,6 +92,13 @@ namespace graphite
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
 					{
 						nodeAllelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, nodeScore);
+						if (nodeScore >= 95)
+						{
+							std::string alignmentName = bamAlignmentPtr->Name +	std::to_string(bamAlignmentPtr->IsSecondMate() + 1);
+							std::string mateAlignmentName = bamAlignmentPtr->Name +	std::to_string((!bamAlignmentPtr->IsSecondMate()) + 1);
+							auto supportingReadInfo = std::make_shared< SupportingReadInfo >(samplePtr->getName(), alignmentName, mateAlignmentName, graphCigarString);
+							nodeAllelePtr->registerSupportingReadInformation(supportingReadInfo);
+						}
 					}
 				}
 			}

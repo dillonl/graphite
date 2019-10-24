@@ -36,6 +36,7 @@ int main(int argc, char** argv)
 	auto readSampleLimit = params.getReadSampleNumber();
 	auto overwriteSampleName = params.getOverwrittenSampleName();
 	auto threadCount = params.getThreadCount();
+	auto saveSupportingReadInfo = params.saveSupportingReadInformation();
 
     // create reference reader
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath);
@@ -72,7 +73,7 @@ int main(int argc, char** argv)
 	std::vector< graphite::VCFReader::SharedPtr > vcfReaderPtrs;
 	for (auto vcfPath : vcfPaths)
 	{
-		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, bamSamplePtrs, outputDirectory);
+		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, bamSamplePtrs, outputDirectory, saveSupportingReadInfo);
 		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr, vcfWriterPtr);
 		vcfReaderPtrs.emplace_back(vcfReaderPtr);
 	}

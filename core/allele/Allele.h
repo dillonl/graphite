@@ -15,6 +15,29 @@
 namespace graphite
 {
 	class Node;
+	class SupportingReadInfo : private Noncopyable
+	{
+	public:
+		typedef std::shared_ptr< SupportingReadInfo > SharedPtr;
+	    SupportingReadInfo(const std::string& sampleName, const std::string& readName, const std::string& mateReadName, const std::string& cigarString) :
+		    m_sample_name(sampleName), m_read_name(readName), m_mate_read_name(mateReadName), m_cigar_string(cigarString)
+		{
+		}
+
+		std::string getSampleName() { return this->m_sample_name; }
+		std::string getReadName() { return this->m_read_name; }
+		std::string getMateReadName() { return this->m_mate_read_name; }
+		std::string getCigarString() { return this->m_cigar_string; }
+		static std::string getHeader(const std::string& token) { return "SampleName" + token + "ReadName" + token + "MateReadName" + token + "CigarString"; }
+		std::string toString(const std::string& token) { return this->m_sample_name + token + this->m_read_name + token + this->m_mate_read_name + token + this->m_cigar_string; }
+
+	private:
+		std::string m_sample_name;
+		std::string m_read_name;
+		std::string m_mate_read_name;
+		std::string m_cigar_string;
+	};
+
 	class Allele : private Noncopyable
 	{
 	public:
@@ -33,6 +56,8 @@ namespace graphite
 		void pairAllele(Allele::SharedPtr allelePtr);
 		void addSemanticLoci(position pos, const std::string& refSequence, const std::string& altSequence);
 		std::unordered_map< position, std::unordered_set< std::string > > getSemanticLocations() { return this->m_semantic_locations; }
+		void registerSupportingReadInformation(SupportingReadInfo::SharedPtr supportingReadInfo);
+		std::vector< SupportingReadInfo::SharedPtr > getSupportingReadInfoPtrs();
 
 	private:
 		std::string m_sequence;
@@ -44,6 +69,8 @@ namespace graphite
         std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > > m_reverse_counts; // map keyed by read SampleName then they are indexed via the AlleleCountType enum value, then add readName to the the unordered set so we are properly counting the reads
 		std::mutex m_counts_lock;
 		std::unordered_set< std::shared_ptr< Node > > m_node_ptrs; // you have to make sure to clear this otherwise you will have hanging shared ptrs
+		std::mutex m_supporting_read_info_mutex;
+		std::vector< SupportingReadInfo::SharedPtr > m_supporting_read_info_list;
 	};
 }
 

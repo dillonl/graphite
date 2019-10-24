@@ -35,6 +35,26 @@ namespace graphite
 			auto columnName = columnNames[i];
 			vcfLine += m_columns[columnName];
 		}
+		if (this->m_vcf_writer_ptr->getSaveSupportingReadInfo())
+		{
+			std::ofstream* outPtr = this->m_vcf_writer_ptr->getSupportingReadOutputStream();
+			(*outPtr) << ">" << this->m_chrom << "\t" << this->m_position << "\t" << this->m_reference_allele_ptr->getSequence() << std::endl;
+			for (auto refAlleleSupportingReadInfo : this->m_reference_allele_ptr->getSupportingReadInfoPtrs())
+			{
+				(*outPtr) << refAlleleSupportingReadInfo->toString("\t") << std::endl;
+			}
+			for (auto altAllelePtr : this->m_alternate_allele_ptrs)
+			{
+				(*outPtr) << ">" << this->m_chrom << "\t" << this->m_position << "\t" << altAllelePtr->getSequence() << std::endl;
+				for (auto altAlleleSupportingReadInfo : altAllelePtr->getSupportingReadInfoPtrs())
+				{
+					(*outPtr) << altAlleleSupportingReadInfo->toString("\t") << std::endl;
+				}
+			}
+			// m_reference_allele_ptr
+			// m_alternate_allele_ptrs
+		}
+
 		this->m_vcf_writer_ptr->writeLine(vcfLine);
 	}
 

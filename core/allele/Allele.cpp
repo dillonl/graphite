@@ -83,4 +83,17 @@ namespace graphite
 			iter->second.emplace(refSequence + ":" + altSequence);
 		}
 	}
+
+	void Allele::registerSupportingReadInformation(SupportingReadInfo::SharedPtr supportingReadInfo)
+	{
+		std::lock_guard< std::mutex > l(this->m_supporting_read_info_mutex);
+		this->m_supporting_read_info_list.emplace_back(supportingReadInfo);
+	}
+
+	std::vector< SupportingReadInfo::SharedPtr > Allele::getSupportingReadInfoPtrs()
+	{
+		std::lock_guard< std::mutex > l(this->m_supporting_read_info_mutex);
+		std::vector< SupportingReadInfo::SharedPtr > supportingReadInfoList(this->m_supporting_read_info_list);
+		return supportingReadInfoList;
+	}
 }
