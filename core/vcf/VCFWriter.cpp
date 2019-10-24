@@ -36,7 +36,8 @@ namespace graphite
 			baseFilename = baseFilename.substr(0, baseFilename.size() - filenameExtension.size() - 1);
 			std::string saveSupportingReadPath = outputDirectory + "/" + baseFilename + ".graphite_supporting_read_info.txt";
 			this->m_out_supporting_read_file.open(saveSupportingReadPath);
-			this->m_out_supporting_read_file << SupportingReadInfo::getHeader("\t") << std::endl;
+			std::string token = "\t";
+			this->m_out_supporting_read_file << "Chrom" << token << "Pos" << "Allele" << token << SupportingReadInfo::getHeader(token) << std::endl;
 		}
 	}
 

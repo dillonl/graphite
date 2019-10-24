@@ -38,21 +38,21 @@ namespace graphite
 		if (this->m_vcf_writer_ptr->getSaveSupportingReadInfo())
 		{
 			std::ofstream* outPtr = this->m_vcf_writer_ptr->getSupportingReadOutputStream();
-			(*outPtr) << ">" << this->m_chrom << "\t" << this->m_position << "\t" << this->m_reference_allele_ptr->getSequence() << std::endl;
+			std::string token = "\t";
+			std::string variantInfo = this->m_chrom + token + std::to_string(this->m_position) + token;
 			for (auto refAlleleSupportingReadInfo : this->m_reference_allele_ptr->getSupportingReadInfoPtrs())
 			{
-				(*outPtr) << refAlleleSupportingReadInfo->toString("\t") << std::endl;
+				(*outPtr) << variantInfo << token << this->m_reference_allele_ptr->getSequence() << token << refAlleleSupportingReadInfo->toString(token) << std::endl;
 			}
 			for (auto altAllelePtr : this->m_alternate_allele_ptrs)
 			{
-				(*outPtr) << ">" << this->m_chrom << "\t" << this->m_position << "\t" << altAllelePtr->getSequence() << std::endl;
+				// (*outPtr) << "" << this->m_chrom << "\t" << this->m_position << "\t" << altAllelePtr->getSequence() << std::endl;
 				for (auto altAlleleSupportingReadInfo : altAllelePtr->getSupportingReadInfoPtrs())
 				{
-					(*outPtr) << altAlleleSupportingReadInfo->toString("\t") << std::endl;
+					// (*outPtr) << altAlleleSupportingReadInfo->toString("\t") << std::endl;
+					(*outPtr) << variantInfo << token << altAllelePtr->getSequence() << token << altAlleleSupportingReadInfo->toString(token) << std::endl;
 				}
 			}
-			// m_reference_allele_ptr
-			// m_alternate_allele_ptrs
 		}
 
 		this->m_vcf_writer_ptr->writeLine(vcfLine);
