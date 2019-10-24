@@ -92,12 +92,12 @@ namespace graphite
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
 					{
 						nodeAllelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, nodeScore);
-						if (nodeScore >= 95)
+						if (nodeScore != 0)
 						{
 							std::string alignmentName = bamAlignmentPtr->Name +	std::to_string(bamAlignmentPtr->IsSecondMate() + 1);
 							std::string mateAlignmentName = bamAlignmentPtr->Name +	std::to_string((!bamAlignmentPtr->IsSecondMate()) + 1);
-							auto supportingReadInfo = std::make_shared< SupportingReadInfo >(samplePtr->getName(), alignmentName, mateAlignmentName, graphCigarString);
-							nodeAllelePtr->registerSupportingReadInformation(supportingReadInfo);
+							auto supportingReadInfo = std::make_shared< SupportingReadInfo >(samplePtr->getName(), alignmentName, mateAlignmentName, graphCigarString, nodeScore, this->m_total_score);
+						    nodeAllelePtr->registerSupportingReadInformation(supportingReadInfo);
 						}
 					}
 				}

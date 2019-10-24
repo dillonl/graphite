@@ -19,23 +19,21 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< SupportingReadInfo > SharedPtr;
-	    SupportingReadInfo(const std::string& sampleName, const std::string& readName, const std::string& mateReadName, const std::string& cigarString) :
-		    m_sample_name(sampleName), m_read_name(readName), m_mate_read_name(mateReadName), m_cigar_string(cigarString)
+	    SupportingReadInfo(const std::string& sampleName, const std::string& readName, const std::string& mateReadName, const std::string& cigarString, int nodeScore, int tracebackScore) :
+    		m_sample_name(sampleName), m_read_name(readName), m_mate_read_name(mateReadName), m_cigar_string(cigarString), m_node_score(nodeScore), m_traceback_score(tracebackScore)
 		{
 		}
 
-		std::string getSampleName() { return this->m_sample_name; }
-		std::string getReadName() { return this->m_read_name; }
-		std::string getMateReadName() { return this->m_mate_read_name; }
-		std::string getCigarString() { return this->m_cigar_string; }
-		static std::string getHeader(const std::string& token) { return "SampleName" + token + "ReadName" + token + "MateReadName" + token + "CigarString"; }
-		std::string toString(const std::string& token) { return this->m_sample_name + token + this->m_read_name + token + this->m_mate_read_name + token + this->m_cigar_string; }
+			static std::string getHeader(const std::string& token) { return "SampleName" + token + "ReadName" + token + "MateReadName" + token + "CigarString" + token + "NodeScore" + token + "TracebackScore"; }
+		std::string toString(const std::string& token) { return this->m_sample_name + token + this->m_read_name + token + this->m_mate_read_name + token + this->m_cigar_string + token + std::to_string(this->m_node_score) + token + std::to_string(this->m_traceback_score); }
 
 	private:
 		std::string m_sample_name;
 		std::string m_read_name;
 		std::string m_mate_read_name;
 		std::string m_cigar_string;
+		int m_node_score;
+		int m_traceback_score;
 	};
 
 	class Allele : private Noncopyable
