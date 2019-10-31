@@ -403,10 +403,10 @@ namespace graphite
 		}
 	}
 
-	void Graph::adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Graph::adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
 		// check if we have already processed this alignment
-		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		std::string alignmentName = alignmentPtr->getUniqueReadName();
 		{
 			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
 			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
@@ -461,11 +461,11 @@ namespace graphite
 				}
 			}
 		}
-
-		gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
-		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
+		std::string foo(alignmentPtr->getSequence());
+		gssw_graph_fill(graph, alignmentPtr->getSequence(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
+		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
 		auto tracebackPtr = std::make_shared< Traceback >();
-		tracebackPtr->processTraceback(gm, bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
+		tracebackPtr->processTraceback(gm, alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well
@@ -476,9 +476,9 @@ namespace graphite
 	}
 
 
-	void Graph::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Graph::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
-		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		std::string alignmentName = alignmentPtr->getUniqueReadName();
 		{
 			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
 			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
@@ -497,223 +497,6 @@ namespace graphite
 		  5. make sure flanking nodes don't have mismatches at the edges
 		  6. if first or last node check for ambiguousness
 		 */
-	}
-
-	void Graph::processTraceback2(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
-	{
-		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
-		{
-			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
-			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
-			{
-				return;
-			}
-			this->m_aligned_read_names.emplace(alignmentName);
-		}
-		std::vector< std::tuple< Node*, uint32_t > > nodePtrScoreTuples;
-		uint32_t totalScore = 0;
-		gssw_node_cigar* nc = graphMapping->cigar.elements;
-		uint32_t softclipLength = 0;
-		std::string fullCigarString = "";
-		uint32_t softclipCount = 0;
-		bool hasAlternate = false;
-		uint32_t firstNodeAlignmentOverlapSize = 0;
-		uint32_t lastNodeAlignmentOverlapSize = 0;
-		bool mismatchesAtInternalNodeEdges = false;
-		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
-		{
-			std::string cigarString = "";
-			gssw_node* gsswNode = graphMapping->cigar.elements[i].node;
-			Node* nodePtr = (Node*)gsswNode->data;
-			hasAlternate |= (nodePtr->getAlleleType() == Node::ALLELE_TYPE::ALT);
-			int32_t score = 0;
-			uint32_t length = 0;
-			uint32_t tmpSofclipLength = 0;
-			uint32_t nodeLengthAccumulator = 0;
-			for (int j = 0; j < nc->cigar->length; ++j)
-			{
-				switch (nc->cigar->elements[j].type)
-				{
-				case 'M':
-					nodeLengthAccumulator += nc->cigar->elements[j].length;
-					score += (matchValue * nc->cigar->elements[j].length);
-					break;
-				case 'X':
-					nodeLengthAccumulator += nc->cigar->elements[j].length;
-					score -= (mismatchValue * nc->cigar->elements[j].length);
-					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					break;
-				case 'I': // I and D are treated the same
-				case 'D':
-					nodeLengthAccumulator += nc->cigar->elements[j].length;
-					score -= gapOpenValue;
-					score -= (gapExtensionValue * (nc->cigar->elements[j].length -1));
-					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					break;
-				case 'S':
-					tmpSofclipLength += nc->cigar->elements[j].length;
-					if (i < graphMapping->cigar.length - 1 && j == nc->cigar->length - 1) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					if (i > 0 && j == 0) // as long as we are not the last node then check if we have internal mismatches
-					{
-						mismatchesAtInternalNodeEdges = true;
-					}
-					++softclipCount;
-				default:
-					break;
-				}
-				length += nc->cigar->elements[j].length;
-				fullCigarString += std::to_string(nc->cigar->elements[j].length) + nc->cigar->elements[j].type;
-			}
-			if (i == 0)
-			{
-				firstNodeAlignmentOverlapSize = nodeLengthAccumulator;
-			}
-			if (i == graphMapping->cigar.length - 1)
-			{
-				lastNodeAlignmentOverlapSize = nodeLengthAccumulator;
-			}
-			score = (score < 0) ? 0 : score; // the floor of the mapping score is 0
-			softclipLength += tmpSofclipLength;
-			float tmpScore = score;
-			uint32_t alleleSWScorePercent = (length > 0) ? (tmpScore / (length - tmpSofclipLength)) * 100 : 0;
-			std::tuple< Node*, uint32_t > nodePtrScoreTuple(nodePtr, alleleSWScorePercent);
-			nodePtrScoreTuples.emplace_back(nodePtrScoreTuple);
-			totalScore += score;
-		}
-
-		float totalScorePercent = ((float)(totalScore))/((float)(bamAlignmentPtr->Length - softclipLength)) * 100;
-		uint32_t count = 0;
-		// static std::mutex lo;
-		// std::lock_guard< std::mutex > lock(lo);
-		for (auto nodePtrScoreTuple : nodePtrScoreTuples)
-		{
-			bool isFirstNode = count == 0;
-			bool isPenultimateNode = count == (nodePtrScoreTuples.size() - 2);
-			bool isLastNode = count == (nodePtrScoreTuples.size() - 1);
-			Node* nodePtr = std::get< 0 >(nodePtrScoreTuple);
-			uint32_t nodeScore = std::get< 1 >(nodePtrScoreTuple);
-			bool isAmbiguous = false;
-			if (nodePtrScoreTuples.size() > 1)
-			{
-				if (isFirstNode) // if nodePtr is a candidate for identifying repeats at the beginning of the graph
-				{
-					std::string firstNodeSequence = nodePtr->getSequence().substr(nodePtr->getSequence().size() - firstNodeAlignmentOverlapSize);
-					Node* nextNodePtr = std::get< 0 >(nodePtrScoreTuples[1]);
-					std::string concatSequence = nodePtr->getSequence() + nextNodePtr->getSequence();
-					for (auto potentialPathNode : nextNodePtr->getInNodes())
-					{
-						if (nodePtr == potentialPathNode.get()) { continue; }
-						std::string potentialConcatSequence = std::string(firstNodeSequence + nextNodePtr->getSequence(), 0, concatSequence.size());
-						if (potentialConcatSequence.compare(concatSequence) == 0)
-						{
-							isAmbiguous = true;
-							break;
-						}
-					}
-				}
-				else if (isPenultimateNode) // if nodePtr the node before the last node
-				{
-					Node* lastNodePtr = std::get< 0 >(nodePtrScoreTuples[nodePtrScoreTuples.size() - 1]);
-					std::string lastNodeSequence = lastNodePtr->getSequence().substr(0, lastNodeAlignmentOverlapSize);
-					if (lastNodePtr->getInNodes().size() > 1 && lastNodePtr->getAlleleType() == Node::ALLELE_TYPE::REF) // if nodePtr is a ref backbone
-					{
-						std::string concatSequence = nodePtr->getSequence() + lastNodeSequence;
-						for (auto potentialPrevPathNode : lastNodePtr->getInNodes())
-						{
-							if (potentialPrevPathNode.get() == nodePtr) { continue; }
-							std::string potentialPathSequence = std::string(potentialPrevPathNode->getSequence() + lastNodePtr->getSequence(), 0, concatSequence.size());
-							/*
-							static std::mutex lo;
-							lo.lock();
-							std::cout << "--------------------" << std::endl;
-							std::cout << bamAlignmentPtr->Name << std::endl;
-							std::cout << concatSequence << std::endl;
-							std::cout << potentialPathSequence << std::endl;
-							std::cout << "--------------------" << std::endl;
-							lo.unlock();
-							*/
-							if (concatSequence.compare(potentialPathSequence) == 0)
-							{
-								isAmbiguous = true;
-								break;
-							}
-						}
-					}
-				}
-				else if (isLastNode && nodePtr->getReferenceOutNode() != nullptr && nodePtr->getReferenceOutNode()->getInNodes().size() > 1)
-				{
-					for (auto potentialNodePtr : nodePtr->getReferenceOutNode()->getInNodes())
-					{
-						if (nodePtr == potentialNodePtr.get()) { continue; }
-						if (nodePtr->getSequence().size() > potentialNodePtr->getSequence().size())
-						{
-							for (auto nextPotentialNodePtr : potentialNodePtr->getOutNodes())
-							{
-
-								std::string potentialSequence = std::string(potentialNodePtr->getSequence() + nextPotentialNodePtr->getSequence(), 0, nodePtr->getSequence().size());
-								if (potentialSequence.compare(nodePtr->getSequence()) == 0)
-								{
-									isAmbiguous = true;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			bool printed = false;
-			// if ((totalScorePercent == referenceTotalScorePercent && hasAlternate) || isAmbiguous)
-			/*
-			static std::mutex l;
-			l.lock();
-			std::cout << "percent: " << totalScorePercent << " " << samplePtr << std::endl;
-			l.unlock();
-			*/
-
-			std::cout << "incrementing allele read counts is disabled for now: Graph.cpp: 797" << std::endl;
-			/*
-			if (isAmbiguous)
-			{
-				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, -1);
-			}
-			else if (totalScorePercent < m_score_threshold || softclipCount > 1)
-			{
-				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, 0);
-			}
-			else if (!mismatchesAtInternalNodeEdges)
-			{
-				nodePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, isForwardStrand, nodeScore);
-				if (m_graph_printer_ptr != nullptr)
-				{
-					m_graph_printer_ptr->registerTraceback(graphMapping, bamAlignmentPtr, totalScorePercent);
-					printed = true;
-				}
-			}
-			*/
-			if (!printed && m_graph_printer_ptr != nullptr)
-			{
-				m_graph_printer_ptr->registerUnalignedRead(bamAlignmentPtr, fullCigarString, totalScorePercent);
-			}
-			++count;
-		}
 	}
 
 	void getAllPaths(Node::SharedPtr nodePtr, std::vector< Node::SharedPtr > currentPath, int numberOfSibs, std::vector< std::vector< Node::SharedPtr > >& paths)

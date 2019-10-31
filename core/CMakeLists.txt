@@ -1,10 +1,10 @@
 INCLUDE_DIRECTORIES(
-    ${BAMTOOLS_INCLUDE}
     ${FASTAHACK_INCLUDE}
 	${CXXOPTS_INCLUDE}
 	${TABIX_INCLUDE}
 	${GSSW_INCLUDE}
 	${ZLIB_INCLUDE}
+	${HTSLIB_INCLUDE}
 	${CMAKE_CURRENT_SOURCE_DIR}/util
 )
 
@@ -38,7 +38,8 @@ set(GRAPHITE_CORE_VCF_SOURCES
   )
 
 set(GRAPHITE_CORE_BAM_SOURCES
-  bam/BamReader.cpp
+  bam/Alignment.cpp
+  bam/AlignmentReader.cpp
   )
 
 set(GRAPHITE_CORE_GRAPH_PROCESSOR_SOURCES
@@ -71,6 +72,7 @@ add_library(graphite_core STATIC
 SET(CORE_LIB graphite_core CACHE STRING "THE CORE LIBRARY") #add graphite_core and graphite_utils to the list of core libs
 
 TARGET_LINK_LIBRARIES(${CORE_LIB}
+  ${HTSLIB_LIB}
   ${BAMTOOLS_LIB}
   ${BAMTOOLS_UTIL_LIB}
   ${SCI_BOOST_LIBRARY}
@@ -78,6 +80,7 @@ TARGET_LINK_LIBRARIES(${CORE_LIB}
   ${FASTAHACK_LIB}
   ${TABIX_LIB}
   ${GSSW_LIB}
+  ${TABIX_LIB}
 )
 
 add_dependencies(${CORE_LIB} ${GRAPHITE_EXTERNAL_PROJECT})

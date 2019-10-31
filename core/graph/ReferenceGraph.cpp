@@ -13,7 +13,7 @@ namespace graphite
 	{
 	}
 
-	float ReferenceGraph::adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue)
+	float ReferenceGraph::adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue)
 	{
 		gssw_sse2_disable();
 		int8_t* nt_table = gssw_create_nt_table();
@@ -23,9 +23,9 @@ namespace graphite
 		gssw_node* gsswNode = (gssw_node*)gssw_node_create(m_node.get(), m_node->getID(), m_node->getSequence().c_str(), nt_table, mat);
 		gssw_graph_add_node(graph, gsswNode);
 
-		gssw_graph_fill(graph, bamAlignmentPtr->QueryBases.c_str(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
-		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, bamAlignmentPtr->QueryBases.c_str(), bamAlignmentPtr->QueryBases.size(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-		float swPercent = processTraceback(gm, bamAlignmentPtr, samplePtr, !bamAlignmentPtr->IsReverseStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
+		gssw_graph_fill(graph, alignmentPtr->getSequence(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
+		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
+		float swPercent = processTraceback(gm, alignmentPtr, samplePtr, alignmentPtr->getIsForwardStrand(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well
@@ -36,9 +36,9 @@ namespace graphite
 		return swPercent;
 	}
 
-	float ReferenceGraph::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue)
+	float ReferenceGraph::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue)
 	{
-		std::string alignmentName = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
+		std::string alignmentName = alignmentPtr->getUniqueReadName();
 		{
 			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
 			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
@@ -51,11 +51,6 @@ namespace graphite
 		static std::mutex lo;
 		std::lock_guard< std::mutex > lock(lo);
 		int count = 0;
-		if (bamAlignmentPtr->Name.find("60797") != std::string::npos || bamAlignmentPtr->Name.find("50444") != std::string::npos)
-		{
-			count += 1;
-			count = 0;
-		}
 
 		std::vector< std::tuple< Node*, uint32_t > > nodePtrScoreTuples;
 		uint32_t prefixMatch = 0;
@@ -122,7 +117,7 @@ namespace graphite
 			totalScore += score;
 		}
 
-		float totalScorePercent = ((float)(totalScore))/((float)(bamAlignmentPtr->Length - softclipLength)) * 100;
+		float totalScorePercent = ((float)(totalScore))/((float)(alignmentPtr->getLength() - softclipLength)) * 100;
 		return totalScorePercent;
 	}
 

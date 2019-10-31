@@ -4,8 +4,7 @@
 #include "core/util/Noncopyable.hpp"
 #include "core/sample/Sample.h"
 #include "core/util/Types.h"
-
-#include "api/BamAlignment.h"
+#include "core/bam/Alignment.h"
 
 #include <memory>
 #include <mutex>
@@ -46,7 +45,7 @@ namespace graphite
 		std::string getSequence() { return this->m_sequence; }
 		/* void registerNodePtr(std::shared_ptr< Node > nodePtr); */
 		/* std::shared_ptr< Node > getNodePtr(); */
-		void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, int score);
+        void incrementScoreCount(Alignment::SharedPtr, Sample::SharedPtr samplePtr, int score);
         std::unordered_set< std::string > getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount);
 		void registerNodePtr(std::shared_ptr< Node > nodePtr) { this->m_node_ptrs.emplace(nodePtr); }
 		std::unordered_set< std::shared_ptr< Node > > getNodePtrs() { return this->m_node_ptrs; }

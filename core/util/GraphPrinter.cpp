@@ -25,16 +25,16 @@ namespace graphite
 	{
 	}
 
-	void GraphPrinter::registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore)
+	void GraphPrinter::registerTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, float sswScore)
 	{
 		static std::mutex l;
 
 		std::lock_guard< std::mutex > lock(l);
-		if (this->m_alignment_readname_tracker_map.find(bamAlignmentPtr->Name) != this->m_alignment_readname_tracker_map.end())
+		if (this->m_alignment_readname_tracker_map.find(alignmentPtr->getReadName()) != this->m_alignment_readname_tracker_map.end())
 		{
 			return;
 		}
-		this->m_alignment_readname_tracker_map.emplace(bamAlignmentPtr->Name);
+		this->m_alignment_readname_tracker_map.emplace(alignmentPtr->getReadName());
 		std::shared_ptr< MappingContainer > mappingContainerPtr = std::make_shared< MappingContainer >();
 		std::vector< std::string > pathNodeIDs;
 		std::vector< std::tuple< uint32_t, char > > cigar;
@@ -87,8 +87,8 @@ namespace graphite
 			return;
 		}
 
-		mappingContainerPtr->m_sequence = bamAlignmentPtr->QueryBases;
-		mappingContainerPtr->m_read_name = bamAlignmentPtr->Name;
+		mappingContainerPtr->m_sequence = std::string(alignmentPtr->getSequence());
+		mappingContainerPtr->m_read_name = alignmentPtr->getReadName();
 		// std::cout << bamAlignmentPtr->Name << std::endl;
 		if (softclipOffset >= 0)
 		{
@@ -111,16 +111,16 @@ namespace graphite
 		}
 	}
 
-	void GraphPrinter::registerUnalignedRead(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, std::string graphCigarString, float sswScore)
+	void GraphPrinter::registerUnalignedRead(Alignment::SharedPtr alignmentPtr, std::string graphCigarString, float sswScore)
 	{
 		static std::mutex l;
 		std::lock_guard< std::mutex > lock(l);
 		std::shared_ptr< UnMappedContainer > mappingContainerPtr = std::make_shared< UnMappedContainer >();
 		mappingContainerPtr->m_ssw_score = sswScore;
 		mappingContainerPtr->m_graph_cigar = graphCigarString;
-		mappingContainerPtr->m_position = bamAlignmentPtr->Position;
-		mappingContainerPtr->m_sequence = bamAlignmentPtr->QueryBases;
-		mappingContainerPtr->m_read_name = bamAlignmentPtr->Name;
+		mappingContainerPtr->m_position = 0;//bamAlignmentPtr->Position;
+		mappingContainerPtr->m_sequence = std::string(alignmentPtr->getSequence());
+		mappingContainerPtr->m_read_name = std::string(alignmentPtr->getReadName());
 		m_unmapped_read_containers.push_back(mappingContainerPtr);
 	}
 

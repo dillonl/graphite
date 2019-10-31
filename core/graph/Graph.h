@@ -6,10 +6,9 @@
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
 #include "core/vcf/Variant.h"
+#include "core/bam/Alignment.h"
 
 #include "Node.h"
-
-#include "api/BamAlignment.h"
 
 #include "gssw.h"
 
@@ -26,7 +25,7 @@ namespace graphite
 		~Graph();
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
-		void adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 		Region::SharedPtr getGraphRegion();
 		std::string getReferenceSequence();
@@ -46,8 +45,7 @@ namespace graphite
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
-		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
-		void processTraceback2(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 		std::vector< std::string > generateAllPathsFromNodesOfLength(Node::SharedPtr nodePtr);
 		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
 

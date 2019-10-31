@@ -10,7 +10,7 @@ namespace graphite
 	{
 	}
 
-	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
 	{
 		this->m_total_score = 0;
 		this->m_traceback_nodes.clear();
@@ -69,17 +69,17 @@ namespace graphite
 			tracebackNodePtr->setNextTracebackNodePtr(nullptr); // this will get set on the next time around unless it's the last node, then we want it nullptr
 			this->m_traceback_nodes.emplace_back(tracebackNodePtr);
 		}
-		if (bamAlignmentPtr->QueryBases.size() > 0)
+		if (alignmentPtr->getLength() > 0)
 		{
-			this->m_total_score = ((float)totalScore / (float)((bamAlignmentPtr->QueryBases.size() - totalSoftclipLength) * matchValue)) * 100;
+			this->m_total_score = ((float)totalScore / (float)((alignmentPtr->getLength() - totalSoftclipLength) * matchValue)) * 100;
 		}
-		if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (bamAlignmentPtr->QueryBases.size() * 0.3))
+		if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (alignmentPtr->getLength() * 0.3))
 		{
-			this->incrementAlleleCounts(bamAlignmentPtr, samplePtr, graphCigarString);
+			this->incrementAlleleCounts(alignmentPtr, samplePtr, graphCigarString);
 		}
 	}
 
-	void Traceback::incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString)
+	void Traceback::incrementAlleleCounts(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString)
 	{
 		for (auto tracebackNodePtr : this->m_traceback_nodes)
 		{
@@ -91,11 +91,11 @@ namespace graphite
 				{
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
 					{
-						nodeAllelePtr->incrementScoreCount(bamAlignmentPtr, samplePtr, nodeScore);
+						nodeAllelePtr->incrementScoreCount(alignmentPtr, samplePtr, nodeScore);
 						if (nodeScore != 0)
 						{
-							std::string alignmentName = bamAlignmentPtr->Name +	std::to_string(bamAlignmentPtr->IsSecondMate() + 1);
-							std::string mateAlignmentName = bamAlignmentPtr->Name +	std::to_string((!bamAlignmentPtr->IsSecondMate()) + 1);
+							std::string alignmentName = alignmentPtr->getReadName() +	std::to_string(!alignmentPtr->getIsFirstMate() + 1);
+							std::string mateAlignmentName = alignmentPtr->getReadName() +	std::to_string((alignmentPtr->getIsFirstMate()) + 1);
 							auto supportingReadInfo = std::make_shared< SupportingReadInfo >(samplePtr->getName(), alignmentName, mateAlignmentName, graphCigarString, nodeScore, this->m_total_score);
 						    nodeAllelePtr->registerSupportingReadInformation(supportingReadInfo);
 						}
@@ -105,7 +105,7 @@ namespace graphite
 		}
 	}
 
-	bool Traceback::nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr)
+	bool Traceback::nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, Alignment::SharedPtr alignmentPtr)
 	{
 		auto prevTracebackNodePtr = tracebackNodePtr->getPrevTracebackNodePtr();
 		auto nextTracebackNodePtr = tracebackNodePtr->getNextTracebackNodePtr();

@@ -5,7 +5,7 @@
 #include "core/reference/FastaReference.h"
 #include "core/vcf/VCFReader.h"
 #include "core/vcf/VCFWriter.h"
-#include "core/bam/BamReader.h"
+#include "core/bam/AlignmentReader.h"
 #include "core/graph/GraphProcessor.h"
 
 #include <string>
@@ -45,27 +45,24 @@ int main(int argc, char** argv)
 	std::vector< graphite::Sample::SharedPtr > bamSamplePtrs;
 
 	// create bam readers
-	std::vector< graphite::BamReader::SharedPtr > bamReaderPtrs;
+    std::vector< graphite::AlignmentReader::SharedPtr > alignmentReaderPtrs;
 	for (auto bamPath : bamPaths)
 	{
-        if (!graphite::endsWith(bamPath, ".bam"))
-		{
-			std::cout << "Your sample files must be BAMs" << std::endl;
-			return 1;
-		}
-		auto bamReaderPtr = std::make_shared< graphite::BamReader >(bamPath);
+		auto alignmentReaderPtr = std::make_shared< graphite::AlignmentReader >(bamPath);
 		if (overwriteSampleName.length() == 0)
 		{
-			auto samplePtrs = bamReaderPtr->getSamplePtrs();
-			bamSamplePtrs.insert(bamSamplePtrs.begin(), samplePtrs.begin(), samplePtrs.end());
+			for (auto iter : alignmentReaderPtr->getSamplePtrs())
+			{
+				bamSamplePtrs.emplace_back(iter.second);
+			}
 		}
 		else
 		{
 			auto samplePtr = std::make_shared< graphite::Sample >(overwriteSampleName, "1", bamPath);
 			bamSamplePtrs.emplace_back(samplePtr);
-			bamReaderPtr->overwriteSample(samplePtr);
+			alignmentReaderPtr->overwriteSample(samplePtr);
 		}
-		bamReaderPtrs.emplace_back(bamReaderPtr);
+		alignmentReaderPtrs.emplace_back(alignmentReaderPtr);
 	}
 
 	// create VCF readers
@@ -80,7 +77,7 @@ int main(int argc, char** argv)
 
 	// create graph processor
 	// call process on processor
-	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality, readSampleLimit, threadCount);
+	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, alignmentReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality, readSampleLimit, threadCount);
 	graphProcessorPtr->processVariants();
 
 	return 0;

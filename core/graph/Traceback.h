@@ -2,8 +2,8 @@
 
 #include "core/util/Noncopyable.hpp"
 #include "Node.h"
+#include "core/bam/Alignment.h"
 
-#include "api/BamAlignment.h"
 #include "gssw.h"
 
 #include <memory>
@@ -99,15 +99,15 @@ namespace graphite
 		Traceback();
 		~Traceback();
 
-		void processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 		void printTraceback();
 
 	private:
-		void incrementAlleleCounts(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString);
-		bool nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr);
+		void incrementAlleleCounts(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, const std::string& graphCigarString);
+		bool nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, Alignment::SharedPtr alignmentPtr);
 		bool isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr);
 		bool fullAlleleInTraceback(Allele::SharedPtr allelePtr, Node* nodePtr);
-		std::shared_ptr< BamTools::BamAlignment > m_bam_alignment_ptr;
+		Alignment::SharedPtr m_alignment_ptr;
 		Sample::SharedPtr m_sample_ptr;
 		int32_t m_total_score;
 		uint32_t m_number_of_softclips; // this is not a count of the bases but rather the number of times a sc occurres in the traceback
