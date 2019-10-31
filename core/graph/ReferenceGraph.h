@@ -4,7 +4,7 @@
 #include "core/util/Noncopyable.hpp"
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
-#include "core/bam/Alignment.h"
+#include "core/alignment/Alignment.h"
 
 #include "Node.h"
 

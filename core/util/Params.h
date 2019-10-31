@@ -26,7 +26,7 @@ namespace graphite
 
 		std::string getFastaPath();
 		std::vector< std::string > getInVCFPaths();
-		std::vector< std::string > getBAMPaths();
+		std::vector< std::string > getAlignmentPaths();
 		std::string getOutputDirectory();
 		std::string getOverwrittenSampleName();
 		Region::SharedPtr getRegion();

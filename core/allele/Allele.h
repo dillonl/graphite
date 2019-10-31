@@ -4,7 +4,7 @@
 #include "core/util/Noncopyable.hpp"
 #include "core/sample/Sample.h"
 #include "core/util/Types.h"
-#include "core/bam/Alignment.h"
+#include "core/alignment/Alignment.h"
 
 #include <memory>
 #include <mutex>

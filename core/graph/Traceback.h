@@ -2,7 +2,7 @@
 
 #include "core/util/Noncopyable.hpp"
 #include "Node.h"
-#include "core/bam/Alignment.h"
+#include "core/alignment/Alignment.h"
 
 #include "gssw.h"
 

@@ -6,7 +6,7 @@
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
 #include "core/vcf/Variant.h"
-#include "core/bam/Alignment.h"
+#include "core/alignment/Alignment.h"
 
 #include "Node.h"
 

@@ -3,7 +3,7 @@
 
 #include "core/util/Noncopyable.hpp"
 #include "core/graph/Node.h"
-#include "core/bam/Alignment.h"
+#include "core/alignment/Alignment.h"
 
 #include "gssw.h"
 

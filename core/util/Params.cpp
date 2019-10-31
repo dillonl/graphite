@@ -25,7 +25,7 @@ namespace graphite
 			("h,help","Print help message")
 			("d,include_duplicates", "Include Duplicate Reads")
 			("v,vcf", "Path to input VCF file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
-			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
+			("b,bam", "Path to input SAM/BAM/CRAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("r,region", "Region information", cxxopts::value< std::string >())
 			("o,output_directory", "Path to output directory", cxxopts::value< std::string >())
 			("s,sample_name", "Ignore the BAM file's samples and use this passed in value as the sample name", cxxopts::value< std::string >()->default_value(""))
@@ -68,7 +68,7 @@ namespace graphite
 		}
 		if (!m_options.count("b"))
 		{
-			errorMessages.emplace_back("bam path(s) required");
+			errorMessages.emplace_back("alignment path(s) required");
 		}
 		if (!m_options.count("f"))
 		{
@@ -118,7 +118,7 @@ namespace graphite
 		return vcfPaths;
 	}
 
-	std::vector< std::string > Params::getBAMPaths()
+	std::vector< std::string > Params::getAlignmentPaths()
 	{
 		auto bamPaths =  m_options["b"].as< std::vector< std::string > >();
 		validateFilePaths(bamPaths, true);
