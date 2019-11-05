@@ -10,6 +10,7 @@
 
 #include <string>
 #include <iostream>
+#include <stdlib.h>
 
 int main(int argc, char** argv)
 {
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
     std::vector< graphite::AlignmentReader::SharedPtr > alignmentReaderPtrs;
 	for (auto alignmentPath : alignmentPaths)
 	{
-		auto alignmentReaderPtr = std::make_shared< graphite::AlignmentReader >(alignmentPath);
+		auto alignmentReaderPtr = std::make_shared< graphite::AlignmentReader >(alignmentPath, fastaPath);
 		if (overwriteSampleName.length() == 0)
 		{
 			for (auto iter : alignmentReaderPtr->getSamplePtrs())

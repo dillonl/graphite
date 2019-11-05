@@ -19,7 +19,7 @@ namespace graphite
 	{
 	public:
 		typedef std::shared_ptr< AlignmentReader > SharedPtr;
-	    AlignmentReader(const std::string& filename);
+	    AlignmentReader(const std::string& filename, const std::string& refPath);
 	    ~AlignmentReader();
 
 		void overwriteSample(Sample::SharedPtr samplePtr);
@@ -32,6 +32,8 @@ namespace graphite
 		void init();
 		void setReadLength();
 
+		htsFile* m_in;
+		bam_hdr_t* m_header;
 		hts_idx_t* m_idx;
 		uint32_t m_read_length;
 		bool m_overwrite_sample;

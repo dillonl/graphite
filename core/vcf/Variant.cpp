@@ -39,7 +39,7 @@ namespace graphite
 		{
 			std::ofstream* outPtr = this->m_vcf_writer_ptr->getSupportingReadOutputStream();
 			std::string token = "\t";
-			std::string variantInfo = this->m_chrom + token + std::to_string(this->m_position) + token;
+			std::string variantInfo = this->m_chrom + token + std::to_string(this->m_position);
 			for (auto refAlleleSupportingReadInfo : this->m_reference_allele_ptr->getSupportingReadInfoPtrs())
 			{
 				(*outPtr) << variantInfo << token << this->m_reference_allele_ptr->getSequence() << token << refAlleleSupportingReadInfo->toString(token) << std::endl;

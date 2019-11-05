@@ -2,27 +2,32 @@
 
 #include "core/util/Utility.h"
 
+#include "cram/cram.h"
+#include "cram/cram_io.h"
+
 namespace graphite
 {
 	// Example from here: https://www.biostars.org/p/151053/
-	AlignmentReader::AlignmentReader(const std::string& filename) : m_path(filename)
+	AlignmentReader::AlignmentReader(const std::string& filename, const std::string& refPath) : m_path(filename)
 	{
-		this->m_idx = NULL;
+		m_in = hts_open(m_path.c_str(), "r");
+		m_header = sam_hdr_read(m_in);
+		hts_set_fai_filename(m_in, refPath.c_str());
+		this->m_idx = sam_index_load(m_in, this->m_path.c_str());
 		this->init();
 	}
 
 	AlignmentReader::~AlignmentReader()
 	{
+		bam_hdr_destroy(m_header);
+		hts_close(m_in);
 	}
 
 	void AlignmentReader::init()
 	{
-		samFile* in = sam_open(m_path.c_str(), "r");
-		bam_hdr_t* header = sam_hdr_read(in);
-
 		this->m_sample_ptrs.clear();
 		this->m_available_regions.clear();
-		std::string headerText = std::string(header->text);
+		std::string headerText = std::string(m_header->text);
 		std::vector< std::string > readGroups;
 		std::vector< std::string > lines;
 		split(headerText, '\n', lines);
@@ -68,8 +73,6 @@ namespace graphite
 				}
 			}
 		}
-		bam_hdr_destroy(header);
-		sam_close(in);
 		setReadLength();
 	}
 
@@ -78,13 +81,10 @@ namespace graphite
 		this->m_read_length = 0;
 
 		bam1_t* alignmentPtr = bam_init1();
-		samFile* in = sam_open(m_path.c_str(), "r");
-		bam_hdr_t* header = sam_hdr_read(in);
-		hts_idx_t* idx = sam_index_load(in, this->m_path.c_str());
 		for (auto region : this->m_available_regions)
 		{
-			hts_itr_t* iter = sam_itr_querys(idx, header, region.c_str());
-			auto isSet = sam_itr_next(in, iter, alignmentPtr);
+			hts_itr_t* iter = sam_itr_querys(m_idx, m_header, region.c_str());
+			auto isSet = sam_itr_next(m_in, iter, alignmentPtr);
 			if (isSet > 0)
 			{
 				this->m_read_length = alignmentPtr->core.l_qseq;
@@ -97,24 +97,14 @@ namespace graphite
 			exit(0);
 		}
 		bam_destroy1(alignmentPtr);
-		bam_hdr_destroy(header);
-		sam_close(in);
 	}
 
 	void AlignmentReader::fetchAlignmentPtrsInRegion(std::vector< std::shared_ptr< Alignment > >& alignmentPtrs, Region::SharedPtr regionPtr, bool unmappedOnly, bool includeDuplicateReads, int32_t mappingQuality)
 	{
-
 		bam1_t* htsAlignmentPtr = bam_init1();
-		samFile* in = sam_open(m_path.c_str(), "r");
-		bam_hdr_t* header = sam_hdr_read(in);
+		hts_itr_t* iter = sam_itr_querys(this->m_idx, m_header, regionPtr->getRegionString().c_str());
 
-		if (this->m_idx == NULL)
-		{
-			this->m_idx = sam_index_load(in, this->m_path.c_str());
-		}
-		hts_itr_t* iter = sam_itr_querys(this->m_idx, header, regionPtr->getRegionString().c_str());
-
-		while ( sam_itr_next(in, iter, htsAlignmentPtr) >= 0)
+		while ( sam_itr_next(m_in, iter, htsAlignmentPtr) >= 0)
 		{
 			std::string readGroup = std::string((char*)bam_aux_get(htsAlignmentPtr, "RG"));
 			readGroup = readGroup.substr(1); // the last char is garbage
@@ -138,8 +128,7 @@ namespace graphite
 
 		sam_itr_destroy(iter);
 		bam_destroy1(htsAlignmentPtr);
-		bam_hdr_destroy(header);
-		sam_close(in);
+
 	}
 
 	void AlignmentReader::overwriteSample(Sample::SharedPtr samplePtr)

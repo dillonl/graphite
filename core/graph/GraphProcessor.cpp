@@ -25,6 +25,7 @@ namespace graphite
 		m_read_sample_limit(readSampleLimit),
 		m_override_shared_ptr(nullptr)
 	{
+		/*
 		for (auto alignmentReaderPtr : alignmentReaderPtrs)
 		{
 			auto alignmentSamplePtrs = alignmentReaderPtr->getSamplePtrs();
@@ -33,6 +34,7 @@ namespace graphite
 				m_override_shared_ptr = iter.second;
 			}
 		}
+		*/
 	}
 
 	GraphProcessor::~GraphProcessor()
@@ -100,15 +102,17 @@ namespace graphite
 		for (auto alignmentPtr : alignmentPtrs)
 		{
 			std::string sampleName;
-			Sample::SharedPtr samplePtr = m_override_shared_ptr;
-			if (m_override_shared_ptr == nullptr)
-			{
-				sampleName = alignmentPtr->getSample()->getName();
-			}
-			else
-			{
-				sampleName = samplePtr->getName();
-			}
+			sampleName = alignmentPtr->getSample()->getName();
+			uint32_t matchValue = m_match_value;
+			uint32_t mismatchValue = m_mismatch_value;
+			uint32_t gapOpenValue = m_gap_open_value;
+			uint32_t gapExtensionValue = m_gap_extension_value;
+			auto funct = [graphPtr, alignmentPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+				{
+					graphPtr->adjudicateAlignment(alignmentPtr, alignmentPtr->getSample(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
+				};
+			m_thread_pool.enqueue(funct);
+			/*
 			auto iter = this->m_alignment_sample_ptrs.find(sampleName);
 			if (iter != this->m_alignment_sample_ptrs.end() || samplePtr != nullptr)
 			{
@@ -126,6 +130,7 @@ namespace graphite
 				};
 				m_thread_pool.enqueue(funct);
 			}
+			*/
 		}
 		m_thread_pool.join();
 		alignmentPtrs.clear();

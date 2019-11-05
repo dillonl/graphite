@@ -23,7 +23,6 @@ namespace graphite
 		{
 			alleleCountType = (size_t)AlleleCountType::Ambiguous;
 		}
-		// std::cout << "ambiguous type: " << AlleleCountTypeToString((AlleleCountType)alleleCountType) << std::endl;
 		std::lock_guard< std::mutex > l(m_counts_lock);
 		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > >* counts = (isForwardStrand) ? &this->m_forward_counts : &this->m_reverse_counts;
 		for (auto allelePtr : this->m_paired_allele_ptrs)
