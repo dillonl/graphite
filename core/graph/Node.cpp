@@ -1,9 +1,12 @@
 #include "Node.h"
 
+#include <limits>
+
 namespace graphite
 {
-	uint32_t Node::s_id = 0;
-	std::mutex Node::s_id_lock;
+	std::atomic< uint32_t > Node::s_atomic_id(0);
+	// uint32_t Node::s_id = 0;
+	// std::mutex Node::s_id_lock;
 	Node::Node(const std::string& sequence, position pos, ALLELE_TYPE alleleType) :
 		m_sequence(sequence),
 		m_position(pos),
@@ -11,10 +14,7 @@ namespace graphite
 		m_in_ref_node(nullptr),
 		m_original_sequence("")
 	{
-		s_id_lock.lock();
-		m_id = s_id;
-		s_id += 1;
-		s_id_lock.unlock();
+		setID();
 	}
 
 	Node::Node(char* sequence, uint32_t length, position pos, ALLELE_TYPE alleleType) :
@@ -24,18 +24,25 @@ namespace graphite
 		m_in_ref_node(nullptr),
 		m_original_sequence("")
 	{
-		s_id_lock.lock();
-		m_id = s_id;
-		s_id += 1;
-		s_id_lock.unlock();
+		setID();
 	}
 
 	Node::Node()
 	{
+		setID();
 	}
 
 	Node::~Node()
 	{
+	}
+
+	void Node::setID()
+	{
+		m_id = s_atomic_id++;
+		if (s_atomic_id >= (std::numeric_limits<uint32_t>::max() - 10000)) // if we are getting close to the limit then reset the id counter
+		{
+			s_atomic_id = 0;
+		}
 	}
 
 	std::string Node::getSequence()

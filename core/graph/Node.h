@@ -12,6 +12,7 @@
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
+#include <atomic>
 
 namespace graphite
 {
@@ -58,8 +59,10 @@ namespace graphite
 		void clearInAndOutNodes();
 
 	private:
-		static uint32_t s_id; // the static id counter for all nodes
-		static std::mutex s_id_lock; // the static id counter lock for all nodes
+		void setID();
+		static std::atomic< uint32_t > s_atomic_id;
+		/* static uint32_t s_id; // the static id counter for all nodes */
+		/* static std::mutex s_id_lock; // the static id counter lock for all nodes */
 		uint32_t m_id;
 		std::unordered_set< Allele::SharedPtr > m_overlapping_allele_ptr_map;
 		/* Allele::SharedPtr m_allele_ptr; */

@@ -129,7 +129,7 @@ namespace graphite
 		}
 		m_thread_pool.join();
 		bamAlignmentPtrs.clear();
-		graphPtr->clearResources();
+		// graphPtr->clearResources();
 	}
 
 	void GraphProcessor::getAlignmentsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs, std::vector< Region::SharedPtr > regionPtrs, bool getFlankingUnalignedReads)

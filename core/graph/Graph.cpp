@@ -422,6 +422,8 @@ namespace graphite
 
 		unordered_map< uint32_t, gssw_node* > gsswNodePtrsMap;
 		Node::SharedPtr nodePtr = m_first_node;
+
+		// std::lock_guard< std::mutex > l(m_graph_mutex);
 		// std::cout << "node from graph: " << nodePtr->getAllelePtr() << std::endl;
 		gssw_node* gsswNode = (gssw_node*)gssw_node_create(nodePtr.get(), nodePtr->getID(), nodePtr->getSequence().c_str(), nt_table, mat);
 		gsswNodePtrsMap.emplace(nodePtr->getID(), gsswNode);

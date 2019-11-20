@@ -65,6 +65,7 @@ namespace graphite
 		std::unordered_set< std::string > m_aligned_read_names;
 		std::mutex m_aligned_read_names_mutex;
         GraphPrinter::SharedPtr m_graph_printer_ptr;
+		std::mutex m_graph_mutex;
 		/* std::unordered_map< Node::SharedPtr, std::vector< std::string > m_paths_from_node; */
 	};
 }
