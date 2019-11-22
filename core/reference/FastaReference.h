@@ -18,7 +18,6 @@ namespace graphite
 		~FastaReference();
 
 		std::string getSequenceStringFromRegion(Region::SharedPtr regionPtr);
-		const char* getSequenceFromRegion(Region::SharedPtr regionPtr);
 
 	private:
 		void setReferenceIDAndSequence(Region::SharedPtr regionPtr);

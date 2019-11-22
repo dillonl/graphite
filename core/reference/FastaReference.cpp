@@ -1,5 +1,8 @@
 #include "FastaReference.h"
 
+#include <algorithm>
+#include <cctype>
+
 namespace graphite
 {
 	FastaReference::FastaReference(const std::string& path) :
@@ -36,17 +39,8 @@ namespace graphite
 			endPosition -= 1;
 		}
 		position length = endPosition - startPosition;
-		return std::string(this->m_reference_sequence.c_str() + startPosition, length);
-	}
-
-	const char* FastaReference::getSequenceFromRegion(Region::SharedPtr regionPtr)
-	{
-		setReferenceIDAndSequence(regionPtr);
-		position startPosition = regionPtr->getStartPosition();
-		if (regionPtr->getBased() == Region::BASED::ONE)
-		{
-			startPosition -= 1;
-		}
-		return &this->m_reference_sequence.c_str()[startPosition];
+		std::string seq = std::string(this->m_reference_sequence.c_str() + startPosition, length);
+		std::transform(seq.begin(), seq.end(), seq.begin(), ::toupper);
+		return seq;
 	}
 }

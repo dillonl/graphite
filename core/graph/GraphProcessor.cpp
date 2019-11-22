@@ -121,7 +121,7 @@ namespace graphite
 			*/
 		}
 		m_thread_pool.join();
-		bamAlignmentPtrs.clear();
+		// bamAlignmentPtrs.clear();
 	 // graphPtr->clearResources();
 	}
 
