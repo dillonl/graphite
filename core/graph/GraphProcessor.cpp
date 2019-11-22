@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include <random>
+#include <atomic>
 
 namespace graphite
 {
@@ -78,19 +79,6 @@ namespace graphite
 	{
 		// generate graph
 		auto graphPtr = std::make_shared< Graph >(this->m_fasta_reference_ptr, variantPtrs, graphSpacing, this->m_print_graphs);
-
-		/*
-		graphPtr->printGraphVisOutput();
-		auto graphPaths = graphPtr->getAllPathsAsStrings();
-		std::cout << "[GraphProcessor.cpp] ------------"<< std::endl;
-		for (auto path : graphPaths)
-		{
-			std::cout << path << std::endl;
-		}
-		std::cout << "[GraphProcessor]------------"<< std::endl;
-
-		std::cout << "skipping adjudicating reads: GraphProcessor.cpp: 91" << std::endl;
-		*/
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments
