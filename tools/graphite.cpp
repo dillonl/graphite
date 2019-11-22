@@ -5,11 +5,12 @@
 #include "core/reference/FastaReference.h"
 #include "core/vcf/VCFReader.h"
 #include "core/vcf/VCFWriter.h"
-#include "core/bam/BamReader.h"
+#include "core/alignment/AlignmentReader.h"
 #include "core/graph/GraphProcessor.h"
 
 #include <string>
 #include <iostream>
+#include <stdlib.h>
 
 int main(int argc, char** argv)
 {
@@ -21,7 +22,7 @@ int main(int argc, char** argv)
 		params.printHelp();
 		return 0;
 	}
-	auto bamPaths = params.getBAMPaths();
+	auto alignmentPaths = params.getAlignmentPaths();
 	auto fastaPath = params.getFastaPath();
 	auto vcfPaths = params.getInVCFPaths();
 	auto outputDirectory = params.getOutputDirectory();
@@ -36,35 +37,33 @@ int main(int argc, char** argv)
 	auto readSampleLimit = params.getReadSampleNumber();
 	auto overwriteSampleName = params.getOverwrittenSampleName();
 	auto threadCount = params.getThreadCount();
+	auto saveSupportingReadInfo = params.saveSupportingReadInformation();
 
     // create reference reader
 	auto fastaReferencePtr = std::make_shared< graphite::FastaReference >(fastaPath);
 
-	// track samples from bams
-	std::vector< graphite::Sample::SharedPtr > bamSamplePtrs;
+	// track samples from alignment files
+	std::vector< graphite::Sample::SharedPtr > alignmentSamplePtrs;
 
-	// create bam readers
-	std::vector< graphite::BamReader::SharedPtr > bamReaderPtrs;
-	for (auto bamPath : bamPaths)
+	// create alignment readers
+    std::vector< graphite::AlignmentReader::SharedPtr > alignmentReaderPtrs;
+	for (auto alignmentPath : alignmentPaths)
 	{
-        if (!graphite::endsWith(bamPath, ".bam"))
-		{
-			std::cout << "Your sample files must be BAMs" << std::endl;
-			return 1;
-		}
-		auto bamReaderPtr = std::make_shared< graphite::BamReader >(bamPath);
+		auto alignmentReaderPtr = std::make_shared< graphite::AlignmentReader >(alignmentPath, fastaPath);
 		if (overwriteSampleName.length() == 0)
 		{
-			auto samplePtrs = bamReaderPtr->getSamplePtrs();
-			bamSamplePtrs.insert(bamSamplePtrs.begin(), samplePtrs.begin(), samplePtrs.end());
+			for (auto iter : alignmentReaderPtr->getSamplePtrs())
+			{
+				alignmentSamplePtrs.emplace_back(iter.second);
+			}
 		}
 		else
 		{
-			auto samplePtr = std::make_shared< graphite::Sample >(overwriteSampleName, "1", bamPath);
-			bamSamplePtrs.emplace_back(samplePtr);
-			bamReaderPtr->overwriteSample(samplePtr);
+			auto samplePtr = std::make_shared< graphite::Sample >(overwriteSampleName, "1", alignmentPath);
+			alignmentSamplePtrs.emplace_back(samplePtr);
+			alignmentReaderPtr->overwriteSample(samplePtr);
 		}
-		bamReaderPtrs.emplace_back(bamReaderPtr);
+		alignmentReaderPtrs.emplace_back(alignmentReaderPtr);
 	}
 
 	// create VCF readers
@@ -72,14 +71,14 @@ int main(int argc, char** argv)
 	std::vector< graphite::VCFReader::SharedPtr > vcfReaderPtrs;
 	for (auto vcfPath : vcfPaths)
 	{
-		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, bamSamplePtrs, outputDirectory);
-		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, bamSamplePtrs, paramRegionPtr, vcfWriterPtr);
+		auto vcfWriterPtr = std::make_shared< graphite::VCFWriter >(vcfPath, alignmentSamplePtrs, outputDirectory, saveSupportingReadInfo);
+		auto vcfReaderPtr = std::make_shared< graphite::VCFReader >(vcfPath, alignmentSamplePtrs, paramRegionPtr, vcfWriterPtr);
 		vcfReaderPtrs.emplace_back(vcfReaderPtr);
 	}
 
 	// create graph processor
 	// call process on processor
-	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, bamReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality, readSampleLimit, threadCount);
+	auto graphProcessorPtr = std::make_shared< graphite::GraphProcessor >(fastaReferencePtr, alignmentReaderPtrs, vcfReaderPtrs, matchValue, misMatchValue, gapOpenValue, gapExtensionValue, outputVisualizationFiles, mappingQuality, readSampleLimit, threadCount);
 	graphProcessorPtr->processVariants();
 
 	return 0;

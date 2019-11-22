@@ -25,7 +25,7 @@ namespace graphite
 			("h,help","Print help message")
 			("d,include_duplicates", "Include Duplicate Reads")
 			("v,vcf", "Path to input VCF file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
-			("b,bam", "Path to input BAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
+			("b,bam", "Path to input SAM/BAM/CRAM file[s], separate multiple files by space", cxxopts::value< std::vector< std::string > >())
 			("r,region", "Region information", cxxopts::value< std::string >())
 			("o,output_directory", "Path to output directory", cxxopts::value< std::string >())
 			("s,sample_name", "Ignore the BAM file's samples and use this passed in value as the sample name", cxxopts::value< std::string >()->default_value(""))
@@ -34,6 +34,7 @@ namespace graphite
 			("m,match_value", "Smith-Waterman Match Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("n,sample_limit", "If the number of reads exceed this number then Graphite will randomly sample n reads [optional - default is no sample limit]", cxxopts::value< int32_t >()->default_value("-1"))
 			("x,mismatch_value", "Smith-Waterman MisMatch Value [optional - default is 4]", cxxopts::value< uint32_t >()->default_value("4"))
+			("a,save_supporting_read", "Save Supporting Read Info [optional - default is false]")
 			("g,gap_open_value", "Smith-Waterman Gap Open Value [optional - default is 6]", cxxopts::value< uint32_t >()->default_value("6"))
 			("e,gap_extionsion_value", "Smith-Waterman Gap Extension Value [optional - default is 1]", cxxopts::value< uint32_t >()->default_value("1"))
 			("t,number_of_threads", "Number of threads to consume [optional - default is 2*number of cores]", cxxopts::value< int32_t >()->default_value("-1"))
@@ -67,7 +68,7 @@ namespace graphite
 		}
 		if (!m_options.count("b"))
 		{
-			errorMessages.emplace_back("bam path(s) required");
+			errorMessages.emplace_back("alignment path(s) required");
 		}
 		if (!m_options.count("f"))
 		{
@@ -117,7 +118,7 @@ namespace graphite
 		return vcfPaths;
 	}
 
-	std::vector< std::string > Params::getBAMPaths()
+	std::vector< std::string > Params::getAlignmentPaths()
 	{
 		auto bamPaths =  m_options["b"].as< std::vector< std::string > >();
 		validateFilePaths(bamPaths, true);
@@ -204,6 +205,11 @@ namespace graphite
 	int32_t Params::getReadSampleNumber()
 	{
 		return m_options["n"].as< int32_t >();
+	}
+
+	bool Params::saveSupportingReadInformation()
+	{
+		return m_options["a"].as< bool >();
 	}
 
 }

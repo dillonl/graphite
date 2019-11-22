@@ -6,8 +6,6 @@
 #include "core/allele/Allele.h"
 #include "core/sample/Sample.h"
 
-#include "api/BamAlignment.h"
-
 #include <string>
 #include <memory>
 #include <unordered_set>
@@ -46,11 +44,9 @@ namespace graphite
 
 		void addOverlappingAllelePtr(Allele::SharedPtr allelePtr);
 		std::unordered_set< Allele::SharedPtr > getOverlappingAllelePtrs();
-		/* void incrementScoreCount(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, int score); */
 		std::string getOriginalSequence();
 		uint32_t getOriginalSequenceSize();
 		void registerAllelePtr(Allele::SharedPtr allelePtr);
-		/* void setAllelePtr(Allele::SharedPtr allelePtr) { this->m_allele_ptr = allelePtr; } */
 		std::unordered_set< Allele::SharedPtr > getAllelePtrs() { return this->m_allele_ptrs; }
 		bool hasAllelePtr(Allele::SharedPtr allelePtr) { return (this->m_allele_ptrs.find(allelePtr) != this->m_allele_ptrs.end()); }
 		void clearAllelePtrs() { this->m_allele_ptrs.clear(); };

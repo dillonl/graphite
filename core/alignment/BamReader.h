@@ -35,7 +35,6 @@ namespace graphite
 		void initializeSamplePtrs();
 		std::shared_ptr< BamTools::BamReader > m_bam_reader;
 		std::unordered_set< Sample::SharedPtr > m_sample_ptrs;
-		std::unordered_set< std::string > m_sample_names;
 		std::string m_bam_path;
 		bool m_overwrite_sample;
 	};

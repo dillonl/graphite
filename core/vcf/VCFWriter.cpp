@@ -1,14 +1,16 @@
 #include "VCFWriter.h"
 #include "core/util/Utility.h"
 #include "core/util/Types.h"
+#include "core/allele/Allele.h"
 
 #include <algorithm>
 
 namespace graphite
 {
-	VCFWriter::VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory) :
+	VCFWriter::VCFWriter(const std::string& filename, std::vector< graphite::Sample::SharedPtr >& bamSamplePtrs, const std::string& outputDirectory, bool saveSupportingReadInfo) :
 		m_bam_sample_ptrs(bamSamplePtrs),
-		m_black_format_string(nullptr)
+		m_black_format_string(nullptr),
+		m_save_supporting_read_info(saveSupportingReadInfo)
 	{
 		for (auto samplePtr : m_bam_sample_ptrs)
 		{
@@ -29,11 +31,23 @@ namespace graphite
 		}
 		std::string path(outputDirectory + "/" + baseFilename);
 		this->m_out_file.open(path);
+		if (m_save_supporting_read_info)
+		{
+			baseFilename = baseFilename.substr(0, baseFilename.size() - filenameExtension.size() - 1);
+			std::string saveSupportingReadPath = outputDirectory + "/" + baseFilename + ".graphite_supporting_read_info.txt";
+			this->m_out_supporting_read_file.open(saveSupportingReadPath);
+			std::string token = "\t";
+			this->m_out_supporting_read_file << "Chrom" << token << "Pos" << "Allele" << token << SupportingReadInfo::getHeader(token) << std::endl;
+		}
 	}
 
 	VCFWriter::~VCFWriter()
 	{
 		this->m_out_file.close();
+		if (m_save_supporting_read_info)
+		{
+			this->m_out_supporting_read_file.close();
+		}
 	}
 
 	void VCFWriter::writeLine(const std::string& line)

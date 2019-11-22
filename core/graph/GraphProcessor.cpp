@@ -11,9 +11,9 @@
 
 namespace graphite
 {
-	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< BamReader::SharedPtr >& bamReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit, uint32_t numberOfThreads) :
+	GraphProcessor::GraphProcessor(FastaReference::SharedPtr fastaReferencePtr, const std::vector< AlignmentReader::SharedPtr >& alignmentReaderPtrs, const std::vector< VCFReader::SharedPtr >& vcfReaderPtrs,  uint32_t matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue, bool printGraph, int32_t mappingQuality, int32_t readSampleLimit, uint32_t numberOfThreads) :
 		m_fasta_reference_ptr(fastaReferencePtr),
-		m_bam_reader_ptrs(bamReaderPtrs),
+		m_alignment_reader_ptrs(alignmentReaderPtrs),
 		m_vcf_reader_ptrs(vcfReaderPtrs),
 		m_flanking_padding(1),
 		m_match_value(matchValue),
@@ -26,14 +26,16 @@ namespace graphite
 		m_read_sample_limit(readSampleLimit),
 		m_override_shared_ptr(nullptr)
 	{
-		for (auto bamReaderPtr : bamReaderPtrs)
+		/*
+		for (auto alignmentReaderPtr : alignmentReaderPtrs)
 		{
-			auto bamSamplePtrs = bamReaderPtr->getSamplePtrs();
-			for (auto samplePtr: bamSamplePtrs)
+			auto alignmentSamplePtrs = alignmentReaderPtr->getSamplePtrs();
+			for (auto iter: alignmentSamplePtrs)
 			{
-				m_override_shared_ptr = samplePtr;
+				m_override_shared_ptr = iter.second;
 			}
 		}
+		*/
 	}
 
 	GraphProcessor::~GraphProcessor()
@@ -45,9 +47,9 @@ namespace graphite
 		uint32_t graphSpacing = 200;
 		bool overwriteSamples = false;
 		// set the graph spacing to be the largest read size
-		for (auto bamReaderPtr : this->m_bam_reader_ptrs)
+		for (auto alignmentReaderPtr : this->m_alignment_reader_ptrs)
 		{
-			graphSpacing = (graphSpacing >= bamReaderPtr->getReadLength()) ? graphSpacing : bamReaderPtr->getReadLength();
+			graphSpacing = (graphSpacing >= alignmentReaderPtr->getReadLength()) ? graphSpacing : alignmentReaderPtr->getReadLength();
 		}
 		std::vector< Variant::SharedPtr > variantPtrs;
 		while (true)
@@ -82,23 +84,25 @@ namespace graphite
 		std::vector< Region::SharedPtr > graphRegionPtrs = graphPtr->getRegionPtrs();
 
 		// get all alignments
-		std::vector< std::shared_ptr< BamAlignment > > bamAlignmentPtrs;
+		std::vector< Alignment::SharedPtr > alignmentPtrs;
 
-		getAlignmentsInRegion(bamAlignmentPtrs, graphRegionPtrs, true);
-		for (auto bamAlignmentPtr : bamAlignmentPtrs)
+		getAlignmentsInRegion(alignmentPtrs, graphRegionPtrs, true);
+		for (auto alignmentPtr : alignmentPtrs)
 		{
 			std::string sampleName;
-			Sample::SharedPtr samplePtr = m_override_shared_ptr;
-			if (m_override_shared_ptr == nullptr)
-			{
-				bamAlignmentPtr->GetTag("RG", sampleName);
-			}
-			else
-			{
-				sampleName = samplePtr->getName();
-			}
-			auto iter = this->m_bam_sample_ptrs.find(sampleName);
-			if (iter != this->m_bam_sample_ptrs.end() || samplePtr != nullptr)
+			sampleName = alignmentPtr->getSample()->getName();
+			uint32_t matchValue = m_match_value;
+			uint32_t mismatchValue = m_mismatch_value;
+			uint32_t gapOpenValue = m_gap_open_value;
+			uint32_t gapExtensionValue = m_gap_extension_value;
+			auto funct = [graphPtr, alignmentPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+				{
+					graphPtr->adjudicateAlignment(alignmentPtr, alignmentPtr->getSample(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
+				};
+			m_thread_pool.enqueue(funct);
+			/*
+			auto iter = this->m_alignment_sample_ptrs.find(sampleName);
+			if (iter != this->m_alignment_sample_ptrs.end() || samplePtr != nullptr)
 			{
 				if (samplePtr == nullptr)
 				{
@@ -108,56 +112,57 @@ namespace graphite
 				uint32_t mismatchValue = m_mismatch_value;
 				uint32_t gapOpenValue = m_gap_open_value;
 				uint32_t gapExtensionValue = m_gap_extension_value;
-				auto funct = [graphPtr,bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+				auto funct = [graphPtr,alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
 				{
-					graphPtr->adjudicateAlignment(bamAlignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
+					graphPtr->adjudicateAlignment(alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
 				};
 				m_thread_pool.enqueue(funct);
 			}
+			*/
 		}
 		m_thread_pool.join();
 		bamAlignmentPtrs.clear();
-		// graphPtr->clearResources();
+	 // graphPtr->clearResources();
 	}
 
-	void GraphProcessor::getAlignmentsInRegion(std::vector< std::shared_ptr< BamAlignment > >& bamAlignmentPtrs, std::vector< Region::SharedPtr > regionPtrs, bool getFlankingUnalignedReads)
+	void GraphProcessor::getAlignmentsInRegion(std::vector< Alignment::SharedPtr >& alignmentPtrs, std::vector< Region::SharedPtr > regionPtrs, bool getFlankingUnalignedReads)
 	{
-		std::vector< std::shared_ptr< BamAlignment > > bamAlignmentPtrsTmp;
+		std::vector< Alignment::SharedPtr > alignmentPtrsTmp;
 		for (auto iter = regionPtrs.begin(); iter != regionPtrs.end(); ++iter)
 		{
 			auto regionPtr = (*iter);
-			for (auto bamReaderPtr : this->m_bam_reader_ptrs)
+			for (auto alignmentReaderPtr : this->m_alignment_reader_ptrs)
 			{
 				if (iter == regionPtrs.begin() && getFlankingUnalignedReads)
 				{
 					auto flankingRegionPtr = std::make_shared< Region >(regionPtr->getReferenceID(), regionPtr->getStartPosition() - this->m_flanking_padding, regionPtr->getStartPosition(), regionPtr->getBased());
-					bamReaderPtr->fetchBamAlignmentPtrsInRegion(bamAlignmentPtrsTmp, flankingRegionPtr, false, false, this->m_mapping_quality);
+					alignmentReaderPtr->fetchAlignmentPtrsInRegion(alignmentPtrsTmp, flankingRegionPtr, false, false, this->m_mapping_quality);
 				}
-				bamReaderPtr->fetchBamAlignmentPtrsInRegion(bamAlignmentPtrsTmp, regionPtr, false, false, this->m_mapping_quality);
+				alignmentReaderPtr->fetchAlignmentPtrsInRegion(alignmentPtrsTmp, regionPtr, false, false, this->m_mapping_quality);
 				if (iter == regionPtrs.end() && getFlankingUnalignedReads)
 				{
 					auto flankingRegionPtr = std::make_shared< Region >(regionPtr->getReferenceID(), regionPtr->getEndPosition(), regionPtr->getEndPosition() + this->m_flanking_padding, regionPtr->getBased());
-					bamReaderPtr->fetchBamAlignmentPtrsInRegion(bamAlignmentPtrsTmp, flankingRegionPtr, false, false, this->m_mapping_quality);
+					alignmentReaderPtr->fetchAlignmentPtrsInRegion(alignmentPtrsTmp, flankingRegionPtr, false, false, this->m_mapping_quality);
 				}
 			}
 		}
 
-		// make sure the reads only appear in bamAlignmentPtrs once
-		bamAlignmentPtrs.clear();
-		std::unordered_set< std::string > bamIDTracker;
-		for (auto bamAlignmentPtr : bamAlignmentPtrsTmp)
+		// make sure the reads only appear in alignmentPtrs once
+		alignmentPtrs.clear();
+		std::unordered_set< std::string > alignmentIDTracker;
+		for (auto alignmentPtr : alignmentPtrsTmp)
 		{
-			std::string bamID = bamAlignmentPtr->Name + std::to_string(bamAlignmentPtr->IsFirstMate());
-			if (bamIDTracker.find(bamID) == bamIDTracker.end())
+			std::string alignmentID = alignmentPtr->getUniqueReadName();
+			if (alignmentIDTracker.find(alignmentID) == alignmentIDTracker.end())
 			{
-				bamAlignmentPtrs.emplace_back(bamAlignmentPtr);
-				bamIDTracker.emplace(bamID);
+				alignmentPtrs.emplace_back(alignmentPtr);
+				alignmentIDTracker.emplace(alignmentID);
 			}
 		}
-		if (this->m_read_sample_limit < bamAlignmentPtrs.size())
+		if (this->m_read_sample_limit < alignmentPtrs.size())
 		{
-			std::shuffle(bamAlignmentPtrs.begin(), bamAlignmentPtrs.end(), default_random_engine(0));
-			bamAlignmentPtrs.resize(this->m_read_sample_limit);
+			std::shuffle(alignmentPtrs.begin(), alignmentPtrs.end(), default_random_engine(0));
+			alignmentPtrs.resize(this->m_read_sample_limit);
 		}
 	}
 }

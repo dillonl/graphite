@@ -3,8 +3,8 @@
 
 #include "core/util/Noncopyable.hpp"
 #include "core/graph/Node.h"
+#include "core/alignment/Alignment.h"
 
-#include "api/BamAlignment.h"
 #include "gssw.h"
 
 #include <tuple>
@@ -22,14 +22,13 @@ namespace graphite
 		GraphPrinter(Graph* graphPtr);
 		~GraphPrinter();
 
-		void registerTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, float sswScore);
-		void registerUnalignedRead(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, std::string graphCigarString, float sswScore);
+		void registerTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, float sswScore);
+		void registerUnalignedRead(Alignment::SharedPtr alignmentPtr, std::string graphCigarString, float sswScore);
 		void printGraph();
 
 	private:
 		struct MappingContainer
 		{
-			/* std::shared_ptr< BamTools::BamAlignment > m_bam_alignment_ptr; */
 			uint32_t m_ssw_score;
 			std::string m_sequence;
 			std::string m_read_name;

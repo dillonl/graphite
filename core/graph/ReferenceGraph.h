@@ -4,10 +4,9 @@
 #include "core/util/Noncopyable.hpp"
 #include "core/region/Region.h"
 #include "core/reference/FastaReference.h"
+#include "core/alignment/Alignment.h"
 
 #include "Node.h"
-
-#include "api/BamAlignment.h"
 
 #include "gssw.h"
 
@@ -23,10 +22,10 @@ namespace graphite
 		ReferenceGraph(const std::string& refSequence, position startPosition);
 		~ReferenceGraph();
 
-float adjudicateAlignment(std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue);
+float adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t gapExtensionValue);
 
 	private:
-		float processTraceback(gssw_graph_mapping* graphMapping, std::shared_ptr< BamTools::BamAlignment > bamAlignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue);
+		float processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue);
 
 		Node::SharedPtr m_node;
 		Region::SharedPtr m_region_ptr;
