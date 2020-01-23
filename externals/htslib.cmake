@@ -33,7 +33,7 @@ SET(HTSLIB_DIR ${CMAKE_BINARY_DIR}/externals/htslib CACHE INTERNAL "htslib proje
 SET(HTSLIB_LIB)
 ExternalProject_Add(${HTSLIB_PROJECT}
 	GIT_REPOSITORY https://github.com/dillonl/htslib.git
-	GIT_TAG bc5b8c6ce0399141e76ad1d0b69adba43bf5f2d8 #lock in the commit id so we don't this doesn't break in the future
+	GIT_TAG 831c05b184360880ce77be013f22ab2b62b7e481 #lock in the commit id so we don't this doesn't break in the future
 	DEPENDS ${ZLIB_PROJECT}
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
