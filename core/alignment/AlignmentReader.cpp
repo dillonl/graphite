@@ -106,8 +106,16 @@ namespace graphite
 
 		while ( sam_itr_next(m_in, iter, htsAlignmentPtr) >= 0)
 		{
-			std::string readGroup = std::string((char*)bam_aux_get(htsAlignmentPtr, "RG"));
-			readGroup = readGroup.substr(1); // the last char is garbage
+			std::string readGroup = "";
+			if (this->m_overwrite_sample)
+			{
+				readGroup = this->m_sample_ptrs.begin()->first;
+			}
+			else
+			{
+				std::string readGroup = std::string((char*)bam_aux_get(htsAlignmentPtr, "RG"));
+				readGroup = readGroup.substr(1); // the last char is garbage
+			}
 			position pos = htsAlignmentPtr->core.pos;
 			char* name  = bam_get_qname(htsAlignmentPtr);
 			bool firstMate = (htsAlignmentPtr->core.flag & BAM_FREAD1);
