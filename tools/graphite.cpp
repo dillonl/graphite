@@ -1,4 +1,3 @@
-//#include <Python.h>
 #include "core/util/Utility.h"
 #include "core/util/Params.h"
 #include "core/region/Region.h"

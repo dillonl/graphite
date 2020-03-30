@@ -8,7 +8,7 @@
 namespace graphite
 {
 	// Example from here: https://www.biostars.org/p/151053/
-	AlignmentReader::AlignmentReader(const std::string& filename, const std::string& refPath) : m_path(filename), m_overwrite_sample(false)
+	AlignmentReader::AlignmentReader(const std::string& filename, const std::string& refPath) : m_path(filename), m_overwrite_sample("")
 	{
 		m_in = hts_open(m_path.c_str(), "r");
 		m_header = sam_hdr_read(m_in);
@@ -107,9 +107,10 @@ namespace graphite
 		while ( sam_itr_next(m_in, iter, htsAlignmentPtr) >= 0)
 		{
 			std::string readGroup = "";
-			if (this->m_overwrite_sample)
+			if (this->m_overwrite_sample.size() > 0)
 			{
-				readGroup = this->m_sample_ptrs.begin()->first;
+				auto iter = this->m_sample_ptrs.find(this->m_overwrite_sample);
+				readGroup = iter->first;
 			}
 			else
 			{
@@ -143,7 +144,7 @@ namespace graphite
 	{
 		this->m_sample_ptrs.empty();
 		this->m_sample_ptrs.emplace(samplePtr->getName(), samplePtr);
-		this->m_overwrite_sample = true;
+		this->m_overwrite_sample = samplePtr->getName();
 	}
 
 }
