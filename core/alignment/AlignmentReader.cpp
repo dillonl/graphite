@@ -8,7 +8,7 @@
 namespace graphite
 {
 	// Example from here: https://www.biostars.org/p/151053/
-	AlignmentReader::AlignmentReader(const std::string& filename, const std::string& refPath) : m_path(filename)
+	AlignmentReader::AlignmentReader(const std::string& filename, const std::string& refPath) : m_path(filename), m_overwrite_sample(false)
 	{
 		m_in = hts_open(m_path.c_str(), "r");
 		m_header = sam_hdr_read(m_in);
