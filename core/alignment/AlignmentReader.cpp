@@ -14,6 +14,11 @@ namespace graphite
 		m_header = sam_hdr_read(m_in);
 		hts_set_fai_filename(m_in, refPath.c_str());
 		this->m_idx = sam_index_load(m_in, this->m_path.c_str());
+		if (this->m_idx == NULL)
+		{
+			std::cout << "An error occurred while attempting to load sam/bam/cram index file. Please check to make sure index exists and is valid" << std::endl;
+			exit(0);
+		}
 		this->init();
 	}
 
