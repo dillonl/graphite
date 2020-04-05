@@ -53,6 +53,7 @@ namespace graphite
 		bool isNodeSuffixAmbiguous(std::string& nodeSequence, Node* comparatorNode, std::unordered_set< Node::SharedPtr >& nodePtrs);
 
 		FastaReference::SharedPtr m_fasta_reference_ptr;
+		std::string m_reference_sequence;
 		std::vector< Variant::SharedPtr > m_variant_ptrs;
 		std::vector< Region::SharedPtr > m_graph_regions;
 		std::unordered_map< uint32_t, Node::SharedPtr > m_node_ptrs_map;
@@ -64,6 +65,7 @@ namespace graphite
 		std::mutex m_aligned_read_names_mutex;
         GraphPrinter::SharedPtr m_graph_printer_ptr;
 		std::mutex m_graph_mutex;
+		position m_start_position;
 		/* std::unordered_map< Node::SharedPtr, std::vector< std::string > m_paths_from_node; */
 	};
 }

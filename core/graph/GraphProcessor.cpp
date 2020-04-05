@@ -1,5 +1,4 @@
 #include "GraphProcessor.h"
-#include "ReferenceGraph.h"
 
 #include <unordered_set>
 #include <thread>
@@ -26,16 +25,6 @@ namespace graphite
 		m_read_sample_limit(readSampleLimit),
 		m_override_shared_ptr(nullptr)
 	{
-		/*
-		for (auto alignmentReaderPtr : alignmentReaderPtrs)
-		{
-			auto alignmentSamplePtrs = alignmentReaderPtr->getSamplePtrs();
-			for (auto iter: alignmentSamplePtrs)
-			{
-				m_override_shared_ptr = iter.second;
-			}
-		}
-		*/
 	}
 
 	GraphProcessor::~GraphProcessor()
@@ -100,29 +89,8 @@ namespace graphite
 					graphPtr->adjudicateAlignment(alignmentPtr, alignmentPtr->getSample(), matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
 				};
 			m_thread_pool.enqueue(funct);
-			/*
-			auto iter = this->m_alignment_sample_ptrs.find(sampleName);
-			if (iter != this->m_alignment_sample_ptrs.end() || samplePtr != nullptr)
-			{
-				if (samplePtr == nullptr)
-				{
-					samplePtr = iter->second;
-				}
-				uint32_t matchValue = m_match_value;
-				uint32_t mismatchValue = m_mismatch_value;
-				uint32_t gapOpenValue = m_gap_open_value;
-				uint32_t gapExtensionValue = m_gap_extension_value;
-				auto funct = [graphPtr,alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
-				{
-					graphPtr->adjudicateAlignment(alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, 0);
-				};
-				m_thread_pool.enqueue(funct);
-			}
-			*/
 		}
 		m_thread_pool.join();
-		// bamAlignmentPtrs.clear();
-	 // graphPtr->clearResources();
 	}
 
 	void GraphProcessor::getAlignmentsInRegion(std::vector< Alignment::SharedPtr >& alignmentPtrs, std::vector< Region::SharedPtr > regionPtrs, bool getFlankingUnalignedReads)

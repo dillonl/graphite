@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <tuple>
 
 /*
   What are all the things we want to check:
@@ -99,7 +100,7 @@ namespace graphite
 		Traceback();
 		~Traceback();
 
-		void processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
+		void processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent, position startPosition, const std::string& referenceSequence);
 		void printTraceback();
 
 	private:
@@ -107,6 +108,7 @@ namespace graphite
 		bool nodeHasFlankingMismatches(TracebackNode::SharedPtr tracebackNodePtr, Alignment::SharedPtr alignmentPtr);
 		bool isNodeSequenceAmbiguous(TracebackNode::SharedPtr tracebackNodePtr);
 		bool fullAlleleInTraceback(Allele::SharedPtr allelePtr, Node* nodePtr);
+        std::string generateSiblingSequence(const std::string& seq, position startPosition, const std::tuple< Node*, Node::SharedPtr >& alignedNodeAndSibNodePtrs);
 		Alignment::SharedPtr m_alignment_ptr;
 		Sample::SharedPtr m_sample_ptr;
 		int32_t m_total_score;

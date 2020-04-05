@@ -11,7 +11,9 @@ namespace graphite
 		// m_variant_ptrs(variantPtrs),
 		m_graph_spacing(graphSpacing),
 		m_score_threshold(70),
-		m_graph_printer_ptr(nullptr)
+		m_graph_printer_ptr(nullptr),
+		m_reference_sequence(""),
+		m_start_position(0)
 	{
 		m_variant_ptrs = reconcileVariantSemantics(variantPtrs);
 		generateGraph();
@@ -41,12 +43,11 @@ namespace graphite
 
 	void Graph::generateGraph()
 	{
-		std::string referenceSequence;
 		Region::SharedPtr referenceRegionPtr;
-		getGraphReference(referenceSequence, referenceRegionPtr, this->m_variant_ptrs);
+		getGraphReference(m_reference_sequence, referenceRegionPtr, this->m_variant_ptrs);
 		Node::SharedPtr firstNodePtr;
 		Node::SharedPtr lastNodePtr;
-		generateReferenceGraphNode(firstNodePtr, lastNodePtr, referenceSequence, referenceRegionPtr);
+		generateReferenceGraphNode(firstNodePtr, lastNodePtr, m_reference_sequence, referenceRegionPtr);
 		addVariantsToGraph(firstNodePtr);
 		firstNodePtr = condenseGraph(lastNodePtr);
 		setPrefixAndSuffix(firstNodePtr); // calculate prefix and suffix matching sequences
@@ -177,6 +178,7 @@ namespace graphite
 		endPosition += this->m_graph_spacing;
 		regionPtr = std::make_shared< Region >(referenceID, startPosition, endPosition, Region::BASED::ONE);
 		sequence = this->m_fasta_reference_ptr->getSequenceStringFromRegion(regionPtr);
+		this->m_start_position = startPosition;
 	}
 
 	void Graph::generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr)
@@ -463,11 +465,10 @@ namespace graphite
 				}
 			}
 		}
-		std::string foo(alignmentPtr->getSequence());
 		gssw_graph_fill(graph, alignmentPtr->getSequence(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
 		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
 		auto tracebackPtr = std::make_shared< Traceback >();
-		tracebackPtr->processTraceback(gm, alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
+		tracebackPtr->processTraceback(gm, alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent, m_start_position, m_reference_sequence);
 		gssw_graph_mapping_destroy(gm);
 
 		// note that nodes which are referred to in this graph are destroyed as well

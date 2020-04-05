@@ -1,6 +1,7 @@
 #include "Node.h"
 
 #include <limits>
+#include <algorithm>
 
 namespace graphite
 {
@@ -126,6 +127,37 @@ namespace graphite
 		if (this->m_out_nodes.find(node) == this->m_out_nodes.end()) // don't add duplicates
 		{
 			this->m_out_nodes.emplace(node);
+		}
+	}
+
+	std::unordered_set< Node::SharedPtr > Node::getSiblings(bool includeThisNode)
+	{
+		std::unordered_set< Node::SharedPtr > siblingNodePtrs;
+		std::unordered_set< Node::SharedPtr >* allSibNodes;
+		if (this->m_out_ref_node != nullptr)
+		{
+			allSibNodes = &this->m_out_ref_node->m_in_nodes;
+		}
+		else if (this->m_in_ref_node != nullptr)
+		{
+			allSibNodes = &this->m_in_ref_node->m_out_nodes;
+		}
+		else
+		{
+			return siblingNodePtrs;
+		}
+		if (!includeThisNode)
+		{
+			std::for_each((*allSibNodes).begin(), (*allSibNodes).end(),
+						  [this, &siblingNodePtrs](Node::SharedPtr nodePtr)
+						  {
+							  if (this->m_id != nodePtr->m_id) { siblingNodePtrs.emplace(nodePtr); }
+						  });
+			return siblingNodePtrs;
+		}
+		else
+		{
+			return *allSibNodes;
 		}
 	}
 

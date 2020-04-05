@@ -1,4 +1,7 @@
 #include "Traceback.h"
+#include "ReferenceGraph.h"
+
+#include <algorithm>
 
 namespace graphite
 {
@@ -10,7 +13,7 @@ namespace graphite
 	{
 	}
 
-	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent, position startPosition, const std::string& referenceSequence)
 	{
 		this->m_total_score = 0;
 		this->m_traceback_nodes.clear();
@@ -20,11 +23,23 @@ namespace graphite
 		std::string graphCigarString = "";
 		gssw_node_cigar* nc = graphMapping->cigar.elements;
 		TracebackNode::SharedPtr prevTracebackNodePtr = nullptr;
+		std::vector< std::tuple< Node*, Node::SharedPtr > > alignedNodeAndSibNodePtrs;
 		for (int i = 0; i < graphMapping->cigar.length; ++i, ++nc)
 		{
 			auto tracebackNodePtr = std::make_shared< TracebackNode >();
 			gssw_node* gsswNode = graphMapping->cigar.elements[i].node;
 			Node* nodePtr = (Node*)gsswNode->data;
+			// if there is only one sibling in this container when this loop is done
+			// then we will try that combination, if the score is the same, then it's ambiguous
+			auto nodeSiblingPtrs = nodePtr->getSiblings(false);
+			if (nodeSiblingPtrs.size() > 0)
+			{
+				std::for_each(nodeSiblingPtrs.begin(), nodeSiblingPtrs.end(),
+						  [&alignedNodeAndSibNodePtrs, &nodePtr](const Node::SharedPtr& siblingPtr)
+						  {
+							  alignedNodeAndSibNodePtrs.push_back(std::make_tuple(nodePtr, siblingPtr));
+						  });
+			}
 			int32_t nodeScore = 0;
 			uint32_t nodeLength = 0;
 			uint32_t nodeSoftclipLength = 0;
@@ -75,7 +90,36 @@ namespace graphite
 		}
 		if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (alignmentPtr->getLength() * 0.3))
 		{
-			this->incrementAlleleCounts(alignmentPtr, samplePtr, graphCigarString);
+			int32_t referenceScore = 0;
+			if (alignedNodeAndSibNodePtrs.size() == 1)
+			{
+				std::string siblingSequence = generateSiblingSequence(referenceSequence, startPosition, alignedNodeAndSibNodePtrs[0]);
+				auto referenceGraphPtr = std::make_shared< ReferenceGraph >(siblingSequence, startPosition);
+				referenceScore = referenceGraphPtr->adjudicateAlignment(alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
+			}
+			if (referenceScore < this->m_total_score)
+			{
+				this->incrementAlleleCounts(alignmentPtr, samplePtr, graphCigarString);
+			}
+		}
+	}
+
+	std::string Traceback::generateSiblingSequence(const std::string& seq, position startPosition, const std::tuple< Node*, Node::SharedPtr >& alignedNodeAndSibNodePtrs)
+	{
+		Node* tracebackNodePtr = std::get< 0 >(alignedNodeAndSibNodePtrs);
+		Node::SharedPtr siblingNodePtr = std::get< 1 >(alignedNodeAndSibNodePtrs);
+
+		if (tracebackNodePtr->getAlleleType() == Node::ALLELE_TYPE::REF)
+		{
+			uint32_t offset = ((tracebackNodePtr->getPosition()) - startPosition);
+			std::string newSeq = seq.substr(0, offset);
+			newSeq += siblingNodePtr->getSequence();
+			newSeq += seq.substr(offset + tracebackNodePtr->getSequence().size());
+			return newSeq;
+		}
+		else
+		{
+			return seq;
 		}
 	}
 
