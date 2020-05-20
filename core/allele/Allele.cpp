@@ -30,16 +30,18 @@ namespace graphite
 			allelePtr->incrementScoreCount(alignmentPtr, samplePtr, score);
 		}
 
-		auto iter = counts->find(samplePtr->getName());
+		auto sampleName = samplePtr->getName();
+		auto iter = counts->find(sampleName);
 		if (iter == counts->end())
 		{
 			std::vector< std::unordered_set< std::string > > sampleCounts((uint32_t)AlleleCountType::EndEnum);
-			counts->emplace(samplePtr->getName(), sampleCounts);
-			iter = counts->find(samplePtr->getName());
+			counts->emplace(sampleName, sampleCounts);
+			iter = counts->find(sampleName);
 		}
-		std::string alignmentName = alignmentPtr->getUniqueReadName();
+		auto alignmentName = alignmentPtr->getReadName(); // we actually want to double-count an alignment if it spans 2 breakpoints (forward-revers strand)
+		// std::string alignmentName = alignmentPtr->getUniqueReadName();
 		auto readCounts = iter->second;
-		(*counts)[samplePtr->getName()][alleleCountType].emplace(alignmentName); // we are using readname so reads aren't counted more than once when we do the traceback and trackback through more than one reference node
+		(*counts)[sampleName][alleleCountType].emplace(alignmentName); // we are using readname so reads aren't counted more than once when we do the traceback and trackback through more than one reference node
 	}
 
 	std::unordered_set< std::string > Allele::getScoreCountFromAlleleCountType(const std::string& sampleName, AlleleCountType alleleCountType, bool forwardCount)
