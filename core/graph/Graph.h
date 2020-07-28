@@ -16,16 +16,18 @@
 
 namespace graphite
 {
-	class Graph : private Noncopyable
+	class Graph
 	{
 	public:
 		typedef std::shared_ptr< Graph > SharedPtr;
 		Graph(FastaReference::SharedPtr fastaReferencePtr, std::vector< Variant::SharedPtr > variantPtrs, uint32_t graphSpacing, bool printGraph);
 		Graph(FastaReference::SharedPtr fastaReferencePtr, Region::SharedPtr regionPtr);
+		Graph(const Graph& graph) = delete;
+		Graph& operator=(const Graph& graph) = delete;
+		Graph() {}
 		~Graph();
 
 		std::vector< Region::SharedPtr > getRegionPtrs();
-		void adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
         std::vector< std::vector< Node::SharedPtr > > generateAllPaths();
 		Region::SharedPtr getGraphRegion();
 		std::string getReferenceSequence();
@@ -33,6 +35,11 @@ namespace graphite
 
 		void printGraphVisOutput();
 		void clearResources();
+		Graph::SharedPtr createCopy();
+		std::unordered_map< uint32_t, Node::SharedPtr > getNodePtrsMap() { return m_node_ptrs_map; }
+		Node::SharedPtr getFirstNode() { return m_first_node; }
+
+		void removeNodePtr(Node* nodePtr);
 
 	private:
 		std::vector< Variant::SharedPtr > reconcileVariantSemantics(std::vector< Variant::SharedPtr >& variantPtrs);
@@ -45,7 +52,6 @@ namespace graphite
         void generateReferenceGraphNode(Node::SharedPtr& firstNodePtr, Node::SharedPtr& lastNodePtr, const std::string& referenceSequence, Region::SharedPtr regionPtr);
 		void addVariantsToGraph(Node::SharedPtr firstNodePtr);
 		Node::SharedPtr condenseGraph(Node::SharedPtr lastNodePtr);
-		void processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent);
 		std::vector< std::string > generateAllPathsFromNodesOfLength(Node::SharedPtr nodePtr);
 		void setPrefixAndSuffix(Node::SharedPtr firstNodePtr);
 
@@ -66,6 +72,7 @@ namespace graphite
 		std::mutex m_graph_mutex;
 		/* std::unordered_map< Node::SharedPtr, std::vector< std::string > m_paths_from_node; */
 	};
+
 }
 
 #endif //GRAPHITE_GRAPH_H

@@ -38,6 +38,7 @@ namespace graphite
 		void setIdenticalSuffixLength(uint32_t suffixLength);
 		uint32_t getIdenticalPrefixLength();
 		uint32_t getIdenticalSuffixLength();
+		bool hasSiblings();
 
 		void addInNode(Node::SharedPtr node);
 		void addOutNode(Node::SharedPtr node);

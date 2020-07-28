@@ -50,6 +50,8 @@ namespace graphite
 		int32_t m_mapping_quality;
 		int32_t m_read_sample_limit;
 		Sample::SharedPtr m_override_shared_ptr;
+		std::mutex m_alignment_tracker_mutex;
+		std::unordered_set< std::string > m_alignment_tracker_set;
 	};
 }
 

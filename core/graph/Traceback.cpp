@@ -10,7 +10,7 @@ namespace graphite
 	{
 	}
 
-	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Traceback::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue)
 	{
 		this->m_total_score = 0;
 		this->m_traceback_nodes.clear();
@@ -91,7 +91,7 @@ namespace graphite
 				{
 					if (fullAlleleInTraceback(nodeAllelePtr, tracebackNodePtr->getNodePtr()))
 					{
-						nodeAllelePtr->incrementScoreCount(alignmentPtr, samplePtr, nodeScore);
+						nodeAllelePtr->incrementScoreCount(alignmentPtr, nodeScore);
 						if (nodeScore != 0)
 						{
 							std::string alignmentName = alignmentPtr->getReadName() +	std::to_string(!alignmentPtr->getIsFirstMate() + 1);

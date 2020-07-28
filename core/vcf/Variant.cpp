@@ -151,11 +151,23 @@ namespace graphite
 			reverseScoreCount.insert(reverseScoreCountTmp.begin(), reverseScoreCountTmp.end());
 			totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
 			std::string tmpCountsString = std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
+			uint32_t ambiguousForwardCount = 0;
+			uint32_t ambiguousReverseCount = 0;
+			if (alleleCountType == AlleleCountType::Ambiguous)
+			{
+				ambiguousForwardCount = forwardScoreCount.size();
+				ambiguousReverseCount = reverseScoreCount.size();
+			}
 			for (auto allelePtr : this->m_alternate_allele_ptrs)
 			{
-				tmpCountsString += ",";
 				forwardScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, true);
 				reverseScoreCount = allelePtr->getScoreCountFromAlleleCountType(sampleName, alleleCountType, false);
+				if (alleleCountType == AlleleCountType::Ambiguous)
+				{
+					ambiguousForwardCount += forwardScoreCount.size();
+					ambiguousReverseCount += reverseScoreCount.size();
+				}
+				tmpCountsString += ",";
 				tmpCountsString += std::to_string(forwardScoreCount.size()) + "," + std::to_string(reverseScoreCount.size());
 				totalCounter += forwardScoreCount.size() + reverseScoreCount.size();
 				for (auto semanticIter : allelePtr->getSemanticLocations())
@@ -180,6 +192,10 @@ namespace graphite
 			if (!graphiteCountsString.empty())
 			{
 				graphiteCountsString += ":";
+			}
+			if (alleleCountType == AlleleCountType::Ambiguous)
+			{
+				tmpCountsString = std::to_string(ambiguousForwardCount) + "," + std::to_string(ambiguousReverseCount);
 			}
 			graphiteCountsString += std::to_string(totalCounter) + ":" + tmpCountsString;
 			alleleCountType = (AlleleCountType)((uint32_t)alleleCountType + 1);

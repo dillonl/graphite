@@ -247,5 +247,17 @@ namespace graphite
 		this->m_allele_ptrs.emplace(allelePtr);
 	}
 
+	bool Node::hasSiblings()
+	{
+		for (auto inNodePtr : m_in_nodes)
+		{
+			if (inNodePtr->getOutNodes().size() > 1)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 }

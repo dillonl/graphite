@@ -13,7 +13,7 @@ namespace graphite
 	{
 	}
 
-	void Allele::incrementScoreCount(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, int score)
+	void Allele::incrementScoreCount(Alignment::SharedPtr alignmentPtr, int score)
 	{
 		bool isForwardStrand = alignmentPtr->getIsForwardStrand();
 		// static std::mutex slock;
@@ -23,11 +23,12 @@ namespace graphite
 		{
 			alleleCountType = (size_t)AlleleCountType::Ambiguous;
 		}
+		auto samplePtr = alignmentPtr->getSample();
 		std::lock_guard< std::mutex > l(m_counts_lock);
 		std::unordered_map< std::string, std::vector< std::unordered_set< std::string > > >* counts = (isForwardStrand) ? &this->m_forward_counts : &this->m_reverse_counts;
 		for (auto allelePtr : this->m_paired_allele_ptrs)
 		{
-			allelePtr->incrementScoreCount(alignmentPtr, samplePtr, score);
+			allelePtr->incrementScoreCount(alignmentPtr, score);
 		}
 
 		auto sampleName = samplePtr->getName();

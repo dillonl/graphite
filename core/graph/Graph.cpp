@@ -1,5 +1,6 @@
 #include "Graph.h"
-#include "Traceback.h"
+// #include "Traceback.h"
+#include "GraphTraceback.hpp"
 
 #include "core/util/Types.h"
 #include <deque>
@@ -403,102 +404,26 @@ namespace graphite
 		}
 	}
 
-	void Graph::adjudicateAlignment(Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
+	void Graph::removeNodePtr(Node* nodePtr)
 	{
-		// check if we have already processed this alignment
-		std::string alignmentName = alignmentPtr->getUniqueReadName();
+		std::unordered_set< Node::SharedPtr > allCreatedNodePtrs;
+		for (auto iter : m_all_created_nodes)
 		{
-			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
-			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
+			if (iter->getID() != nodePtr->getID())
 			{
-				return;
-			}
-			this->m_aligned_read_names.emplace(alignmentName);
-		}
-		gssw_sse2_disable();
-		int8_t* nt_table = gssw_create_nt_table();
-		int8_t* mat = gssw_create_score_matrix(matchValue, mismatchValue);
-		gssw_graph* graph = gssw_graph_create(this->m_node_ptrs_map.size());
-
-		unordered_map< uint32_t, gssw_node* > gsswNodePtrsMap;
-		Node::SharedPtr nodePtr = m_first_node;
-
-		// std::lock_guard< std::mutex > l(m_graph_mutex);
-		// std::cout << "node from graph: " << nodePtr->getAllelePtr() << std::endl;
-		gssw_node* gsswNode = (gssw_node*)gssw_node_create(nodePtr.get(), nodePtr->getID(), nodePtr->getSequence().c_str(), nt_table, mat);
-		gsswNodePtrsMap.emplace(nodePtr->getID(), gsswNode);
-		gssw_graph_add_node(graph, gsswNode);
-		while (nodePtr != nullptr)
-		{
-			Node::SharedPtr nextRefNodePtr = nullptr;
-			for (auto outNodePtr : nodePtr->getOutNodes())
-			{
-				if (outNodePtr->getAlleleType() == Node::ALLELE_TYPE::REF)
-				{
-					nextRefNodePtr = outNodePtr;
-				}
-				gsswNode = (gssw_node*)gssw_node_create(outNodePtr.get(), outNodePtr->getID(), outNodePtr->getSequence().c_str(), nt_table, mat);
-				gssw_graph_add_node(graph, gsswNode);
-				gsswNodePtrsMap.emplace(outNodePtr->getID(), gsswNode);
-			}
-			nodePtr = nextRefNodePtr;
-		}
-
-		for (auto iter : this->m_node_ptrs_map)
-		{
-			Node::SharedPtr nodePtr = iter.second;
-			auto gsswIter = gsswNodePtrsMap.find(nodePtr->getID());
-			if (gsswIter == gsswNodePtrsMap.end())
-			{
-				continue;
-			}
-			gssw_node* gsswNode = gsswIter->second;
-			for (auto outNodePtr : nodePtr->getOutNodes())
-			{
-				auto iter = gsswNodePtrsMap.find(outNodePtr->getID());
-				if (iter != gsswNodePtrsMap.end())
-				{
-					gssw_node* gsswOutNode = iter->second;
-					gssw_nodes_add_edge(gsswNode, gsswOutNode);
-				}
+				allCreatedNodePtrs.emplace(nodePtr);
 			}
 		}
-		std::string foo(alignmentPtr->getSequence());
-		gssw_graph_fill(graph, alignmentPtr->getSequence(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0, 15, 2, true);
-		gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, gapOpenValue, gapExtensionValue, 0, 0);
-		auto tracebackPtr = std::make_shared< Traceback >();
-		tracebackPtr->processTraceback(gm, alignmentPtr, samplePtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, referenceTotalScorePercent);
-		gssw_graph_mapping_destroy(gm);
-
-		// note that nodes which are referred to in this graph are destroyed as well
-		gssw_graph_destroy(graph);
-
-		free(nt_table);
-		free(mat);
-	}
-
-
-	void Graph::processTraceback(gssw_graph_mapping* graphMapping, Alignment::SharedPtr alignmentPtr, Sample::SharedPtr samplePtr, bool isForwardStrand, uint32_t  matchValue, uint32_t mismatchValue, uint32_t gapOpenValue, uint32_t  gapExtensionValue, float referenceTotalScorePercent)
-	{
-		std::string alignmentName = alignmentPtr->getUniqueReadName();
+		m_all_created_nodes = allCreatedNodePtrs;
+		std::unordered_map< uint32_t, Node::SharedPtr > nodePtrsMap;
+		for (auto iter : m_node_ptrs_map)
 		{
-			std::lock_guard< std::mutex > l(m_aligned_read_names_mutex);
-			if (this->m_aligned_read_names.find(alignmentName) != this->m_aligned_read_names.end())
+			if (iter.first != nodePtr->getID())
 			{
-				return;
+				nodePtrsMap.emplace(iter.first, iter.second);
 			}
-			this->m_aligned_read_names.emplace(alignmentName);
 		}
-		uint32_t totalScore = 0;
-		/*
-		  What are all the things we want to check:
-		  1. total score is high enough
-		  2. individual node score is high enough
-		  3. make sure traceback travels through all nodes in the allele being considered (if it's at the beginning or end of traceback maybe mark as ambiguous)
-		  4. no more than 1 softclip region
-		  5. make sure flanking nodes don't have mismatches at the edges
-		  6. if first or last node check for ambiguousness
-		 */
+		m_node_ptrs_map = nodePtrsMap;
 	}
 
 	void getAllPaths(Node::SharedPtr nodePtr, std::vector< Node::SharedPtr > currentPath, int numberOfSibs, std::vector< std::vector< Node::SharedPtr > >& paths)
@@ -738,5 +663,20 @@ namespace graphite
 			nodePtr->clearAllelePtrs();
 			nodePtr->clearInAndOutNodes();
 		}
+	}
+
+	Graph::SharedPtr Graph::createCopy()
+	{
+		auto graphPtr = std::make_shared< Graph >();
+		graphPtr->m_fasta_reference_ptr = this->m_fasta_reference_ptr;
+		graphPtr->m_variant_ptrs = this->m_variant_ptrs;
+		graphPtr->m_graph_regions = this->m_graph_regions;
+		graphPtr->m_graph_spacing = this->m_graph_spacing;
+		graphPtr->m_score_threshold = this->m_score_threshold;
+		graphPtr->m_aligned_read_names = this->m_aligned_read_names;
+        graphPtr->m_graph_printer_ptr = this->m_graph_printer_ptr;
+		graphPtr->m_node_ptrs_map = this->m_node_ptrs_map;
+		graphPtr->m_first_node = this->m_first_node;
+		return graphPtr;
 	}
 }
