@@ -112,6 +112,17 @@ namespace graphite
 		for (auto bamSamplePtr : this->m_bam_sample_ptrs)
 		{
 			auto sampleName = bamSamplePtr->getName();
+
+			bool isInCols = false;
+			for (auto colIdx = 0; colIdx < this->m_vcf_column_names.size(); ++colIdx)
+			{
+				std::string colLabel = this->m_vcf_column_names[colIdx];
+				if (sampleName.compare(colLabel) == 0)
+				{
+					isInCols = true;
+				}
+			}
+
 			auto iter = std::find_if(this->m_vcf_column_names.begin(), this->m_vcf_column_names.end(), [&sampleName](const std::string& columnName)
 									 {
 										 return columnName.compare(sampleName) == 0;
@@ -147,12 +158,28 @@ namespace graphite
 
 	bool VCFWriter::isSampleNameInOriginalVCF(const std::string& sampleName)
 	{
-		return (m_sample_name_in_vcf.find(sampleName) != m_sample_name_in_vcf.end());
+		for (std::string tmpSampleName : this->m_original_vcf_sample_names)
+		{
+			if (sampleName.compare(tmpSampleName) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool VCFWriter::isSampleNameInBam(const std::string& sampleName)
 	{
-		return (m_bam_sample_ptrs_map.find(sampleName) != m_bam_sample_ptrs_map.end());
+		for (auto iter : m_bam_sample_ptrs_map)
+		{
+			std::string tmpSampleName = iter.first;
+			if (sampleName.compare(tmpSampleName) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+		// return (m_bam_sample_ptrs_map.find(sampleName) != m_bam_sample_ptrs_map.end());
 	}
 
 	std::vector< std::string > VCFWriter::getColumnNames()
@@ -171,5 +198,20 @@ namespace graphite
 	std::shared_ptr< std::string > VCFWriter::getBlankFormatStringPtr()
 	{
 		return this->m_black_format_string;
+	}
+
+
+
+	void VCFWriter::setOriginalVCFSampleNames(const std::string& headerLine)
+	{
+		std::vector< std::string > headerColumns;
+		split(headerLine, '\t', headerColumns);
+		for (auto headerColumn : headerColumns)
+		{
+			if (STANDARD_VCF_COLUMN_NAMES_SET.find(headerColumn) == STANDARD_VCF_COLUMN_NAMES_SET.end())
+			{
+				this->m_original_vcf_sample_names.emplace(headerColumn);
+			}
+		}
 	}
 }

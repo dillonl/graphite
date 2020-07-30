@@ -116,6 +116,7 @@ namespace graphite
 			}
 			else
 			{
+				this->m_vcf_writer->setOriginalVCFSampleNames(line);
 				headerColumns = line;
 			}
 		}

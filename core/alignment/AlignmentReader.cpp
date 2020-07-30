@@ -119,8 +119,8 @@ namespace graphite
 			}
 			else
 			{
-				std::string readGroup = std::string((char*)bam_aux_get(htsAlignmentPtr, "RG"));
-				readGroup = readGroup.substr(1); // the last char is garbage
+				std::string tmpReadGroup = std::string((char*)bam_aux_get(htsAlignmentPtr, "RG"));
+				readGroup = tmpReadGroup.substr(1);
 			}
 			position pos = htsAlignmentPtr->core.pos;
 			char* name  = bam_get_qname(htsAlignmentPtr);
