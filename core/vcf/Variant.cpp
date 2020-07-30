@@ -61,29 +61,32 @@ namespace graphite
 	void Variant::processSampleColumns()
 	{
 		size_t colonCount = std::count(m_columns["FORMAT"].begin(), m_columns["FORMAT"].end(), ':');
+		std::string divider = "";
+		std::string missingSamplePrefix = "";
 		if (m_columns["FORMAT"].size() > 0)
 		{
-			m_columns["FORMAT"] += ":";
+			divider = ":";
+			missingSamplePrefix = ".:";
 		}
-		m_columns["FORMAT"] += "DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP2_AP:SEM";
-
+		for (auto i = 0; i < colonCount; ++i)
+		{
+			missingSamplePrefix += ".:";
+		}
+		m_columns["FORMAT"] += divider + "DP_NFP:DP4_NFP:DP_NP:DP4_NP:DP_EP:DP4_EP:DP_SP:DP4_SP:DP_LP:DP4_LP:DP_AP:DP2_AP:SEM";
 		for (auto& sampleName : this->m_vcf_writer_ptr->getSampleNames())
 		{
+			std::string column = m_columns[sampleName];
 			std::string graphiteCounts = (this->m_vcf_writer_ptr->isSampleNameInBam(sampleName)) ? getSampleCounts(sampleName) : m_blank_graphite_format;
-			std::string samplePrefix = "";
 			if (!this->m_vcf_writer_ptr->isSampleNameInOriginalVCF(sampleName))
 			{
-				for (auto i = 0; i < colonCount; ++i)
-				{
-					samplePrefix += ".:";
-				}
-				if (samplePrefix.size() == 0 && m_columns["FORMAT"].size() > 0) // this is the scenario where there is only one entry in the format field (colonCount == 0)
-				{
-					samplePrefix += ".:";
-				}
-				m_columns[sampleName] += samplePrefix;
+				column += missingSamplePrefix;
 			}
-			m_columns[sampleName] += graphiteCounts;
+			else
+			{
+				column += divider;
+			}
+			column += graphiteCounts;
+			m_columns[sampleName] = column;
 		}
 	}
 
