@@ -77,6 +77,9 @@ namespace graphite
 			gssw_graph_fill(graph, alignmentPtr->getSequence(), nt_table, mat, m_gap_open_value, m_gap_extension_value, 0, 0, 15, 2, true);
 			gssw_graph_mapping* gm = gssw_graph_trace_back (graph, alignmentPtr->getSequence(), alignmentPtr->getLength(), nt_table, mat, m_gap_open_value, m_gap_extension_value, 0, 0);
 			processTraceback(gm, alignmentPtr->getLength());
+
+			setNormalizedCigarString(gm);
+
 			gssw_graph_mapping_destroy(gm);
 
 			// note that nodes which are referred to in this graph are destroyed as well
@@ -95,6 +98,22 @@ namespace graphite
 			auto iter = m_node_id_node_score_map.find(nodePtr->getID());
 			if (iter == m_node_id_node_score_map.end()) { return -1; }
 			return iter->second;
+		}
+
+		std::string getTracebackAsSequence(const std::string& delim)
+		{
+			std::string seq = "";
+			for (auto nodePtr : m_traceback_node_ptrs)
+			{
+				seq += nodePtr->getSequence() + delim;
+			}
+			return seq;
+		}
+
+
+		std::string getNormalizedCigarString()
+		{
+			return this->m_normalized_cigar_string;
 		}
 
 	private:
@@ -143,33 +162,39 @@ namespace graphite
 				int32_t nodeScorePercent = (nodeLength > 0) ? ((float)nodeScore / ((float)(nodeLength - nodeSoftclipLength) * m_match_value)) * 100 : 0;
 				totalScore += nodeScore;
 				m_node_id_node_score_map.emplace(nodePtr->getID(), nodeScorePercent);
-				/*
-				tracebackNodePtr->setNodePtr(nodePtr);
-				tracebackNodePtr->setPrevTracebackNodePtr(prevTracebackNodePtr);
-				if (prevTracebackNodePtr != nullptr)
-				{
-					prevTracebackNodePtr->setNextTracebackNodePtr(tracebackNodePtr);
-				}
-				tracebackNodePtr->setNodeScore(nodeScorePercent);
-				prevTracebackNodePtr = tracebackNodePtr;
-				tracebackNodePtr->setNextTracebackNodePtr(nullptr); // this will get set on the next time around unless it's the last node, then we want it nullptr
-				this->m_traceback_nodes.emplace_back(tracebackNodePtr);
-				*/
 				m_traceback_node_ptrs.emplace_back(nodePtr);
 			}
 			this->m_total_score = ((float)totalScore / (float)((alignmentLength - totalSoftclipLength) * m_match_value)) * 100;
-			/*
-			if (alignmentPtr->getLength() > 0)
-			{
-
-			}
-			if (this->m_total_score >= 80 && this->m_number_of_softclips <= 1 && totalSoftclipLength < (alignmentPtr->getLength() * 0.3))
-			{
-				this->incrementAlleleCounts(alignmentPtr, samplePtr, graphCigarString);
-			}
-			*/
 		}
 
+		void setNormalizedCigarString(gssw_graph_mapping* graphMapping)
+		{
+			this->m_normalized_cigar_string = "";
+			std::vector< char > cigTypes;
+			std::vector< int > cigLens;
+			gssw_node_cigar* nc = graphMapping->cigar.elements;
+			for (auto i = 0; i < graphMapping->cigar.length; ++i, ++nc)
+			{
+				for (auto j = 0; j < nc->cigar->length; ++j)
+				{
+					if (cigTypes.size() > 0 && cigTypes[cigTypes.size() - 1] == nc->cigar->elements[j].type)
+					{
+						cigLens[cigTypes.size() - 1] += nc->cigar->elements[j].length;
+					}
+					else
+					{
+						cigTypes.emplace_back(nc->cigar->elements[j].type);
+						cigLens.emplace_back(nc->cigar->elements[j].length);
+					}
+				}
+			}
+			for (auto i = 0; i < cigTypes.size(); ++i)
+			{
+				this->m_normalized_cigar_string += std::to_string(cigLens[i]) + cigTypes[i];
+			}
+		}
+
+		std::string m_normalized_cigar_string;
 		uint32_t m_soft_clip_occurrences;
 		uint32_t m_total_score;
 		std::string m_cigar_string;

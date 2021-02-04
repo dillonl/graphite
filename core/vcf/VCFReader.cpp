@@ -155,7 +155,10 @@ namespace graphite
 				this->m_sample_ptrs_map.emplace(samplePtr->getName(), samplePtr);
 			}
 			newLine += column + "\t";
-			lastColumnName = column;
+			if (column.size() > 0)
+			{
+				lastColumnName = column;
+			}
 		}
 		if (lastColumnName.compare("INFO") == 0)
 		{

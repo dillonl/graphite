@@ -35,7 +35,7 @@ namespace graphite
 
 	void GraphProcessor::processVariants()
 	{
-		uint32_t graphSpacing = 200;
+		uint32_t graphSpacing = 10;
 		bool overwriteSamples = false;
 		// set the graph spacing to be the largest read size
 		for (auto alignmentReaderPtr : this->m_alignment_reader_ptrs)
@@ -87,6 +87,7 @@ namespace graphite
 			uint32_t gapOpenValue = m_gap_open_value;
 			uint32_t gapExtensionValue = m_gap_extension_value;
 			// check if the alignment has already been processed
+			/*
 			{
 				std::lock_guard< std::mutex > l(m_alignment_tracker_mutex);
 				if (m_alignment_tracker_set.find(alignmentPtr->getUniqueReadName()) != m_alignment_tracker_set.end())
@@ -95,13 +96,16 @@ namespace graphite
 				}
 				m_alignment_tracker_set.emplace(alignmentPtr->getUniqueReadName());
 			}
-			auto funct = [graphPtr, alignmentPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue]()
+			*/
+			auto funct = [graphPtr, alignmentPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue, variantPtrs]()
 				{
 					auto graphTraceback = std::make_shared< GraphTraceback >(graphPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
 					graphTraceback->processGraph(alignmentPtr);
 					auto tracebackNodePtrs = graphTraceback->getTracebackNodePtrs();
-
-					if (graphTraceback->getTotalScore() >= 70)
+					auto originalGraphTracebackCigar = graphTraceback->getNormalizedCigarString();
+					int origTracebackSoftclipCount = std::count(originalGraphTracebackCigar.begin(), originalGraphTracebackCigar.end(), 'S');
+					int counter = -1;
+					if (graphTraceback->getTotalScore() >= 90)
 					{
 						for (auto nodePtr : tracebackNodePtrs)
 						{
@@ -115,22 +119,65 @@ namespace graphite
 							altGraphPtr->removeNodePtr(nodePtr);
 							auto altGraphTraceback = std::make_shared< GraphTraceback >(altGraphPtr, matchValue, mismatchValue, gapOpenValue, gapExtensionValue);
 							altGraphTraceback->processGraph(alignmentPtr);
+							auto altGraphTracebackCigar = altGraphTraceback->getNormalizedCigarString();
 							auto nodeScorePercent = graphTraceback->getNodeScorePercent(nodePtr);
+							auto cigarComparisonEqual = originalGraphTracebackCigar.compare(altGraphTracebackCigar);
+							int altTracebackSoftclipCount = std::count(altGraphTracebackCigar.begin(), altGraphTracebackCigar.end(), 'S');
+
+							// static std::mutex l;
+							// std::lock_guard< std::mutex > lock(l);
+							// std::cout << "---------------" << std::endl;
+							// std::cout << "orig: " << graphTraceback->getTracebackAsSequence("|") << "\tscore: " << graphTraceback->getTotalScore() << std::endl;
+							// std::cout << "alt:  " << altGraphTraceback->getTracebackAsSequence("|") << "\tscore: " << altGraphTraceback->getTotalScore() << std::endl;
+							// std::cout << "\torigCig: " << originalGraphTracebackCigar << std::endl;
+							// std::cout << "\taltCig:  " << altGraphTracebackCigar << std::endl;
+							// if (cigarComparisonEqual == 0)
+							// {
+								// std::cout << "PASSED - CIGAR MATCH" << std::endl;
+							// }
+							// if (graphTraceback->getTotalScore() == altGraphTraceback->getTotalScore())
+							// {
+								// std::cout << "scores are equal" << std::endl;
+							// }
+
 							if (nodeScorePercent >= 70)
 							{
 								for (auto nodeAllelePtr : nodePtr->getAllelePtrs())
 								{
-									if (graphTraceback->getTotalScore() == altGraphTraceback->getTotalScore() ) // check the cigar here if you want to
+									//if (graphTraceback->getTotalScore() == altGraphTraceback->getTotalScore()) // check the cigar here if you want to
+									if ((cigarComparisonEqual == 0 || graphTraceback->getTotalScore() == altGraphTraceback->getTotalScore()) && (origTracebackSoftclipCount == altTracebackSoftclipCount))
 									{
 										// this is if the node with that alignment is ambiguous
 										nodeAllelePtr->incrementScoreCount(alignmentPtr, -1);
 									}
 									else
 									{
+										/*
+										if (nodePtr->getAlleleType() == Node::ALLELE_TYPE::REF)
+										{
+											std::cout << "---------------" << std::endl;
+
+											std::cout << "all paths: " << std::endl;
+											auto paths = altGraphPtr->getAllPathsAsStrings();
+											for (auto path : paths)
+											{
+												std::cout << "path: " << path << std::endl;
+											}
+
+											std::cout << "alignment: " << alignmentPtr->getSequence() << std::endl;
+											std::cout << "we're counting allele: " << nodeAllelePtr->getSequence() << std::endl;
+											std::cout << "orig: " << graphTraceback->getTracebackAsSequence("|") << "\tscore: " << graphTraceback->getTotalScore() << std::endl;
+											std::cout << "alt:  " << altGraphTraceback->getTracebackAsSequence("|") << "\tscore: " << altGraphTraceback->getTotalScore() << std::endl;
+											std::cout << "\torigCig: " << originalGraphTracebackCigar << std::endl;
+											std::cout << "\taltCig:  " << altGraphTracebackCigar << std::endl;
+											std::cout << "---------------" << std::endl;
+										}
+										*/
 										nodeAllelePtr->incrementScoreCount(alignmentPtr, nodeScorePercent);
 									}
 								}
 							}
+							// std::cout << "---------------" << std::endl;
 						}
 					}
 				};
