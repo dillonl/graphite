@@ -83,7 +83,7 @@ namespace graphite
 	{
 		for (auto tracebackNodePtr : this->m_traceback_nodes)
 		{
-			if (tracebackNodePtr->getScore() >= 70)// && !nodeHasFlankingMismatches(tracebackNodePtr, bamAlignmentPtr))
+			if (tracebackNodePtr->getScore() >= 70 && !nodeHasFlankingMismatches(tracebackNodePtr, alignmentPtr))
 			{
 				auto nodeScore = (isNodeSequenceAmbiguous(tracebackNodePtr)) ? -1 : tracebackNodePtr->getScore();
 				// auto nodeScore = tracebackNodePtr->getScore();
